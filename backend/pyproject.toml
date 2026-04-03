@@ -5,13 +5,18 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "aiosqlite>=0.22.1",
+    "aiofiles>=25.1.0",
     "fastapi>=0.135.2",
+    "json-repair>=0.58.7",
     "openai>=2.30.0",
-    "sqlalchemy[asyncio]>=2.0.48",
+    "pymupdf>=1.27.2.2",
+    "python-multipart>=0.0.22",
     "sse-starlette>=3.3.4",
     "uvicorn[standard]>=0.42.0",
 ]
 
 [tool.ruff.lint]
-select = ["I", "DOC", "FAST", "UP"]
+select = ["I", "FAST", "UP", "F401"]
+
+[dependency-groups]
+dev = ["notebook>=7.5.5"]

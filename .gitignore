@@ -67,3 +67,4 @@ data/*.db
 *.tmp
 
 .idea/
+upload/
