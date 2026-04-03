@@ -32,6 +32,20 @@ class TaskIdResponse(BaseSchema):
     task_id: str
 
 
+class Work(BaseSchema):
+    """工作任务模型。
+
+    对应 Java 后端 /api/work/{id} 接口返回的 data 字段。
+    """
+
+    id: str = Field(default="", description="任务ID")
+    file_name: str = Field(default="", alias="fileName", description="文件名称")
+    src: str = Field(default="", description="文件绝对路径")
+    status: str = Field(default="", description="任务状态")
+    created_at: str = Field(default="", alias="createdAt", description="创建时间")
+    updated_at: str = Field(default="", alias="updatedAt", description="修改时间")
+
+
 class PersonalInfo(BaseSchema):
     """个人信息模型。"""
 
