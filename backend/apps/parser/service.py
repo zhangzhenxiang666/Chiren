@@ -56,30 +56,38 @@ async def _create_resume_sections(
             "updatedAt": now,
         }
 
-    sections = [
-        ("personal_info", result.personal_info.model_dump(), 0),
-        ("summary", {"text": result.summary}, 1),
-        (
-            "education",
-            {"items": [_ensure_id(e.model_dump()) for e in result.education]},
-            2,
-        ),
-        (
-            "skills",
-            {"categories": [_ensure_id(s.model_dump()) for s in result.skills]},
-            3,
-        ),
-        (
-            "projects",
-            {"items": [_ensure_id(p.model_dump()) for p in result.projects]},
-            4,
-        ),
-        (
-            "certifications",
-            {"items": [_ensure_id(c.model_dump()) for c in result.certifications]},
-            5,
-        ),
+    sections = []
+    sort_order = 0
+
+    sections.append(("personal_info", result.personal_info.model_dump(), sort_order))
+    sort_order += 1
+    sections.append(("summary", {"text": result.summary}, sort_order))
+    sort_order += 1
+
+    # 可选的列表字段配置：(字段名, 结果中的属性名, content 的 key)
+    list_field_configs = [
+        ("work_experiences", result.work_experiences, "items"),
+        ("education", result.education, "items"),
+        ("projects", result.projects, "items"),
+        ("skills", result.skills, "categories"),
+        ("certifications", result.certifications, "items"),
+        ("languages", result.languages, "items"),
     ]
+
+    for section_type, field_value, content_key in list_field_configs:
+        if field_value is not None:
+            sections.append(
+                (
+                    section_type,
+                    {
+                        content_key: [
+                            _ensure_id(item.model_dump()) for item in field_value
+                        ]
+                    },
+                    sort_order,
+                )
+            )
+            sort_order += 1
 
     for section_type, content, sort_order in sections:
         await java_client.post(
