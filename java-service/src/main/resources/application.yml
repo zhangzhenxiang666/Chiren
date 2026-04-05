@@ -5,7 +5,7 @@ spring:
   application:
     name: java-service
   datasource:
-    url: jdbc:sqlite:/root/txx/Chiren/java-service/data/app.db
+    url: jdbc:sqlite:/root/txx/txx2/Chiren/java-service/data/app.db
     driver-class-name: org.sqlite.JDBC
     hikari:
       maximum-pool-size: 1

@@ -69,3 +69,4 @@ data/*.db
 .idea/
 upload/
 .conversation_store/
+target/
