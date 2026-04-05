@@ -1,0 +1,208 @@
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict, Field
+
+
+class BaseSchema(BaseModel):
+    """禁止额外字段的基类"""
+
+    model_config = ConfigDict(extra="forbid")
+
+
+class ToolCall(BaseModel):
+    """工具调用"""
+
+    id: str = Field(description="工具调用ID")
+    name: str = Field(description="工具名称")
+    arguments: str = Field(description="工具参数(JSON字符串)")
+
+
+class Message(BaseModel):
+    """消息"""
+
+    role: Literal["user", "assistant", "tool", "think"] = Field(description="角色")
+    content: str | None = Field(default=None, description="内容")
+    tool_calls: list[ToolCall] | None = Field(default=None, description="工具调用列表")
+
+
+class ChatRequest(BaseModel):
+    """请求参数"""
+
+    resume_id: str = Field(description="简历ID")
+    type: str = Field(description="LLM 供应商类型")
+    base_url: str = Field(description="AI API 地址")
+    api_key: str = Field(description="AI API 密钥")
+    model: str = Field(description="模型名称")
+    messages: list[Message] = Field(description="消息列表")
+
+
+class ResumeSection(BaseModel):
+    """简历的各个区域的数据库实体"""
+
+    id: str = Field(description="id")
+    resume_id: str = Field(description="简历ID")
+    type: Literal[
+        "personal_info",
+        "summary",
+        "work_experience",
+        "projects",
+        "education",
+        "skills",
+        "languages",
+        "certifications",
+        "qr_codes",
+        "github",
+        "custom",
+    ] = Field(description="区域类型")
+    title: str = Field(description="区域标题")
+    content: str = Field(description="内容json字符串")
+    sort_order: int = Field(description="排序序号")
+    visible: bool = Field(description="是否可见")
+    created_at: str = Field(description="创建时间")
+    updated_at: str = Field(description="更新时间")
+
+
+class PersonalInfo(BaseSchema):
+    """个人信息"""
+
+    full_name: str | None = Field(default=None, description="姓名")
+    job_title: str | None = Field(default=None, description="预期岗位")
+    phone: str | None = Field(default=None, description="手机号")
+    email: str | None = Field(default=None, description="邮箱")
+    salary: str | None = Field(default=None, description="期望薪资")
+    location: str | None = Field(default=None, description="城市")
+    age: str | None = Field(default=None, description="年龄")
+    gender: str | None = Field(default=None, description="性别")
+    political_status: str | None = Field(default=None, description="政治面貌")
+    education_level: str | None = Field(default=None, description="学历")
+
+
+class Summary(BaseSchema):
+    """个人简介"""
+
+    text: str | None = Field(default=None, description="简介")
+
+
+class WorkExperienceItem(BaseSchema):
+    """工作经历"""
+
+    id: str | None = Field(default=None, description="工作经历ID")
+    company: str | None = Field(default=None, description="公司名称")
+    position: str | None = Field(default=None, description="职位名称")
+    location: str | None = Field(default=None, description="工作地点")
+    start_date: str | None = Field(default=None, description="开始时间")
+    end_date: str | None = Field(default=None, description="结束时间")
+    current: bool | None = Field(default=None, description="是否至今")
+    description: str | None = Field(default=None, description="工作描述")
+    highlights: list[str] | None = Field(default=None, description="工作 highlights")
+
+
+class EducationItem(BaseSchema):
+    """教育经历"""
+
+    id: str | None = Field(default=None, description="教育经历ID")
+    institution: str | None = Field(default=None, description="学校名称")
+    degree: str | None = Field(default=None, description="学位")
+    field: str | None = Field(default=None, description="专业")
+    location: str | None = Field(default=None, description="地点")
+    start_date: str | None = Field(default=None, description="开始时间")
+    end_date: str | None = Field(default=None, description="结束时间")
+    gpa: str | None = Field(default=None, description="GPA")
+    highlights: list[str] | None = Field(default=None, description="亮点")
+
+
+class ProjectItem(BaseSchema):
+    """项目经历"""
+
+    id: str | None = Field(default=None, description="项目ID")
+    name: str | None = Field(default=None, description="项目名称")
+    url: str | None = Field(default=None, description="项目链接")
+    description: str | None = Field(default=None, description="项目描述")
+    technologies: list[str] | None = Field(default=None, description="技术栈")
+    highlights: list[str] | None = Field(default=None, description="亮点")
+    start_date: str | None = Field(default=None, description="开始时间")
+    end_date: str | None = Field(default=None, description="结束时间")
+
+
+class CertificationItem(BaseSchema):
+    """证书"""
+
+    id: str | None = Field(default=None, description="证书ID")
+    name: str | None = Field(default=None, description="证书名称")
+    issuer: str | None = Field(default=None, description="颁发机构")
+    date: str | None = Field(default=None, description="获得日期")
+
+
+class LanguageItem(BaseSchema):
+    """语言能力"""
+
+    id: str | None = Field(default=None, description="语言ID")
+    language: str | None = Field(default=None, description="语言")
+    proficiency: str | None = Field(default=None, description="熟练程度")
+    description: str | None = Field(default=None, description="描述")
+
+
+class GitHubItem(BaseSchema):
+    """GitHub 仓库"""
+
+    id: str | None = Field(default=None, description="仓库ID")
+    repo_url: str | None = Field(default=None, description="仓库链接")
+    name: str | None = Field(default=None, description="仓库名")
+    stars: int | None = Field(default=None, description="星标数")
+    language: str | None = Field(default=None, description="编程语言")
+    description: str | None = Field(default=None, description="仓库描述")
+
+
+class CustomItem(BaseSchema):
+    """自定义项"""
+
+    id: str | None = Field(default=None, description="自定义项ID")
+    title: str | None = Field(default=None, description="标题")
+    date: str | None = Field(default=None, description="日期")
+    description: str | None = Field(default=None, description="描述")
+
+
+class SkillItem(BaseSchema):
+    """技能项"""
+
+    id: str | None = Field(default=None, description="技能ID")
+    name: str | None = Field(default=None, description="技能名称")
+    skills: list[str] | None = Field(default=None, description="技能列表")
+
+
+# ============ SSE 事件 Schema ============
+
+
+class ThinkDelta(BaseModel):
+    """思考增量"""
+
+    text: str = Field(default="", description="思考内容增量")
+
+
+class TextDelta(BaseModel):
+    """文本增量"""
+
+    text: str = Field(default="", description="文本内容增量")
+
+
+class ToolCallData(BaseModel):
+    """工具调用"""
+
+    name: str = Field(description="工具名称")
+    arguments: str = Field(description="工具参数(JSON字符串)")
+    tool_call_id: str = Field(description="工具调用ID")
+
+
+class ToolResultData(BaseModel):
+    """工具结果"""
+
+    success: bool = Field(description="是否成功")
+    content: str = Field(description="工具返回内容(可能是JSON字符串)")
+    tool_call_id: str = Field(description="关联的工具调用ID")
+    tool_name: str = Field(description="工具名称")
+
+
+class ErrorData(BaseModel):
+    """错误"""
+
+    message: str = Field(description="错误信息")

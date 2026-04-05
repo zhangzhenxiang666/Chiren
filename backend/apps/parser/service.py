@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-import uuid
+import secrets
 from datetime import UTC, datetime
 
 from apps.parser.call_llm import executor_llm
@@ -25,30 +25,51 @@ def _now_iso() -> str:
     return datetime.now(UTC).isoformat().replace("+00:00", "Z")
 
 
-def _ensure_id(obj: dict) -> dict:
-    """确保对象有 id 字段。"""
+def _ensure_id(obj: dict, prefix: str, index: int) -> dict:
+    """确保对象有 id 字段。
+
+    Args:
+        obj: 待处理的对象字典。
+        prefix: 该 section 共用的随机前缀。
+        index: 序号（从1开始）。
+
+    Returns:
+        添加了 id 字段的对象字典。
+    """
     if "id" not in obj or not obj["id"]:
-        obj["id"] = str(uuid.uuid4())
+        obj["id"] = f"{prefix}-{index:04d}"
     return obj
 
 
-async def _create_resume_sections(
-    resume_id: str, result: ParserResult, title: str
-) -> None:
+async def _create_resume_sections(resume_id: str, result: ParserResult) -> None:
     """创建简历的所有区块。
 
     Args:
         resume_id: 简历 ID。
         result: LLM 解析结果。
-        title: 简历标题（用于生成区块标题）。
     """
     now = _now_iso()
+
+    # 区块类型到中文标题的映射
+    section_type_to_title = {
+        "personal_info": "个人信息",
+        "summary": "个人简介",
+        "work_experience": "工作经历",
+        "education": "教育背景",
+        "projects": "项目经历",
+        "skills": "技能特长",
+        "languages": "语言能力",
+        "certifications": "资格证书",
+        "qr_codes": "二维码",
+        "github": "GitHub 项目",
+        "custom": "自定义区域",
+    }
 
     def build_section(section_type: str, content: dict, sort_order: int) -> dict:
         return {
             "resumeId": resume_id,
             "type": section_type,
-            "title": title,
+            "title": section_type_to_title[section_type],
             "sortOrder": sort_order,
             "visible": True,
             "content": json.dumps(content, ensure_ascii=False),
@@ -64,9 +85,9 @@ async def _create_resume_sections(
     sections.append(("summary", {"text": result.summary}, sort_order))
     sort_order += 1
 
-    # 可选的列表字段配置：(字段名, 结果中的属性名, content 的 key)
+    # 可选的列表字段配置：(type值, 结果中的属性名, content 的 key)
     list_field_configs = [
-        ("work_experiences", result.work_experiences, "items"),
+        ("work_experience", result.work_experiences, "items"),
         ("education", result.education, "items"),
         ("projects", result.projects, "items"),
         ("skills", result.skills, "categories"),
@@ -76,12 +97,14 @@ async def _create_resume_sections(
 
     for section_type, field_value, content_key in list_field_configs:
         if field_value is not None:
+            section_prefix = secrets.token_hex(4)
             sections.append(
                 (
                     section_type,
                     {
                         content_key: [
-                            _ensure_id(item.model_dump()) for item in field_value
+                            _ensure_id(item.model_dump(), section_prefix, idx)
+                            for idx, item in enumerate(field_value, start=1)
                         ]
                     },
                     sort_order,
@@ -170,7 +193,7 @@ async def _execute_parse_flow(
             },
         )
         # 创建简历区块
-        await _create_resume_sections(task_id, result, title)
+        await _create_resume_sections(task_id, result)
 
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=delete_file))
 

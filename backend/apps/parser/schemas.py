@@ -34,7 +34,6 @@ class TaskIdResponse(BaseSchema):
 
 class Work(BaseSchema):
     """工作任务模型。
-
     对应 Java 后端 /api/work/{id} 接口返回的 data 字段。
     """
 
@@ -65,7 +64,6 @@ class PersonalInfo(BaseSchema):
 class EducationItem(BaseSchema):
     """教育背景条目模型。"""
 
-    id: str = Field(default="", description="Unique identifier")
     institution: str = Field(default="", description="School / institution name")
     degree: str = Field(default="", description="Degree")
     field: str = Field(default="", description="Major / field of study")
