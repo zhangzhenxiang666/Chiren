@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,7 +22,9 @@ class Message(BaseModel):
 
     role: Literal["user", "assistant", "tool", "think"] = Field(description="角色")
     content: str | None = Field(default=None, description="内容")
+    tool_call_id: str | None = Field(default=None, description="工具调用ID")
     tool_calls: list[ToolCall] | None = Field(default=None, description="工具调用列表")
+    metadata: dict[str, Any] = Field(default_factory=dict, description="元数据")
 
 
 class ChatRequest(BaseModel):
@@ -168,41 +170,3 @@ class SkillItem(BaseSchema):
     id: str | None = Field(default=None, description="技能ID")
     name: str | None = Field(default=None, description="技能名称")
     skills: list[str] | None = Field(default=None, description="技能列表")
-
-
-# ============ SSE 事件 Schema ============
-
-
-class ThinkDelta(BaseModel):
-    """思考增量"""
-
-    text: str = Field(default="", description="思考内容增量")
-
-
-class TextDelta(BaseModel):
-    """文本增量"""
-
-    text: str = Field(default="", description="文本内容增量")
-
-
-class ToolCallData(BaseModel):
-    """工具调用"""
-
-    name: str = Field(description="工具名称")
-    arguments: str = Field(description="工具参数(JSON字符串)")
-    tool_call_id: str = Field(description="工具调用ID")
-
-
-class ToolResultData(BaseModel):
-    """工具结果"""
-
-    success: bool = Field(description="是否成功")
-    content: str = Field(description="工具返回内容(可能是JSON字符串)")
-    tool_call_id: str = Field(description="关联的工具调用ID")
-    tool_name: str = Field(description="工具名称")
-
-
-class ErrorData(BaseModel):
-    """错误"""
-
-    message: str = Field(description="错误信息")

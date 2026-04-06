@@ -1,32 +1,18 @@
 import json
-import secrets
 from collections.abc import AsyncIterator
 from typing import Any
 
 import json_repair
 from openai import APIError, AsyncOpenAI, RateLimitError
 from openai.types.chat import ChatCompletionChunk
-from pydantic import BaseModel, ValidationError
+from pydantic import ValidationError
 from sse_starlette import EventSourceResponse
 
-from .prompt import SYSTEM, build_sections_prompt
-from .schemas import (
-    CertificationItem,
-    ChatRequest,
-    CustomItem,
-    EducationItem,
-    GitHubItem,
-    LanguageItem,
-    Message,
-    PersonalInfo,
-    ProjectItem,
-    ResumeSection,
-    SkillItem,
-    Summary,
-    ToolCall,
-    WorkExperienceItem,
-)
-from .tools.update_section import make_update_section_tool
+from apps.chat.prompt import SYSTEM, build_sections_prompt
+from apps.chat.schemas import ChatRequest, Message, ResumeSection, ToolCall
+from apps.chat.tools.add_section import AddSectionTool
+from apps.chat.tools.update_section import UpdateSectionTool
+from shared.types.base_tool import ToolExecutionContext, ToolRegistry
 
 # 重试机制常量
 _RETRYABLE_ERRORS = (RateLimitError, APIError)
@@ -97,6 +83,11 @@ async def _process_streaming_response(
                         "name": "",
                         "arguments": "",
                     }
+                else:
+                    # 调试：检查 id 是否从空字符串变成了有效值
+                    existing_id = accumulated_tool_calls[idx]["id"]
+                    if not existing_id and tc.id:
+                        accumulated_tool_calls[idx]["id"] = tc.id
 
                 entry = accumulated_tool_calls[idx]
                 if tc.id:
@@ -122,8 +113,16 @@ async def _process_streaming_response(
     }
 
 
-def _handle_tool_calls(
+def _build_result(
+    tool_call_id: str, is_error: bool, output: str = ""
+) -> dict[str, Any]:
+    """构建统一的工具调用结果字典"""
+    return {"is_error": is_error, "tool_call_id": tool_call_id, "output": output}
+
+
+async def _handle_tool_calls(
     accumulated_tool_calls: dict[str, dict[str, Any]],
+    tool_registry: ToolRegistry,
     id_to_type: dict[str, str],
     sections: list[dict[str, Any]],
     messages: list[Message],
@@ -131,9 +130,6 @@ def _handle_tool_calls(
     tool_results: list[dict[str, Any]] = []
 
     for tool_call in accumulated_tool_calls.values():
-        if tool_call["name"] != "update_section":
-            continue
-
         yield make_sse_event(
             "tool_call",
             {
@@ -143,104 +139,79 @@ def _handle_tool_calls(
             },
         )
 
-        # 1. 将 arguments 解析为 dict
-        try:
-            args = json_repair.loads(tool_call["arguments"])
-        except Exception as e:
-            error_msg = f"参数解析失败: {e}"
-            tool_results.append(
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]}
+        handler = tool_registry.get(tool_call["name"])
+
+        # 工具不存在
+        if handler is None:
+            tool_id = tool_call["id"]
+            result = _build_result(
+                tool_id, is_error=True, output=f"Unknown tool: {tool_call['name']}"
             )
-            yield make_sse_event(
-                "tool_result",
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]},
+            tool_results.append(result)
+            yield make_sse_event("tool_result", result)
+            messages.append(
+                Message(
+                    role="tool",
+                    tool_call_id=tool_id,
+                    content=result["output"],
+                    metadata={
+                        "is_error": True,
+                    },
+                )
             )
             continue
 
-        # 2. 根据 section_id 获取 section_type
-        section_id = args.get("section_id")
-        section_type = id_to_type.get(section_id)
-        if not section_type:
-            error_msg = f"未找到 section_id: {section_id}"
-            tool_results.append(
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]}
-            )
-            yield make_sse_event(
-                "tool_result",
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]},
-            )
-            continue
-
-        # 3. 获取对应的 pydantic 模型并验证 value
-        model = SECTION_TYPE_TO_MODEL.get(section_type)
-        value = args.get("value", {})
-
+        # 验证参数
         try:
-            if section_type in ("personal_info", "summary"):
-                model.model_validate(value)
-            elif section_type in (
-                "work_experience",
-                "education",
-                "projects",
-                "certifications",
-                "languages",
-                "github",
-                "custom",
-            ):
-                for item_data in value.get("items", []):
-                    model.model_validate(item_data)
-            elif section_type == "skills":
-                for category_data in value.get("categories", []):
-                    model.model_validate(category_data)
+            arguments = handler.input_model.model_validate_json(tool_call["arguments"])
         except ValidationError as e:
-            error_msg = f"数据验证失败: {e}"
-            tool_results.append(
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]}
-            )
-            yield make_sse_event(
-                "tool_result",
-                {"success": False, "error": error_msg, "tool_call_id": tool_call["id"]},
+            errors = []
+            for err in e.errors():
+                field = ".".join(str(loc) for loc in err["loc"])
+                errors.append(f"  - {field}: {err['msg']}")
+            error_msg = "Validation failed:\n" + "\n".join(errors)
+            tool_id = tool_call["id"]
+            result = _build_result(tool_id, is_error=True, output=error_msg)
+            tool_results.append(result)
+            yield make_sse_event("tool_result", result)
+            messages.append(
+                Message(
+                    role="tool",
+                    tool_call_id=tool_id,
+                    content=result["output"],
+                    metadata={
+                        "is_error": True,
+                    },
+                )
             )
             continue
 
-        # 4. 验证通过，执行更新
-        for section in sections:
-            if section["id"] != section_id:
-                continue
-
-            content = section.get("content", {})
-
-            if section_type in ("personal_info", "summary"):
-                content.update(value)
-            elif section_type in (
-                "work_experience",
-                "education",
-                "projects",
-                "certifications",
-                "languages",
-                "github",
-                "custom",
-            ):
-                content["items"] = _assign_ids(
-                    value.get("items", []), content.get("items", [])
-                )
-            elif section_type == "skills":
-                content["categories"] = _assign_ids(
-                    value.get("categories", []), content.get("categories", [])
-                )
-            break
-
-        yield make_sse_event(
-            "tool_result", {"success": True, "tool_call_id": tool_call["id"]}
+        # 执行工具
+        tool_result = await handler.execute(
+            arguments,
+            ToolExecutionContext(
+                sections=sections,
+                metadata={
+                    "tool_call_id": tool_call["id"],
+                    "id_to_type": id_to_type,
+                },
+            ),
         )
 
-        # 5. 添加成功结果到 messages
-        tool_msg = Message(
-            role="tool",
-            tool_call_id=tool_call["id"],
-            content=json.dumps({"success": True}),
+        tool_id = tool_call["id"]
+        result = _build_result(tool_id, tool_result.is_error, tool_result.output)
+        tool_results.append(result)
+        yield make_sse_event("tool_result", result)
+        messages.append(
+            Message(
+                role="tool",
+                tool_call_id=tool_id,
+                content=result["output"],
+                metadata={
+                    "is_error": tool_result.is_error,
+                },
+            )
         )
-        messages.append(tool_msg)
 
     yield {"type": "tool_results", "data": tool_results}
 
@@ -289,9 +260,15 @@ def build_final_messages(
                 for tc in msg.tool_calls
             ]
 
+        if msg.role == "tool" and msg.tool_call_id:
+            msg_dict["tool_call_id"] = msg.tool_call_id
+
         if count == 1 and is_last_msg and last_msg.role == "user":
             final_messages.append(
-                {"role": "user", "content": f"当前简历信息: \n---\n{resume_info}\n---"}
+                {
+                    "role": "user",
+                    "content": f"Current Resume Information: \n---\n{resume_info}\n---",
+                }
             )
             final_messages.append(msg_dict)
         elif count != 1 and is_last_msg and last_msg.role == "tool":
@@ -310,52 +287,18 @@ def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
     return json.dumps(sections, ensure_ascii=False)
 
 
-SECTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
-    "personal_info": PersonalInfo,
-    "summary": Summary,
-    "work_experience": WorkExperienceItem,
-    "education": EducationItem,
-    "projects": ProjectItem,
-    "certifications": CertificationItem,
-    "languages": LanguageItem,
-    "github": GitHubItem,
-    "custom": CustomItem,
-    "skills": SkillItem,
-}
-
-
-def _generate_prefix() -> str:
-    return secrets.token_hex(4)
-
-
-def _generate_id(prefix: str, index: int) -> str:
-    return f"{prefix}-{index:04d}"
-
-
-def _assign_ids(submitted_items: list, existing_items: list) -> list:
-    if existing_items:
-        last_id = (
-            existing_items[-1].get("id", "")
-            if isinstance(existing_items[-1], dict)
-            else existing_items[-1].get("id", "")
-        )
-        prefix = last_id.split("-")[0]
-        last_index = int(last_id.split("-")[1])
-    else:
-        prefix = _generate_prefix()
-        last_index = 0
-
-    next_index = last_index + 1
-    result = []
-    for item in submitted_items:
-        if isinstance(item, dict):
-            if "id" not in item or not item["id"]:
-                item["id"] = _generate_id(prefix, next_index)
-                next_index += 1
-            result.append(item)
-        else:
-            result.append(item)
-    return result
+def convert_tool_schema(tools: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {
+            "type": "function",
+            "function": {
+                "name": tool["name"],
+                "description": tool["description"],
+                "parameters": {**tool["input_schema"]},
+            },
+        }
+        for tool in tools
+    ]
 
 
 async def generate_content(
@@ -364,7 +307,9 @@ async def generate_content(
     max_count = 100
     client = AsyncOpenAI(base_url=request.base_url, api_key=request.api_key)
     messages: list[Message] = [msg for msg in request.messages if msg.role != "think"]
-
+    tool_registry = ToolRegistry()
+    tool_registry.register(UpdateSectionTool())
+    tool_registry.register(AddSectionTool())
     count = 0
 
     while count < max_count:
@@ -372,7 +317,8 @@ async def generate_content(
 
         system = SYSTEM.format(sections=build_sections_prompt(sections))
         resume_info = make_current_resume_info(sections)
-        update_section_tool = make_update_section_tool(sections)
+        tools = tool_registry.to_api_schema(sections)
+        tools = convert_tool_schema(tools)
 
         final_messages = [{"role": "system", "content": system}]
         final_messages.extend(build_final_messages(messages, resume_info, count))
@@ -383,7 +329,7 @@ async def generate_content(
             input_args = {
                 "model": request.model,
                 "messages": final_messages,
-                "tools": [update_section_tool.openai_tool],
+                "tools": tools,
             }
             response_stream = await _create_chat_completion_with_retry(
                 client, **input_args
@@ -418,8 +364,8 @@ async def generate_content(
             messages.append(assistant_msg)
 
             # 处理工具调用请求
-            for event in _handle_tool_calls(
-                accumulated_tool_calls, id_to_type, sections, messages
+            async for event in _handle_tool_calls(
+                accumulated_tool_calls, tool_registry, id_to_type, sections, messages
             ):
                 if event.get("type") == "tool_results":
                     tool_results = event["data"]

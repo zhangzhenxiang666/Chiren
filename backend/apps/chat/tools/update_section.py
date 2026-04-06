@@ -1,7 +1,23 @@
-from . import ToolDefinition
+import secrets
+
+from pydantic import BaseModel, Field, ValidationError
+
+from apps.chat.schemas import (
+    CertificationItem,
+    CustomItem,
+    EducationItem,
+    GitHubItem,
+    LanguageItem,
+    PersonalInfo,
+    ProjectItem,
+    SkillItem,
+    Summary,
+    WorkExperienceItem,
+)
+from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 
 # 各 section 类型的字段结构和示例
-SECTION_CONTENT_SCHEMAS = {
+_SECTION_CONTENT_SCHEMAS = {
     "personal_info": {
         "fields": "full_name, job_title, email, phone, location, salary, age, gender, political_status, education_level",
         "example": '{ "full_name": "John", "email": "john@example.com" }',
@@ -58,97 +74,166 @@ def build_tool_description(sections: list[dict]) -> str:
     lines = []
     for section in sections:
         section_type = section.get("type")
-        if section_type in SECTION_CONTENT_SCHEMAS:
-            schema = SECTION_CONTENT_SCHEMAS[section_type]
+        if section_type in _SECTION_CONTENT_SCHEMAS:
+            schema = _SECTION_CONTENT_SCHEMAS[section_type]
             lines.append(f"- {section_type}: {schema['fields']}")
             lines.append(f"  → e.g. {schema['example']}")
     return "\n".join(lines)
 
 
-def make_update_section_tool(sections: list[dict]) -> ToolDefinition:
-    """根据激活的 sections 动态生成 update_section 工具定义"""
-    content_structures = build_tool_description(sections)
+SECTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
+    "personal_info": PersonalInfo,
+    "summary": Summary,
+    "work_experience": WorkExperienceItem,
+    "education": EducationItem,
+    "projects": ProjectItem,
+    "certifications": CertificationItem,
+    "languages": LanguageItem,
+    "github": GitHubItem,
+    "custom": CustomItem,
+    "skills": SkillItem,
+}
 
-    description = f"""
-Update the content of a specific resume section using a partial update object.
 
-Pass only the fields you want to update. Unmentioned fields remain unchanged.
+def _generate_prefix() -> str:
+    return secrets.token_hex(4)
 
-Section content structures and update examples:
-{content_structures}
 
-For all array sections, pass the COMPLETE items/categories array.
+def _generate_id(prefix: str, index: int) -> str:
+    return f"{prefix}-{index:04d}"
 
-Item ID rules:
-- Existing items: preserve their id field exactly as-is
-- New items: omit the id field entirely — it will be generated automatically
-"""
 
-    return ToolDefinition(
-        name="update_section",
-        description=description.strip(),
-        parameters={
-            "type": "object",
-            "properties": {
-                "section_id": {
-                    "description": "The ID of the section to update",
-                    "type": "string",
-                },
-                "value": {
-                    "description": "Partial update object. For scalar sections (personal_info, summary), include only the fields to change. For array sections, pass the complete items/categories array.",
-                    "type": "object",
-                },
-            },
-            "required": ["section_id", "value"],
-        },
+def _assign_ids(submitted_items: list, existing_items: list) -> list:
+    if existing_items:
+        last_id = (
+            existing_items[-1].get("id", "")
+            if isinstance(existing_items[-1], dict)
+            else existing_items[-1].get("id", "")
+        )
+        prefix = last_id.split("-")[0]
+        last_index = int(last_id.split("-")[1])
+    else:
+        prefix = _generate_prefix()
+        last_index = 0
+
+    next_index = last_index + 1
+    result = []
+    for item in submitted_items:
+        if isinstance(item, dict):
+            if "id" not in item or not item["id"]:
+                item["id"] = _generate_id(prefix, next_index)
+                next_index += 1
+            result.append(item)
+        else:
+            result.append(item)
+    return result
+
+
+class UpdateSectionToolInput(BaseModel):
+    section_id: str = Field(description="The ID of the section to update")
+    value: dict = Field(
+        description="Partial update object. For scalar sections (personal_info, summary), include only the fields to change. For array sections, pass the complete items/categories array."
     )
 
 
-# 静态默认工具定义（向后兼容）
-_tool_description = """
-Update the content of a specific resume section using a partial update object.
+class UpdateSectionTool(BaseTool):
+    name = "update_section"
+    description = (
+        "Update the content of a specific resume section using a partial update object.\n\n"
+        "Pass only the fields you want to update. Unmentioned fields remain unchanged.\n\n"
+        "Section content structures and update examples:\n"
+        "{content_structures}\n\n"
+        "For all array sections, pass the COMPLETE items/categories array.\n\n"
+        "Item ID rules:\n"
+        "- Existing items: preserve their id field exactly as-is\n"
+        "- New items: omit the id field entirely — it will be generated automatically"
+    )
+    input_model = UpdateSectionToolInput
 
-Pass only the fields you want to update. Unmentioned fields remain unchanged.
+    # TODO: 这里更新sections时要同步数据库, 以及更改里面的update_at字段
+    async def execute(
+        self, arguments: UpdateSectionToolInput, context: ToolExecutionContext
+    ) -> ToolResult:
+        id_to_type: dict[str, str] = context.metadata.get("id_to_type", {})
+        section_type = id_to_type.get(arguments.section_id)
 
-Section content structures and update examples:
-- personal_info: { full_name, job_title, email, phone, location, salary, age, gender, political_status, education_level, avatar }
-  → e.g. { "full_name": "John", "email": "john@example.com" }
-- summary: { text }
-  → e.g. { "text": "Experienced engineer..." }
-- work_experience: { items: [{ id, company, position, location, start_date, end_date, current, description, highlights: string[] }] }
-- education:       { items: [{ id, institution, degree, field, location, start_date, end_date, gpa, highlights: string[] }] }
-- projects:        { items: [{ id, name, url, description, technologies: string[], highlights: string[], start_date, end_date }] }
-- certifications:  { items: [{ id, name, issuer, date }] }
-- languages:       { items: [{ id, language, proficiency, description }] }
-- github:          { items: [{ id, repo_url, name, stars, language, description }] } — repo_url/name/stars/language are READ-ONLY, only modify description
-- custom:          { items: [{ id, title, date, description }] }
-- skills:          { categories: [{ id, name, skills: string[] }] }
+        # 验证section_id
+        if section_type is None:
+            return ToolResult(
+                is_error=True, output=f"Unknown Section ID: {arguments.section_id}"
+            )
 
-For all array sections, pass the COMPLETE items/categories array.
+        model = SECTION_TYPE_TO_MODEL.get(section_type)
 
-Item ID rules:
-- Existing items: preserve their id field exactly as-is
-- New items: omit the id field entirely — it will be generated automatically
-"""
+        # 验证value
+        try:
+            if section_type in ("personal_info", "summary"):
+                model.model_validate(arguments.value)
+            elif section_type in (
+                "work_experience",
+                "education",
+                "projects",
+                "certifications",
+                "languages",
+                "github",
+                "custom",
+            ):
+                for item_data in arguments.value.get("items", []):
+                    model.model_validate(item_data)
+            elif section_type == "skills":
+                for category_data in arguments.value.get("categories", []):
+                    model.model_validate(category_data)
+        except ValidationError as e:
+            errors = []
+            for err in e.errors():
+                field = ".".join(str(loc) for loc in err["loc"])
+                errors.append(f"  - {field}: {err['msg']}")
+            error_msg = f"[{section_type}] Validation failed:\n" + "\n".join(errors)
 
-tool_definition = ToolDefinition(
-    name="update_section",
-    description=_tool_description.strip(),
-    parameters={
-        "type": "object",
-        "properties": {
-            "section_id": {
-                "description": "The ID of the section to update",
-                "type": "string",
-            },
-            "value": {
-                "description": "Partial update object. For scalar sections (personal_info, summary), include only the fields to change. For array sections, pass the complete items/categories array.",
-                "type": "object",
-            },
-        },
-        "required": ["section_id", "value"],
-    },
-)
+            return ToolResult(
+                is_error=True,
+                output=error_msg,
+            )
+
+        # 所有验证均通过, 执行更新
+        for section in context.sections:
+            if section["id"] != arguments.section_id:
+                continue
+
+            content = section.get("content", {})
+
+            if section_type in ("personal_info", "summary"):
+                content.update(arguments.value)
+            elif section_type in (
+                "work_experience",
+                "education",
+                "projects",
+                "certifications",
+                "languages",
+                "github",
+                "custom",
+            ):
+                content["items"] = _assign_ids(
+                    arguments.value.get("items", []), content.get("items", [])
+                )
+            elif section_type == "skills":
+                content["categories"] = _assign_ids(
+                    arguments.value.get("categories", []), content.get("categories", [])
+                )
+            break
+
+        return ToolResult(
+            output=f"Successfully updated section {arguments.section_id}."
+        )
+
+    def to_api_schema(self, setions: list[dict[str, any]]):
+        return {
+            "name": self.name,
+            "description": self.description.format(
+                content_structures=build_tool_description(setions)
+            ),
+            "input_schema": self.input_model.model_json_schema(),
+        }
 
 
 if __name__ == "__main__":
@@ -181,9 +266,9 @@ if __name__ == "__main__":
         },
     ]
 
-    # 动态生成工具
-    tool = make_update_section_tool(sections)
-    print("=== 动态生成的工具定义 ===")
+    import pprint
+
+    tool = UpdateSectionTool()
     print(f"工具名称: {tool.name}")
-    print(f"工具描述:\n{tool.description}")
-    print(f"\nOpenAI 格式:\n{tool.openai_tool}")
+    print("工具schema:")
+    pprint.pp(tool.to_api_schema(sections))
