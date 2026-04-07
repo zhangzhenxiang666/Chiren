@@ -1,5 +1,8 @@
 """Parser Pydantic 模型。"""
 
+from datetime import datetime
+from typing import Optional
+
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -38,11 +41,16 @@ class Work(BaseSchema):
     """
 
     id: str = Field(default="", description="任务ID")
-    file_name: str = Field(default="", alias="fileName", description="文件名称")
+    file_name: str = Field(default="", description="文件名称")
     src: str = Field(default="", description="文件绝对路径")
     status: str = Field(default="", description="任务状态")
-    created_at: str = Field(default="", alias="createdAt", description="创建时间")
-    updated_at: str = Field(default="", alias="updatedAt", description="修改时间")
+    template: str = Field(default="", description="模板名称")
+    title: str = Field(default="", description="简历标题")
+    created_at: Optional[datetime] = Field(default=None, description="创建时间")
+    updated_at: Optional[datetime] = Field(default=None, description="更新时间")
+
+    model_config = ConfigDict(from_attributes=True)
+
 
 
 class PersonalInfo(BaseSchema):
@@ -198,3 +206,42 @@ if __name__ == "__main__":
     }
     result = ParserResult.model_validate(data)
     print(result.model_dump())
+
+
+class ResumeResult(BaseSchema):
+    id: str = Field(default="",description="简历id")
+    workspace_id: Optional[str] = Field(default="",description="顶级简历id")
+    title: Optional[str] = Field(default="我的简历",description="简历标题")
+    template: str = Field(default="",description="简历模板")
+    theme_config: Optional[str] = Field(default="",description="简历主题")
+    is_default: Optional[bool] = Field(default=True,description="简历是否默认")
+    language: Optional[str] = Field(default="zn",description="简历语言")
+    share_token: Optional[str] = Field(default="",description="简历分享链接")
+    is_public: Optional[bool] = Field(default=True,description="简历是否公开")
+    share_password: Optional[str] = Field(default="",description="简历分享密码")
+    view_count: Optional[int] = Field(default="0",description="简历访问次数")
+    created_at: Optional[datetime] = Field(default=None, description="创建时间")
+    updated_at: Optional[datetime] = Field(default=None, description="更新时间")
+
+
+class ResumeSectionResult(BaseSchema):
+    id: str = Field(default="",description="区块id")
+    resume_id: str = Field(default="",description="区块所属简历id")
+    type: str = Field(default="",description="区块类型")
+    title: str = Field(default="",description="区块显示标题")
+    sort_order: int = Field(default="",description="排序")
+    visible: Optional[bool] = Field(default=True,description="是否可见")
+    content: str = Field(default="",description="区块内容")
+    created_at: Optional[datetime] = Field(default=None,description="区块创建时间")
+    updated_at: Optional[datetime] = Field(default=None,description="更新时间")
+
+
+class TemplateResult(BaseSchema):
+    id: str = Field(default="",description="模板id")
+    name: str = Field(default="",description="模板名称")
+    display_name: str = Field(default="",description="模板显示名称")
+    preview_image_url: str = Field(default="",description="模板图片地址")
+    is_active: Optional[bool] = Field(default=False,description="是否启用")
+    description: str = Field(default="",description="模板描述")
+    created_at: Optional[datetime] = Field(default=None,description="创建时间")
+    updated_at: Optional[datetime] = Field(default=None,description="修改时间")

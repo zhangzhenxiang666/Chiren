@@ -3,14 +3,18 @@
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Query, UploadFile, Depends
 
-from apps.parser.schemas import TaskIdResponse
+from apps.parser.schemas import TaskIdResponse,Work,ResumeResult,ResumeSectionResult,TemplateResult
 from apps.parser.service import infer_parser_type, retry_parser_task, run_parser_task
 from apps.parser.sse import sse_event_generator
 from apps.parser.state import TaskStatus, create_task, tasks
 from shared.java_client import java_client
 from shared.java_client.endpoints import endpoints
+from shared.database import get_session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select,insert,delete
+from shared.models import BaseWork,Resume,ResumeSection,template
 
 router = APIRouter(prefix="/parser", tags=["parser"])
 
@@ -192,3 +196,339 @@ async def retry_failed_task(
     )
 
     return TaskIdResponse(task_id=task_id)
+
+
+
+##   任务相关接口
+
+@router.get(
+        "/work/list",
+        summary="查询全部任务")
+async def get_work_list(db: AsyncSession = Depends(get_session)) -> list[Work]:
+    works = await db.execute(select(BaseWork))
+    result = works.scalars().all()
+    return [
+        Work.model_validate(w, from_attributes=True)
+        for w in result
+    ]
+
+
+@router.get(
+    "/listByStatus",
+    summary="根据状态查询任务",
+    response_model=list[Work])
+async def listByStatus(
+    status: str = Query(description="任务状态"),
+    db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(BaseWork).where(BaseWork.status == status))
+    return result.scalars().all()
+
+@router.get(
+    "/{id}",
+    summary="按id查询单个任务",
+    response_model=Work
+)
+async def getById(id: str, db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(BaseWork).where(BaseWork.id == id))
+    item = result.scalar_one_or_none()
+    if not item:
+        raise HTTPException(status_code=404, detail="没有该任务")
+    return item
+
+@router.post(
+    "/create",
+    summary="创建任务",
+    response_model=Work
+)
+async def create(work: Work, db: AsyncSession = Depends(get_session)):
+    data = work.model_dump(exclude={"created_at", "updated_at"})
+    db_work = BaseWork(**data)
+    db.add(db_work)
+    try:
+        await db.commit()
+        await db.refresh(db_work)
+    except Exception as ex:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error: {str(ex)}")
+    return db_work
+    
+@router.put(
+    "/updateStatus",
+    summary="更新任务状态",
+    response_model=Work
+)
+async def updateStatus(
+    id: str,
+    status: str,
+    db: AsyncSession = Depends(get_session),
+):
+    get = await db.execute(select(BaseWork).where(BaseWork.id == id))
+    item = get.scalar_one_or_none()
+    if not item:
+        raise HTTPException(status_code=404, detail="没有该任务")
+
+    setattr(item, "status", status)
+    await db.commit()
+    await db.refresh(item)
+    return item
+
+@router.delete(
+    "/delete/{id}",
+    summary="根据id删除任务",
+    response_model=Work
+)
+async def deleteById(id: str, db: AsyncSession = Depends(get_session)):
+    get = await db.execute(select(BaseWork).where(BaseWork.id == id))
+    item = get.scalar_one_or_none()
+    if not item:
+        raise HTTPException(status_code=404, detail="没有该任务")
+    try:
+        await db.delete(item)
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="删除失败")
+    return item
+
+
+
+# 生成简历相关接口
+
+@router.get(
+    "/resume/list",
+    summary="根据用户id查询该用户所有简历",
+    response_model=list[ResumeResult]
+)
+async def listResume(db: AsyncSession = Depends(get_session)):
+    get = await db.execute(select(Resume))
+    result_list = get.scalars().all()
+    if result_list is None:
+        raise HTTPException(status_code=400, detail="数据为空")
+    return result_list
+
+
+@router.get(
+    "/resume/{id}",
+    summary="根据简历id查询单份简历",
+    response_model=ResumeResult
+)
+async def getResume(id: int,db: AsyncSession = Depends(get_session)):
+    one = await db.execute(select(Resume).where(Resume.id == id))
+    result = one.scalar_one_or_none()
+    if not result:
+        raise HTTPException(status_code=404, detail="数据为空")
+    return result
+
+
+@router.post(
+    "/resume/create",
+    summary="新建简历",
+    response_model=ResumeResult
+)
+async def createResume(data: ResumeResult, db: AsyncSession = Depends(get_session)):
+    d = data.model_dump(exclude={"created_at", "updated_at"})
+    resume = Resume(**d)
+    db.add(resume)
+    try:
+        await db.commit()
+        await db.refresh(resume)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="新增失败")
+    return resume
+
+
+@router.put(
+    "/resume/update",
+    summary="修改简历",
+    response_model=ResumeResult
+)
+async def updateResume(data: ResumeResult,db: AsyncSession = Depends(get_session)):
+    get = await db.execute(select(Resume).where(Resume.id == data.id))
+    result = get.scalar_one_or_none()
+    one = data.model_dump()
+    for key,value in one.items():
+        setattr(result,key,value)
+    try:
+        await db.commit()
+        await db.refresh(result)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="修改失败")
+    return result
+    
+
+@router.delete(
+    "/resume/delete",
+    summary="根据简历id删除简历",
+)
+async def deleteResume(id: int = Query(description="简历ID"), db: AsyncSession = Depends(get_session)):
+    await db.execute(delete(Resume).where(Resume.id == id))
+    await db.commit()
+    return None
+
+
+##   区块相关接口
+
+@router.get(
+    "/resumeSetion/one",
+    summary="获取指定简历的指定区块信息",
+    response_model=ResumeSectionResult
+)
+async def get_by_id_and_type(id: str, type: str, db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(ResumeSection).where(ResumeSection.resume_id == id, ResumeSection.type == type))
+    item = result.scalar_one_or_none()
+    if not item:
+        raise HTTPException(status_code=404, detail="数据不存在")
+    return item
+
+
+@router.get(
+    "/resumeSetion/list/{id}",
+    summary="根据简历id获取区块列表",
+    response_model=list[ResumeSectionResult]
+)
+async def get_by_resumeid(id: str, db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(ResumeSection).where(ResumeSection.resume_id == id))
+    return result.scalars().all()
+
+
+@router.post(
+    "/resumeSetion/create",
+    summary="添加区块",
+    response_model=ResumeSectionResult
+)
+async def create_section(data: ResumeSectionResult, db: AsyncSession = Depends(get_session)):
+    d = data.model_dump(exclude={"created_at", "updated_at"})
+    section = ResumeSection(**d)
+    db.add(section)
+    try:
+        await db.commit()
+        await db.refresh(section)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="新增失败")
+    return section
+
+
+@router.put(
+    "/resumeSetion/update",
+    summary="修改区块",
+    response_model=ResumeSectionResult
+)
+async def update_section(data: ResumeSectionResult, db: AsyncSession = Depends(get_session)):
+    old = await db.execute(select(ResumeSection).where(ResumeSection.id == data.id))
+    old_item = old.scalar_one_or_none()
+    if not old_item:
+        raise HTTPException(status_code=404, detail="没有该区块")
+    d = data.model_dump(exclude={"created_at", "updated_at"})
+    for key, value in d.items():
+        setattr(old_item, key, value)
+    try:
+        await db.commit()
+        await db.refresh(old_item)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="修改失败")
+    return old_item
+
+
+@router.delete(
+    "/resumeSetion/delete",
+    summary="删除指定区块",
+)
+async def delete_section(id: str = Query(description="区块ID"), db: AsyncSession = Depends(get_session)):
+    await db.execute(delete(ResumeSection).where(ResumeSection.id == id))
+    try:
+        await db.commit()
+    except Exception:
+        raise HTTPException(status_code=500, detail="删除失败")
+    return None
+
+@router.delete(
+    "/setion/delete/all",
+    summary="清楚指定简历所有区块",
+)
+async def delete_all(id: str,db: AsyncSession = Depends(get_session)):
+    await db.execute(delete(ResumeSection).where(ResumeSection.resume_id == id))
+    try :
+        await db.commit()
+    except Exception:
+        raise HTTPException(status_code=500, detail="删除失败")
+    
+    return None
+
+
+
+#     模板相关接口
+
+@router.get(
+    "/template/list",
+    summary="获取所有简历模板",
+    response_model=list[TemplateResult]
+)
+async def get_template_list(db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(template))
+    return result.scalars().all()
+
+
+@router.get(
+    "/template/active",
+    summary="获取启用的模板",
+    response_model=list[TemplateResult]
+)
+async def list_active_templates(db: AsyncSession = Depends(get_session)):
+    result = await db.execute(select(template).where(template.is_active == True))
+    return result.scalars().all()
+
+
+@router.post(
+    "/template/create",
+    summary="新增简历模板",
+    response_model=TemplateResult
+)
+async def create_template(data: TemplateResult, db: AsyncSession = Depends(get_session)):
+    d = data.model_dump(exclude={"created_at", "updated_at"})
+    db_template = template(**d)
+    db.add(db_template)
+    try:
+        await db.commit()
+        await db.refresh(db_template)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="新增失败")
+    return db_template
+
+
+@router.put(
+    "/template/update",
+    summary="修改模板",
+    response_model=TemplateResult
+)
+async def update_template(data: TemplateResult, db: AsyncSession = Depends(get_session)):
+    old = await db.execute(select(template).where(template.id == data.id))
+    old_data = old.scalar_one_or_none()
+    if not old_data:
+        raise HTTPException(status_code=404, detail="没有该模板")
+    d = data.model_dump(exclude={"created_at", "updated_at"})
+    for key, value in d.items():
+        setattr(old_data, key, value)
+    try:
+        await db.commit()
+        await db.refresh(old_data)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="修改失败")
+    return old_data
+
+
+@router.delete(
+    "/template/delete",
+    summary="根据id删除模板"
+)
+async def delete_template(id: str = Query(description="模板ID"), db: AsyncSession = Depends(get_session)):
+    await db.execute(delete(template).where(template.id == id))
+    try:
+        await db.commit()
+    except Exception:
+        raise HTTPException(status_code=500, detail="删除失败")

@@ -219,3 +219,114 @@ class ResumeSection(Base):
     )
 
     resume = relationship("Resume", back_populates="sections")
+
+
+class BaseWork(Base):
+    """任务流数据库模型"""
+
+    __tablename__ = "work"
+
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        comment="工作流唯一id")
+
+    file_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        comment="文件名称"
+    )
+
+    src: Mapped[str] = mapped_column(
+        String(255),
+        nullable=False,
+        comment="文件绝对路径"
+    )
+
+    status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=True,
+        default="start",
+        comment="当前状态"
+    )
+
+    template: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        comment="模板名称"
+    )
+
+    title: Mapped[str] = mapped_column(
+        String(100),
+        nullable=True,
+        comment="简历标题"
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        comment="创建时间",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="更新时间",
+    )
+    
+
+class template(Base):
+    """模板类数据库模型"""
+    __tablename__ = "template"
+
+    id: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        primary_key=True,
+        comment="模板id"
+    )
+    name: Mapped[str] = mapped_column(
+        String(100),
+        default="该用户很懒，什么也没有留下",
+        nullable=False,
+        comment="模板名称"
+    )
+    display_name: Mapped[str] = mapped_column(
+        String(100),
+        default="该用户很懒，什么也没有留下",
+        nullable=False,
+        comment="模板显示名称"
+    )
+    preview_image_url: Mapped[str] = mapped_column(
+        String(100),
+        default="该用户很懒，什么也没有留下",
+        nullable=False,
+        comment="模板图片地址"
+    )
+    is_active: Mapped[bool] = mapped_column(
+        default=False,
+        nullable=True,
+        comment="模板是否启用"
+    )
+    description: Mapped[str] = mapped_column(
+        String(100),
+        default="该用户很懒，什么也没有留下",
+        nullable=True,
+        comment="模板id"
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="创建时间"
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="修改时间"
+    )

@@ -13,7 +13,7 @@ async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit
 async def init_db():
     """初始化数据库表"""
     async with engine.begin() as conn:
-        Base.metadata.create_all(conn)
+        await conn.run_sync(Base.metadata.create_all)
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, Any]:
