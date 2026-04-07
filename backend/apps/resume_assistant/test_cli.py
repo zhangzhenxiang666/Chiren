@@ -11,12 +11,6 @@ from rich.table import Table
 
 from apps.resume_assistant.schemas import ResumeAssistantRequest
 from apps.resume_assistant.service import generate_content
-from shared.types.messages import (
-    ConversationMessage,
-    TextBlock,
-    ToolResultBlock,
-    ToolUseBlock,
-)
 
 # --- 初始化 Rich Console ---
 console = Console()
@@ -86,7 +80,7 @@ async def read_user_input(session: PromptSession) -> str:
 
 
 async def run_turn(
-    messages_history: list[ConversationMessage],
+    user_input: str,
     sections: list[dict],
     id_to_type: dict[str, str],
 ) -> None:
@@ -95,43 +89,11 @@ async def run_turn(
         api_key=API_KEY,
         model=MODEL,
         type="anthropic",
-        messages=messages_history,
+        input=user_input,
         resume_id=RESUME_ID,
     )
 
-    round_content, round_tool_calls, round_tool_msgs = [], [], []
     loop_count = 0
-
-    def flush_round_to_history():
-        if not round_content and not round_tool_calls:
-            return
-        content_blocks: list[TextBlock | ToolUseBlock] = [
-            TextBlock(text="".join(round_content))
-        ]
-        if round_tool_calls:
-            for tc in round_tool_calls:
-                content_blocks.append(
-                    ToolUseBlock(id=tc["id"], name=tc["name"], input=tc["input"])
-                )
-        assistant_msg = ConversationMessage(role="assistant", content=content_blocks)
-        messages_history.append(assistant_msg)
-        if round_tool_msgs:
-            messages_history.append(
-                ConversationMessage(
-                    role="user",
-                    content=[
-                        ToolResultBlock(
-                            tool_use_id=tm["tool_use_id"],
-                            content=tm["content"],
-                            is_error=tm.get("is_error", False),
-                        )
-                        for tm in round_tool_msgs
-                    ],
-                )
-            )
-        round_content.clear()
-        round_tool_calls.clear()
-        round_tool_msgs.clear()
 
     try:
         async for event in generate_content(request, sections, id_to_type):
@@ -139,7 +101,6 @@ async def run_turn(
             data = json.loads(event.get("data", "{}"))
 
             if etype == "next":
-                flush_round_to_history()
                 loop_count += 1
 
             elif etype == "thinking_start":
@@ -153,17 +114,10 @@ async def run_turn(
                 console.rule("[bold blue]Assistant Response")
 
             elif etype == "text_delta":
-                text = data.get("text", "")
-                round_content.append(text)
-                console.print(text, end="", style="bold cyan")
+                console.print(data.get("text", ""), end="", style="bold cyan")
 
             elif etype == "tool_use":
-                tc_id, name, args = (
-                    data["id"],
-                    data["name"],
-                    data["input"],
-                )
-                round_tool_calls.append({"id": tc_id, "name": name, "input": args})
+                name, args = data["name"], data["input"]
                 console.print(
                     Panel(
                         f"[bold magenta]Call:[/bold magenta] {name}\n[bold white]Args:[/bold white] {args}",
@@ -175,13 +129,6 @@ async def run_turn(
 
             elif etype == "tool_result":
                 success = not data.get("is_error")
-                round_tool_msgs.append(
-                    {
-                        "tool_use_id": data["tool_use_id"],
-                        "content": data["content"],
-                        "is_error": data.get("is_error", False),
-                    }
-                )
 
                 if success:
                     console.print(
@@ -203,7 +150,6 @@ async def run_turn(
                     )
 
             elif etype == "done":
-                flush_round_to_history()
                 console.print("\n")
                 return
 
@@ -260,7 +206,6 @@ async def main() -> None:
     )
 
     session = PromptSession()
-    messages_history: list[ConversationMessage] = []
 
     while True:
         user_input = await read_user_input(session)
@@ -269,8 +214,7 @@ async def main() -> None:
                 break
             continue
 
-        messages_history.append(ConversationMessage.from_user_text(user_input))
-        await run_turn(messages_history, SECTIONS, ID_TO_TYPE)
+        await run_turn(user_input, SECTIONS, ID_TO_TYPE)
         print_resume_state(SECTIONS)
 
 

@@ -10,7 +10,7 @@ router = APIRouter(prefix="/resume-assistant", tags=["resume-assistant"])
 
 
 @router.post("")
-async def chat(
+async def resume_assistant(
     request: Annotated[ResumeAssistantRequest, Body()],
 ) -> EventSourceResponse:
     # TODO: 根据id从java中获取简历信息

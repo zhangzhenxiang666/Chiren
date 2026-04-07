@@ -8,7 +8,7 @@ def build_sections_prompt(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
-SYSTEM = """
+SYSTEM = """\
 You are Chiren, a resume optimization expert assistant.
 Your task is to help users enhance the professionalism, impact, and ATS-friendliness of their resumes.
 

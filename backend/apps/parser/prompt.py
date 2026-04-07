@@ -1,4 +1,4 @@
-SYSTEM = """
+SYSTEM = """\
 You are a resume parser. Extract ALL information from the resume into the EXACT JSON schema below.
 
 REQUIRED JSON SCHEMA:
@@ -19,7 +19,7 @@ RULES:
 """
 
 
-CONTENT = """
+CONTENT = """\
 Below is the full text extracted from a resume PDF. Extract all resume information using the EXACT JSON schema from the system prompt.
 
 ---

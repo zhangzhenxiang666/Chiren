@@ -1,12 +1,12 @@
 import json
 from typing import Any
 
-import json_repair
 from pydantic import ValidationError
 from sse_starlette import EventSourceResponse
 
+from apps.resume_assistant.conversation_store import ConversationStore
 from apps.resume_assistant.prompt import SYSTEM, build_sections_prompt
-from apps.resume_assistant.schemas import ResumeAssistantRequest, ResumeSection
+from apps.resume_assistant.schemas import ResumeAssistantRequest
 from apps.resume_assistant.tools import (
     AddSectionTool,
     SectionInfoTool,
@@ -22,6 +22,7 @@ from shared.api.client import (
 )
 from shared.types.base_tool import ToolExecutionContext, ToolRegistry
 from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseBlock
+from shared.types.resume import ResumeSection
 
 
 def _build_result(
@@ -136,9 +137,7 @@ async def resume_assistant_service(
     for section in sections:
         if section.visible:
             id_to_type[section.id] = section.type
-            content = json_repair.loads(section.content)
             new_section = section.model_dump()
-            new_section["content"] = content
             visible_sections.append(new_section)
 
     visible_sections = sorted(
@@ -159,10 +158,11 @@ def insert_resume_info(
 
     if count == 1 and last_msg.role == "user":
         return [
-            *messages,
+            *messages[:-1],
             ConversationMessage.from_user_text(
                 f"Current Resume Information: \n---\n{resume_info}\n---"
             ),
+            messages[-1],
         ]
     elif (
         count != 1
@@ -201,9 +201,10 @@ async def generate_content(
 
     client = get_client(request.type, request.api_key, request.base_url)
 
-    messages: list[ConversationMessage] = [
-        msg for msg in request.messages if not hasattr(msg, "_reasoning")
-    ]
+    # 从 .conversation_store 目录读取缓存的 messages
+    store = ConversationStore()
+    messages: list[ConversationMessage] = store.read(request.resume_id)
+    messages.append(ConversationMessage.from_user_text(request.input))
 
     # 工具注册只做一次
     tool_registry = ToolRegistry()
@@ -263,6 +264,7 @@ async def generate_content(
                     complete_event = event
 
             if complete_event is None:
+                store.write(request.resume_id, messages)
                 yield make_sse_event("done", {})
                 break
 
@@ -290,8 +292,10 @@ async def generate_content(
 
             # TODO: 这里要考虑stop_reason各种运营商兼容的格式
             if complete_event.stop_reason in ("end_turn", "stop"):
+                store.write(request.resume_id, messages)
                 yield make_sse_event("done", {})
                 break
         except Exception as e:
+            store.write(request.resume_id, messages)
             yield make_sse_event("error", {"message": str(e)})
             break
