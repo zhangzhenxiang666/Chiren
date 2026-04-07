@@ -42,13 +42,16 @@ class BaseTool(ABC):
         del arguments
         return False
 
-    def to_api_schema(self, sections: list[dict[str, Any]]) -> dict[str, Any]:
+    def to_api_schema(self) -> dict[str, Any]:
         """Return the tool schema expected by the Anthropic Messages API."""
         return {
             "name": self.name,
             "description": self.description,
             "input_schema": self.input_model.model_json_schema(),
         }
+
+    def to_api_schema_v2(self, sections: list[dict[str, Any]]) -> dict[str, Any]:
+        return self.to_api_schema()
 
 
 class ToolRegistry:
@@ -69,6 +72,10 @@ class ToolRegistry:
         """Return all registered tools."""
         return list(self._tools.values())
 
-    def to_api_schema(self, sections) -> list[dict[str, Any]]:
+    def to_api_schema(self) -> list[dict[str, Any]]:
         """Return all tool schemas in API format."""
-        return [tool.to_api_schema(sections) for tool in self._tools.values()]
+        return [tool.to_api_schema() for tool in self._tools.values()]
+
+    def to_api_schema_v2(self, sections: list[dict[str, Any]]) -> list[dict[str, Any]]:
+        """Return tool schema in API format."""
+        return [tool.to_api_schema_v2(sections) for tool in self._tools.values()]

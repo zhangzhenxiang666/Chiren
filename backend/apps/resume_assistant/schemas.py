@@ -1,41 +1,20 @@
-from typing import Any, Literal
+from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
-
-class BaseSchema(BaseModel):
-    """禁止额外字段的基类"""
-
-    model_config = ConfigDict(extra="forbid")
+from shared.types.messages import ConversationMessage
+from shared.types.strict_model import StrictBaseModel
 
 
-class ToolCall(BaseModel):
-    """工具调用"""
-
-    id: str = Field(description="工具调用ID")
-    name: str = Field(description="工具名称")
-    arguments: str = Field(description="工具参数(JSON字符串)")
-
-
-class Message(BaseModel):
-    """消息"""
-
-    role: Literal["user", "assistant", "tool", "think"] = Field(description="角色")
-    content: str | None = Field(default=None, description="内容")
-    tool_call_id: str | None = Field(default=None, description="工具调用ID")
-    tool_calls: list[ToolCall] | None = Field(default=None, description="工具调用列表")
-    metadata: dict[str, Any] = Field(default_factory=dict, description="元数据")
-
-
-class ChatRequest(BaseModel):
+class ResumeAssistantRequest(BaseModel):
     """请求参数"""
 
     resume_id: str = Field(description="简历ID")
-    type: str = Field(description="LLM 供应商类型")
+    type: Literal["openai", "anthropic"] = Field(description="LLM 供应商类型")
     base_url: str = Field(description="AI API 地址")
     api_key: str = Field(description="AI API 密钥")
     model: str = Field(description="模型名称")
-    messages: list[Message] = Field(description="消息列表")
+    messages: list[ConversationMessage] = Field(description="消息列表")
 
 
 class ResumeSection(BaseModel):
@@ -64,7 +43,7 @@ class ResumeSection(BaseModel):
     updated_at: str = Field(description="更新时间")
 
 
-class PersonalInfo(BaseSchema):
+class PersonalInfo(StrictBaseModel):
     """个人信息"""
 
     full_name: str | None = Field(default=None, description="姓名")
@@ -79,13 +58,13 @@ class PersonalInfo(BaseSchema):
     education_level: str | None = Field(default=None, description="学历")
 
 
-class Summary(BaseSchema):
+class Summary(StrictBaseModel):
     """个人简介"""
 
     text: str | None = Field(default=None, description="简介")
 
 
-class WorkExperienceItem(BaseSchema):
+class WorkExperienceItem(StrictBaseModel):
     """工作经历"""
 
     id: str | None = Field(default=None, description="工作经历ID")
@@ -99,7 +78,7 @@ class WorkExperienceItem(BaseSchema):
     highlights: list[str] | None = Field(default=None, description="工作 highlights")
 
 
-class EducationItem(BaseSchema):
+class EducationItem(StrictBaseModel):
     """教育经历"""
 
     id: str | None = Field(default=None, description="教育经历ID")
@@ -113,7 +92,7 @@ class EducationItem(BaseSchema):
     highlights: list[str] | None = Field(default=None, description="亮点")
 
 
-class ProjectItem(BaseSchema):
+class ProjectItem(StrictBaseModel):
     """项目经历"""
 
     id: str | None = Field(default=None, description="项目ID")
@@ -126,7 +105,7 @@ class ProjectItem(BaseSchema):
     end_date: str | None = Field(default=None, description="结束时间")
 
 
-class CertificationItem(BaseSchema):
+class CertificationItem(StrictBaseModel):
     """证书"""
 
     id: str | None = Field(default=None, description="证书ID")
@@ -135,7 +114,7 @@ class CertificationItem(BaseSchema):
     date: str | None = Field(default=None, description="获得日期")
 
 
-class LanguageItem(BaseSchema):
+class LanguageItem(StrictBaseModel):
     """语言能力"""
 
     id: str | None = Field(default=None, description="语言ID")
@@ -144,7 +123,7 @@ class LanguageItem(BaseSchema):
     description: str | None = Field(default=None, description="描述")
 
 
-class GitHubItem(BaseSchema):
+class GitHubItem(StrictBaseModel):
     """GitHub 仓库"""
 
     id: str | None = Field(default=None, description="仓库ID")
@@ -155,7 +134,7 @@ class GitHubItem(BaseSchema):
     description: str | None = Field(default=None, description="仓库描述")
 
 
-class CustomItem(BaseSchema):
+class CustomItem(StrictBaseModel):
     """自定义项"""
 
     id: str | None = Field(default=None, description="自定义项ID")
@@ -164,9 +143,23 @@ class CustomItem(BaseSchema):
     description: str | None = Field(default=None, description="描述")
 
 
-class SkillItem(BaseSchema):
+class SkillItem(StrictBaseModel):
     """技能项"""
 
     id: str | None = Field(default=None, description="技能ID")
     name: str | None = Field(default=None, description="技能名称")
     skills: list[str] | None = Field(default=None, description="技能列表")
+
+
+SECTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
+    "personal_info": PersonalInfo,
+    "summary": Summary,
+    "work_experience": WorkExperienceItem,
+    "education": EducationItem,
+    "projects": ProjectItem,
+    "certifications": CertificationItem,
+    "languages": LanguageItem,
+    "github": GitHubItem,
+    "custom": CustomItem,
+    "skills": SkillItem,
+}

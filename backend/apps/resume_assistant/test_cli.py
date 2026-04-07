@@ -9,16 +9,22 @@ from rich.panel import Panel
 from rich.syntax import Syntax
 from rich.table import Table
 
-from apps.chat.schemas import ChatRequest, Message, ToolCall
-from apps.chat.service import generate_content
+from apps.resume_assistant.schemas import ResumeAssistantRequest
+from apps.resume_assistant.service import generate_content
+from shared.types.messages import (
+    ConversationMessage,
+    TextBlock,
+    ToolResultBlock,
+    ToolUseBlock,
+)
 
 # --- 初始化 Rich Console ---
 console = Console()
 
 # --- 配置区 ---
-BASE_URL = "http://127.0.0.1:5564/openai"
+BASE_URL = "http://127.0.0.1:5564/anthropic"
 API_KEY = "any-key"
-MODEL = "minimax@minimax-m2.7"
+MODEL = "an-minimax@minimax-m2.7"
 RESUME_ID = "35242f8b-2ea2-4607-8038-5c2cd057e26f"
 
 SECTIONS: list[dict] = [
@@ -80,13 +86,15 @@ async def read_user_input(session: PromptSession) -> str:
 
 
 async def run_turn(
-    messages_history: list[Message], sections: list[dict], id_to_type: dict[str, str]
+    messages_history: list[ConversationMessage],
+    sections: list[dict],
+    id_to_type: dict[str, str],
 ) -> None:
-    request = ChatRequest(
+    request = ResumeAssistantRequest(
         base_url=BASE_URL,
         api_key=API_KEY,
         model=MODEL,
-        type="openai",
+        type="anthropic",
         messages=messages_history,
         resume_id=RESUME_ID,
     )
@@ -97,16 +105,28 @@ async def run_turn(
     def flush_round_to_history():
         if not round_content and not round_tool_calls:
             return
-        assistant_msg = Message(
-            role="assistant", content="".join(round_content) or None
-        )
+        content_blocks: list[TextBlock | ToolUseBlock] = [
+            TextBlock(text="".join(round_content))
+        ]
         if round_tool_calls:
-            assistant_msg.tool_calls = [ToolCall(**tc) for tc in round_tool_calls]
+            for tc in round_tool_calls:
+                content_blocks.append(
+                    ToolUseBlock(id=tc["id"], name=tc["name"], input=tc["input"])
+                )
+        assistant_msg = ConversationMessage(role="assistant", content=content_blocks)
         messages_history.append(assistant_msg)
-        for tm in round_tool_msgs:
+        if round_tool_msgs:
             messages_history.append(
-                Message(
-                    role="tool", tool_call_id=tm["tool_call_id"], content=tm["content"]
+                ConversationMessage(
+                    role="user",
+                    content=[
+                        ToolResultBlock(
+                            tool_use_id=tm["tool_use_id"],
+                            content=tm["content"],
+                            is_error=tm.get("is_error", False),
+                        )
+                        for tm in round_tool_msgs
+                    ],
                 )
             )
         round_content.clear()
@@ -137,13 +157,13 @@ async def run_turn(
                 round_content.append(text)
                 console.print(text, end="", style="bold cyan")
 
-            elif etype == "tool_call":
+            elif etype == "tool_use":
                 tc_id, name, args = (
-                    data["tool_call_id"],
+                    data["id"],
                     data["name"],
-                    data["arguments"],
+                    data["input"],
                 )
-                round_tool_calls.append({"id": tc_id, "name": name, "arguments": args})
+                round_tool_calls.append({"id": tc_id, "name": name, "input": args})
                 console.print(
                     Panel(
                         f"[bold magenta]Call:[/bold magenta] {name}\n[bold white]Args:[/bold white] {args}",
@@ -157,16 +177,17 @@ async def run_turn(
                 success = not data.get("is_error")
                 round_tool_msgs.append(
                     {
-                        "tool_call_id": data["tool_call_id"],
-                        "content": data["output"],
+                        "tool_use_id": data["tool_use_id"],
+                        "content": data["content"],
+                        "is_error": data.get("is_error", False),
                     }
                 )
 
                 if success:
                     console.print(
                         Panel(
-                            data["output"],
-                            title=f"[bold green]✓ Tool Success[/bold green] [dim]({data['tool_call_id'][:8]})[/dim]",
+                            data["content"],
+                            title=f"[bold green]✓ Tool Success[/bold green] [dim]({data['tool_use_id'][:8]})[/dim]",
                             border_style="green",
                             expand=False,
                         )
@@ -174,8 +195,8 @@ async def run_turn(
                 else:
                     console.print(
                         Panel(
-                            data["output"],
-                            title=f"[bold red]✗ Tool Error[/bold red] [dim]({data['tool_call_id'][:8]})[/dim]",
+                            data["content"],
+                            title=f"[bold red]✗ Tool Error[/bold red] [dim]({data['tool_use_id'][:8]})[/dim]",
                             border_style="red",
                             expand=False,
                         )
@@ -239,7 +260,7 @@ async def main() -> None:
     )
 
     session = PromptSession()
-    messages_history: list[Message] = []
+    messages_history: list[ConversationMessage] = []
 
     while True:
         user_input = await read_user_input(session)
@@ -248,7 +269,7 @@ async def main() -> None:
                 break
             continue
 
-        messages_history.append(Message(role="user", content=user_input))
+        messages_history.append(ConversationMessage.from_user_text(user_input))
         await run_turn(messages_history, SECTIONS, ID_TO_TYPE)
         print_resume_state(SECTIONS)
 

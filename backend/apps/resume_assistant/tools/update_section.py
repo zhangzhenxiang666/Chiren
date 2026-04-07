@@ -1,19 +1,12 @@
+import re
 import secrets
+from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 
-from apps.chat.schemas import (
-    CertificationItem,
-    CustomItem,
-    EducationItem,
-    GitHubItem,
-    LanguageItem,
-    PersonalInfo,
-    ProjectItem,
-    SkillItem,
-    Summary,
-    WorkExperienceItem,
-)
+_ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
+
+from apps.resume_assistant.schemas import SECTION_TYPE_TO_MODEL
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 
 # 各 section 类型的字段结构和示例
@@ -81,20 +74,6 @@ def build_tool_description(sections: list[dict]) -> str:
     return "\n".join(lines)
 
 
-SECTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
-    "personal_info": PersonalInfo,
-    "summary": Summary,
-    "work_experience": WorkExperienceItem,
-    "education": EducationItem,
-    "projects": ProjectItem,
-    "certifications": CertificationItem,
-    "languages": LanguageItem,
-    "github": GitHubItem,
-    "custom": CustomItem,
-    "skills": SkillItem,
-}
-
-
 def _generate_prefix() -> str:
     return secrets.token_hex(4)
 
@@ -127,6 +106,51 @@ def _assign_ids(submitted_items: list, existing_items: list) -> list:
         else:
             result.append(item)
     return result
+
+
+def _collect_existing_ids(items: list[dict]) -> set[str]:
+    """收集已存在 items 的 id 集合。"""
+    return {item["id"] for item in items if isinstance(item, dict) and item.get("id")}
+
+
+def _validate_item_id(item: dict, field_path: str, existing_ids: set[str]) -> list[str]:
+    """
+    验证单个 item 的 id。
+
+    - 格式必须符合 8hex-4位数字
+    - 如果提供了 id，则必须是已存在的 id（新 item 不应带 id）
+    """
+    errors = []
+    item_id = item.get("id")
+    if not item_id:
+        return errors
+
+    if not _ID_FORMAT.match(item_id) or item_id not in existing_ids:
+        errors.append(
+            f"  - {field_path}.id: '{item_id}' is invalid. Omit the id field for new items (it will be auto-generated); preserve the original id for existing items."
+        )
+        return errors
+    return errors
+
+
+def _validate_items(
+    submitted_items: list, existing_items: list, item_type: str
+) -> list[str]:
+    """
+    验证提交的 items 的 id。
+
+    - id 格式必须正确
+    - 新增的 item 不应带 id（应自动生成）
+    - 只有现有 item 的 id 才能保留
+    """
+    errors = []
+    existing_ids = _collect_existing_ids(existing_items)
+    for i, item in enumerate(submitted_items):
+        if not isinstance(item, dict):
+            continue
+        field_path = f"{item_type}[{i}]"
+        errors.extend(_validate_item_id(item, field_path, existing_ids))
+    return errors
 
 
 class UpdateSectionToolInput(BaseModel):
@@ -195,16 +219,15 @@ class UpdateSectionTool(BaseTool):
                 output=error_msg,
             )
 
-        # 所有验证均通过, 执行更新
+        # 验证并执行更新
         for section in context.sections:
             if section["id"] != arguments.section_id:
                 continue
 
             content = section.get("content", {})
 
-            if section_type in ("personal_info", "summary"):
-                content.update(arguments.value)
-            elif section_type in (
+            # 验证 item id（新 item 不应带 id，只有现有 item 才能保留原 id）
+            if section_type in (
                 "work_experience",
                 "education",
                 "projects",
@@ -213,24 +236,48 @@ class UpdateSectionTool(BaseTool):
                 "github",
                 "custom",
             ):
+                id_errors = _validate_items(
+                    arguments.value.get("items", []),
+                    content.get("items", []),
+                    "items",
+                )
+                if id_errors:
+                    error_msg = (
+                        f"[{section_type}] Item ID validation failed:\n"
+                        + "\n".join(id_errors)
+                    )
+                    return ToolResult(is_error=True, output=error_msg)
                 content["items"] = _assign_ids(
                     arguments.value.get("items", []), content.get("items", [])
                 )
             elif section_type == "skills":
+                id_errors = _validate_items(
+                    arguments.value.get("categories", []),
+                    content.get("categories", []),
+                    "categories",
+                )
+                if id_errors:
+                    error_msg = (
+                        f"[{section_type}] Item ID validation failed:\n"
+                        + "\n".join(id_errors)
+                    )
+                    return ToolResult(is_error=True, output=error_msg)
                 content["categories"] = _assign_ids(
                     arguments.value.get("categories", []), content.get("categories", [])
                 )
+            elif section_type in ("personal_info", "summary"):
+                content.update(arguments.value)
             break
 
         return ToolResult(
             output=f"Successfully updated section {arguments.section_id}."
         )
 
-    def to_api_schema(self, setions: list[dict[str, any]]):
+    def to_api_schema_v2(self, sections: list[dict[str, Any]]) -> dict[str, Any]:
         return {
             "name": self.name,
             "description": self.description.format(
-                content_structures=build_tool_description(setions)
+                content_structures=build_tool_description(sections)
             ),
             "input_schema": self.input_model.model_json_schema(),
         }

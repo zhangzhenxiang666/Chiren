@@ -71,7 +71,7 @@ class AddSectionTool(BaseTool):
 
         return ToolResult(output=f"Successfully added section {section['id']}.")
 
-    def to_api_schema(self, sections: list[dict[str, Any]]):
+    def to_api_schema_v2(self, sections: list[dict[str, Any]]) -> dict[str, Any]:
         existing_types = {s.get("type") for s in sections if s.get("type")}
         # 可添加的类型：排除已存在的，custom 必然出现
         available_types = [t for t in _ALL_TYPES if t not in existing_types]
