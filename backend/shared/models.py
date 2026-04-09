@@ -2,18 +2,21 @@ from __future__ import annotations
 
 import json
 import uuid
-from datetime import UTC, datetime
+from datetime import datetime, timedelta, timezone
 from typing import TypeVar
+
+# 上海时区 (UTC+8)
+SHANGHAI_TZ = timezone(timedelta(hours=8))
+utc_now = lambda: datetime.now(SHANGHAI_TZ)
 
 from pydantic import BaseModel
 from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from shared.types.resume import Resume as ResumeSchema
+from shared.types.messages import ConversationMessageSchema
+from shared.types.resume import ResumeSchema, ResumeSectionSchema, section_adapter
 
 S = TypeVar("S", bound=BaseModel)
-
-utc_now = lambda: datetime.now(UTC)
 
 
 class PydanticMixin[S: BaseModel]:
@@ -158,7 +161,7 @@ class Resume(PydanticMixin, Base):
         )
 
 
-class ResumeSection(Base):
+class ResumeSection(PydanticMixin, Base):
     """简历区块数据库模型"""
 
     __tablename__ = "resume_sections"
@@ -220,6 +223,45 @@ class ResumeSection(Base):
 
     resume = relationship("Resume", back_populates="sections")
 
+    def to_pydantic(self) -> ResumeSectionSchema:
+        data = dict(
+            id=self.id,
+            resume_id=self.resume_id,
+            title=self.title,
+            type=self.type,
+            sort_order=self.sort_order,
+            visible=self.visible,
+            content=json.loads(self.content),
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+        return section_adapter.validate_python(data)
+
+    @classmethod
+    def from_pydantic(cls, schema: ResumeSectionSchema) -> ResumeSection:
+        if schema.content is not None:
+            content = json.dumps(schema.content, ensure_ascii=False)
+        elif schema.type in {"personal_info", "summary"}:
+            content = "{}"
+        elif schema.type == "skills":
+            content = '{"categories": []}'
+        else:
+            content = '{"items": []}'
+        # 为 None 时使用当前时间，让 ORM 的 default/onupdate 生效
+        created = schema.created_at or utc_now()
+        updated = schema.updated_at or utc_now()
+        return cls(
+            id=schema.id,
+            resume_id=schema.resume_id,
+            title=schema.title,
+            type=schema.type,
+            sort_order=schema.sort_order,
+            visible=schema.visible,
+            content=content,
+            created_at=created,
+            updated_at=updated,
+        )
+
 
 class BaseWork(Base):
     """任务流数据库模型"""
@@ -227,40 +269,26 @@ class BaseWork(Base):
     __tablename__ = "work"
 
     id: Mapped[str] = mapped_column(
-        String(36),
-        primary_key=True,
-        comment="工作流唯一id")
+        String(36), primary_key=True, comment="工作流唯一id"
+    )
 
     file_name: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        comment="文件名称"
+        String(100), nullable=False, comment="文件名称"
     )
 
     src: Mapped[str] = mapped_column(
-        String(255),
-        nullable=False,
-        comment="文件绝对路径"
+        String(255), nullable=False, comment="文件绝对路径"
     )
 
     status: Mapped[str] = mapped_column(
-        String(20),
-        nullable=True,
-        default="start",
-        comment="当前状态"
+        String(20), nullable=True, default="start", comment="当前状态"
     )
 
     template: Mapped[str] = mapped_column(
-        String(50),
-        nullable=False,
-        comment="模板名称"
+        String(50), nullable=False, comment="模板名称"
     )
 
-    title: Mapped[str] = mapped_column(
-        String(100),
-        nullable=True,
-        comment="简历标题"
-    )
+    title: Mapped[str] = mapped_column(String(100), nullable=True, comment="简历标题")
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -275,58 +303,123 @@ class BaseWork(Base):
         onupdate=utc_now,
         comment="更新时间",
     )
-    
 
-class template(Base):
+
+class ConversationMessageRecord(PydanticMixin, Base):
+    """会话消息数据库模型"""
+
+    __tablename__ = "conversation_messages"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+        comment="消息唯一标识",
+    )
+    conversation_id: Mapped[str] = mapped_column(
+        String(36),
+        nullable=False,
+        index=True,
+        comment="所属会话 ID",
+    )
+    role: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        comment="消息角色，user 或 assistant",
+    )
+    content: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="消息内容，JSON 字符串",
+    )
+    reasoning: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+        default=None,
+        comment="AI 思考过程（可选）",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        comment="创建时间",
+    )
+
+    def to_pydantic(self) -> ConversationMessageSchema:
+        """转换为 Pydantic DTO"""
+        return ConversationMessageSchema.model_validate(
+            {
+                "id": self.id,
+                "conversation_id": self.conversation_id,
+                "role": self.role,
+                "content": json.loads(self.content) if self.content else [],
+                "reasoning": self.reasoning,
+                "created_at": self.created_at,
+            }
+        )
+
+    @classmethod
+    def from_pydantic(
+        cls, schema: ConversationMessageSchema
+    ) -> ConversationMessageRecord:
+        """从 Pydantic DTO 创建数据库模型"""
+        return cls(
+            id=schema.id,
+            conversation_id=schema.conversation_id,
+            role=schema.role,
+            content=json.dumps(schema.content, ensure_ascii=False),
+            reasoning=schema.reasoning,
+            created_at=schema.created_at,
+        )
+
+
+class Template(Base):
     """模板类数据库模型"""
+
     __tablename__ = "template"
 
     id: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-        primary_key=True,
-        comment="模板id"
+        String(100), nullable=False, primary_key=True, comment="模板id"
     )
     name: Mapped[str] = mapped_column(
         String(100),
         default="该用户很懒，什么也没有留下",
         nullable=False,
-        comment="模板名称"
+        comment="模板名称",
     )
     display_name: Mapped[str] = mapped_column(
         String(100),
         default="该用户很懒，什么也没有留下",
         nullable=False,
-        comment="模板显示名称"
+        comment="模板显示名称",
     )
     preview_image_url: Mapped[str] = mapped_column(
         String(100),
         default="该用户很懒，什么也没有留下",
         nullable=False,
-        comment="模板图片地址"
+        comment="模板图片地址",
     )
     is_active: Mapped[bool] = mapped_column(
-        default=False,
-        nullable=True,
-        comment="模板是否启用"
+        default=False, nullable=True, comment="模板是否启用"
     )
     description: Mapped[str] = mapped_column(
         String(100),
         default="该用户很懒，什么也没有留下",
         nullable=True,
-        comment="模板id"
+        comment="模板id",
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=utc_now,
         onupdate=utc_now,
-        comment="创建时间"
+        comment="创建时间",
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
         default=utc_now,
         onupdate=utc_now,
-        comment="修改时间"
+        comment="修改时间",
     )

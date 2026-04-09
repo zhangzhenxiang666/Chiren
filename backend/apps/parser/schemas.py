@@ -1,8 +1,5 @@
 """Parser Pydantic 模型。"""
 
-from datetime import datetime
-from typing import Optional
-
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 
@@ -35,24 +32,6 @@ class TaskIdResponse(BaseSchema):
     task_id: str
 
 
-class Work(BaseSchema):
-    """工作任务模型。
-    对应 Java 后端 /api/work/{id} 接口返回的 data 字段。
-    """
-
-    id: str = Field(default="", description="任务ID")
-    file_name: str = Field(default="", description="文件名称")
-    src: str = Field(default="", description="文件绝对路径")
-    status: str = Field(default="", description="任务状态")
-    template: str = Field(default="", description="模板名称")
-    title: str = Field(default="", description="简历标题")
-    created_at: Optional[datetime] = Field(default=None, description="创建时间")
-    updated_at: Optional[datetime] = Field(default=None, description="更新时间")
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-
 class PersonalInfo(BaseSchema):
     """个人信息模型。"""
 
@@ -66,7 +45,6 @@ class PersonalInfo(BaseSchema):
     gender: str = Field(default="", description="Gender")
     political_status: str = Field(default="", description="Political status")
     education_level: str = Field(default="", description="Education level")
-    avatar: str = Field(default="", description="Avatar URL")
 
 
 class EducationItem(BaseSchema):
@@ -163,85 +141,3 @@ class ParserResult(BaseSchema):
         default=None, description="Certifications"
     )
     languages: list[LanguageItem] | None = Field(default=None, description="Languages")
-
-
-if __name__ == "__main__":
-    # 测试 1：空字典
-    print("======== 空字典 ========")
-    result = ParserResult.model_validate({})
-    print(result.model_dump())
-
-    # 测试 2：None 输入
-    print("\n======== None 输入 ========")
-    result = ParserResult.model_validate(None)
-    print(result.model_dump())
-
-    # 测试 3：列表字段为 None
-    print("\n======== 列表字段为 None ========")
-    result = ParserResult.model_validate({"education": None, "languages": None})
-    print(result.model_dump())
-
-    # 测试 4：完整输入
-    print("\n======== 完整输入 ========")
-    data = {
-        "personal_info": {"full_name": "张三", "email": "zhang@example.com"},
-        "summary": "我是开发者",
-        "education": [{"institution": "清华大学", "degree": "本科", "field": "计算机"}],
-        "skills": [{"name": "编程", "skills": ["Python", "Go"]}],
-        "projects": [
-            {"name": "项目A", "description": "一个项目", "technologies": ["FastAPI"]}
-        ],
-        "certifications": [{"name": "AWS认证", "issuer": "亚马逊"}],
-        "work_experiences": [
-            {
-                "company": "某公司",
-                "position": "开发工程师",
-                "start_date": "2020-01",
-                "end_date": "至今",
-                "current": True,
-                "highlights": ["独立完成模块开发"],
-            }
-        ],
-        "languages": [{"language": "英语", "proficiency": "六级"}],
-    }
-    result = ParserResult.model_validate(data)
-    print(result.model_dump())
-
-
-class ResumeResult(BaseSchema):
-    id: str = Field(default="",description="简历id")
-    workspace_id: Optional[str] = Field(default="",description="顶级简历id")
-    title: Optional[str] = Field(default="我的简历",description="简历标题")
-    template: str = Field(default="",description="简历模板")
-    theme_config: Optional[str] = Field(default="",description="简历主题")
-    is_default: Optional[bool] = Field(default=True,description="简历是否默认")
-    language: Optional[str] = Field(default="zn",description="简历语言")
-    share_token: Optional[str] = Field(default="",description="简历分享链接")
-    is_public: Optional[bool] = Field(default=True,description="简历是否公开")
-    share_password: Optional[str] = Field(default="",description="简历分享密码")
-    view_count: Optional[int] = Field(default="0",description="简历访问次数")
-    created_at: Optional[datetime] = Field(default=None, description="创建时间")
-    updated_at: Optional[datetime] = Field(default=None, description="更新时间")
-
-
-class ResumeSectionResult(BaseSchema):
-    id: str = Field(default="",description="区块id")
-    resume_id: str = Field(default="",description="区块所属简历id")
-    type: str = Field(default="",description="区块类型")
-    title: str = Field(default="",description="区块显示标题")
-    sort_order: int = Field(default="",description="排序")
-    visible: Optional[bool] = Field(default=True,description="是否可见")
-    content: str = Field(default="",description="区块内容")
-    created_at: Optional[datetime] = Field(default=None,description="区块创建时间")
-    updated_at: Optional[datetime] = Field(default=None,description="更新时间")
-
-
-class TemplateResult(BaseSchema):
-    id: str = Field(default="",description="模板id")
-    name: str = Field(default="",description="模板名称")
-    display_name: str = Field(default="",description="模板显示名称")
-    preview_image_url: str = Field(default="",description="模板图片地址")
-    is_active: Optional[bool] = Field(default=False,description="是否启用")
-    description: str = Field(default="",description="模板描述")
-    created_at: Optional[datetime] = Field(default=None,description="创建时间")
-    updated_at: Optional[datetime] = Field(default=None,description="修改时间")

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
@@ -34,6 +35,19 @@ class ToolResultBlock(BaseModel):
 ContentBlock = Annotated[
     TextBlock | ToolUseBlock | ToolResultBlock, Field(discriminator="type")
 ]
+
+
+class ConversationMessageSchema(BaseModel):
+    """会话消息 DTO，用于前后端交互"""
+
+    id: int = Field(description="消息唯一标识")
+    conversation_id: str = Field(description="所属会话 ID")
+    role: Literal["user", "assistant"] = Field(description="消息角色")
+    content: list[ContentBlock] = Field(
+        default_factory=list, description="消息内容块列表"
+    )
+    reasoning: str | None = Field(default=None, description="AI 思考过程（可选）")
+    created_at: datetime | None = Field(default=None, description="创建时间")
 
 
 class ConversationMessage(BaseModel):

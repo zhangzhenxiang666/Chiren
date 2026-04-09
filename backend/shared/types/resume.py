@@ -4,21 +4,29 @@ import json
 from datetime import datetime
 from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Discriminator,
+    Field,
+    Tag,
+    TypeAdapter,
+    model_validator,
+)
 
 from shared.types.strict_model import StrictBaseModel
 
 
-class Resume(BaseModel):
+class ResumeSchema(BaseModel):
     """简历模型"""
 
-    id: str | None = Field(default=None, description="简历唯一标识")
+    id: str = Field(description="简历唯一标识")
     workspace_id: str | None = Field(
         default=None, description="所属 Workspace ID，为空表示本身就是 Workspace"
     )
     title: str = Field(default="我的简历", description="简历标题")
-    template: str = Field(default="two-column", description="模板名称")
     theme_config: dict[str, Any] = Field(default_factory=dict, description="主题配置")
+    template: str = Field(default="two-column", description="模板名称")
     is_default: bool = Field(default=False, description="是否为用户的默认简历")
     language: str = Field(default="zh", description="简历语言")
     share_token: str | None = Field(
@@ -232,8 +240,10 @@ class ResumeSectionBase(BaseModel):
     title: str = Field(description="区块显示标题")
     sort_order: int = Field(default=0, description="排序序号，越小越靠前")
     visible: bool = Field(default=True, description="是否可见")
-    created_at: datetime = Field(description="创建时间")
-    updated_at: datetime = Field(description="更新时间")
+    created_at: datetime | None = Field(default=None, description="创建时间")
+    updated_at: datetime | None = Field(default=None, description="更新时间")
+
+    model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="before")
     @classmethod
@@ -245,12 +255,6 @@ class ResumeSectionBase(BaseModel):
                 raise ValueError(f"content 字段不是合法 JSON：{e}") from e
         return values
 
-    def dump_for_db(self) -> dict[str, Any]:
-        """序列化回数据库格式（content 重新变成 JSON 字符串）"""
-        data = self.model_dump()
-        data["content"] = json.dumps(data["content"], ensure_ascii=False)
-        return data
-
 
 # ══════════════════════════════════════════════════════════════
 #  各具体 Section 子类
@@ -259,64 +263,64 @@ class ResumeSectionBase(BaseModel):
 
 class PersonalInfoSection(ResumeSectionBase):
     type: Literal["personal_info"]
-    content: PersonalInfo
+    content: PersonalInfo | None = Field(default=None)
 
 
 class SummarySection(ResumeSectionBase):
     type: Literal["summary"]
-    content: Summary
+    content: Summary | None = Field(default=None)
 
 
 class WorkExperienceSection(ResumeSectionBase):
     type: Literal["work_experience"]
-    content: WorkExperienceContent
+    content: WorkExperienceContent | None = Field(default=None)
 
 
 class ProjectsSection(ResumeSectionBase):
     type: Literal["projects"]
-    content: ProjectsContent
+    content: ProjectsContent | None = Field(default=None)
 
 
 class EducationSection(ResumeSectionBase):
     type: Literal["education"]
-    content: EducationContent
+    content: EducationContent | None = Field(default=None)
 
 
 class SkillsSection(ResumeSectionBase):
     type: Literal["skills"]
-    content: SkillsContent
+    content: SkillsContent | None = Field(default=None)
 
 
 class LanguagesSection(ResumeSectionBase):
     type: Literal["languages"]
-    content: LanguagesContent
+    content: LanguagesContent | None = Field(default=None)
 
 
 class CertificationsSection(ResumeSectionBase):
     type: Literal["certifications"]
-    content: CertificationsContent
+    content: CertificationsContent | None = Field(default=None)
 
 
 class QrCodesSection(ResumeSectionBase):
     type: Literal["qr_codes"]
-    content: QrCodesContent
+    content: QrCodesContent | None = Field(default=None)
 
 
 class GitHubSection(ResumeSectionBase):
     type: Literal["github"]
-    content: GitHubContent
+    content: GitHubContent | None = Field(default=None)
 
 
 class CustomSection(ResumeSectionBase):
     type: Literal["custom"]
-    content: CustomContent
+    content: CustomContent | None = Field(default=None)
 
 
 # ══════════════════════════════════════════════════════════════
 #  Discriminated Union 入口类型
 # ══════════════════════════════════════════════════════════════
 
-ResumeSection = Annotated[
+ResumeSectionSchema = Annotated[
     Annotated[PersonalInfoSection, Tag("personal_info")]
     | Annotated[SummarySection, Tag("summary")]
     | Annotated[WorkExperienceSection, Tag("work_experience")]
@@ -330,6 +334,7 @@ ResumeSection = Annotated[
     | Annotated[CustomSection, Tag("custom")],
     Discriminator("type"),
 ]
+
 
 # ── type alias，方便在其他地方 import ─────────────────────────
 ResumeSectionType = (
@@ -345,3 +350,5 @@ ResumeSectionType = (
     | GitHubSection
     | CustomSection
 )
+
+section_adapter = TypeAdapter(ResumeSectionSchema)

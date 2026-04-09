@@ -1,11 +1,13 @@
 from collections.abc import AsyncGenerator
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from shared.models import Base
 
-engine = create_async_engine("sqlite+aiosqlite:///./app.db", echo=True)
+db_path = Path(__file__).parent.parent / "app.db"
+engine = create_async_engine(f"sqlite+aiosqlite:///{db_path}", echo=True)
 
 async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 

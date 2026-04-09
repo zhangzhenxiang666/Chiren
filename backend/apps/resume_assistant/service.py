@@ -1,7 +1,9 @@
 import json
+import logging
 from typing import Any
 
 from pydantic import ValidationError
+from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette import EventSourceResponse
 
 from apps.resume_assistant.conversation_store import ConversationStore
@@ -20,9 +22,12 @@ from shared.api.client import (
     ApiTextDeltaEvent,
     SupportsStreamingMessages,
 )
+from shared.models import ConversationMessageRecord
 from shared.types.base_tool import ToolExecutionContext, ToolRegistry
 from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseBlock
-from shared.types.resume import ResumeSection
+from shared.types.resume import ResumeSectionSchema
+
+log = logging.getLogger(__name__)
 
 
 def _build_result(
@@ -41,6 +46,7 @@ async def _handle_tool_calls(
     id_to_type: dict[str, str],
     sections: list[dict[str, Any]],
     messages: list[ConversationMessage],
+    db: AsyncSession,
 ):
     tool_results: list[ToolResultBlock] = []
 
@@ -101,10 +107,11 @@ async def _handle_tool_calls(
             ToolExecutionContext(
                 sections=sections,
                 metadata={
-                    "tool_call_id": tool_use.id,
+                    "tool_use_id": tool_use.id,
                     "id_to_type": id_to_type,
                     "client": client,
                     "model": model,
+                    "db": db,
                 },
             ),
         )
@@ -126,25 +133,27 @@ async def _handle_tool_calls(
 
 
 def make_sse_event(event: str, data: dict[str, Any]) -> dict[str, str]:
-    return {"event": event, "data": json.dumps(data, ensure_ascii=False)}
+
+    return {
+        "event": event,
+        "data": json.dumps(data, ensure_ascii=False),
+    }
 
 
 async def resume_assistant_service(
-    request: ResumeAssistantRequest, sections: list[ResumeSection]
+    request: ResumeAssistantRequest,
+    sections: list[ResumeSectionSchema],
+    db: AsyncSession,
 ) -> EventSourceResponse:
-    visible_sections: list[dict[str, Any]] = []
+    sections_list: list[dict[str, Any]] = []
     id_to_type: dict[str, str] = {}
+
     for section in sections:
-        if section.visible:
-            id_to_type[section.id] = section.type
-            new_section = section.model_dump()
-            visible_sections.append(new_section)
+        id_to_type[section.id] = section.type
+        new_section = section.model_dump()
+        sections_list.append(new_section)
 
-    visible_sections = sorted(
-        visible_sections, key=lambda section: section["sort_order"]
-    )
-
-    return EventSourceResponse(generate_content(request, visible_sections, id_to_type))
+    return EventSourceResponse(generate_content(request, sections_list, id_to_type, db))
 
 
 def insert_resume_info(
@@ -189,13 +198,23 @@ def insert_resume_info(
 
 
 def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
-    return json.dumps(sections, ensure_ascii=False)
+    def json_serializer(obj):
+        if hasattr(obj, "isoformat"):
+            return obj.isoformat()
+        if hasattr(obj, "model_dump"):
+            return obj.model_dump()
+        if hasattr(obj, "__dict__"):
+            return obj.__dict__
+        raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+    return json.dumps(sections, ensure_ascii=False, default=json_serializer)
 
 
 async def generate_content(
     request: ResumeAssistantRequest,
     sections: list[dict[str, Any]],
     id_to_type: dict[str, str],
+    db: AsyncSession,
 ):
     max_count = 30
 
@@ -268,11 +287,23 @@ async def generate_content(
                 yield make_sse_event("done", {})
                 break
 
-            # TODO: 这里占位提交think消息给后端数据库
-            pass
-
-            # TODO: 这里占位提交assistant消息给后端数据库，而且要合并可能的tool_calls
-            pass
+            # 添加ai消息
+            db.add(
+                ConversationMessageRecord(
+                    conversation_id=request.resume_id,
+                    role="assistant",
+                    content=json.dumps(
+                        [
+                            block.model_dump()
+                            for block in complete_event.message.content
+                        ],
+                        ensure_ascii=False,
+                    ),
+                    reasoning=complete_event.message._reasoning
+                    if hasattr(complete_event.message, "_reasoning")
+                    else None,
+                )
+            )
 
             messages.append(complete_event.message)
 
@@ -284,11 +315,24 @@ async def generate_content(
                 id_to_type,
                 sections,
                 messages,
+                db,
             ):
                 yield event
 
-            # TODO: 这里占位将tool_results提交给后端数据库
-            pass
+            # 添加tool result消息
+            if messages[-1].role == "user":
+                db.add(
+                    ConversationMessageRecord(
+                        conversation_id=request.resume_id,
+                        role="user",
+                        content=json.dumps(
+                            [block.model_dump() for block in messages[-1].content],
+                            ensure_ascii=False,
+                        ),
+                    )
+                )
+
+            await db.commit()
 
             # TODO: 这里要考虑stop_reason各种运营商兼容的格式
             if complete_event.stop_reason in ("end_turn", "stop"):
@@ -296,6 +340,8 @@ async def generate_content(
                 yield make_sse_event("done", {})
                 break
         except Exception as e:
+            log.error(f"POST /resume-assistant error: {str(e)}")
+
             store.write(request.resume_id, messages)
             yield make_sse_event("error", {"message": str(e)})
             break

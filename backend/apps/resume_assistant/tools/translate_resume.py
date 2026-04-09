@@ -5,6 +5,8 @@ from collections import Counter
 
 import json_repair
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from apps.resume_assistant.schemas import SECTION_TYPE_TO_MODEL
 from shared.api.client import (
@@ -13,6 +15,7 @@ from shared.api.client import (
     ApiTextDeltaEvent,
     SupportsStreamingMessages,
 )
+from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 from shared.types.messages import ConversationMessage, TextBlock
 
@@ -236,7 +239,6 @@ class TranslateResumeTool(BaseTool):
     description = "Translate a resume (or a specific section) to the target language."
     input_model = TranslateResumeToolInput
 
-    # TODO: 这里更新sections时要同步数据库, 以及更改里面的update_at字段
     async def execute(
         self, arguments: TranslateResumeToolInput, context: ToolExecutionContext
     ) -> ToolResult:
@@ -290,10 +292,36 @@ class TranslateResumeTool(BaseTool):
             f"\nTotal: {len(non_empty)} translated, {success} succeeded, {failed} failed"
         )
 
+        # 同步成功的翻译结果到数据库
+        if success:
+            db: AsyncSession = context.metadata["db"]
+            resume_id = context.sections[0]["resume_id"]
+            now = utc_now()
+            for r in section_results:
+                if not r["success"]:
+                    continue
+                section_id = r["section_id"]
+                # 从 context.sections 获取更新后的 content
+                for section in context.sections:
+                    if section["id"] == section_id:
+                        result = await db.execute(
+                            select(ResumeSection).where(
+                                ResumeSection.id == section_id,
+                                ResumeSection.resume_id == resume_id,
+                            )
+                        )
+                        db_section = result.scalar_one_or_none()
+                        if db_section is not None:
+                            db_section.content = json.dumps(
+                                section.get("content", {}), ensure_ascii=False
+                            )
+                            db_section.updated_at = now
+                            db.add(db_section)
+                        break
+
         return ToolResult(output="\n".join(lines))
 
 
-# TODO: 在翻译成功时同步数据库
 async def _attempt_translation(
     client: SupportsStreamingMessages,
     model: str,

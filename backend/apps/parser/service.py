@@ -3,7 +3,10 @@
 import asyncio
 import json
 import secrets
-from datetime import UTC, datetime
+from datetime import datetime, timedelta, timezone
+
+from pydantic import BaseModel
+from sqlalchemy import select
 
 from apps.parser.call_llm import executor_llm
 from apps.parser.pdf_parser import pdf_parser
@@ -15,14 +18,12 @@ from apps.parser.state import (
     update_task_result,
     update_task_status,
 )
+from shared.api.client import SupportsStreamingMessages
+from shared.database import async_session
 from shared.exceptions.base import ParseError
-from shared.java_client import java_client
-from shared.java_client.endpoints import endpoints
+from shared.models import BaseWork, Resume, ResumeSection
 
-
-def _now_iso() -> str:
-    """返回当前时间的 ISO 格式字符串。"""
-    return datetime.now(UTC).isoformat().replace("+00:00", "Z")
+SHANGHAI_TZ = timezone(timedelta(hours=8))
 
 
 def _ensure_id(obj: dict, prefix: str, index: int) -> dict:
@@ -48,7 +49,6 @@ async def _create_resume_sections(resume_id: str, result: ParserResult) -> None:
         resume_id: 简历 ID。
         result: LLM 解析结果。
     """
-    now = _now_iso()
 
     # 区块类型到中文标题的映射
     section_type_to_title = {
@@ -65,28 +65,30 @@ async def _create_resume_sections(resume_id: str, result: ParserResult) -> None:
         "custom": "自定义区域",
     }
 
-    def build_section(section_type: str, content: dict, sort_order: int) -> dict:
-        return {
-            "resumeId": resume_id,
-            "type": section_type,
-            "title": section_type_to_title[section_type],
-            "sortOrder": sort_order,
-            "visible": True,
-            "content": json.dumps(content, ensure_ascii=False),
-            "createdAt": now,
-            "updatedAt": now,
-        }
+    def build_section(
+        section_type: str, content: dict, sort_order: int
+    ) -> ResumeSection:
+        return ResumeSection(
+            resume_id=resume_id,
+            type=section_type,
+            title=section_type_to_title[section_type],
+            sort_order=sort_order,
+            visible=True,
+            content=json.dumps(content, ensure_ascii=False),
+        )
 
     sections = []
     sort_order = 0
 
-    sections.append(("personal_info", result.personal_info.model_dump(), sort_order))
+    sections.append(
+        build_section("personal_info", result.personal_info.model_dump(), sort_order)
+    )
     sort_order += 1
-    sections.append(("summary", {"text": result.summary}, sort_order))
+    sections.append(build_section("summary", {"text": result.summary}, sort_order))
     sort_order += 1
 
     # 可选的列表字段配置：(type值, 结果中的属性名, content 的 key)
-    list_field_configs = [
+    list_field_configs: list[tuple[str, BaseModel | None, str]] = [
         ("work_experience", result.work_experiences, "items"),
         ("education", result.education, "items"),
         ("projects", result.projects, "items"),
@@ -98,25 +100,19 @@ async def _create_resume_sections(resume_id: str, result: ParserResult) -> None:
     for section_type, field_value, content_key in list_field_configs:
         if field_value is not None:
             section_prefix = secrets.token_hex(4)
-            sections.append(
-                (
-                    section_type,
-                    {
-                        content_key: [
-                            _ensure_id(item.model_dump(), section_prefix, idx)
-                            for idx, item in enumerate(field_value, start=1)
-                        ]
-                    },
-                    sort_order,
-                )
-            )
+            content = {
+                content_key: [
+                    _ensure_id(item.model_dump(), section_prefix, idx)
+                    for idx, item in enumerate(field_value, start=1)
+                ]
+            }
+            sections.append(build_section(section_type, content, sort_order))
             sort_order += 1
 
-    for section_type, content, sort_order in sections:
-        await java_client.post(
-            endpoints.resume_section_create,
-            json=build_section(section_type, content, sort_order),
-        )
+    # 批量写入数据库
+    async with async_session() as session:
+        session.add_all(sections)
+        await session.commit()
 
 
 def infer_parser_type(filename: str, content_type: str | None) -> str:
@@ -140,11 +136,26 @@ def infer_parser_type(filename: str, content_type: str | None) -> str:
     raise ValueError(f"不支持的文件类型: {ext or content_type or '未知'}")
 
 
+async def _update_work_status(task_id: str, status: TaskStatus) -> None:
+    """更新任务状态到数据库。
+
+    Args:
+        task_id: 任务 ID。
+        status: 新状态。
+    """
+    async with async_session() as session:
+        result = await session.execute(select(BaseWork).where(BaseWork.id == task_id))
+        work = result.scalar_one_or_none()
+        if work:
+            work.status = status.value
+            work.updated_at = datetime.now(SHANGHAI_TZ)
+            await session.commit()
+
+
 async def _execute_parse_flow(
     task_id: str,
     file_path: str,
-    base_url: str,
-    api_key: str,
+    client: SupportsStreamingMessages,
     model: str,
     template: str,
     title: str,
@@ -158,8 +169,6 @@ async def _execute_parse_flow(
     Args:
         task_id: 任务 ID。
         file_path: PDF 文件绝对路径。
-        base_url: AI API 地址。
-        api_key: AI API 密钥。
         model: 模型名称。
         template: 模板名称。
         title: 简历标题。
@@ -167,31 +176,24 @@ async def _execute_parse_flow(
     """
     try:
         await update_task_status(task_id, TaskStatus.RUNNING)
-        # 向 Java 后端更新任务状态为 RUNNING
-        await java_client.post(
-            endpoints.work_update_status,
-            params={"id": task_id, "status": TaskStatus.RUNNING.value},
-        )
+        await _update_work_status(task_id, TaskStatus.RUNNING)
 
         result = await pdf_parser.parse(file_path)
-        result = await executor_llm(api_key, base_url, model, result["text"])
+        result = await executor_llm(client, model, result["text"])
 
         await update_task_result(task_id, result.model_dump())
-        # 向 Java 后端更新任务状态为 SUCCESS
-        await java_client.post(
-            endpoints.work_update_status,
-            params={"id": task_id, "status": TaskStatus.SUCCESS.value},
-        )
+        await _update_work_status(task_id, TaskStatus.SUCCESS)
+
         # 创建简历
-        await java_client.post(
-            endpoints.resume_create,
-            json={
-                "id": task_id,
-                "userId": "0",
-                "title": title,
-                "template": template,
-            },
-        )
+        async with async_session() as session:
+            resume = Resume(
+                id=task_id,
+                title=title,
+                template=template,
+            )
+            session.add(resume)
+            await session.commit()
+
         # 创建简历区块
         await _create_resume_sections(task_id, result)
 
@@ -199,27 +201,18 @@ async def _execute_parse_flow(
 
     except ParseError as e:
         await update_task_error(task_id, str(e))
-        # 向 Java 后端更新任务状态为 ERROR
-        await java_client.post(
-            endpoints.work_update_status,
-            params={"id": task_id, "status": TaskStatus.ERROR.value},
-        )
+        await _update_work_status(task_id, TaskStatus.ERROR)
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))
     except Exception as e:
         await update_task_error(task_id, f"解析失败: {str(e)}")
-        # 向 Java 后端更新任务状态为 ERROR
-        await java_client.post(
-            endpoints.work_update_status,
-            params={"id": task_id, "status": TaskStatus.ERROR.value},
-        )
+        await _update_work_status(task_id, TaskStatus.ERROR)
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))
 
 
 async def run_parser_task(
     task_id: str,
     file_path: str,
-    base_url: str,
-    api_key: str,
+    client: SupportsStreamingMessages,
     model: str,
     template: str,
     title: str,
@@ -231,22 +224,20 @@ async def run_parser_task(
     Args:
         task_id: 任务 ID。
         file_path: PDF 文件绝对路径。
-        base_url: AI API 地址。
-        api_key: AI API 密钥。
+        client: LLM 客户端。
         model: 模型名称。
         template: 模板名称。
         title: 简历标题。
     """
     await _execute_parse_flow(
-        task_id, file_path, base_url, api_key, model, template, title, delete_file=True
+        task_id, file_path, client, model, template, title, delete_file=True
     )
 
 
 async def retry_parser_task(
     task_id: str,
     file_path: str,
-    base_url: str,
-    api_key: str,
+    client: SupportsStreamingMessages,
     model: str,
     template: str,
     title: str,
@@ -258,12 +249,11 @@ async def retry_parser_task(
     Args:
         task_id: 任务 ID。
         file_path: PDF 文件绝对路径（暂未使用，保留接口兼容性）。
-        base_url: AI API 地址。
-        api_key: AI API 密钥。
+        client: llm 客户端。
         model: 模型名称。
         template: 模板名称。
         title: 简历标题。
     """
     await _execute_parse_flow(
-        task_id, file_path, base_url, api_key, model, template, title, delete_file=True
+        task_id, file_path, client, model, template, title, delete_file=True
     )

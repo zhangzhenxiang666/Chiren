@@ -1,12 +1,16 @@
+import json
 import re
 import secrets
 from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 _ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
 
 from apps.resume_assistant.schemas import SECTION_TYPE_TO_MODEL
+from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 
 # 各 section 类型的字段结构和示例
@@ -174,7 +178,6 @@ class UpdateSectionTool(BaseTool):
     )
     input_model = UpdateSectionToolInput
 
-    # TODO: 这里更新sections时要同步数据库, 以及更改里面的update_at字段
     async def execute(
         self, arguments: UpdateSectionToolInput, context: ToolExecutionContext
     ) -> ToolResult:
@@ -268,6 +271,27 @@ class UpdateSectionTool(BaseTool):
             elif section_type in ("personal_info", "summary"):
                 content.update(arguments.value)
             break
+
+        # 同步更新数据库
+        db: AsyncSession = context.metadata["db"]
+        resume_id = context.sections[0]["resume_id"]
+        result = await db.execute(
+            select(ResumeSection).where(
+                ResumeSection.id == arguments.section_id,
+                ResumeSection.resume_id == resume_id,
+            )
+        )
+        db_section = result.scalar_one_or_none()
+        if db_section is not None:
+            # 从 context.sections 中获取更新后的 content
+            for section in context.sections:
+                if section["id"] == arguments.section_id:
+                    db_section.content = json.dumps(
+                        section.get("content", {}), ensure_ascii=False
+                    )
+                    break
+            db_section.updated_at = utc_now()
+            db.add(db_section)
 
         return ToolResult(
             output=f"Successfully updated section {arguments.section_id}."

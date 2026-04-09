@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import UploadFile
 
-UPLOAD_DIR = Path("upload")
+UPLOAD_DIR = Path(__file__).parent.parent.parent / "upload"
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
