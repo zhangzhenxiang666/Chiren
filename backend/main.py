@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from apps.config import router as config_router
 from apps.conversation_message import router as conversation_message_router
 from apps.parser import router as parser_router
 from apps.resume import router as resume_router
@@ -33,6 +34,7 @@ app.add_middleware(
 )
 
 # 注册路由
+app.include_router(config_router)
 app.include_router(parser_router)
 app.include_router(work_router)
 app.include_router(resume_router)

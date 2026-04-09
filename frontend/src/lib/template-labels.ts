@@ -50,6 +50,23 @@ import { TwoColumnTemplate } from '../components/preview/templates/two-column';
 import { WatercolorTemplate } from '../components/preview/templates/watercolor';
 import { ZigzagTemplate } from '../components/preview/templates/zigzag';
 
+export const TEMPLATE_ORDER = [
+  // 经典
+  'classic',
+  // 通用专业
+  'professional', 'formal', 'elegant', 'corporate', 'ats', 'executive', 'consultant',
+  // 现代极简
+  'minimal', 'modern', 'clean', 'compact', 'swiss', 'nordic', 'gradient', 'bold',
+  // 布局结构
+  'two-column', 'sidebar', 'card', 'blocks', 'timeline', 'material',
+  // 创意设计
+  'creative', 'artistic', 'neon', 'watercolor', 'mosaic', 'luxe', 'retro', 'magazine', 'ribbon', 'rose', 'zigzag',
+  // 行业定向
+  'developer', 'coder', 'designer', 'architect', 'engineer', 'scientist', 'finance', 'medical', 'metro', 'legal', 'teacher', 'academic', 'startup',
+  // 实验风格
+  'japanese', 'euro', 'berlin', 'infographic',
+];
+
 export const templateLabelsMap: Record<string, string> = {
   academic: '学术',
   architect: '建筑师',

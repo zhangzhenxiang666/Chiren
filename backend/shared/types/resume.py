@@ -20,13 +20,13 @@ from shared.types.strict_model import StrictBaseModel
 class ResumeSchema(BaseModel):
     """简历模型"""
 
-    id: str = Field(description="简历唯一标识")
+    id: str | None = Field(default=None, description="简历唯一标识")
     workspace_id: str | None = Field(
         default=None, description="所属 Workspace ID，为空表示本身就是 Workspace"
     )
-    title: str = Field(default="我的简历", description="简历标题")
+    title: str = Field(default="未命名简历", description="简历标题")
     theme_config: dict[str, Any] = Field(default_factory=dict, description="主题配置")
-    template: str = Field(default="two-column", description="模板名称")
+    template: str = Field(default="classic", description="模板名称")
     is_default: bool = Field(default=False, description="是否为用户的默认简历")
     language: str = Field(default="zh", description="简历语言")
     share_token: str | None = Field(
@@ -44,99 +44,97 @@ class ResumeSchema(BaseModel):
 class WorkExperienceItem(StrictBaseModel):
     """工作经历"""
 
-    id: str | None = Field(default=None, description="工作经历ID")
-    company: str | None = Field(default=None, description="公司名称")
-    position: str | None = Field(default=None, description="职位名称")
-    location: str | None = Field(default=None, description="工作地点")
-    start_date: str | None = Field(default=None, description="开始时间")
-    end_date: str | None = Field(default=None, description="结束时间")
-    current: bool | None = Field(default=None, description="是否至今")
-    description: str | None = Field(default=None, description="工作描述")
-    highlights: list[str] | None = Field(default=None, description="工作 highlights")
+    id: str = Field(default="", description="工作经历ID")
+    company: str = Field(default="", description="公司名称")
+    position: str = Field(default="", description="职位名称")
+    location: str = Field(default="", description="工作地点")
+    start_date: str = Field(default="", description="开始时间")
+    end_date: str = Field(default="", description="结束时间")
+    current: bool = Field(default=False, description="是否至今")
+    description: str = Field(default="", description="工作描述")
+    highlights: list[str] = Field(default_factory=list, description="工作 highlights")
 
 
 class EducationItem(StrictBaseModel):
     """教育经历"""
 
-    id: str | None = Field(default=None, description="教育经历ID")
-    institution: str | None = Field(default=None, description="学校名称")
-    degree: str | None = Field(default=None, description="学位")
-    field: str | None = Field(default=None, description="专业")
-    location: str | None = Field(default=None, description="地点")
-    start_date: str | None = Field(default=None, description="开始时间")
-    end_date: str | None = Field(default=None, description="结束时间")
-    gpa: str | None = Field(default=None, description="GPA")
-    highlights: list[str] | None = Field(default=None, description="亮点")
+    id: str = Field(default="", description="教育经历ID")
+    institution: str = Field(default="", description="学校名称")
+    degree: str = Field(default="", description="学位")
+    field: str = Field(default="", description="专业")
+    location: str = Field(default="", description="地点")
+    start_date: str = Field(default="", description="开始时间")
+    end_date: str = Field(default="", description="结束时间")
+    gpa: str = Field(default="", description="GPA")
+    highlights: list[str] = Field(default_factory=list, description="亮点")
 
 
 class ProjectItem(StrictBaseModel):
     """项目经历"""
 
-    id: str | None = Field(default=None, description="项目ID")
-    name: str | None = Field(default=None, description="项目名称")
-    url: str | None = Field(default=None, description="项目链接")
-    description: str | None = Field(default=None, description="项目描述")
-    technologies: list[str] | None = Field(default=None, description="技术栈")
-    highlights: list[str] | None = Field(default=None, description="亮点")
-    start_date: str | None = Field(default=None, description="开始时间")
-    end_date: str | None = Field(default=None, description="结束时间")
+    id: str = Field(default="", description="项目ID")
+    name: str = Field(default="", description="项目名称")
+    url: str = Field(default="", description="项目链接")
+    description: str = Field(default="", description="项目描述")
+    technologies: list[str] = Field(default_factory=list, description="技术栈")
+    highlights: list[str] = Field(default_factory=list, description="亮点")
+    start_date: str = Field(default="", description="开始时间")
+    end_date: str = Field(default="", description="结束时间")
 
 
 class SkillItem(StrictBaseModel):
     """技能项"""
 
-    id: str | None = Field(default=None, description="技能ID")
-    name: str | None = Field(default=None, description="技能名称")
-    skills: list[str] | None = Field(default=None, description="技能列表")
+    id: str = Field(default="", description="技能ID")
+    name: str = Field(default="", description="技能名称")
+    skills: list[str] = Field(default_factory=list, description="技能列表")
 
 
 class LanguageItem(StrictBaseModel):
     """语言能力"""
 
-    id: str | None = Field(default=None, description="语言ID")
-    language: str | None = Field(default=None, description="语言")
-    proficiency: str | None = Field(default=None, description="熟练程度")
-    description: str | None = Field(default=None, description="描述")
+    id: str = Field(default="", description="语言ID")
+    language: str = Field(default="", description="语言")
+    proficiency: str = Field(default="", description="熟练程度")
+    description: str = Field(default="", description="描述")
 
 
 class CertificationItem(StrictBaseModel):
     """证书"""
 
-    id: str | None = Field(default=None, description="证书ID")
-    name: str | None = Field(default=None, description="证书名称")
-    issuer: str | None = Field(default=None, description="颁发机构")
-    date: str | None = Field(default=None, description="获得日期")
+    id: str = Field(default="", description="证书ID")
+    name: str = Field(default="", description="证书名称")
+    issuer: str = Field(default="", description="颁发机构")
+    date: str = Field(default="", description="获得日期")
 
 
 class QrCodeItem(StrictBaseModel):
     """二维码"""
 
-    id: str | None = Field(default=None, description="二维码ID")
-    label: str | None = Field(
-        default=None, description="二维码标签，如「微信」「主页」"
-    )
-    url: str | None = Field(default=None, description="二维码指向的链接")
-    image_url: str | None = Field(default=None, description="已生成的二维码图片地址")
+    id: str = Field(default="", description="二维码ID")
+    label: str = Field(default="", description="二维码标签，如「微信」「主页」")
+    url: str = Field(default="", description="二维码指向的链接")
+    image_url: str = Field(default="", description="已生成的二维码图片地址")
 
 
 class GitHubItem(StrictBaseModel):
     """GitHub 仓库"""
 
-    id: str | None = Field(default=None, description="仓库ID")
-    repo_url: str | None = Field(default=None, description="仓库链接")
-    name: str | None = Field(default=None, description="仓库名")
-    stars: int | None = Field(default=None, description="星标数")
-    language: str | None = Field(default=None, description="编程语言")
-    description: str | None = Field(default=None, description="仓库描述")
+    id: str = Field(default="", description="仓库ID")
+    repo_url: str = Field(default="", description="仓库链接")
+    name: str = Field(default="", description="仓库名")
+    stars: int = Field(default=0, description="星标数")
+    language: str = Field(default="", description="编程语言")
+    description: str = Field(default="", description="仓库描述")
 
 
 class CustomItem(StrictBaseModel):
     """自定义项"""
 
-    id: str | None = Field(default=None, description="自定义项ID")
-    title: str | None = Field(default=None, description="标题")
-    date: str | None = Field(default=None, description="日期")
-    description: str | None = Field(default=None, description="描述")
+    id: str = Field(default="", description="自定义项ID")
+    title: str = Field(default="", description="标题")
+    date: str = Field(default="", description="日期")
+    description: str = Field(default="", description="描述")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -147,22 +145,22 @@ class CustomItem(StrictBaseModel):
 class PersonalInfo(StrictBaseModel):
     """个人信息"""
 
-    full_name: str | None = Field(default=None, description="姓名")
-    job_title: str | None = Field(default=None, description="预期岗位")
-    phone: str | None = Field(default=None, description="手机号")
-    email: str | None = Field(default=None, description="邮箱")
-    salary: str | None = Field(default=None, description="期望薪资")
-    location: str | None = Field(default=None, description="城市")
-    age: str | None = Field(default=None, description="年龄")
-    gender: str | None = Field(default=None, description="性别")
-    political_status: str | None = Field(default=None, description="政治面貌")
-    education_level: str | None = Field(default=None, description="学历")
+    full_name: str = Field(default="", description="姓名")
+    job_title: str = Field(default="", description="预期岗位")
+    phone: str = Field(default="", description="手机号")
+    email: str = Field(default="", description="邮箱")
+    salary: str = Field(default="", description="期望薪资")
+    location: str = Field(default="", description="城市")
+    age: str = Field(default="", description="年龄")
+    gender: str = Field(default="", description="性别")
+    political_status: str = Field(default="", description="政治面貌")
+    education_level: str = Field(default="", description="学历")
 
 
 class Summary(StrictBaseModel):
     """个人简介"""
 
-    text: str | None = Field(default=None, description="简介")
+    text: str = Field(default="", description="简介")
 
 
 class WorkExperienceContent(StrictBaseModel):
@@ -262,57 +260,57 @@ class ResumeSectionBase(BaseModel):
 
 
 class PersonalInfoSection(ResumeSectionBase):
-    type: Literal["personal_info"]
+    type: Literal["personal_info"] = "personal_info"
     content: PersonalInfo | None = Field(default=None)
 
 
 class SummarySection(ResumeSectionBase):
-    type: Literal["summary"]
+    type: Literal["summary"] = "summary"
     content: Summary | None = Field(default=None)
 
 
 class WorkExperienceSection(ResumeSectionBase):
-    type: Literal["work_experience"]
+    type: Literal["work_experience"] = "work_experience"
     content: WorkExperienceContent | None = Field(default=None)
 
 
 class ProjectsSection(ResumeSectionBase):
-    type: Literal["projects"]
+    type: Literal["projects"] = "projects"
     content: ProjectsContent | None = Field(default=None)
 
 
 class EducationSection(ResumeSectionBase):
-    type: Literal["education"]
+    type: Literal["education"] = "education"
     content: EducationContent | None = Field(default=None)
 
 
 class SkillsSection(ResumeSectionBase):
-    type: Literal["skills"]
+    type: Literal["skills"] = "skills"
     content: SkillsContent | None = Field(default=None)
 
 
 class LanguagesSection(ResumeSectionBase):
-    type: Literal["languages"]
+    type: Literal["languages"] = "languages"
     content: LanguagesContent | None = Field(default=None)
 
 
 class CertificationsSection(ResumeSectionBase):
-    type: Literal["certifications"]
+    type: Literal["certifications"] = "certifications"
     content: CertificationsContent | None = Field(default=None)
 
 
 class QrCodesSection(ResumeSectionBase):
-    type: Literal["qr_codes"]
+    type: Literal["qr_codes"] = "qr_codes"
     content: QrCodesContent | None = Field(default=None)
 
 
 class GitHubSection(ResumeSectionBase):
-    type: Literal["github"]
+    type: Literal["github"] = "github"
     content: GitHubContent | None = Field(default=None)
 
 
 class CustomSection(ResumeSectionBase):
-    type: Literal["custom"]
+    type: Literal["custom"] = "custom"
     content: CustomContent | None = Field(default=None)
 
 

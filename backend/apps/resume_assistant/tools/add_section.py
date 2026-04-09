@@ -87,17 +87,13 @@ def _create_section(
         (Section实例, Section类) 元组
     """
     section_cls, content_cls = _SECTION_TYPE_MAP[section_type]
-    # summary 类型需要特殊处理 content
-    if section_type == "summary":
-        content = Summary(text="")
-    else:
-        content = content_cls()
+
     return section_cls(
         id=str(uuid.uuid4()),
         resume_id=resume_id,
         title=title,
         sort_order=sort_order,
-        content=content,
+        content=content_cls(),
         created_at=utc_now(),
         updated_at=utc_now(),
     ), section_cls

@@ -10,7 +10,7 @@ SHANGHAI_TZ = timezone(timedelta(hours=8))
 utc_now = lambda: datetime.now(SHANGHAI_TZ)
 
 from pydantic import BaseModel
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from shared.types.messages import ConversationMessageSchema
@@ -53,7 +53,7 @@ class Resume(PydanticMixin, Base):
     title: Mapped[str] = mapped_column(
         String(100),
         nullable=False,
-        default="我的简历",
+        default="未命名简历",
         comment="简历标题",
     )
     template: Mapped[str] = mapped_column(
@@ -144,6 +144,9 @@ class Resume(PydanticMixin, Base):
 
     @classmethod
     def from_pydantic(cls, schema: ResumeSchema) -> Resume:
+        created = schema.created_at or utc_now()
+        updated = schema.updated_at or utc_now()
+
         return cls(
             id=schema.id,
             workspace_id=schema.workspace_id,
@@ -156,8 +159,8 @@ class Resume(PydanticMixin, Base):
             is_public=schema.is_public,
             share_password=schema.share_password,
             view_count=schema.view_count,
-            created_at=schema.created_at,
-            updated_at=schema.updated_at,
+            created_at=created,
+            updated_at=updated,
         )
 
 
@@ -240,7 +243,7 @@ class ResumeSection(PydanticMixin, Base):
     @classmethod
     def from_pydantic(cls, schema: ResumeSectionSchema) -> ResumeSection:
         if schema.content is not None:
-            content = json.dumps(schema.content, ensure_ascii=False)
+            content = json.dumps(schema.content.model_dump(), ensure_ascii=False)
         elif schema.type in {"personal_info", "summary"}:
             content = "{}"
         elif schema.type == "skills":
@@ -422,4 +425,34 @@ class Template(Base):
         default=utc_now,
         onupdate=utc_now,
         comment="修改时间",
+    )
+
+
+class UserConfig(Base):
+    """用户配置数据库模型
+
+    使用统一的 key-value 结构存储各类用户配置，
+    支持灵活扩展配置项而无需修改表结构。
+    """
+
+    __tablename__ = "user_config"
+
+    key: Mapped[str] = mapped_column(
+        String(50),
+        nullable=False,
+        primary_key=True,
+        comment="配置项标识",
+    )
+    value: Mapped[dict] = mapped_column(
+        JSON,
+        nullable=False,
+        default=dict,
+        comment="配置值，JSON 对象",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="最后更新时间",
     )

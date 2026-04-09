@@ -1,0 +1,132 @@
+import { Clock, FileText } from 'lucide-react';
+import type { WorkTask } from '../../types/work';
+
+interface MessageDropdownProps {
+  onClose: () => void;
+  tasks: WorkTask[];
+}
+
+function formatTime(dateStr: string | null): string {
+  if (!dateStr) return '未知';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+
+  if (diffMins < 1) return '刚刚';
+  if (diffMins < 60) return `${diffMins} 分钟前`;
+  if (diffHours < 24) return `${diffHours} 小时前`;
+  if (diffDays < 7) return `${diffDays} 天前`;
+  return date.toLocaleDateString('zh-CN');
+}
+
+function getStatusLabel(status: string): string {
+  const map: Record<string, string> = {
+    start: '待开始',
+    processing: '处理中',
+    completed: '已完成',
+    failed: '失败',
+    error: '错误',
+  };
+  return map[status] || status;
+}
+
+function getStatusBadgeBg(status: string): string {
+  const map: Record<string, string> = {
+    start: 'border-gray-500/50 bg-gray-500/10',
+    processing: 'border-amber-500/50 bg-amber-500/10',
+    completed: 'border-emerald-500/50 bg-emerald-500/10',
+    failed: 'border-red-500/50 bg-red-500/10',
+    error: 'border-red-500/50 bg-red-500/10',
+  };
+  return map[status] || 'border-gray-500/50 bg-gray-500/10';
+}
+
+function getStatusTextColor(status: string): string {
+  const map: Record<string, string> = {
+    start: 'text-gray-400',
+    processing: 'text-amber-400',
+    completed: 'text-emerald-400',
+    failed: 'text-red-400',
+    error: 'text-red-400',
+  };
+  return map[status] || 'text-gray-400';
+}
+
+function getStatusDot(status: string): string {
+  const map: Record<string, string> = {
+    start: 'bg-gray-400',
+    processing: 'bg-amber-400 animate-pulse',
+    completed: 'bg-emerald-400',
+    failed: 'bg-red-400',
+    error: 'bg-red-400',
+  };
+  return map[status] || 'bg-gray-400';
+}
+
+export default function MessageDropdown({ onClose, tasks }: MessageDropdownProps) {
+  function handleClickOutside(e: React.MouseEvent) {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 overflow-hidden bg-black/30"
+      onClick={handleClickOutside}
+    >
+      <div className="absolute right-6 top-14 w-96 bg-[#1a1a1c] border border-[#1e1e20] rounded-xl shadow-2xl overflow-hidden">
+        <div className="px-4 py-3 border-b border-[#1e1e20] flex items-center justify-between">
+          <h3 className="text-sm font-medium text-white">任务通知</h3>
+          <span className="text-xs text-gray-500">{tasks.length} 个任务</span>
+        </div>
+
+        <div className="max-h-96 overflow-y-auto">
+          {tasks.length === 0 && (
+            <div className="flex flex-col items-center gap-2 py-8 text-gray-500">
+              <FileText className="w-8 h-8" />
+              <p className="text-sm">暂无任务</p>
+            </div>
+          )}
+
+          {tasks.length > 0 && (
+            <ul className="divide-y divide-[#1e1e20]">
+              {tasks.map((task: WorkTask) => (
+                <li key={task.id} className="px-4 py-3 hover:bg-[#222225] transition-colors">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#2a1a22] flex items-center justify-center shrink-0">
+                      <FileText className="w-4 h-4 text-pink-400" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <p className="text-sm text-white truncate" title={task.file_name}>
+                          {task.file_name || '未命名文件'}
+                        </p>
+                        <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border shrink-0 ${getStatusBadgeBg(task.status)}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(task.status)}`} />
+                          <span className={getStatusTextColor(task.status)}>
+                            {getStatusLabel(task.status)}
+                          </span>
+                        </span>
+                      </div>
+                      {task.title && (
+                        <p className="text-xs text-gray-500 truncate mb-1">{task.title}</p>
+                      )}
+                      <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatTime(task.created_at)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

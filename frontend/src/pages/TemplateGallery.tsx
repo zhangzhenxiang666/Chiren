@@ -3,9 +3,7 @@ import { X } from 'lucide-react';
 import TemplateCard from '../components/template/TemplateCard';
 import ResumePreview from '../components/preview/ResumePreview';
 import { mockResume } from '../data/mockResume';
-import { templateLabelsMap } from '../lib/template-labels';
-
-const TEMPLATE_ORDER = Object.keys(templateLabelsMap);
+import { templateLabelsMap, TEMPLATE_ORDER } from '../lib/template-labels';
 
 export default function TemplateGallery() {
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);

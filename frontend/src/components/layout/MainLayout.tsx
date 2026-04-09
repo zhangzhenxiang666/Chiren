@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
+import { Toaster } from 'sonner'
 import Header from './Header'
 import Sidebar from './Sidebar'
 
@@ -15,6 +16,16 @@ export default function MainLayout() {
           <Outlet />
         </main>
       </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#1c1c1e',
+            border: '1px solid #2a2a2e',
+            color: '#fff',
+          },
+        }}
+      />
     </div>
   )
 }
