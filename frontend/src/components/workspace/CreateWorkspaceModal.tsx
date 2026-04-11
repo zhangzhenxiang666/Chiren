@@ -77,7 +77,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     const provider = providerConfig.providers[active]
     if (!provider) return null
     // 检查api_key、base_url、model是否都为空
-    if (!provider.api_key && !provider.base_url && !provider.model) return null
+    if (!provider.apiKey && !provider.baseUrl && !provider.model) return null
     return provider
   }
 
@@ -121,19 +121,20 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     setIsParsing(true)
     setParseError('')
     try {
-      const { task_id } = await uploadAndParse(file, {
+      const { taskId } = await uploadAndParse(file, {
         type: providerConfig!.active as ProviderType,
-        base_url: configured.base_url,
-        api_key: configured.api_key,
+        baseUrl: configured.baseUrl,
+        apiKey: configured.apiKey,
         model: configured.model,
         template: selectedTemplate,
-        title: file.name,
+        title: name || file.name,
       })
       onClose()
       setIsParsing(false)
       setFile(null)
+      setName('')
       setTab('template')
-      pendingTaskIdRef.current = task_id
+      pendingTaskIdRef.current = taskId
       toast.success('上传成功，简历正在解析中')
     } catch (err: any) {
       setParseError(err.message || '解析失败')
@@ -177,7 +178,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetAndClose} />
 
-      <div className="relative w-[896px] h-[720px] bg-[#1c1c1e] border border-[#2a2a2e] rounded-2xl shadow-2xl flex flex-col">
+      <div className="relative w-[896px] h-[768px] bg-[#1c1c1e] border border-[#2a2a2e] rounded-2xl shadow-2xl flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
@@ -218,25 +219,25 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
           </button>
         </div>
 
+        {/* Name input */}
+        <div className="mx-6 mt-4">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="输入工作空间名称..."
+            className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+          />
+        </div>
+
         <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
           {tab === 'template' ? (
-            <div className="flex flex-col h-full space-y-4">
-              {/* Name input */}
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="输入工作空间名称..."
-                className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
-              />
-
-              {/* Template grid */}
-              <div className="flex flex-col flex-1 min-h-0">
-                <p className="mb-3 text-sm font-medium text-gray-300 shrink-0">
-                  选择模板
-                </p>
-                <div className="flex-1 overflow-y-auto pr-1 min-h-0">
-                  <div className="grid grid-cols-5 gap-3">
+            <div className="flex flex-col flex-1 min-h-0">
+              <p className="mb-3 text-sm font-medium text-gray-300 shrink-0">
+                选择模板
+              </p>
+              <div className="flex-1 overflow-y-auto pr-1 min-h-0">
+                <div className="grid grid-cols-5 gap-3">
                     {TEMPLATE_ORDER.map((tpl) => {
                       const isSelected = selectedTemplate === tpl
                       return (
@@ -277,9 +278,8 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="flex flex-col h-full space-y-4">
+            ) : (
+            <div className="flex flex-col flex-1 min-h-0">
               {/* Dropzone */}
               <div
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
@@ -340,7 +340,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
               )}
 
               {/* Template selector for upload */}
-              <div className="flex flex-col flex-1 min-h-0">
+              <div className="flex flex-col flex-1 min-h-0 mt-4">
                 <p className="mb-3 text-sm font-medium text-gray-300 shrink-0">
                   选择模板
                 </p>

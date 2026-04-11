@@ -1,8 +1,7 @@
 import { Clock, FileText } from 'lucide-react';
 import type { WorkTask } from '../../types/work';
 
-interface MessageDropdownProps {
-  onClose: () => void;
+interface MessageListProps {
   tasks: WorkTask[];
 }
 
@@ -66,67 +65,56 @@ function getStatusDot(status: string): string {
   return map[status] || 'bg-gray-400';
 }
 
-export default function MessageDropdown({ onClose, tasks }: MessageDropdownProps) {
-  function handleClickOutside(e: React.MouseEvent) {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
-  }
-
+export default function MessageList({ tasks }: MessageListProps) {
   return (
-    <div
-      className="fixed inset-0 z-50 overflow-hidden bg-black/30"
-      onClick={handleClickOutside}
-    >
-      <div className="absolute right-6 top-14 w-96 bg-[#1a1a1c] border border-[#1e1e20] rounded-xl shadow-2xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-[#1e1e20] flex items-center justify-between">
-          <h3 className="text-sm font-medium text-white">任务通知</h3>
-          <span className="text-xs text-gray-500">{tasks.length} 个任务</span>
-        </div>
+    <>
+      <div className="px-4 py-3 border-b border-[#1e1e20] flex items-center justify-between">
+        <h3 className="text-sm font-medium text-white">任务通知</h3>
+        <span className="text-xs text-gray-500">{tasks.length} 个任务</span>
+      </div>
 
-        <div className="max-h-96 overflow-y-auto">
-          {tasks.length === 0 && (
-            <div className="flex flex-col items-center gap-2 py-8 text-gray-500">
-              <FileText className="w-8 h-8" />
-              <p className="text-sm">暂无任务</p>
-            </div>
-          )}
+      <div className="max-h-96 overflow-y-auto">
+        {tasks.length === 0 && (
+          <div className="flex flex-col items-center gap-2 py-8 text-gray-500">
+            <FileText className="w-8 h-8" />
+            <p className="text-sm">暂无任务</p>
+          </div>
+        )}
 
-          {tasks.length > 0 && (
-            <ul className="divide-y divide-[#1e1e20]">
-              {tasks.map((task: WorkTask) => (
-                <li key={task.id} className="px-4 py-3 hover:bg-[#222225] transition-colors">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-[#2a1a22] flex items-center justify-center shrink-0">
-                      <FileText className="w-4 h-4 text-pink-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-2 mb-1">
-                        <p className="text-sm text-white truncate" title={task.file_name}>
-                          {task.file_name || '未命名文件'}
-                        </p>
-                        <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border shrink-0 ${getStatusBadgeBg(task.status)}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(task.status)}`} />
-                          <span className={getStatusTextColor(task.status)}>
-                            {getStatusLabel(task.status)}
-                          </span>
+        {tasks.length > 0 && (
+          <ul className="divide-y divide-[#1e1e20]">
+            {tasks.map((task: WorkTask) => (
+              <li key={task.id} className="px-4 py-3 hover:bg-[#222225] transition-colors">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-[#2a1a22] flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4 text-pink-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2 mb-1">
+                      <p className="text-sm text-white truncate" title={task.fileName}>
+                        {task.fileName || '未命名文件'}
+                      </p>
+                      <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border shrink-0 ${getStatusBadgeBg(task.status)}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(task.status)}`} />
+                        <span className={getStatusTextColor(task.status)}>
+                          {getStatusLabel(task.status)}
                         </span>
-                      </div>
-                      {task.title && (
-                        <p className="text-xs text-gray-500 truncate mb-1">{task.title}</p>
-                      )}
-                      <div className="flex items-center gap-1 text-xs text-gray-600">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatTime(task.created_at)}</span>
-                      </div>
+                      </span>
+                    </div>
+                    {task.title && (
+                      <p className="text-xs text-gray-500 truncate mb-1">{task.title}</p>
+                    )}
+                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                      <Clock className="w-3 h-3" />
+                      <span>{formatTime(task.createdAt)}</span>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
-    </div>
+    </>
   );
 }

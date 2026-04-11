@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
-import { Plus } from 'lucide-react'
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { Plus, Search, X } from 'lucide-react'
 import WorkspaceCard from '../components/workspace/WorkspaceCard'
 import CreateWorkspaceModal from '../components/workspace/CreateWorkspaceModal'
+import WorkspaceDetail from './WorkspaceDetail'
 import { fetchWorkspaces, createWorkspace } from '../lib/api'
 import type { Workspace } from '../types/workspace'
 
@@ -26,12 +27,21 @@ function formatRelativeTime(dateString: string): string {
   return `${mmdd} ${hhmm}`
 }
 
-const coverStyles: Array<'food' | 'portrait' | 'plant'> = ['food', 'portrait', 'plant']
-
 export default function Dashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [debouncedQuery, setDebouncedQuery] = useState('')
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setSearchQuery(value)
+    if (timerRef.current) clearTimeout(timerRef.current)
+    timerRef.current = setTimeout(() => setDebouncedQuery(value), 300)
+  }, [])
 
   const refreshWorkspaces = () => {
     fetchWorkspaces().then((data) => {
@@ -46,13 +56,34 @@ export default function Dashboard() {
     })
   }, [])
 
+  const filteredWorkspaces = useMemo(() => {
+    if (!debouncedQuery.trim()) return workspaces
+    const q = debouncedQuery.toLowerCase().trim()
+    return workspaces.filter(ws => ws.title.toLowerCase().includes(q))
+  }, [workspaces, debouncedQuery])
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current)
+    }
+  }, [])
+
   if (loading) {
     return <div className="text-gray-400">加载中...</div>
   }
 
+  if (selectedWorkspace) {
+    return (
+      <WorkspaceDetail
+        workspace={selectedWorkspace}
+        onBack={() => setSelectedWorkspace(null)}
+      />
+    )
+  }
+
   return (
-    <div>
-      <div className="flex items-start justify-between mb-8">
+    <div className="flex flex-col h-[calc(100vh-73px-64px)]">
+      <div className="flex items-center justify-between mb-8 shrink-0">
         <div>
           <div className="text-pink-500 text-xs font-medium tracking-widest mb-2">MANAGEMENT</div>
           <h1 className="text-4xl font-bold text-white mb-2">工作空间管理</h1>
@@ -60,27 +91,48 @@ export default function Dashboard() {
             管理您的职业身份。Chiren 为不同岗位精准定制简历，帮助您在每个领域都展现出最佳状态。
           </p>
         </div>
-        <button
-          className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium"
-          onClick={() => setCreateModalOpen(true)}
-        >
-          <Plus className="w-4 h-4" />
-          新建工作空间
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="button" className="flex items-center gap-2 bg-[#1a1a1c] rounded-lg px-3 py-2 border border-[#2a2a2e] w-64">
+            <Search className="w-4 h-4 text-gray-500 shrink-0" />
+            <input
+              type="text"
+              placeholder="搜索工作空间..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className="bg-transparent text-gray-300 text-sm outline-none placeholder-gray-500 min-w-0 flex-1"
+            />
+            {searchQuery && (
+              <button type="button" onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }} className="text-gray-500 hover:text-gray-300 transition-colors shrink-0">
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </button>
+          <button
+            type="button"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium"
+            onClick={() => setCreateModalOpen(true)}
+          >
+            <Plus className="w-4 h-4" />
+            新建工作空间
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-5">
-        {workspaces.map((ws, index) => (
-          <WorkspaceCard
-            key={ws.id}
-            title={ws.title}
-            domain={`${ws.template} 模板`}
-            subResumeCount={ws.sub_resume_count}
-            lastModified={formatRelativeTime(ws.updated_at)}
-            coverStyle={coverStyles[index % 3]}
-            isActive={ws.is_default}
-          />
-        ))}
+      <div className="flex-1 overflow-y-auto min-h-0 flex justify-center">
+        <div className="grid grid-cols-5 gap-5 pb-4 max-w-[1500px] w-full px-4">
+          {filteredWorkspaces.map((ws, index) => (
+            <WorkspaceCard
+              key={ws.id}
+              title={ws.title}
+              domain={`${ws.template} 模板`}
+              subResumeIds={ws.subResumeIds}
+              lastModified={formatRelativeTime(ws.updatedAt)}
+              templateName={ws.template}
+              isActive={ws.isDefault}
+              onClick={() => setSelectedWorkspace(ws)}
+            />
+          ))}
+        </div>
       </div>
 
       <CreateWorkspaceModal

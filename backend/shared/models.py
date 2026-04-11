@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import TypeVar
+from typing import Any, TypeVar
 
 # 上海时区 (UTC+8)
 SHANGHAI_TZ = timezone(timedelta(hours=8))
@@ -116,6 +116,12 @@ class Resume(PydanticMixin, Base):
         onupdate=utc_now,
         comment="最后更新时间",
     )
+    meta_info: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=None,
+        comment="子简历元数据，包含 JD、目标公司等",
+    )
 
     workspace = relationship("Resume", remote_side=[id], back_populates="versions")
     versions = relationship(
@@ -140,6 +146,7 @@ class Resume(PydanticMixin, Base):
             view_count=self.view_count,
             created_at=self.created_at,
             updated_at=self.updated_at,
+            meta_info=self.meta_info,
         )
 
     @classmethod
@@ -161,6 +168,7 @@ class Resume(PydanticMixin, Base):
             view_count=schema.view_count,
             created_at=created,
             updated_at=updated,
+            meta_info=schema.meta_info,
         )
 
 

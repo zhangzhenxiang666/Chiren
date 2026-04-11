@@ -3,6 +3,7 @@ import MainLayout from './components/layout/MainLayout'
 import Dashboard from './pages/Dashboard'
 import WorkspaceStub from './pages/WorkspaceStub'
 import TemplateGallery from './pages/TemplateGallery'
+import EditorPage from './pages/EditorPage'
 import './App.css'
 
 function App() {
@@ -11,9 +12,9 @@ function App() {
       <Routes>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Dashboard />} />
-          <Route path="workspace/:id" element={<WorkspaceStub />} />
           <Route path="templates" element={<TemplateGallery />} />
         </Route>
+        <Route path="/workspace/:id" element={<EditorPage />} />
       </Routes>
     </BrowserRouter>
   )

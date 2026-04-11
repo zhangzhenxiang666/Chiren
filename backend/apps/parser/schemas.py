@@ -1,6 +1,6 @@
 """Parser Pydantic 模型。"""
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, alias_generators, model_validator
 
 
 def _strip_title(schema: dict) -> None:
@@ -28,6 +28,12 @@ class BaseSchema(BaseModel):
 
 class TaskIdResponse(BaseSchema):
     """任务 ID 响应模型。"""
+
+    model_config = ConfigDict(
+        json_schema_extra=_strip_title,
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
 
     task_id: str
 

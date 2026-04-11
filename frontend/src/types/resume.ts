@@ -19,6 +19,7 @@ export interface PersonalInfoContent {
   phone: string;
   wechat?: string;
   location: string;
+  salary?: string;
   website?: string;
   linkedin?: string;
   github?: string;

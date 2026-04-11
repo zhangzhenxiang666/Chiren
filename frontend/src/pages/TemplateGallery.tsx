@@ -13,15 +13,16 @@ export default function TemplateGallery() {
   };
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="flex flex-col h-full">
+      <div className="shrink-0 mb-8">
         <h1 className="text-3xl font-bold text-white">模板</h1>
         <p className="text-sm text-gray-500 mt-1">选择一个模板开始创建你的简历</p>
       </div>
 
-      <div className="flex justify-center">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-        {TEMPLATE_ORDER.map((id) => {
+      <div className="flex-1 overflow-y-auto min-h-0">
+        <div className="flex justify-center">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          {TEMPLATE_ORDER.map((id) => {
           const label = templateLabelsMap[id] || id;
           const previewResume = { ...mockResume, template: id };
 
@@ -36,6 +37,7 @@ export default function TemplateGallery() {
             />
           );
         })}
+        </div>
         </div>
       </div>
 

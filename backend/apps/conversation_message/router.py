@@ -4,7 +4,7 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, alias_generators
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +16,11 @@ router = APIRouter(prefix="/conversation-message", tags=["conversation-message"]
 
 
 class CreateMessageRequest(BaseModel):
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
+
     conversation_id: str
     user_input: str
 

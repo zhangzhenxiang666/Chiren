@@ -1,6 +1,7 @@
 import axios from 'axios';
 import type { Workspace } from '../types/workspace';
 import type { WorkTask } from '../types/work';
+import type { ResumeSection } from '../types/resume';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000',
@@ -18,8 +19,8 @@ export async function createWorkspace(
   const { data } = await api.post<Workspace>('/resume/create', {
     title: title || '未命名工作空间',
     template,
-    theme_config: {},
-    is_default: false,
+    themeConfig: {},
+    isDefault: false,
     language: 'zh',
   });
   return data;
@@ -40,8 +41,8 @@ export async function fetchWorkByStatus(status: string): Promise<WorkTask[]> {
 export type ProviderType = 'openai' | 'anthropic';
 
 export interface ProviderConfigItem {
-  base_url: string;
-  api_key: string;
+  baseUrl: string;
+  apiKey: string;
   model: string;
 }
 
@@ -77,23 +78,23 @@ export async function switchProviderConfig(
 
 export interface UploadParseParams {
   type: ProviderType;
-  base_url: string;
-  api_key: string;
+  baseUrl: string;
+  apiKey: string;
   model: string;
   template: string;
   title?: string;
 }
 
 export interface TaskIdResponse {
-  task_id: string;
+  taskId: string;
 }
 
 export async function uploadAndParse(file: File, params: UploadParseParams): Promise<TaskIdResponse> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('type', params.type);
-  formData.append('base_url', params.base_url);
-  formData.append('api_key', params.api_key);
+  formData.append('base_url', params.baseUrl);
+  formData.append('api_key', params.apiKey);
   formData.append('model', params.model);
   formData.append('template', params.template);
   formData.append('title', params.title || '未命名简历');
@@ -101,3 +102,7 @@ export async function uploadAndParse(file: File, params: UploadParseParams): Pro
   return data;
 }
 
+export async function fetchResumeSections(resumeId: string): Promise<ResumeSection[]> {
+  const { data } = await api.get<any[]>(`/resume-section/${resumeId}`);
+  return data;
+}

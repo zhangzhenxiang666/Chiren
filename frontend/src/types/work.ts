@@ -1,10 +1,10 @@
 export interface WorkTask {
   id: string;
-  file_name: string;
+  fileName: string;
   src: string;
   status: string;
   template: string;
   title: string;
-  created_at: string | null;
-  updated_at: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
 }

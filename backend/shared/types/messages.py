@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Annotated, Any, Literal
 from uuid import uuid4
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, alias_generators
 
 
 class TextBlock(BaseModel):
@@ -26,6 +26,11 @@ class ToolUseBlock(BaseModel):
 class ToolResultBlock(BaseModel):
     """Tool result content sent back to the model."""
 
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
+
     type: Literal["tool_result"] = "tool_result"
     tool_use_id: str
     content: str
@@ -39,6 +44,11 @@ ContentBlock = Annotated[
 
 class ConversationMessageSchema(BaseModel):
     """会话消息 DTO，用于前后端交互"""
+
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
 
     id: int = Field(description="消息唯一标识")
     conversation_id: str = Field(description="所属会话 ID")

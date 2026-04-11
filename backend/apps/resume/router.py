@@ -3,6 +3,7 @@ import uuid
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import Field
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -15,16 +16,34 @@ from shared.types.resume import ResumeSchema
 router = APIRouter(prefix="/resume", tags=["resume"])
 
 
-class WorkspaceInfo(ResumeSchema):
-    """工作空间信息，包含子简历数量"""
+class SubResumeInfo(ResumeSchema):
+    """子简历简要信息"""
 
-    sub_resume_count: int = 0
+    model_config = ResumeSchema.model_config
+
+
+class WorkspaceSummary(ResumeSchema):
+    """工作空间概要，含子简历 id 列表"""
+
+    model_config = ResumeSchema.model_config
+
+    sub_resume_ids: list[str] = Field(
+        default_factory=list, description="子简历 id 列表"
+    )
+
+
+class WorkspaceDetail(WorkspaceSummary):
+    """工作空间详情，包含完整子简历列表"""
+
+    sub_resumes: list[SubResumeInfo] = Field(
+        default_factory=list, description="子简历列表"
+    )
 
 
 @router.get("/list", summary="查询workspace_id = null的主简历")
 async def list_resumes(
     db: Annotated[AsyncSession, Depends(get_session)],
-) -> list[WorkspaceInfo]:
+) -> list[WorkspaceSummary]:
     result = await db.execute(
         select(Resume)
         .where(Resume.workspace_id.is_(None))
@@ -33,27 +52,31 @@ async def list_resumes(
     resume_list = result.scalars().all()
 
     return [
-        WorkspaceInfo(
+        WorkspaceSummary(
             **resume.to_pydantic().model_dump(),
-            sub_resume_count=len(resume.versions),
+            sub_resume_ids=[v.id for v in resume.versions],
         )
         for resume in resume_list
     ]
 
 
-@router.get("/{id}", summary="根据简历id查询单份简历")
+@router.get("/{id}", summary="根据简历id查询单份简历详情")
 async def get_resume(
     id: str,
     db: Annotated[AsyncSession, Depends(get_session)],
-) -> WorkspaceInfo:
+) -> WorkspaceDetail:
     result = await db.execute(
         select(Resume).where(Resume.id == id).options(selectinload(Resume.versions))
     )
     resume = result.scalar_one_or_none()
-    if not result:
-        raise HTTPException(status_code=404, detail="数据为空")
-    return WorkspaceInfo(
-        **resume.to_pydantic().model_dump(), sub_resume_count=len(resume.versions)
+    if not resume:
+        raise HTTPException(status_code=404, detail="简历不存在")
+    return WorkspaceDetail(
+        **resume.to_pydantic().model_dump(),
+        sub_resume_ids=[v.id for v in resume.versions],
+        sub_resumes=[
+            SubResumeInfo(**v.to_pydantic().model_dump()) for v in resume.versions
+        ],
     )
 
 
@@ -61,7 +84,7 @@ async def get_resume(
 async def create_resume(
     data: ResumeSchema,
     db: Annotated[AsyncSession, Depends(get_session)],
-) -> WorkspaceInfo:
+) -> WorkspaceSummary:
     resume_id = str(uuid.uuid4())
 
     # 创建新简历
@@ -79,7 +102,7 @@ async def create_resume(
         await db.rollback()
         raise HTTPException(status_code=500, detail="新增失败")
 
-    return WorkspaceInfo(**resume.to_pydantic().model_dump(), sub_resume_count=0)
+    return WorkspaceSummary(**resume.to_pydantic().model_dump(), sub_resume_ids=[])
 
 
 @router.put("/update", summary="修改简历")

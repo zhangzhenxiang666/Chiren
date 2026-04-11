@@ -70,14 +70,14 @@ async def cleanup_task(
 ) -> None:
     """延迟清理任务相关资源。
 
-    延迟2秒执行清理，确保SSE事件已发送给客户端。
+    延迟120秒执行清理，确保SSE事件已发送给客户端。
 
     Args:
         task_id: 任务ID。
         file_path: 上传文件的绝对路径（可选）。
         delete_file: 是否删除上传文件。
     """
-    await asyncio.sleep(2)
+    await asyncio.sleep(120)
     if task_id in tasks:
         del tasks[task_id]
     if task_id in task_events:

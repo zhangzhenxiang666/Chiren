@@ -12,7 +12,6 @@ from apps.resume_assistant.schemas import ResumeAssistantRequest
 from apps.resume_assistant.tools import (
     AddSectionTool,
     SectionInfoTool,
-    TranslateResumeTool,
     UpdateSectionTool,
 )
 from shared.api import get_client
@@ -225,13 +224,15 @@ async def generate_content(
     messages: list[ConversationMessage] = store.read(request.resume_id)
     messages.append(ConversationMessage.from_user_text(request.input))
 
+    # 收集本轮新增消息，结束时统一写入减少 I/O
+    pending: list[ConversationMessage] = [messages[-1]]
+
     # 工具注册只做一次
     tool_registry = ToolRegistry()
     for tool in (
         UpdateSectionTool(),
         AddSectionTool(),
         SectionInfoTool(),
-        TranslateResumeTool(),
     ):
         tool_registry.register(tool)
 
@@ -283,7 +284,7 @@ async def generate_content(
                     complete_event = event
 
             if complete_event is None:
-                store.write(request.resume_id, messages)
+                store.extend(request.resume_id, pending)
                 yield make_sse_event("done", {})
                 break
 
@@ -331,17 +332,19 @@ async def generate_content(
                         ),
                     )
                 )
+                pending.extend(messages[-2:])
+            else:
+                pending.append(messages[-1])
 
             await db.commit()
 
             # TODO: 这里要考虑stop_reason各种运营商兼容的格式
             if complete_event.stop_reason in ("end_turn", "stop"):
-                store.write(request.resume_id, messages)
+                store.extend(request.resume_id, pending)
                 yield make_sse_event("done", {})
                 break
         except Exception as e:
             log.error(f"POST /resume-assistant error: {str(e)}")
-
-            store.write(request.resume_id, messages)
+            store.extend(request.resume_id, pending)
             yield make_sse_event("error", {"message": str(e)})
             break

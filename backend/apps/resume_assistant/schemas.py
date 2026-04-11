@@ -1,6 +1,6 @@
 from typing import Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field, alias_generators
 
 from shared.types.resume import (
     CertificationItem,
@@ -18,6 +18,11 @@ from shared.types.resume import (
 
 class ResumeAssistantRequest(BaseModel):
     """请求参数"""
+
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
 
     resume_id: str = Field(description="简历ID")
     type: Literal["openai", "anthropic"] = Field(description="LLM 供应商类型")

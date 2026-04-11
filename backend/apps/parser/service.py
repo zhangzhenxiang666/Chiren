@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import logging
 import secrets
 from datetime import datetime, timedelta, timezone
 
@@ -33,6 +34,8 @@ from shared.types.resume import (
 )
 
 SHANGHAI_TZ = timezone(timedelta(hours=8))
+
+log = logging.getLogger(__name__)
 
 
 def _ensure_id(obj: dict, prefix: str, index: int) -> dict:
@@ -281,18 +284,20 @@ async def _execute_parse_flow(
         await _create_resume_sections(task_id, result)
 
         await update_task_result(task_id, {"resume_id": task_id})
+
         await _update_work_status(task_id, TaskStatus.SUCCESS)
 
-        await update_task_result(task_id, result.model_dump(), resume_id=task_id)
         await _update_work_status(task_id, TaskStatus.SUCCESS)
 
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=delete_file))
 
     except ParseError as e:
+        log.error("解析失败: %s", e)
         await update_task_error(task_id, str(e))
         await _update_work_status(task_id, TaskStatus.ERROR)
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))
     except Exception as e:
+        log.error("解析失败: %s", e)
         await update_task_error(task_id, f"解析失败: {str(e)}")
         await _update_work_status(task_id, TaskStatus.ERROR)
         asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))

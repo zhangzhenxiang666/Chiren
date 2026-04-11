@@ -205,23 +205,30 @@ def _is_content_empty(content: dict, section_type: str) -> bool:
 
 def build_system_prompt(target_language: str) -> str:
     """Build system prompt with generic translation instructions."""
-    return f"Translate resume content to {target_language}. Only translate text fields, keep JSON structure unchanged. Return JSON only."
+    return f"""\
+You will receive a JSON array of resume sections.
+Your task is to translate the resume content to {target_language}.
+Return a JSON array only, no explanation.
+Keep the original JSON array structure and order.
+"""
 
 
-def build_user_prompt(section: dict) -> str:
+def build_sections_user_prompt(sections: list[dict]) -> str:
     """
-    Build user prompt with section-specific content (title, content).
+    Build user prompt containing all sections to translate in a single request.
 
     Args:
-        section: section dict with type, title, content
+        sections: List of section dicts with type, id, title, content
     """
-    return f"""
-**Section type**: {section["type"]}
-**Original title**: {section["title"]}
+    filtered = [
+        {k: v for k, v in s.items() if k not in ("updated_at", "created_at")}
+        for s in sections
+    ]
+    return f"""\
+Here is the JSON resume content:
 
-**Content to translate**:
 ---
-{json.dumps(section["content"], indent=2, ensure_ascii=False)}
+{json.dumps(filtered, indent=2, ensure_ascii=False)}
 ---
 """
 
@@ -265,14 +272,10 @@ class TranslateResumeTool(BaseTool):
 
         skipped = len(target_sections) - len(non_empty)
 
-        # 并发翻译所有非空 section
-        tasks = [
-            _translate_single_section(
-                section, arguments.target_language, context.metadata
-            )
-            for section in non_empty
-        ]
-        section_results = await asyncio.gather(*tasks)
+        # 一次性翻译所有 sections，统一验证，失败则只重试失败的
+        section_results = await _translate_all_sections(
+            non_empty, arguments.target_language, context.metadata
+        )
 
         # 汇总结果
         success = sum(1 for r in section_results if r["success"])
@@ -301,7 +304,6 @@ class TranslateResumeTool(BaseTool):
                 if not r["success"]:
                     continue
                 section_id = r["section_id"]
-                # 从 context.sections 获取更新后的 content
                 for section in context.sections:
                     if section["id"] == section_id:
                         result = await db.execute(
@@ -322,29 +324,159 @@ class TranslateResumeTool(BaseTool):
         return ToolResult(output="\n".join(lines))
 
 
-async def _attempt_translation(
+async def _translate_all_sections(
+    sections: list[dict], target_language: str, metadata: dict
+) -> list[dict]:
+    """
+    Translate all sections in a single LLM call, then validate each.
+    If any validation fails, retry all sections with error context.
+
+    Returns:
+        List of {"success": bool, "section_id": str, "section_type": str, "error": str | None}
+        All items have the same success status on completion.
+    """
+    client: SupportsStreamingMessages = metadata.get("client")
+    model: str = metadata.get("model")
+
+    system_prompt = build_system_prompt(target_language)
+    user_prompt = build_sections_user_prompt(sections)
+
+    # 按 section_id 建立索引
+    section_map: dict[str, dict] = {s["id"]: s for s in sections}
+
+    # 初始化 messages 列表
+    messages: list[ConversationMessage] = [
+        ConversationMessage.from_user_text(user_prompt),
+    ]
+
+    for attempt in range(1, _MAX_RETRIES + 1):
+        # 单次 LLM 调用，翻译所有 sections
+        raw_content, call_error = await _call_translation(
+            client, model, messages, system_prompt
+        )
+        if call_error:
+            return [
+                {
+                    "success": False,
+                    "section_id": s["id"],
+                    "section_type": s["type"],
+                    "error": call_error,
+                }
+                for s in sections
+            ]
+
+        # 解析响应
+        try:
+            translated_list = json_repair.loads(raw_content)
+            if not isinstance(translated_list, list):
+                raise ValueError(f"Expected list, got {type(translated_list).__name__}")
+        except Exception as e:
+            return [
+                {
+                    "success": False,
+                    "section_id": s["id"],
+                    "section_type": s["type"],
+                    "error": f"JSON parse error: {e}",
+                }
+                for s in sections
+            ]
+
+        # 逐个验证
+        results: list[dict] = []
+        all_valid = True
+        for i, translated_item in enumerate(translated_list):
+            if i >= len(sections):
+                break
+            original = sections[i]
+            section_id = original["id"]
+            section_type = original["type"]
+            original_content = original.get("content", {})
+            new_content = translated_item.get("content", {})
+
+            is_valid, error_msg = validate_translated_content(
+                new_content, section_type, original_content
+            )
+
+            if is_valid:
+                section_map[section_id]["content"] = new_content
+                results.append(
+                    {
+                        "success": True,
+                        "section_id": section_id,
+                        "section_type": section_type,
+                        "error": None,
+                    }
+                )
+            else:
+                all_valid = False
+                results.append(
+                    {
+                        "success": False,
+                        "section_id": section_id,
+                        "section_type": section_type,
+                        "error": error_msg,
+                    }
+                )
+
+        if all_valid:
+            return results
+
+        # 有验证失败：追加到 messages 列表，让 LLM 重新翻译所有 sections
+        messages.append(
+            ConversationMessage(
+                role="assistant", content=[TextBlock(text=raw_content)]
+            ),
+        )
+
+        # 收集所有错误，生成统一的修正请求
+        error_summary_parts = []
+        for r in results:
+            if not r["success"]:
+                error_summary_parts.append(
+                    f"**Section {r['section_id']} ({r['section_type']}) errors:**\n{r['error']}"
+                )
+
+        retry_msg = (
+            "Some sections failed validation. Please fix ALL sections below and "
+            "return the complete corrected JSON array (all sections, not just the failed ones).\n\n"
+            + "\n\n".join(error_summary_parts)
+        )
+        messages.append(ConversationMessage.from_user_text(retry_msg))
+
+        if attempt < _MAX_RETRIES:
+            await asyncio.sleep(0.5 * attempt)
+
+    # 达到最大重试次数，全部标记为失败
+    return [
+        {
+            "success": False,
+            "section_id": s["id"],
+            "section_type": s["type"],
+            "error": "Max retries exceeded after validation failures",
+        }
+        for s in sections
+    ]
+
+
+async def _call_translation(
     client: SupportsStreamingMessages,
     model: str,
     messages: list[ConversationMessage],
     system_prompt: str | None,
-    section_type: str,
-    original_content: dict,
-) -> tuple[bool, str | None, str | None]:
+) -> tuple[str, str | None]:
     """
-    执行单次翻译尝试。
+    Execute a single translation LLM call.
 
     Returns:
-        (success, content, error_message)
-        - success=True: 翻译成功，content 为翻译后的内容
-        - success=False: content=None, error_message 描述错误类型
+        (content, error_message)
     """
-    accumulated_content = ""
     request = ApiMessageRequest(
         model=model,
         messages=messages,
         system_prompt=system_prompt,
     )
 
+    accumulated_content = ""
     try:
         async for event in client.stream_message(request):
             if isinstance(event, ApiTextDeltaEvent):
@@ -354,95 +486,9 @@ async def _attempt_translation(
             elif isinstance(event, ApiMessageCompleteEvent):
                 pass
     except Exception as e:
-        return False, None, f"Stream error: {type(e).__name__}: {e}"
+        return "", f"Stream error: {type(e).__name__}: {e}"
 
     if not accumulated_content:
-        return False, None, "No content in response"
+        return "", "No content in response"
 
-    content = accumulated_content
-
-    try:
-        translated_content = json_repair.loads(content)
-    except Exception as e:
-        return False, None, f"JSON parse error: {e}"
-
-    is_valid, error_msg = validate_translated_content(
-        translated_content, section_type, original_content
-    )
-
-    if is_valid:
-        return True, translated_content, None
-
-    return False, None, f"Translation validation failed:\n{error_msg}"
-
-
-async def _translate_single_section(
-    section: dict, target_language: str, metadata: dict
-) -> dict:
-    """
-    翻译单个 section，包含重试逻辑。
-
-    Returns:
-        {"success": bool, "section_id": str, "section_type": str, "error": str | None}
-    """
-    section_id = section["id"]
-    section_type = section["type"]
-    original_content = section.get("content", {})
-    error_message = ""
-
-    client: SupportsStreamingMessages = metadata.get("client")
-    model: str = metadata.get("model")
-
-    system_prompt, user_prompt = build_translate_prompt(section, target_language)
-    messages: list[ConversationMessage] = [
-        ConversationMessage.from_user_text(user_prompt),
-    ]
-
-    for attempt in range(1, _MAX_RETRIES + 1):
-        success, content, error_message = await _attempt_translation(
-            client, model, messages, system_prompt, section_type, original_content
-        )
-
-        if success:
-            section["content"] = content
-            return {
-                "success": True,
-                "section_id": section_id,
-                "section_type": section_type,
-                "error": None,
-            }
-
-        # 非验证类错误，需要重试
-        if "validation failed" not in error_message.lower():
-            if attempt < _MAX_RETRIES:
-                await asyncio.sleep(0.5 * attempt)
-            continue
-
-        # 验证失败：追加错误信息到消息列表，让模型修正
-        messages.append(
-            ConversationMessage(role="assistant", content=[TextBlock(text=content)]),
-        )
-        messages.append(
-            ConversationMessage.from_user_text(
-                f"Invalid output. Please fix the errors and try again:\n{error_message}"
-            ),
-        )
-
-    return {
-        "success": False,
-        "section_id": section_id,
-        "section_type": section_type,
-        "error": error_message,
-    }
-
-
-def build_translate_prompt(section: dict, target_language: str) -> tuple[str, str]:
-    """
-    构建单个 section 的翻译提示词。
-
-    Returns:
-        (system_prompt, user_prompt)
-    """
-    system_prompt = build_system_prompt(target_language)
-    user_prompt = build_user_prompt(section)
-    return system_prompt, user_prompt
+    return accumulated_content, None

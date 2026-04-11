@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.routing import APIRoute
 
 from apps.config import router as config_router
 from apps.conversation_message import router as conversation_message_router
@@ -42,3 +43,7 @@ app.include_router(resume_section_router)
 app.include_router(template_router)
 app.include_router(resume_assistant_router)
 app.include_router(conversation_message_router)
+
+for route in app.routes:
+    if isinstance(route, APIRoute):
+        route.response_model_by_alias = True

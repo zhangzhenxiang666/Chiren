@@ -4,6 +4,7 @@ import { templateMap } from '../../lib/template-labels';
 
 interface ResumePreviewProps {
   resume: Resume;
+  onClick?: () => void;
 }
 
 const FONT_SIZE_SCALE: Record<string, { body: string; h1: string; h2: string; h3: string }> = {
@@ -125,7 +126,7 @@ function buildThemeCSS(scopeId: string, theme: ThemeConfig, template: string): s
   `;
 }
 
-export default function ResumePreview({ resume }: ResumePreviewProps) {
+export default function ResumePreview({ resume, onClick }: ResumePreviewProps) {
   const TemplateComponent = templateMap[resume.template];
   const scopeId = useId();
   const theme: ThemeConfig = { ...DEFAULT_THEME, ...(resume.themeConfig || {}) };
@@ -141,7 +142,14 @@ export default function ResumePreview({ resume }: ResumePreviewProps) {
   const safeResume = resume.sections ? resume : { ...resume, sections: [] };
 
   return (
-    <div data-theme-scope={scopeId}>
+    <div
+      data-theme-scope={scopeId}
+      onClick={onClick}
+      onKeyDown={(e) => { if (onClick && (e.key === 'Enter' || e.key === ' ')) e.preventDefault(); onClick(); }}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      className={onClick ? 'cursor-pointer' : undefined}
+    >
       <style dangerouslySetInnerHTML={{ __html: buildThemeCSS(scopeId, theme, safeResume.template) }} />
       <TemplateComponent resume={safeResume} />
     </div>

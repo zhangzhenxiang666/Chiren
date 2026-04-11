@@ -20,9 +20,9 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [saving, setSaving] = useState(false)
 
   const [activeProvider, setActiveProvider] = useState<ProviderType>('openai')
-  const [config, setConfig] = useState<Record<ProviderType, { base_url: string; api_key: string; model: string }>>({
-    openai: { base_url: '', api_key: '', model: '' },
-    anthropic: { base_url: '', api_key: '', model: '' },
+  const [config, setConfig] = useState<Record<ProviderType, { baseUrl: string; apiKey: string; model: string }>>({
+    openai: { baseUrl: '', apiKey: '', model: '' },
+    anthropic: { baseUrl: '', apiKey: '', model: '' },
   })
   const [showApiKey, setShowApiKey] = useState(false)
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -59,8 +59,8 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const saveConfig = async () => {
     const current = configRef.current[activeProvider]
     const payload: Record<string, string> = {}
-    if (current.base_url) payload.base_url = current.base_url
-    if (current.api_key) payload.api_key = current.api_key
+    if (current.baseUrl) payload.baseUrl = current.baseUrl
+    if (current.apiKey) payload.apiKey = current.apiKey
     if (current.model) payload.model = current.model
 
     if (Object.keys(payload).length === 0) return
@@ -75,7 +75,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
     }
   }
 
-  const updateCurrentProviderConfig = (field: 'base_url' | 'api_key' | 'model', value: string) => {
+  const updateCurrentProviderConfig = (field: 'baseUrl' | 'apiKey' | 'model', value: string) => {
     setConfig((prev) => {
       const next = {
         ...prev,
@@ -111,7 +111,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   if (!open) return null
 
-  const currentProvider = config[activeProvider] ?? { base_url: '', api_key: '', model: '' }
+  const currentProvider = config[activeProvider] ?? { baseUrl: '', apiKey: '', model: '' }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -219,8 +219,8 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <div className="relative">
                     <input
                       type={showApiKey ? 'text' : 'password'}
-                      value={currentProvider.api_key}
-                      onChange={(e) => updateCurrentProviderConfig('api_key', e.target.value)}
+                      value={currentProvider.apiKey}
+                      onChange={(e) => updateCurrentProviderConfig('apiKey', e.target.value)}
                       placeholder="输入 API Key..."
                       className="w-full px-4 py-2.5 pr-10 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                     />
@@ -241,8 +241,8 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                   </label>
                   <input
                     type="text"
-                    value={currentProvider.base_url}
-                    onChange={(e) => updateCurrentProviderConfig('base_url', e.target.value)}
+                    value={currentProvider.baseUrl}
+                    onChange={(e) => updateCurrentProviderConfig('baseUrl', e.target.value)}
                     placeholder="https://api.openai.com/v1"
                     className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                   />

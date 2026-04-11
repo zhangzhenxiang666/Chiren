@@ -11,6 +11,7 @@ from pydantic import (
     Field,
     Tag,
     TypeAdapter,
+    alias_generators,
     model_validator,
 )
 
@@ -19,6 +20,11 @@ from shared.types.strict_model import StrictBaseModel
 
 class ResumeSchema(BaseModel):
     """简历模型"""
+
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
 
     id: str | None = Field(default=None, description="简历唯一标识")
     workspace_id: str | None = Field(
@@ -37,6 +43,9 @@ class ResumeSchema(BaseModel):
         default=None, description="分享密码，为空表示无密码"
     )
     view_count: int = Field(default=0, description="公开/分享页面的浏览次数")
+    meta_info: dict[str, Any] | None = Field(
+        default=None, description="子简历元数据，包含 JD、目标公司等"
+    )
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="最后更新时间")
 
@@ -241,7 +250,11 @@ class ResumeSectionBase(BaseModel):
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="更新时间")
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
 
     @model_validator(mode="before")
     @classmethod

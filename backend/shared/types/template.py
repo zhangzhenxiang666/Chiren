@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, alias_generators
 
 
 class TemplateSchema(BaseModel):
@@ -17,4 +17,8 @@ class TemplateSchema(BaseModel):
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="修改时间")
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
