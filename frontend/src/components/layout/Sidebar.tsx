@@ -29,8 +29,8 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
   const queryClient = useQueryClient()
 
   const { data: tasks } = useQuery({
-    queryKey: ['work-tasks'],
-    queryFn: fetchWorkTasks,
+    queryKey: ['work-tasks', 'parse'],
+    queryFn: () => fetchWorkTasks('parse'),
     refetchInterval: 15000,
   })
 

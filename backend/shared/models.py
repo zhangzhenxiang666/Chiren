@@ -13,6 +13,7 @@ from pydantic import BaseModel
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from shared.types.jd_analysis import JobDescriptionAnalysisSchema, SuggestionItem
 from shared.types.messages import ConversationMessageSchema
 from shared.types.resume import ResumeSchema, ResumeSectionSchema, section_adapter
 
@@ -275,32 +276,23 @@ class ResumeSection(PydanticMixin, Base):
 
 
 class BaseWork(Base):
-    """任务流数据库模型"""
+    """通用任务流数据库模型。"""
 
     __tablename__ = "work"
 
-    id: Mapped[str] = mapped_column(
-        String(36), primary_key=True, comment="工作流唯一id"
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, comment="任务唯一id")
+    task_type: Mapped[str] = mapped_column(
+        String(50), nullable=False, comment="任务类型标识"
     )
-
-    file_name: Mapped[str] = mapped_column(
-        String(100), nullable=False, comment="文件名称"
-    )
-
-    src: Mapped[str] = mapped_column(
-        String(255), nullable=False, comment="文件绝对路径"
-    )
-
     status: Mapped[str] = mapped_column(
-        String(20), nullable=True, default="start", comment="当前状态"
+        String(20), nullable=True, default="pending", comment="当前状态"
     )
-
-    template: Mapped[str] = mapped_column(
-        String(50), nullable=False, comment="模板名称"
+    meta_info: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON, nullable=True, default=dict, comment="任务元数据"
     )
-
-    title: Mapped[str] = mapped_column(String(100), nullable=True, comment="简历标题")
-
+    error_message: Mapped[str | None] = mapped_column(
+        Text, nullable=True, comment="错误信息"
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -464,3 +456,100 @@ class UserConfig(Base):
         onupdate=utc_now,
         comment="最后更新时间",
     )
+
+
+class JobDescriptionAnalysis(PydanticMixin, Base):
+    """职位描述分析数据库模型"""
+
+    __tablename__ = "job_description_analysis"
+
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+        comment="职位描述分析唯一标识",
+    )
+    resume_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("resumes.id"),
+        nullable=False,
+        index=True,
+        comment="职位描述分析所属简历 ID",
+    )
+    overall_score: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="职位描述分析总分(0-100)",
+    )
+    ats_score: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="职位描述分析ATS得分(0-100)",
+    )
+    summary: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+        comment="职位描述分析总结",
+    )
+    keyword_matches: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析关键词匹配结果",
+    )
+    missing_keywords: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析缺少的关键词",
+    )
+    suggestions: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析建议",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="创建时间",
+    )
+
+    def to_pydantic(self) -> JobDescriptionAnalysisSchema:
+        suggestions = [
+            SuggestionItem.model_validate(suggestion)
+            for suggestion in json.loads(self.suggestions)
+        ]
+
+        return JobDescriptionAnalysisSchema(
+            id=self.id,
+            resume_id=self.resume_id,
+            overall_score=self.overall_score,
+            ats_score=self.ats_score,
+            summary=self.summary,
+            keyword_matches=json.loads(self.keyword_matches),
+            missing_keywords=json.loads(self.missing_keywords),
+            suggestions=suggestions,
+            created_at=self.created_at,
+        )
+
+    @classmethod
+    def from_pydantic(
+        cls, schema: JobDescriptionAnalysisSchema
+    ) -> JobDescriptionAnalysis:
+        suggestions = [suggestion.model_dump() for suggestion in schema.suggestions]
+        return cls(
+            id=schema.id,
+            resume_id=schema.resume_id,
+            overall_score=schema.overall_score,
+            ats_score=schema.ats_score,
+            summary=schema.summary,
+            keyword_matches=json.dumps(schema.keyword_matches, ensure_ascii=False),
+            missing_keywords=json.dumps(schema.missing_keywords, ensure_ascii=False),
+            suggestions=json.dumps(suggestions, ensure_ascii=False),
+        )

@@ -5,23 +5,23 @@ import json
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from sqlalchemy import select
 
 from apps.parser.call_llm import executor_llm
 from apps.parser.pdf_parser import pdf_parser
 from apps.parser.schemas import ParserResult
-from apps.parser.state import (
-    TaskStatus,
+from shared.api.client import SupportsStreamingMessages
+from shared.database import async_session
+from shared.exceptions.base import ParseError
+from shared.models import BaseWork, Resume, ResumeSection
+from shared.task_state import (
     cleanup_task,
     update_task_error,
     update_task_result,
     update_task_status,
 )
-from shared.api.client import SupportsStreamingMessages
-from shared.database import async_session
-from shared.exceptions.base import ParseError
-from shared.models import BaseWork, Resume, ResumeSection
 from shared.types.resume import (
     CertificationsContent,
     EducationContent,
@@ -32,6 +32,7 @@ from shared.types.resume import (
     Summary,
     WorkExperienceContent,
 )
+from shared.types.task import TaskStatus
 
 SHANGHAI_TZ = timezone(timedelta(hours=8))
 
@@ -225,12 +226,15 @@ def infer_parser_type(filename: str, content_type: str | None) -> str:
     raise ValueError(f"不支持的文件类型: {ext or content_type or '未知'}")
 
 
-async def _update_work_status(task_id: str, status: TaskStatus) -> None:
+async def _update_work_status(
+    task_id: str, status: TaskStatus, error: str | None = None
+) -> None:
     """更新任务状态到数据库。
 
     Args:
         task_id: 任务 ID。
         status: 新状态。
+        error: 错误信息（当状态为 ERROR 时传入）。
     """
     async with async_session() as session:
         result = await session.execute(select(BaseWork).where(BaseWork.id == task_id))
@@ -238,6 +242,8 @@ async def _update_work_status(task_id: str, status: TaskStatus) -> None:
         if work:
             work.status = status.value
             work.updated_at = datetime.now(SHANGHAI_TZ)
+            if error:
+                work.error_message = error
             await session.commit()
 
 
@@ -287,20 +293,24 @@ async def _execute_parse_flow(
 
         await _update_work_status(task_id, TaskStatus.SUCCESS)
 
-        await _update_work_status(task_id, TaskStatus.SUCCESS)
+        async def cleanup() -> None:
+            if delete_file and file_path:
+                Path(file_path).unlink(missing_ok=True)
 
-        asyncio.create_task(cleanup_task(task_id, file_path, delete_file=delete_file))
+        asyncio.create_task(cleanup_task(task_id, cleanup))
 
     except ParseError as e:
         log.error("解析失败: %s", e)
         await update_task_error(task_id, str(e))
-        await _update_work_status(task_id, TaskStatus.ERROR)
-        asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))
+        await _update_work_status(task_id, TaskStatus.ERROR, error=str(e))
+        asyncio.create_task(cleanup_task(task_id, None))
     except Exception as e:
         log.error("解析失败: %s", e)
         await update_task_error(task_id, f"解析失败: {str(e)}")
-        await _update_work_status(task_id, TaskStatus.ERROR)
-        asyncio.create_task(cleanup_task(task_id, file_path, delete_file=False))
+        await _update_work_status(
+            task_id, TaskStatus.ERROR, error=f"解析失败: {str(e)}"
+        )
+        asyncio.create_task(cleanup_task(task_id, None))
 
 
 async def run_parser_task(

@@ -18,10 +18,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from apps.parser.schemas import TaskIdResponse
 from apps.parser.service import infer_parser_type, retry_parser_task, run_parser_task
 from apps.parser.sse import sse_event_generator
-from apps.parser.state import TaskStatus, create_task, tasks
 from shared.api import get_client
 from shared.database import get_session
 from shared.models import BaseWork
+from shared.task_state import create_task, tasks
+from shared.types.task import TaskStatus, TaskType
 
 router = APIRouter(prefix="/parser", tags=["parser"])
 
@@ -66,11 +67,14 @@ async def parse_document(
     # 创建任务记录到数据库
     work = BaseWork(
         id=task_id,
-        file_name=original_name,
-        src=file_path,
+        task_type=TaskType.PARSE.value,
         status=TaskStatus.PENDING.value,
-        template=template,
-        title=title,
+        meta_info={
+            "file_name": original_name,
+            "src": file_path,
+            "template": template,
+            "title": title,
+        },
     )
     db.add(work)
     await db.commit()
@@ -133,9 +137,10 @@ async def retry_failed_task(
     if work.status != TaskStatus.ERROR.value:
         raise HTTPException(status_code=400, detail="只有错误状态的任务才能重试")
 
-    file_path = work.src or ""
-    template = work.template or "default"
-    title = work.title or "未命名简历"
+    meta_info = work.meta_info or {}
+    file_path = meta_info.get("src", "")
+    template = meta_info.get("template", "default")
+    title = meta_info.get("title", "未命名简历")
 
     create_task(task_id)
 

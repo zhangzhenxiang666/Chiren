@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -100,11 +100,11 @@ async def switch_provider(
 
     config = await _get_provider_config_from_db(db)
 
+    # 如果 provider 不存在，自动用空配置创建
     if switch.active not in config.providers:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Provider '{switch.active}' 尚未配置，请先调用 PUT /config/provider 进行配置",
-        )
+        from apps.config.schemas import ProviderConfigItem
+
+        config.providers[switch.active] = ProviderConfigItem()
 
     config.active = switch.active
     await _save_provider_config(db, config)

@@ -46,7 +46,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
 
     eventSourceRef.current = new EventSource(`http://localhost:8000/parser/stream/${taskId}`)
     eventSourceRef.current.addEventListener('status', (e: MessageEvent) => {
-      if (e.data === 'success' || e.data === 'error') {
+      if (e.data === 'error') {
         eventSourceRef.current?.close()
         eventSourceRef.current = null
         pendingTaskIdRef.current = null
@@ -105,7 +105,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     }
     const configured = activeProviderConfigured()
     if (!configured) {
-      setParseError('当前供应商未配置 API，请先在设置中配置')
+      toast.error('当前供应商未配置 API，请先在设置中配置')
       return
     }
     setFile(selectedFile)
@@ -115,7 +115,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     if (!file) return
     const configured = activeProviderConfigured()
     if (!configured) {
-      setParseError('当前供应商未配置 API，请先在设置中配置')
+      toast.error('当前供应商未配置 API，请先在设置中配置')
       return
     }
     setIsParsing(true)

@@ -11,21 +11,18 @@ from shared.types.work import WorkSchema
 router = APIRouter(prefix="/work", tags=["work"])
 
 
-@router.get("/list", summary="查询全部任务")
+@router.get("/list", summary="查询任务列表")
 async def get_work_list(
     db: Annotated[AsyncSession, Depends(get_session)],
+    task_type: Annotated[str | None, Query(description="任务类型")] = None,
+    status: Annotated[str | None, Query(description="任务状态")] = None,
 ) -> list[WorkSchema]:
-    result = await db.execute(select(BaseWork))
-    work_list = result.scalars().all()
-    return [WorkSchema.model_validate(item) for item in work_list]
-
-
-@router.get("/list-by-status", summary="根据状态查询任务")
-async def list_by_status(
-    status: Annotated[str, Query(description="任务状态")],
-    db: Annotated[AsyncSession, Depends(get_session)],
-) -> list[WorkSchema]:
-    result = await db.execute(select(BaseWork).where(BaseWork.status == status))
+    query = select(BaseWork)
+    if task_type:
+        query = query.where(BaseWork.task_type == task_type)
+    if status:
+        query = query.where(BaseWork.status == status)
+    result = await db.execute(query)
     work_list = result.scalars().all()
     return [WorkSchema.model_validate(item) for item in work_list]
 
@@ -42,48 +39,11 @@ async def get_by_id(
     return WorkSchema.model_validate(item)
 
 
-@router.post("/create", summary="创建任务")
-async def create_work(
-    work: WorkSchema,
-    db: Annotated[AsyncSession, Depends(get_session)],
-) -> WorkSchema:
-    data = work.model_dump(exclude={"created_at", "updated_at"})
-    db_work = BaseWork(**data)
-    db.add(db_work)
-    try:
-        await db.commit()
-        await db.refresh(db_work)
-    except Exception:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="创建失败")
-    return WorkSchema.model_validate(db_work)
-
-
-@router.put("/update-status", summary="更新任务状态", response_model=WorkSchema)
-async def update_status(
-    id: str,
-    status: str,
-    db: Annotated[AsyncSession, Depends(get_session)],
-) -> BaseWork:
-    result = await db.execute(select(BaseWork).where(BaseWork.id == id))
-    work = result.scalar_one_or_none()
-    if not work:
-        raise HTTPException(status_code=404, detail="没有该任务")
-    setattr(work, "status", status)
-    try:
-        await db.commit()
-        await db.refresh(work)
-    except Exception:
-        await db.rollback()
-        raise HTTPException(status_code=500, detail="更新失败")
-    return work
-
-
-@router.delete("/delete/{id}", summary="根据id删除任务", response_model=WorkSchema)
+@router.delete("/delete/{id}", summary="根据id删除任务")
 async def delete_by_id(
     id: str,
     db: Annotated[AsyncSession, Depends(get_session)],
-) -> BaseWork:
+) -> WorkSchema:
     result = await db.execute(select(BaseWork).where(BaseWork.id == id))
     work = result.scalar_one_or_none()
     if not work:
@@ -94,4 +54,4 @@ async def delete_by_id(
     except Exception:
         await db.rollback()
         raise HTTPException(status_code=500, detail="删除失败")
-    return work
+    return WorkSchema.model_validate(work)

@@ -6,14 +6,13 @@ from pydantic import BaseModel, ConfigDict, Field, alias_generators
 
 
 class WorkSchema(BaseModel):
-    """工作任务 API 类型。对应 Java 后端 /api/work/{id} 接口返回的 data 字段。"""
+    """工作任务 API 类型。对应 work 表的 Pydantic 映射。"""
 
     id: str = Field(default="", description="任务ID")
-    file_name: str = Field(default="", description="文件名称")
-    src: str = Field(default="", description="文件绝对路径")
+    task_type: str = Field(default="", description="任务类型标识")
     status: str = Field(default="", description="任务状态")
-    template: str = Field(default="", description="模板名称")
-    title: str = Field(default="", description="简历标题")
+    meta_info: dict | None = Field(default=None, description="任务元数据")
+    error_message: str | None = Field(default=None, description="错误信息")
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="更新时间")
 

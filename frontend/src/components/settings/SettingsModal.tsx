@@ -91,7 +91,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current)
     }
-    saveTimeoutRef.current = setTimeout(saveConfig, 1500)
+    saveTimeoutRef.current = setTimeout(saveConfig, 400)
   }
 
   const handleClose = () => {
@@ -185,6 +185,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                       value={activeProvider}
                       onChange={(e) => {
                         const nextProvider = e.target.value as ProviderType
+                        const prevProvider = activeProvider
                         setActiveProvider(nextProvider)
                         if (saveTimeoutRef.current) {
                           clearTimeout(saveTimeoutRef.current)
@@ -195,10 +196,11 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                             await switchProviderConfig(nextProvider)
                           } catch (error) {
                             console.error('Failed to switch provider:', error)
+                            setActiveProvider(prevProvider)
                           } finally {
                             setSaving(false)
                           }
-                        }, 1500)
+                        }, 400)
                       }}
                       className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                     >

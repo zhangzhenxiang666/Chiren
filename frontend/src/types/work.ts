@@ -1,10 +1,14 @@
 export interface WorkTask {
   id: string;
-  fileName: string;
-  src: string;
+  taskType: string;
   status: string;
-  template: string;
-  title: string;
+  metaInfo: {
+    fileName?: string;
+    src?: string;
+    template?: string;
+    title?: string;
+  } | null;
+  errorMessage: string | null;
   createdAt: string | null;
   updatedAt: string | null;
 }

@@ -23,10 +23,9 @@ function formatTime(dateStr: string | null): string {
 
 function getStatusLabel(status: string): string {
   const map: Record<string, string> = {
-    start: '待开始',
-    processing: '处理中',
-    completed: '已完成',
-    failed: '失败',
+    pending: '待处理',
+    running: '处理中',
+    success: '已完成',
     error: '错误',
   };
   return map[status] || status;
@@ -34,10 +33,9 @@ function getStatusLabel(status: string): string {
 
 function getStatusBadgeBg(status: string): string {
   const map: Record<string, string> = {
-    start: 'border-gray-500/50 bg-gray-500/10',
-    processing: 'border-amber-500/50 bg-amber-500/10',
-    completed: 'border-emerald-500/50 bg-emerald-500/10',
-    failed: 'border-red-500/50 bg-red-500/10',
+    pending: 'border-gray-500/50 bg-gray-500/10',
+    running: 'border-amber-500/50 bg-amber-500/10',
+    success: 'border-emerald-500/50 bg-emerald-500/10',
     error: 'border-red-500/50 bg-red-500/10',
   };
   return map[status] || 'border-gray-500/50 bg-gray-500/10';
@@ -45,10 +43,9 @@ function getStatusBadgeBg(status: string): string {
 
 function getStatusTextColor(status: string): string {
   const map: Record<string, string> = {
-    start: 'text-gray-400',
-    processing: 'text-amber-400',
-    completed: 'text-emerald-400',
-    failed: 'text-red-400',
+    pending: 'text-gray-400',
+    running: 'text-amber-400',
+    success: 'text-emerald-400',
     error: 'text-red-400',
   };
   return map[status] || 'text-gray-400';
@@ -56,10 +53,9 @@ function getStatusTextColor(status: string): string {
 
 function getStatusDot(status: string): string {
   const map: Record<string, string> = {
-    start: 'bg-gray-400',
-    processing: 'bg-amber-400 animate-pulse',
-    completed: 'bg-emerald-400',
-    failed: 'bg-red-400',
+    pending: 'bg-gray-400',
+    running: 'bg-amber-400 animate-pulse',
+    success: 'bg-emerald-400',
     error: 'bg-red-400',
   };
   return map[status] || 'bg-gray-400';
@@ -91,8 +87,8 @@ export default function MessageList({ tasks }: MessageListProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-sm text-white truncate" title={task.fileName}>
-                        {task.fileName || '未命名文件'}
+                      <p className="text-sm text-white truncate" title={task.metaInfo?.fileName}>
+                        {task.metaInfo?.fileName || '未命名文件'}
                       </p>
                       <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border shrink-0 ${getStatusBadgeBg(task.status)}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(task.status)}`} />
@@ -101,8 +97,8 @@ export default function MessageList({ tasks }: MessageListProps) {
                         </span>
                       </span>
                     </div>
-                    {task.title && (
-                      <p className="text-xs text-gray-500 truncate mb-1">{task.title}</p>
+                    {task.metaInfo?.title && (
+                      <p className="text-xs text-gray-500 truncate mb-1">{task.metaInfo.title}</p>
                     )}
                     <div className="flex items-center gap-1 text-xs text-gray-600">
                       <Clock className="w-3 h-3" />

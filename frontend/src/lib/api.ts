@@ -26,14 +26,12 @@ export async function createWorkspace(
   return data;
 }
 
-export async function fetchWorkTasks(): Promise<WorkTask[]> {
-  const { data } = await api.get<WorkTask[]>('/work/list');
-  return data;
-}
-
-export async function fetchWorkByStatus(status: string): Promise<WorkTask[]> {
-  const { data } = await api.get<WorkTask[]>('/work/list-by-status', {
-    params: { status },
+export async function fetchWorkTasks(
+  taskType?: string,
+  status?: string,
+): Promise<WorkTask[]> {
+  const { data } = await api.get<WorkTask[]>('/work/list', {
+    params: { task_type: taskType, status },
   });
   return data;
 }

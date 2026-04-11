@@ -1,8 +1,6 @@
 """SSE 事件生成器。"""
 
-import asyncio
-
-from apps.parser.state import task_events
+from shared.task_state import hub
 
 
 async def sse_event_generator(task_id: str):
@@ -20,17 +18,5 @@ async def sse_event_generator(task_id: str):
             - error: 解析过程中的错误信息
             - heartbeat: 保持连接的心跳（每60秒一次）
     """
-    queue = task_events.get(task_id)
-    if not queue:
-        return
-
-    while True:
-        try:
-            event = await asyncio.wait_for(queue.get(), timeout=60)
-            yield event
-            if event["event"] in ("result", "error"):
-                break
-        except TimeoutError:
-            yield {"event": "heartbeat", "data": ""}
-        except asyncio.CancelledError:
-            raise
+    async for event in hub.subscribe(task_id):
+        yield event
