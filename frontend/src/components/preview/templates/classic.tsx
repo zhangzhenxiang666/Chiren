@@ -20,7 +20,7 @@ export function ClassicTemplate({ resume }: { resume: Resume }) {
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
-    <div className="mx-auto max-w-[210mm] bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div className="mx-auto bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif', wordWrap: 'break-word', overflowWrap: 'break-word', maxWidth: '210mm', width: '100%' }}>
       {/* Header */}
       <div className="mb-6 border-b-2 border-zinc-800 pb-4">
         <div className="flex items-center justify-center gap-4">
@@ -138,9 +138,9 @@ function SectionContent({ section, lang }: { section: any; lang?: string }) {
     return (
       <div className="space-y-1">
         {categories.map((cat: any) => (
-          <div key={cat.id} className="flex text-sm">
-            <span className="font-medium text-zinc-700 w-28 shrink-0">{cat.name}:</span>
-            <span className="text-zinc-600">{cat.skills?.join(', ')}</span>
+          <div key={cat.id} className="text-sm">
+            <span className="font-medium text-zinc-700">{cat.name}:</span>
+            <span className="text-zinc-600 ml-1">{cat.skills?.join(', ')}</span>
           </div>
         ))}
       </div>

@@ -43,11 +43,11 @@ export function EditorPreviewPanel() {
           </button>
         </div>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-auto">
         <div className="flex justify-center p-4">
           <div
             className="bg-white shadow-md"
-            style={{ width: A4_WIDTH, zoom: scale }}
+            style={{ width: '100%', maxWidth: A4_WIDTH, zoom: scale }}
           >
             <ResumePreview resume={liveResume} />
           </div>

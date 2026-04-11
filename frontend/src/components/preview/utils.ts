@@ -46,7 +46,7 @@ export function isSectionEmpty(section: ResumeSection): boolean {
 
   if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories;
-    return !categories?.length || categories.every((cat: { skills?: string[] }) => !cat.skills?.length);
+    return !categories?.length || categories.every((cat: { name?: string; skills?: string[] }) => !cat.name && !cat.skills?.length);
   }
 
   // work_experience, education, projects, certifications, languages, custom
