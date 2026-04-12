@@ -6,13 +6,13 @@ from shared.types.strict_model import StrictBaseModel
 
 
 class SuggestionItem(StrictBaseModel):
-    section_id: str = Field(description="区块唯一标识")
-    current: str = Field(description="当前的描述")
-    suggested: str = Field(description="修改的建议")
+    section_id: str = Field(description="Unique section identifier")
+    current: str = Field(description="Current content/section text")
+    suggested: str = Field(description="Suggested modification")
 
 
 class JobDescriptionAnalysisSchema(StrictBaseModel):
-    id: str = Field(description="职位描述分析唯一标识")
+    id: int = Field(description="职位描述分析唯一标识")
     resume_id: str = Field(description="职位描述分析所属简历 ID")
     overall_score: int = Field(description="职位描述分析总分(0-100)")
     ats_score: int = Field(description="职位描述分析ATS得分(0-100)")

@@ -8,7 +8,6 @@ from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.resume_assistant.schemas import SECTION_TYPE_TO_MODEL
 from shared.api.client import (
     ApiMessageCompleteEvent,
     ApiMessageRequest,
@@ -18,6 +17,7 @@ from shared.api.client import (
 from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 from shared.types.messages import ConversationMessage, TextBlock
+from shared.types.resume import SECTION_TYPE_TO_MODEL
 
 _ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
 _MAX_RETRIES = 5
@@ -123,7 +123,7 @@ def validate_translated_content(
 
     # Schema validation
     try:
-        if section_type in ("personal_info", "summary"):
+        if section_type in ("personal_info", "summary", "custom"):
             model.model_validate(content)
         elif section_type in (
             "work_experience",
@@ -132,7 +132,6 @@ def validate_translated_content(
             "certifications",
             "languages",
             "github",
-            "custom",
         ):
             for item_data in content.get("items", []):
                 model.model_validate(item_data)
@@ -158,7 +157,6 @@ def validate_translated_content(
         "certifications",
         "languages",
         "github",
-        "custom",
     ):
         id_errors = _validate_item_ids(content.get("items", []), existing_ids, "items")
         if id_errors:
@@ -183,7 +181,7 @@ def _is_content_empty(content: dict, section_type: str) -> bool:
     if not content:
         return True
 
-    if section_type in ("personal_info", "summary"):
+    if section_type in ("personal_info", "summary", "custom"):
         return not any(content.values())
 
     if section_type in (
@@ -193,7 +191,6 @@ def _is_content_empty(content: dict, section_type: str) -> bool:
         "certifications",
         "languages",
         "github",
-        "custom",
     ):
         return not content.get("items")
 

@@ -1,44 +1,11 @@
 """Parser Pydantic 模型。"""
 
-from pydantic import BaseModel, ConfigDict, Field, alias_generators, model_validator
+from pydantic import Field, model_validator
+
+from shared.types.strict_model import StrictBaseModel
 
 
-def _strip_title(schema: dict) -> None:
-    """移除 JSON Schema 中的 title 字段。"""
-
-    def strip_obj(obj: dict) -> None:
-        obj.pop("title", None)
-        if "properties" in obj:
-            for prop in obj["properties"].values():
-                prop.pop("title", None)
-                if prop.get("type") == "array" and "items" in prop:
-                    prop["items"].pop("title", None)
-        if "$defs" in obj:
-            for def_schema in obj["$defs"].values():
-                strip_obj(def_schema)
-
-    strip_obj(schema)
-
-
-class BaseSchema(BaseModel):
-    """Schema 基类，自动移除 JSON Schema 中的 title 字段。"""
-
-    model_config = ConfigDict(json_schema_extra=_strip_title)
-
-
-class TaskIdResponse(BaseSchema):
-    """任务 ID 响应模型。"""
-
-    model_config = ConfigDict(
-        json_schema_extra=_strip_title,
-        alias_generator=alias_generators.to_camel,
-        populate_by_name=True,
-    )
-
-    task_id: str
-
-
-class PersonalInfo(BaseSchema):
+class PersonalInfo(StrictBaseModel):
     """个人信息模型。"""
 
     full_name: str = Field(default="", description="Full name")
@@ -53,7 +20,7 @@ class PersonalInfo(BaseSchema):
     education_level: str = Field(default="", description="Education level")
 
 
-class EducationItem(BaseSchema):
+class EducationItem(StrictBaseModel):
     """教育背景条目模型。"""
 
     institution: str = Field(default="", description="School / institution name")
@@ -68,7 +35,7 @@ class EducationItem(BaseSchema):
     )
 
 
-class SkillCategory(BaseSchema):
+class SkillCategory(StrictBaseModel):
     """技能分类模型。"""
 
     name: str = Field(default="", description="Category name")
@@ -77,7 +44,7 @@ class SkillCategory(BaseSchema):
     )
 
 
-class ProjectItem(BaseSchema):
+class ProjectItem(StrictBaseModel):
     """项目经历条目模型。"""
 
     name: str = Field(default="", description="Project name")
@@ -91,7 +58,7 @@ class ProjectItem(BaseSchema):
     end_date: str = Field(default="", description="End date")
 
 
-class CertificationItem(BaseSchema):
+class CertificationItem(StrictBaseModel):
     """资格证书条目模型。"""
 
     name: str = Field(default="", description="Certificate name")
@@ -99,7 +66,7 @@ class CertificationItem(BaseSchema):
     date: str = Field(default="", description="Date obtained")
 
 
-class WorkExperienceItem(BaseSchema):
+class WorkExperienceItem(StrictBaseModel):
     """工作经历条目模型。"""
 
     company: str = Field(default="", description="Company / organization name")
@@ -114,7 +81,7 @@ class WorkExperienceItem(BaseSchema):
     )
 
 
-class LanguageItem(BaseSchema):
+class LanguageItem(StrictBaseModel):
     """语言能力条目模型。"""
 
     language: str = Field(default="", description="Language name")
@@ -122,7 +89,7 @@ class LanguageItem(BaseSchema):
     description: str = Field(default="", description="Additional description")
 
 
-class ParserResult(BaseSchema):
+class ParserResult(StrictBaseModel):
     """解析结果模型。"""
 
     @model_validator(mode="before")

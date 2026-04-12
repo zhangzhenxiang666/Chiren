@@ -235,6 +235,8 @@ class OpenAICompatibleClient:
             # tools are present – avoids triggering model-side thinking mode
             # that requires reasoning_content on every assistant message.
             params.pop("stream_options", None)
+        if request.temperature:
+            params["temperature"] = request.temperature
 
         # Collect full response while streaming text deltas
         collected_content = ""

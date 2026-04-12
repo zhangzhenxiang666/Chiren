@@ -21,3 +21,14 @@ class WorkSchema(BaseModel):
         alias_generator=alias_generators.to_camel,
         populate_by_name=True,
     )
+
+
+class TaskIdResponse(BaseModel):
+    """任务 ID 响应模型。"""
+
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
+
+    task_id: str

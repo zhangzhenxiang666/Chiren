@@ -2,6 +2,7 @@
 
 import uuid
 
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.models import ResumeSection
@@ -70,3 +71,27 @@ async def create_default_sections(resume_id: str, db: AsyncSession) -> None:
 
     for section in sections:
         db.add(ResumeSection.from_pydantic(section))
+
+
+async def copy_sections_from_workspace(
+    source_resume_id: str, target_resume_id: str, db: AsyncSession
+) -> None:
+    """从源简历复制所有 sections 到目标简历（内容复制，id 重新生成）"""
+    from shared.models import ResumeSection
+
+    result = await db.execute(
+        select(ResumeSection).where(ResumeSection.resume_id == source_resume_id)
+    )
+    source_sections = result.scalars().all()
+
+    for section in source_sections:
+        new_section = ResumeSection(
+            id=str(uuid.uuid4()),
+            resume_id=target_resume_id,
+            title=section.title,
+            type=section.type,
+            sort_order=section.sort_order,
+            visible=section.visible,
+            content=section.content,
+        )
+        db.add(new_section)

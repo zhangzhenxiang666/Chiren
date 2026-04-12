@@ -29,116 +29,6 @@ from shared.types.resume import ResumeSectionSchema
 log = logging.getLogger(__name__)
 
 
-def _build_result(
-    tool_use_id: str, is_error: bool, content: str = ""
-) -> dict[str, Any]:
-    """构建统一的工具调用结果字典"""
-    return {"is_error": is_error, "tool_use_id": tool_use_id, "content": content}
-
-
-# TODO: 这里先直接占位传递openai的客户端和model, 后续抽象出通用的接口, 和一个query_context
-async def _handle_tool_calls(
-    tool_use_blocks: list[ToolUseBlock],
-    tool_registry: ToolRegistry,
-    client: SupportsStreamingMessages,
-    model: str,
-    id_to_type: dict[str, str],
-    sections: list[dict[str, Any]],
-    messages: list[ConversationMessage],
-    db: AsyncSession,
-):
-    tool_results: list[ToolResultBlock] = []
-
-    for tool_use in tool_use_blocks:
-        tool_id = tool_use.id
-
-        yield make_sse_event(
-            "tool_use",
-            {
-                "name": tool_use.name,
-                "id": tool_id,
-                "input": tool_use.input,
-            },
-        )
-
-        handler = tool_registry.get(tool_use.name)
-
-        # 工具不存在
-        if handler is None:
-            result = _build_result(
-                tool_id, is_error=True, content=f"Unknown tool: {tool_use.name}"
-            )
-
-            tool_results.append(
-                ToolResultBlock(
-                    tool_use_id=tool_id,
-                    content=result["content"],
-                    is_error=True,
-                )
-            )
-
-            yield make_sse_event("tool_result", result)
-            continue
-
-        # 验证参数
-        try:
-            arguments = handler.input_model.model_validate(tool_use.input)
-        except ValidationError as e:
-            errors = []
-            for err in e.errors():
-                field = ".".join(str(loc) for loc in err["loc"])
-                errors.append(f"  - {field}: {err['msg']}")
-            error_msg = "Validation failed:\n" + "\n".join(errors)
-            result = _build_result(tool_id, is_error=True, content=error_msg)
-            tool_results.append(
-                ToolResultBlock(
-                    tool_use_id=tool_id,
-                    content=result["content"],
-                    is_error=True,
-                )
-            )
-            yield make_sse_event("tool_result", result)
-            continue
-
-        # 执行工具
-        tool_result = await handler.execute(
-            arguments,
-            ToolExecutionContext(
-                sections=sections,
-                metadata={
-                    "tool_use_id": tool_use.id,
-                    "id_to_type": id_to_type,
-                    "client": client,
-                    "model": model,
-                    "db": db,
-                },
-            ),
-        )
-
-        result = _build_result(tool_id, tool_result.is_error, tool_result.output)
-        tool_results.append(
-            ToolResultBlock(
-                tool_use_id=tool_id,
-                content=tool_result.output,
-                is_error=tool_result.is_error,
-            )
-        )
-        yield make_sse_event("tool_result", result)
-
-    if tool_results:
-        messages.append(
-            ConversationMessage(role="user", content=tool_results),
-        )
-
-
-def make_sse_event(event: str, data: dict[str, Any]) -> dict[str, str]:
-
-    return {
-        "event": event,
-        "data": json.dumps(data, ensure_ascii=False),
-    }
-
-
 async def resume_assistant_service(
     request: ResumeAssistantRequest,
     sections: list[ResumeSectionSchema],
@@ -153,60 +43,6 @@ async def resume_assistant_service(
         sections_list.append(new_section)
 
     return EventSourceResponse(generate_content(request, sections_list, id_to_type, db))
-
-
-def insert_resume_info(
-    messages: list[ConversationMessage], resume_info: str, count: int
-) -> list[ConversationMessage]:
-    # 只处理最后一条消息，避免全量深拷贝
-    if not messages:
-        return messages
-
-    last_msg = messages[-1]
-
-    if count == 1 and last_msg.role == "user":
-        return [
-            *messages[:-1],
-            ConversationMessage.from_user_text(
-                f"Current Resume Information: \n---\n{resume_info}\n---"
-            ),
-            messages[-1],
-        ]
-    elif (
-        count != 1
-        and last_msg.role == "user"
-        and last_msg.content
-        and isinstance(last_msg.content[-1], ToolResultBlock)
-    ):
-        # 只对最后一条做浅拷贝 + 最后一个 content block 替换
-        last_block = last_msg.content[-1]
-        new_block = last_block.model_copy(
-            update={
-                "content": json.dumps(
-                    {"content": last_block.content, "resume_info": resume_info},
-                    ensure_ascii=False,
-                )
-            }
-        )
-        new_last = last_msg.model_copy(
-            update={"content": [*last_msg.content[:-1], new_block]}
-        )
-        return [*messages[:-1], new_last]
-
-    return messages
-
-
-def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
-    def json_serializer(obj):
-        if hasattr(obj, "isoformat"):
-            return obj.isoformat()
-        if hasattr(obj, "model_dump"):
-            return obj.model_dump()
-        if hasattr(obj, "__dict__"):
-            return obj.__dict__
-        raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
-
-    return json.dumps(sections, ensure_ascii=False, default=json_serializer)
 
 
 async def generate_content(
@@ -348,3 +184,167 @@ async def generate_content(
             store.extend(request.resume_id, pending)
             yield make_sse_event("error", {"message": str(e)})
             break
+
+
+def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
+    def json_serializer(obj):
+        if hasattr(obj, "isoformat"):
+            return obj.isoformat()
+        if hasattr(obj, "model_dump"):
+            return obj.model_dump()
+        if hasattr(obj, "__dict__"):
+            return obj.__dict__
+        raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
+
+    return json.dumps(sections, ensure_ascii=False, default=json_serializer)
+
+
+def insert_resume_info(
+    messages: list[ConversationMessage], resume_info: str, count: int
+) -> list[ConversationMessage]:
+    # 只处理最后一条消息，避免全量深拷贝
+    if not messages:
+        return messages
+
+    last_msg = messages[-1]
+
+    if count == 1 and last_msg.role == "user":
+        return [
+            *messages[:-1],
+            ConversationMessage.from_user_text(
+                f"Current Resume Information: \n---\n{resume_info}\n---"
+            ),
+            messages[-1],
+        ]
+    elif (
+        count != 1
+        and last_msg.role == "user"
+        and last_msg.content
+        and isinstance(last_msg.content[-1], ToolResultBlock)
+    ):
+        # 只对最后一条做浅拷贝 + 最后一个 content block 替换
+        last_block = last_msg.content[-1]
+        new_block = last_block.model_copy(
+            update={
+                "content": json.dumps(
+                    {"content": last_block.content, "resume_info": resume_info},
+                    ensure_ascii=False,
+                )
+            }
+        )
+        new_last = last_msg.model_copy(
+            update={"content": [*last_msg.content[:-1], new_block]}
+        )
+        return [*messages[:-1], new_last]
+
+    return messages
+
+
+def make_sse_event(event: str, data: dict[str, Any]) -> dict[str, str]:
+
+    return {
+        "event": event,
+        "data": json.dumps(data, ensure_ascii=False),
+    }
+
+
+# TODO: 这里先直接占位传递openai的客户端和model, 后续抽象出通用的接口, 和一个query_context
+async def _handle_tool_calls(
+    tool_use_blocks: list[ToolUseBlock],
+    tool_registry: ToolRegistry,
+    client: SupportsStreamingMessages,
+    model: str,
+    id_to_type: dict[str, str],
+    sections: list[dict[str, Any]],
+    messages: list[ConversationMessage],
+    db: AsyncSession,
+):
+    tool_results: list[ToolResultBlock] = []
+
+    for tool_use in tool_use_blocks:
+        tool_id = tool_use.id
+
+        yield make_sse_event(
+            "tool_use",
+            {
+                "name": tool_use.name,
+                "id": tool_id,
+                "input": tool_use.input,
+            },
+        )
+
+        handler = tool_registry.get(tool_use.name)
+
+        # 工具不存在
+        if handler is None:
+            result = _build_result(
+                tool_id, is_error=True, content=f"Unknown tool: {tool_use.name}"
+            )
+
+            tool_results.append(
+                ToolResultBlock(
+                    tool_use_id=tool_id,
+                    content=result["content"],
+                    is_error=True,
+                )
+            )
+
+            yield make_sse_event("tool_result", result)
+            continue
+
+        # 验证参数
+        try:
+            arguments = handler.input_model.model_validate(tool_use.input)
+        except ValidationError as e:
+            errors = []
+            for err in e.errors():
+                field = ".".join(str(loc) for loc in err["loc"])
+                errors.append(f"  - {field}: {err['msg']}")
+            error_msg = "Validation failed:\n" + "\n".join(errors)
+            result = _build_result(tool_id, is_error=True, content=error_msg)
+            tool_results.append(
+                ToolResultBlock(
+                    tool_use_id=tool_id,
+                    content=result["content"],
+                    is_error=True,
+                )
+            )
+            yield make_sse_event("tool_result", result)
+            continue
+
+        # 执行工具
+        tool_result = await handler.execute(
+            arguments,
+            ToolExecutionContext(
+                sections=sections,
+                metadata={
+                    "tool_use_id": tool_use.id,
+                    "id_to_type": id_to_type,
+                    "client": client,
+                    "model": model,
+                    "db": db,
+                },
+            ),
+        )
+
+        result = _build_result(tool_id, tool_result.is_error, tool_result.output)
+        tool_results.append(
+            ToolResultBlock(
+                tool_use_id=tool_id,
+                content=tool_result.output,
+                is_error=tool_result.is_error,
+            )
+        )
+        yield make_sse_event("tool_result", result)
+
+    if tool_results:
+        messages.append(
+            ConversationMessage(role="user", content=tool_results),
+        )
+
+
+def _build_result(
+    tool_use_id: str, is_error: bool, content: str = ""
+) -> dict[str, Any]:
+    """构建统一的工具调用结果字典"""
+    return {"is_error": is_error, "tool_use_id": tool_use_id, "content": content}

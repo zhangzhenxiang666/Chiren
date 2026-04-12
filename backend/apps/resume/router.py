@@ -8,7 +8,11 @@ from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from apps.resume.service import create_default_sections
+from apps.resume.schemas import (
+    CreateSubResumeRequest,
+    CreateWorkspaceRequest,
+)
+from apps.resume.service import copy_sections_from_workspace, create_default_sections
 from shared.database import get_session
 from shared.models import Resume
 from shared.types.resume import ResumeSchema
@@ -80,20 +84,69 @@ async def get_resume(
     )
 
 
-@router.post("/create", summary="新建简历")
-async def create_resume(
-    data: ResumeSchema,
+@router.post("/create", summary="新建 Workspace（主简历）")
+async def create_workspace(
+    data: CreateWorkspaceRequest,
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> WorkspaceSummary:
     resume_id = str(uuid.uuid4())
 
-    # 创建新简历
-    resume = Resume.from_pydantic(data)
-    resume.id = resume_id
+    resume = Resume(
+        id=resume_id,
+        workspace_id=None,
+        title=data.title,
+        template=data.template,
+        theme_config=json.dumps(data.theme_config, ensure_ascii=False),
+        language=data.language,
+    )
     db.add(resume)
 
-    # 为每个创建的新简历创建默认的section
     await create_default_sections(resume_id, db)
+
+    try:
+        await db.commit()
+        await db.refresh(resume)
+    except Exception:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail="新增失败")
+
+    return WorkspaceSummary(**resume.to_pydantic().model_dump(), sub_resume_ids=[])
+
+
+@router.post("/sub/create", summary="新建子简历")
+async def create_sub_resume(
+    data: CreateSubResumeRequest,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> WorkspaceSummary:
+    result = await db.execute(
+        select(Resume).where(
+            Resume.id == data.workspace_id, Resume.workspace_id.is_(None)
+        )
+    )
+    workspace = result.scalar_one_or_none()
+    if not workspace:
+        raise HTTPException(status_code=404, detail="所属 Workspace 不存在")
+
+    resume_id = str(uuid.uuid4())
+
+    meta_info = {"job_description": data.job_description}
+
+    if data.job_title:
+        meta_info["job_title"] = data.job_title
+
+    resume = Resume(
+        id=resume_id,
+        workspace_id=data.workspace_id,
+        title=data.title,
+        template=data.template,
+        theme_config=json.dumps(data.theme_config, ensure_ascii=False),
+        language=data.language,
+        meta_info=meta_info,
+    )
+
+    db.add(resume)
+
+    await copy_sections_from_workspace(workspace.id, resume_id, db)
 
     try:
         await db.commit()
@@ -129,7 +182,6 @@ async def update_resume(
     return resume.to_pydantic()
 
 
-# TODO: 删除简历还需将对应的section和conversation_message_record删除, 已经本地的json文件也要删除
 @router.delete("/delete", summary="根据简历id删除简历")
 async def delete_resume(
     id: Annotated[str, Query(description="简历ID")],

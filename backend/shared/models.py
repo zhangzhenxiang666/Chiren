@@ -544,7 +544,6 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
     ) -> JobDescriptionAnalysis:
         suggestions = [suggestion.model_dump() for suggestion in schema.suggestions]
         return cls(
-            id=schema.id,
             resume_id=schema.resume_id,
             overall_score=schema.overall_score,
             ats_score=schema.ats_score,

@@ -34,6 +34,7 @@ class ApiMessageRequest:
     messages: list[ConversationMessage]
     system_prompt: str | None = None
     max_tokens: int = 4096
+    temperature: float | None = None
     tools: list[dict[str, Any]] = field(default_factory=list)
 
 
@@ -156,6 +157,8 @@ class AnthropicApiClient:
             params["system"] = request.system_prompt
         if request.tools:
             params["tools"] = request.tools
+        if request.temperature:
+            params["temperature"] = request.temperature
 
         try:
             async with self._client.messages.stream(**params) as stream:

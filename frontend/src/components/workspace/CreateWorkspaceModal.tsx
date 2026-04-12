@@ -27,8 +27,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
   const [parseError, setParseError] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [providerConfig, setProviderConfig] = useState<{ providers: Record<string, ProviderConfigItem>; active: string } | null>(null)
-  const eventSourceRef = useRef<EventSource | null>(null)
-  const pendingTaskIdRef = useRef<string | null>(null)
+  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
   const onRefreshWsRef = useRef(onRefreshWs)
   onRefreshWsRef.current = onRefreshWs
 
@@ -41,34 +40,29 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
 
   // 管理SSE连接生命周期，不受modal卸载影响
   useEffect(() => {
-    const taskId = pendingTaskIdRef.current
-    if (!taskId) return
+    if (!pendingTaskId) return
 
-    eventSourceRef.current = new EventSource(`http://localhost:8000/parser/stream/${taskId}`)
-    eventSourceRef.current.addEventListener('status', (e: MessageEvent) => {
+    const eventSource = new EventSource(`http://localhost:8000/work/stream/${pendingTaskId}`)
+    eventSource.addEventListener('status', (e: MessageEvent) => {
       if (e.data === 'error') {
-        eventSourceRef.current?.close()
-        eventSourceRef.current = null
-        pendingTaskIdRef.current = null
+        eventSource.close()
+        setPendingTaskId(null)
       }
     })
-    eventSourceRef.current.addEventListener('result', () => {
+    eventSource.addEventListener('result', () => {
       onRefreshWsRef.current()
-      eventSourceRef.current?.close()
-      eventSourceRef.current = null
-      pendingTaskIdRef.current = null
+      eventSource.close()
+      setPendingTaskId(null)
     })
-    eventSourceRef.current.addEventListener('error', () => {
-      eventSourceRef.current?.close()
-      eventSourceRef.current = null
-      pendingTaskIdRef.current = null
+    eventSource.addEventListener('error', () => {
+      eventSource.close()
+      setPendingTaskId(null)
     })
 
     return () => {
-      eventSourceRef.current?.close()
-      eventSourceRef.current = null
+      eventSource.close()
     }
-  }, [pendingTaskIdRef.current])
+  }, [pendingTaskId])
 
   // 检查当前active provider是否已配置
   const activeProviderConfigured = (): ProviderConfigItem | null => {
@@ -134,7 +128,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
       setFile(null)
       setName('')
       setTab('template')
-      pendingTaskIdRef.current = taskId
+      setPendingTaskId(taskId)
       toast.success('上传成功，简历正在解析中')
     } catch (err: any) {
       setParseError(err.message || '解析失败')
@@ -143,8 +137,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
   }
 
   const resetAndClose = () => {
-    eventSourceRef.current?.close()
-    eventSourceRef.current = null
+    setPendingTaskId(null)
     onClose()
     setName('')
     setSelectedTemplate('classic')

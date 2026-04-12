@@ -137,15 +137,6 @@ class GitHubItem(StrictBaseModel):
     description: str = Field(default="", description="仓库描述")
 
 
-class CustomItem(StrictBaseModel):
-    """自定义项"""
-
-    id: str = Field(default="", description="自定义项ID")
-    title: str = Field(default="", description="标题")
-    date: str = Field(default="", description="日期")
-    description: str = Field(default="", description="描述")
-
-
 # ══════════════════════════════════════════════════════════════
 #  Content 模型（全部是 dict，列表统一放在 items / categories）
 # ══════════════════════════════════════════════════════════════
@@ -227,7 +218,10 @@ class GitHubContent(StrictBaseModel):
 class CustomContent(StrictBaseModel):
     """自定义 content"""
 
-    items: list[CustomItem] = Field(default_factory=list, description="自定义项列表")
+    id: str = Field(default="", description="自定义项ID")
+    title: str = Field(default="", description="标题")
+    date: str = Field(default="", description="日期")
+    description: str = Field(default="", description="描述")
 
 
 # ══════════════════════════════════════════════════════════════
@@ -363,3 +357,16 @@ ResumeSectionType = (
 )
 
 section_adapter = TypeAdapter(ResumeSectionSchema)
+
+SECTION_TYPE_TO_MODEL: dict[str, type[BaseModel]] = {
+    "personal_info": PersonalInfo,
+    "summary": Summary,
+    "work_experience": WorkExperienceItem,
+    "education": EducationItem,
+    "projects": ProjectItem,
+    "certifications": CertificationItem,
+    "languages": LanguageItem,
+    "github": GitHubItem,
+    "custom": CustomContent,
+    "skills": SkillItem,
+}

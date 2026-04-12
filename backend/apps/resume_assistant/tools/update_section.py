@@ -9,9 +9,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 _ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
 
-from apps.resume_assistant.schemas import SECTION_TYPE_TO_MODEL
 from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
+from shared.types.resume import SECTION_TYPE_TO_MODEL
 
 # 各 section 类型的字段结构和示例
 _SECTION_CONTENT_SCHEMAS = {
@@ -194,7 +194,7 @@ class UpdateSectionTool(BaseTool):
 
         # 验证value
         try:
-            if section_type in ("personal_info", "summary"):
+            if section_type in ("personal_info", "summary", "custom"):
                 model.model_validate(arguments.value)
             elif section_type in (
                 "work_experience",
@@ -203,7 +203,6 @@ class UpdateSectionTool(BaseTool):
                 "certifications",
                 "languages",
                 "github",
-                "custom",
             ):
                 for item_data in arguments.value.get("items", []):
                     model.model_validate(item_data)
@@ -237,7 +236,6 @@ class UpdateSectionTool(BaseTool):
                 "certifications",
                 "languages",
                 "github",
-                "custom",
             ):
                 id_errors = _validate_items(
                     arguments.value.get("items", []),

@@ -1,14 +1,20 @@
+import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette import EventSourceResponse
 
-from apps.resume_assistant.schemas import ResumeAssistantRequest
-from apps.resume_assistant.service import resume_assistant_service
+from apps.resume_assistant.agent_service import resume_assistant_service
+from apps.resume_assistant.schemas import ResumeAssistantRequest, SubResumeCreateRequest
+from apps.resume_assistant.task_service import run_sub_resume_task
+from shared.api import get_client
 from shared.database import get_session
-from shared.models import ResumeSection
+from shared.models import BaseWork, Resume, ResumeSection
+from shared.task_state import create_task
+from shared.types.task import TaskStatus, TaskType
+from shared.types.work import TaskIdResponse
 
 router = APIRouter(prefix="/resume-assistant", tags=["resume-assistant"])
 
@@ -60,3 +66,66 @@ async def resume_assistant(
     sections = [resume.to_pydantic() for resume in resume_section_list]
 
     return await resume_assistant_service(request, sections, db)
+
+
+@router.post(
+    "/sub-resumes",
+    summary="根据 JD 创建子简历",
+)
+async def create_sub_resume(
+    background_tasks: BackgroundTasks,
+    request: Annotated[SubResumeCreateRequest, Body(description="子简历创建请求参数")],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> TaskIdResponse:
+
+    section_result = await db.execute(
+        select(Resume).where(Resume.id == request.workspace_id)
+    )
+    resume = section_result.scalar_one_or_none()
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"简历不存在: {request.workspace_id}",
+        )
+
+    task_id = str(uuid.uuid4())
+
+    section_result = await db.execute(
+        select(ResumeSection)
+        .where(ResumeSection.resume_id == request.workspace_id)
+        .order_by(ResumeSection.sort_order.asc())
+    )
+
+    resume_section_list = section_result.scalars().all()
+    sections = [resume.to_pydantic() for resume in resume_section_list]
+
+    # 创建任务记录到数据库
+    work = BaseWork(
+        id=task_id,
+        task_type=TaskType.PARSE.value,
+        status=TaskStatus.PENDING.value,
+        meta_info={
+            "job_description": request.job_description,
+            "job_title": request.job_title,
+            "template": request.template,
+            "title": request.title,
+        },
+    )
+    db.add(work)
+    await db.commit()
+
+    create_task(task_id)
+
+    client = get_client(request.type, request.api_key, request.base_url)
+
+    background_tasks.add_task(
+        run_sub_resume_task,
+        db,
+        task_id,
+        client,
+        request,
+        sections,
+    )
+
+    return TaskIdResponse(task_id=task_id)

@@ -63,3 +63,5 @@ async def executor_llm(
         except Exception as e:
             raise e
         return result
+
+    raise Exception("Max retries exceeded")

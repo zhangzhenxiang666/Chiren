@@ -15,14 +15,13 @@ from fastapi import (
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from apps.parser.schemas import TaskIdResponse
 from apps.parser.service import infer_parser_type, retry_parser_task, run_parser_task
-from apps.parser.sse import sse_event_generator
 from shared.api import get_client
 from shared.database import get_session
 from shared.models import BaseWork
 from shared.task_state import create_task, tasks
 from shared.types.task import TaskStatus, TaskType
+from shared.types.work import TaskIdResponse
 
 router = APIRouter(prefix="/parser", tags=["parser"])
 
@@ -47,7 +46,7 @@ async def parse_document(
     ],
     api_key: Annotated[str, Form(description="AI API 密钥", examples=["sk-xxx"])],
     model: Annotated[str, Form(description="模型名称", examples=["gpt-4o"])],
-    template: Annotated[str, Form(description="模板名称", examples=["default"])],
+    template: Annotated[str, Form(description="模板名称", examples=["classic"])],
     title: Annotated[
         str, Form(description="简历标题", examples=["未命名简历"])
     ] = "未命名简历",
@@ -81,26 +80,10 @@ async def parse_document(
 
     client = get_client(type, api_key, base_url)
     background_tasks.add_task(
-        run_parser_task, task_id, file_path, client, model, template, title
+        run_parser_task, db, task_id, file_path, client, model, template, title
     )
 
     return TaskIdResponse(task_id=task_id)
-
-
-@router.get(
-    "/stream/{task_id}",
-    summary="通过SSE流式获取解析任务结果",
-    responses={
-        404: {"description": "任务不存在"},
-    },
-)
-async def stream_parser_result(task_id: str):
-    if task_id not in tasks:
-        raise HTTPException(status_code=404, detail="任务不存在")
-
-    from sse_starlette.sse import EventSourceResponse
-
-    return EventSourceResponse(sse_event_generator(task_id))
 
 
 @router.post(
@@ -139,7 +122,7 @@ async def retry_failed_task(
 
     meta_info = work.meta_info or {}
     file_path = meta_info.get("src", "")
-    template = meta_info.get("template", "default")
+    template = meta_info.get("template", "classic")
     title = meta_info.get("title", "未命名简历")
 
     create_task(task_id)
@@ -148,6 +131,7 @@ async def retry_failed_task(
 
     background_tasks.add_task(
         retry_parser_task,
+        db,
         task_id,
         file_path,
         client,

@@ -3,9 +3,12 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sse_starlette.sse import EventSourceResponse
 
+from apps.work.sse import sse_event_generator
 from shared.database import get_session
 from shared.models import BaseWork
+from shared.task_state import tasks
 from shared.types.work import WorkSchema
 
 router = APIRouter(prefix="/work", tags=["work"])
@@ -55,3 +58,10 @@ async def delete_by_id(
         await db.rollback()
         raise HTTPException(status_code=500, detail="删除失败")
     return WorkSchema.model_validate(work)
+
+
+@router.get("/stream/{task_id}", summary="通过SSE流式获取任务结果")
+async def stream_task_result(task_id: str):
+    if task_id not in tasks:
+        raise HTTPException(status_code=404, detail="任务不存在")
+    return EventSourceResponse(sse_event_generator(task_id))
