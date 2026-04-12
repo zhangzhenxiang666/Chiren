@@ -16,7 +16,7 @@ from shared.types.resume import SECTION_TYPE_TO_MODEL
 # 各 section 类型的字段结构和示例
 _SECTION_CONTENT_SCHEMAS = {
     "personal_info": {
-        "fields": "full_name, job_title, email, phone, location, salary, age, gender, political_status, education_level",
+        "fields": "full_name, job_title, email, phone, location, salary, age, gender, political_status, education_level, ethnicity, hometown, marital_status, years_of_experience, wechat, website, linkedin",
         "example": '{ "full_name": "John", "email": "john@example.com" }',
     },
     "summary": {
@@ -24,8 +24,8 @@ _SECTION_CONTENT_SCHEMAS = {
         "example": '{ "text": "Experienced engineer..." }',
     },
     "work_experience": {
-        "fields": "items: [{ id, company, position, location, start_date, end_date, current, description, highlights: string[] }]",
-        "example": '{ "items": [{ "company": "Google", "position": "Engineer", "start_date": "2020.01", "end_date": "2023.12", "description": "..." }] }',
+        "fields": "items: [{ id, company, position, location, start_date, end_date, current, description, technologies: string[], highlights: string[] }]",
+        "example": '{ "items": [{ "company": "Google", "position": "Engineer", "start_date": "2020.01", "end_date": "2023.12", "description": "...", "technologies": ["Python", "Go"] }] }',
     },
     "education": {
         "fields": "items: [{ id, institution, degree, field, location, start_date, end_date, gpa, highlights: string[] }]",
@@ -36,8 +36,8 @@ _SECTION_CONTENT_SCHEMAS = {
         "example": '{ "items": [{ "name": "AI Project", "description": "...", "technologies": ["Python", "PyTorch"] }] }',
     },
     "certifications": {
-        "fields": "items: [{ id, name, issuer, date }]",
-        "example": '{ "items": [{ "name": "AWS Solutions Architect", "issuer": "Amazon", "date": "2023.01" }] }',
+        "fields": "items: [{ id, name, issuer, date, description }]",
+        "example": '{ "items": [{ "name": "AWS Solutions Architect", "issuer": "Amazon", "date": "2023.01", "description": "..." }] }',
     },
     "languages": {
         "fields": "items: [{ id, language, proficiency, description }]",

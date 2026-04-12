@@ -54,6 +54,13 @@ RESUME_PERSONAL_INFO_FIELDS = PersonalInfoFields(
     salary=True,
     location=True,
     political_status=True,
+    ethnicity=True,
+    hometown=True,
+    marital_status=True,
+    years_of_experience=True,
+    wechat=True,
+    website=True,
+    linkedin=True,
 )
 
 RESUME_ITEM_FIELDS = ItemFields(location=True)

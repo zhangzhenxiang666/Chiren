@@ -253,7 +253,7 @@ class ResumeSection(PydanticMixin, Base):
     def from_pydantic(cls, schema: ResumeSectionSchema) -> ResumeSection:
         if schema.content is not None:
             content = json.dumps(schema.content.model_dump(), ensure_ascii=False)
-        elif schema.type in {"personal_info", "summary"}:
+        elif schema.type in {"personal_info", "summary", "custom"}:
             content = "{}"
         elif schema.type == "skills":
             content = '{"categories": []}'

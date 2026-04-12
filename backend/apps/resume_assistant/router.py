@@ -103,7 +103,7 @@ async def create_sub_resume(
     # 创建任务记录到数据库
     work = BaseWork(
         id=task_id,
-        task_type=TaskType.PARSE.value,
+        task_type=TaskType.JD_GENERATE.value,
         status=TaskStatus.PENDING.value,
         meta_info={
             "job_description": request.job_description,

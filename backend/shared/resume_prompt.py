@@ -36,6 +36,13 @@ class PersonalInfoFields:
     salary: bool = True
     location: bool = True
     political_status: bool = True
+    ethnicity: bool = True
+    hometown: bool = True
+    marital_status: bool = True
+    years_of_experience: bool = True
+    wechat: bool = True
+    website: bool = True
+    linkedin: bool = True
 
 
 @dataclass
@@ -152,6 +159,22 @@ class ResumePromptBuilder:
                 optional_fields.append(("location", content.location))
             if cfg.political_status and content.political_status:
                 optional_fields.append(("political_status", content.political_status))
+            if cfg.ethnicity and content.ethnicity:
+                optional_fields.append(("ethnicity", content.ethnicity))
+            if cfg.hometown and content.hometown:
+                optional_fields.append(("hometown", content.hometown))
+            if cfg.marital_status and content.marital_status:
+                optional_fields.append(("marital_status", content.marital_status))
+            if cfg.years_of_experience and content.years_of_experience:
+                optional_fields.append(
+                    ("years_of_experience", content.years_of_experience)
+                )
+            if cfg.wechat and content.wechat:
+                optional_fields.append(("wechat", content.wechat))
+            if cfg.website and content.website:
+                optional_fields.append(("website", content.website))
+            if cfg.linkedin and content.linkedin:
+                optional_fields.append(("linkedin", content.linkedin))
 
             for field_name, field_value in optional_fields:
                 lines.append(f"{field_name}: {field_value}")

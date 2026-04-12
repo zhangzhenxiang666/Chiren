@@ -22,6 +22,13 @@ Fields:
 - gender (string): Gender, e.g., "Male"
 - political_status (string): Political affiliation, e.g., "Communist Party Member"
 - education_level (string): Highest education level, e.g., "Bachelor's"
+- ethnicity (string): Ethnicity, e.g., "Han"
+- hometown (string): Hometown, e.g., "Hunan"
+- marital_status (string): Marital status, e.g., "Single"
+- years_of_experience (string): Years of work experience, e.g., "3"
+- wechat (string): WeChat ID, e.g., "zhangsan"
+- website (string): Personal website, e.g., "https://example.com"
+- linkedin (string): LinkedIn profile, e.g., "https://linkedin.com/in/xxx"
 """,
     "summary": """
 Personal Summary Section
@@ -44,6 +51,7 @@ Each item:
 - end_date (string): End date or "Present", e.g., "Present"
 - current (boolean): Whether this is the current job, e.g., true
 - description (text): Detailed job description
+- technologies (array[string]): Tech stack, e.g., ["Python", "FastAPI"]
 - highlights (array[string]): Key achievements or highlights, e.g., ["Led model API封装...", ...]""",
     "education": """
 Education Background Section
@@ -105,7 +113,8 @@ Each item:
 - id (string): Unique identifier, e.g., "d1b2c3d4-0001"
 - name (string): Certification name, e.g., "CET-4"
 - issuer (string): Issuing organization, e.g., "National Education Committee"
-- date (string): Date obtained, e.g., "2022年" """,
+- date (string): Date obtained, e.g., "2022年"
+- description (string): Certification description """,
     "github": """
 GitHub Projects Section
 

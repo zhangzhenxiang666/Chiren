@@ -16,6 +16,13 @@ JD_ANALYSIS_PERSONAL_INFO_FIELDS = PersonalInfoFields(
     salary=True,
     location=True,
     political_status=True,
+    ethnicity=True,
+    hometown=True,
+    marital_status=True,
+    years_of_experience=True,
+    wechat=False,
+    website=True,
+    linkedin=True,
 )
 
 JD_ANALYSIS_ITEM_FIELDS = ItemFields(location=False)

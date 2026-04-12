@@ -1,7 +1,7 @@
-import { useState, useEffect, useRef, useMemo, type JSX } from 'react'
-import { Sparkles, Download, MoreVertical, Plus, ArrowLeft } from 'lucide-react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { Sparkles, Download, MoreVertical, Plus, ArrowLeft, FileText } from 'lucide-react'
 import { toast } from 'sonner'
-import type { Workspace } from '../types/workspace'
+import type { Workspace, SubResume } from '../types/workspace'
 import type { Resume, ResumeSection } from '../types/resume'
 import ResumePreview from '../components/preview/ResumePreview'
 import EditorToolbar from '../components/editor/EditorToolbar'
@@ -11,87 +11,50 @@ import { ThemeEditor } from '../components/editor/ThemeEditor'
 import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel'
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
-import { fetchResumeSections } from '../lib/api'
-
-interface TaggedResume {
-  id: string
-  title: string
-  company: string
-  matchScore: number
-  format: 'PDF' | 'WORD'
-  generateDate: string
-  icon: string
-}
-
-const mockTaggedResumes: TaggedResume[] = [
-  {
-    id: '1',
-    title: '高级解决方案架构师',
-    company: '阿里巴巴 (Cloud Native Division)',
-    matchScore: 98,
-    format: 'PDF',
-    generateDate: '2023.11.20',
-    icon: 'architecture',
-  },
-  {
-    id: '2',
-    title: '技术专家 (P7) - 前端工程化',
-    company: '字节跳动 (抖音基础架构组)',
-    matchScore: 92,
-    format: 'WORD',
-    generateDate: '2023.11.15',
-    icon: 'frontend',
-  },
-  {
-    id: '3',
-    title: 'AI 算法架构师',
-    company: '腾讯 (AI Lab)',
-    matchScore: 85,
-    format: 'PDF',
-    generateDate: '2023.11.02',
-    icon: 'ai',
-  },
-]
-
-function getIconComponent(icon: string) {
-  const icons: Record<string, JSX.Element> = {
-    architecture: (
-      <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-        <rect x="4" y="8" width="24" height="16" rx="2" stroke="#f472b6" strokeWidth="2" />
-        <path d="M12 8V4M20 8V4M8 24h16" stroke="#f472b6" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-    frontend: (
-      <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-        <rect x="4" y="6" width="24" height="16" rx="2" stroke="#60a5fa" strokeWidth="2" />
-        <path d="M12 28h8M16 22v6" stroke="#60a5fa" strokeWidth="2" strokeLinecap="round" />
-        <path d="M10 12l3 3 3-3" stroke="#60a5fa" strokeWidth="1.5" strokeLinecap="round" />
-      </svg>
-    ),
-    ai: (
-      <svg viewBox="0 0 32 32" className="w-8 h-8" fill="none">
-        <circle cx="16" cy="16" r="10" stroke="#a78bfa" strokeWidth="2" />
-        <circle cx="12" cy="13" r="2" fill="#a78bfa" />
-        <circle cx="20" cy="13" r="2" fill="#a78bfa" />
-        <path d="M12 20c1 1.5 2 2 4 2s3-.5 4-2" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" />
-      </svg>
-    ),
-  }
-  return icons[icon] || icons.architecture
-}
+import { fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, getProviderConfig } from '../lib/api'
+import { markUnread, addNotificationTask } from '../lib/notification'
+import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
 
 interface WorkspaceDetailProps {
   workspace: Workspace
   onBack: () => void
+  onRefreshWs?: () => void
 }
 
-export default function WorkspaceDetail({ workspace, onBack }: WorkspaceDetailProps) {
+export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: WorkspaceDetailProps) {
   const [sections, setSections] = useState<ResumeSection[]>([])
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
+  const [subResumes, setSubResumes] = useState<SubResume[]>([])
+  const [subResumesLoading, setSubResumesLoading] = useState(true)
+  const [showGenerateModal, setShowGenerateModal] = useState(false)
 
-  // Track if we've populated the store for editor mode
-  const editorReadyRef = useRef(false)
+  const refreshSubResumes = useCallback(async () => {
+    try {
+      const data = await fetchResumeDetail(workspace.id)
+      const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
+        id: sub.id,
+        title: sub.title,
+        jobTitle: sub.metaInfo?.job_title,
+        createdAt: sub.createdAt,
+        updatedAt: sub.updatedAt,
+      }))
+      await Promise.all(
+        subs.map(async (sub) => {
+          try {
+            const analyses = await fetchJdAnalysisList(sub.id)
+            if (analyses.length > 0) {
+              sub.matchScore = analyses[0].overallScore
+            }
+          } catch {
+          }
+        }),
+      )
+      setSubResumes(subs)
+      onRefreshWs?.()
+    } catch {
+    }
+  }, [workspace.id, onRefreshWs])
 
   useEffect(() => {
     fetchResumeSections(workspace.id)
@@ -106,6 +69,53 @@ export default function WorkspaceDetail({ workspace, onBack }: WorkspaceDetailPr
         setLoading(false)
       })
   }, [workspace.id])
+
+  useEffect(() => {
+    fetchResumeDetail(workspace.id)
+      .then(async (data) => {
+        const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
+          id: sub.id,
+          title: sub.title,
+          jobTitle: sub.metaInfo?.job_title,
+          createdAt: sub.createdAt,
+          updatedAt: sub.updatedAt,
+        }))
+
+        // 获取每个子简历的评分数据
+        await Promise.all(
+          subs.map(async (sub) => {
+            try {
+              const analyses = await fetchJdAnalysisList(sub.id)
+              if (analyses.length > 0) {
+                // 取最新一条的 overallScore
+                sub.matchScore = analyses[0].overallScore
+              }
+            } catch (err) {
+              // 评分数据不存在或获取失败，保持 undefined
+              console.warn(`Failed to fetch score for resume ${sub.id}:`, err)
+            }
+          }),
+        )
+
+        setSubResumes(subs)
+      })
+      .catch((err) => {
+        console.error('Failed to fetch sub resumes:', err)
+      })
+      .finally(() => {
+        setSubResumesLoading(false)
+      })
+  }, [workspace.id])
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { taskType: string }
+      if (detail?.taskType !== 'ai_resume') return
+      refreshSubResumes()
+    }
+    window.addEventListener('global-sse-complete', handler)
+    return () => { window.removeEventListener('global-sse-complete', handler) }
+  }, [refreshSubResumes])
 
   const resumeData: Resume = useMemo(() => ({
     id: workspace.id,
@@ -122,6 +132,8 @@ export default function WorkspaceDetail({ workspace, onBack }: WorkspaceDetailPr
 
   const { currentResume, sections: storeSections, updateSection, addSection, removeSection, reorderSections } = useResumeStore()
   const { showThemeEditor } = useEditorStore()
+
+  const editorReadyRef = useRef(false)
 
   // When entering edit mode: populate Zustand stores
   useEffect(() => {
@@ -210,7 +222,7 @@ export default function WorkspaceDetail({ workspace, onBack }: WorkspaceDetailPr
         </div>
         <button
           type="button"
-          onClick={() => toast.info('即将上线：针对新职位生成功能')}
+          onClick={() => setShowGenerateModal(true)}
           className="flex items-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 transition-all text-sm font-medium shrink-0"
         >
           <Sparkles className="w-4 h-4" />
@@ -235,100 +247,206 @@ export default function WorkspaceDetail({ workspace, onBack }: WorkspaceDetailPr
               </div>
           </div>
 
-          <div className="w-[420px] shrink-0 flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
-                  已生成的子简历 (Tailored Versions)
-                </span>
-              </div>
-              <span className="text-gray-500 text-xs">共 {mockTaggedResumes.length} 份</span>
-            </div>
+             <div className="w-[420px] shrink-0 flex flex-col" style={{ height: '630px' }}>
+             <div className="flex items-center justify-between mb-4">
+               <div className="flex items-center gap-2">
+                 <span className="w-2 h-2 rounded-full bg-blue-500" />
+                 <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
+                   已生成的子简历 (Tailored Versions)
+                 </span>
+               </div>
+               <span className="text-gray-500 text-xs">共 {subResumes.length} 份</span>
+             </div>
 
-            <div className="space-y-3 overflow-y-auto">
-              {mockTaggedResumes.map((resume) => (
-                <div
-                  key={resume.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => toast.info(`即将打开：${resume.title}`)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault()
-                      toast.info(`即将打开：${resume.title}`)
-                    }
-                  }}
-                  className="w-full text-left bg-[#1e1e20] rounded-xl border border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors p-4 flex items-center gap-3 cursor-pointer"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-[#2a2a2e] flex items-center justify-center shrink-0">
-                    {getIconComponent(resume.icon)}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">{resume.title}</p>
-                    <p className="text-gray-400 text-xs mt-0.5 truncate">{resume.company}</p>
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="text-gray-500 text-xs">{resume.generateDate} 生成</span>
-                      <span className="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-400 text-xs">
-                        {resume.format} 格式
-                      </span>
+             <div className="space-y-3 overflow-y-auto pr-1" style={{ height: 'calc(100% - 48px)' }}>
+              {subResumesLoading ? (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                  加载中...
+                </div>
+              ) : subResumes.length === 0 ? (
+                <div className="flex items-center justify-center h-full">
+                  <button
+                    type="button"
+                    onClick={() => setShowGenerateModal(true)}
+                    className="w-full h-full rounded-xl border-2 border-dashed border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors flex flex-col items-center justify-center gap-3 text-gray-500"
+                  >
+                    <FileText className="w-10 h-10 opacity-40" />
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-sm font-medium">暂无子简历</span>
+                      <span className="text-xs">创建新的针对性版本</span>
                     </div>
-                  </div>
+                    <div className="w-10 h-10 rounded-full bg-[#2a2a2e] flex items-center justify-center mt-2">
+                      <Plus className="w-5 h-5" />
+                    </div>
+                  </button>
+                </div>
+              ) : (
+                subResumes.map((resume) => (
+                  <div
+                    key={resume.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => toast.info(`即将打开：${resume.title}`)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault()
+                        toast.info(`即将打开：${resume.title}`)
+                      }
+                    }}
+                    className="w-full text-left bg-[#1e1e20] rounded-xl border border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors p-4 flex items-center gap-3 cursor-pointer"
+                  >
+                    <div className="w-12 h-12 rounded-lg bg-[#2a2a2e] flex items-center justify-center shrink-0">
+                      <FileText className="w-6 h-6 text-gray-400" />
+                    </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="text-right">
-                      <p
-                        className={`text-xl font-bold ${
-                          resume.matchScore >= 95
-                            ? 'text-pink-400'
-                            : resume.matchScore >= 85
-                              ? 'text-indigo-400'
-                              : 'text-yellow-400'
-                        }`}
-                      >
-                        {resume.matchScore}%
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{resume.title}</p>
+                      <p className="text-gray-400 text-xs mt-0.5 truncate">
+                        {resume.jobTitle || '—'}
                       </p>
-                      <p className="text-gray-500 text-xs">AI 匹配得分</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="text-gray-500 text-xs">
+                          {new Date(resume.createdAt).toLocaleDateString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                          }).replace(/\//g, '.')}{' '}
+                          生成
+                        </span>
+                      </div>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toast.info('即将下载')
-                      }}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
-                    >
-                      <Download className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toast.info('更多操作')
-                      }}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
-                    >
-                      <MoreVertical className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              ))}
 
-              <button
-                type="button"
-                onClick={() => toast.info('即将上线：创建新的针对性版本')}
-                className="w-full py-8 rounded-xl border-2 border-dashed border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors flex flex-col items-center gap-2 text-gray-500 hover:text-gray-300"
-              >
-                <div className="w-8 h-8 rounded-full bg-[#2a2a2e] flex items-center justify-center">
-                  <Plus className="w-5 h-5" />
-                </div>
-                <span className="text-sm">创建新的针对性版本</span>
-              </button>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="text-right">
+                        {resume.matchScore !== undefined ? (
+                          <>
+                            <p
+                              className={`text-xl font-bold ${
+                                resume.matchScore >= 95
+                                  ? 'text-pink-400'
+                                  : resume.matchScore >= 85
+                                    ? 'text-indigo-400'
+                                    : 'text-yellow-400'
+                              }`}
+                            >
+                              {resume.matchScore}%
+                            </p>
+                            <p className="text-gray-500 text-xs">AI 匹配得分</p>
+                          </>
+                        ) : (
+                          <>
+                            <p className="text-xl font-bold text-gray-500">--</p>
+                            <p className="text-gray-500 text-xs">AI 匹配得分</p>
+                          </>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toast.info('即将下载')
+                        }}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                      >
+                        <Download className="w-4 h-4" />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          toast.info('更多操作')
+                        }}
+                        className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </div>
       </div>
+
+      <GenerateForPositionModal
+        open={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
+        onSubmit={async (payload) => {
+          try {
+            const config = await getProviderConfig()
+            const activeConfig = config.providers[config.active]
+            if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+              toast.error('请先在设置中配置 AI 提供商')
+              return
+            }
+            const { taskId } = await createSubResumeWithAI({
+              workspaceId: workspace.id,
+              jobDescription: payload.jdDescription,
+              jobTitle: payload.jobTitle || undefined,
+              title: payload.name || undefined,
+              template: payload.template,
+              type: config.active,
+              baseUrl: activeConfig.baseUrl,
+              apiKey: activeConfig.apiKey,
+              model: activeConfig.model,
+            })
+            const title = payload.name || payload.jobTitle || ''
+            setShowGenerateModal(false)
+            markUnread()
+            addNotificationTask({ id: taskId, taskType: 'ai_resume', status: 'running', workspaceId: workspace.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+            toast.success(
+              <div className="flex flex-col gap-1">
+                <span className="font-medium text-sm">AI 子简历生成任务已启动</span>
+                {title && (
+                  <span className="text-xs text-gray-400 truncate">
+                    「{title}」正在生成中
+                  </span>
+                )}
+              </div>,
+            )
+          } catch (err: any) {
+            toast.error(err.message || 'AI 生成请求失败')
+          }
+        }}
+        onCreateDirect={async (payload) => {
+          try {
+            await createSubResume({
+              workspaceId: workspace.id,
+              jobDescription: payload.jdDescription,
+              title: payload.name || undefined,
+              jobTitle: payload.jobTitle || undefined,
+              template: payload.template,
+            })
+            toast.success('子简历创建成功')
+            setShowGenerateModal(false)
+
+            const data = await fetchResumeDetail(workspace.id)
+            const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
+              id: sub.id,
+              title: sub.title,
+              jobTitle: sub.metaInfo?.job_title,
+              createdAt: sub.createdAt,
+              updatedAt: sub.updatedAt,
+            }))
+            await Promise.all(
+              subs.map(async (sub) => {
+                try {
+                  const analyses = await fetchJdAnalysisList(sub.id)
+                  if (analyses.length > 0) {
+                    sub.matchScore = analyses[0].overallScore
+                  }
+                } catch {
+                }
+              }),
+            )
+            setSubResumes(subs)
+            onRefreshWs?.()
+          } catch {
+            toast.error('创建子简历失败')
+          }
+        }}
+      />
     </div>
   )
 }

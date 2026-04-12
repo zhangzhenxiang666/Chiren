@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { X, Check, Upload, FileText, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { TemplateThumbnail } from '../template/TemplateThumbnail'
 import { templateLabelsMap, TEMPLATE_ORDER } from '../../lib/template-labels'
 import { getProviderConfig, uploadAndParse, type ProviderConfigItem, type ProviderType } from '../../lib/api'
+import { addNotificationTask } from '../../lib/notification'
 
 export interface CreateWorkspaceModalProps {
   open: boolean
@@ -27,42 +28,12 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
   const [parseError, setParseError] = useState('')
   const [isDragging, setIsDragging] = useState(false)
   const [providerConfig, setProviderConfig] = useState<{ providers: Record<string, ProviderConfigItem>; active: string } | null>(null)
-  const [pendingTaskId, setPendingTaskId] = useState<string | null>(null)
-  const onRefreshWsRef = useRef(onRefreshWs)
-  onRefreshWsRef.current = onRefreshWs
-
   // 获取provider配置
   useEffect(() => {
     if (open) {
       getProviderConfig().then(setProviderConfig).catch(() => setProviderConfig(null))
     }
   }, [open])
-
-  // 管理SSE连接生命周期，不受modal卸载影响
-  useEffect(() => {
-    if (!pendingTaskId) return
-
-    const eventSource = new EventSource(`http://localhost:8000/work/stream/${pendingTaskId}`)
-    eventSource.addEventListener('status', (e: MessageEvent) => {
-      if (e.data === 'error') {
-        eventSource.close()
-        setPendingTaskId(null)
-      }
-    })
-    eventSource.addEventListener('result', () => {
-      onRefreshWsRef.current()
-      eventSource.close()
-      setPendingTaskId(null)
-    })
-    eventSource.addEventListener('error', () => {
-      eventSource.close()
-      setPendingTaskId(null)
-    })
-
-    return () => {
-      eventSource.close()
-    }
-  }, [pendingTaskId])
 
   // 检查当前active provider是否已配置
   const activeProviderConfigured = (): ProviderConfigItem | null => {
@@ -128,7 +99,16 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
       setFile(null)
       setName('')
       setTab('template')
-      setPendingTaskId(taskId)
+      addNotificationTask({
+        id: taskId,
+        taskType: 'parse',
+        status: 'running',
+        workspaceId: undefined,
+        metaInfo: { title: name || file.name },
+        errorMessage: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
       toast.success('上传成功，简历正在解析中')
     } catch (err: any) {
       setParseError(err.message || '解析失败')
@@ -137,7 +117,6 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
   }
 
   const resetAndClose = () => {
-    setPendingTaskId(null)
     onClose()
     setName('')
     setSelectedTemplate('classic')

@@ -129,3 +129,112 @@ export async function updateResume(data: {
   const { data: res } = await api.put('/resume/update', data);
   return res;
 }
+
+export interface JdAnalysis {
+  id: number;
+  resumeId: string;
+  overallScore: number;
+  atsScore: number;
+  summary: string;
+  keywordMatches: string[];
+  missingKeywords: string[];
+  suggestions: any[];
+  createdAt: string;
+}
+
+export async function fetchJdAnalysisList(resumeId: string): Promise<JdAnalysis[]> {
+  const { data } = await api.get<JdAnalysis[]>(`/jd-analysis/list/${resumeId}`);
+  return data;
+}
+
+export interface CreateSubResumeParams {
+  workspaceId: string;
+  jobDescription: string;
+  title?: string;
+  jobTitle?: string;
+  template?: string;
+  themeConfig?: Record<string, unknown>;
+  language?: string;
+}
+
+export interface WorkspaceSummary {
+  id: string;
+  title: string;
+  template: string;
+  themeConfig: Record<string, unknown>;
+  isDefault: boolean;
+  language: string;
+  createdAt: string;
+  updatedAt: string;
+  subResumeIds: string[];
+}
+
+export async function createSubResume(params: CreateSubResumeParams): Promise<WorkspaceSummary> {
+  const { data } = await api.post<WorkspaceSummary>('/resume/sub/create', {
+    workspaceId: params.workspaceId,
+    jobDescription: params.jobDescription,
+    title: params.title || '未命名简历',
+    jobTitle: params.jobTitle || null,
+    template: params.template || 'classic',
+    themeConfig: params.themeConfig || {},
+    language: params.language || 'zh',
+  });
+  return data;
+}
+
+export interface CreateSubResumeWithAIParams {
+  workspaceId: string;
+  jobDescription: string;
+  jobTitle?: string;
+  template?: string;
+  title?: string;
+  themeConfig?: Record<string, unknown>;
+  language?: string;
+  type: ProviderType;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
+export async function createSubResumeWithAI(params: CreateSubResumeWithAIParams): Promise<TaskIdResponse> {
+  const { data } = await api.post<TaskIdResponse>('/resume-assistant/sub-resumes', {
+    workspaceId: params.workspaceId,
+    jobDescription: params.jobDescription,
+    title: params.title || '未命名简历',
+    jobTitle: params.jobTitle || '',
+    template: params.template || 'classic',
+    themeConfig: params.themeConfig || {},
+    language: params.language || 'zh',
+    type: params.type,
+    baseUrl: params.baseUrl,
+    apiKey: params.apiKey,
+    model: params.model,
+  });
+  return data;
+}
+
+export async function fetchErrorTasks(): Promise<WorkTask[]> {
+  const [parseErrors, jdErrors] = await Promise.all([
+    fetchWorkTasks('parse', 'error'),
+    fetchWorkTasks('jd_generate', 'error'),
+  ]);
+  return [...parseErrors, ...jdErrors];
+}
+
+export interface RetryTaskParams {
+  taskId: string;
+  type: ProviderType;
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
+export async function retryTask(params: RetryTaskParams): Promise<TaskIdResponse> {
+  const formData = new FormData();
+  formData.append('type', params.type);
+  formData.append('base_url', params.baseUrl);
+  formData.append('api_key', params.apiKey);
+  formData.append('model', params.model);
+  const { data } = await api.post<TaskIdResponse>(`/parser/retry/${params.taskId}`, formData);
+  return data;
+}

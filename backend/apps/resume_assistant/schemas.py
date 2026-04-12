@@ -2,6 +2,7 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, alias_generators
 
+from shared.types.mixins import NoneToDefaultMixin
 from shared.types.strict_model import StrictBaseModel
 
 
@@ -42,7 +43,7 @@ class SubResumeCreateRequest(BaseModel):
     model: str = Field(description="模型名称")
 
 
-class PersonalInfo(StrictBaseModel):
+class PersonalInfo(NoneToDefaultMixin, StrictBaseModel):
     """个人信息"""
 
     full_name: str = Field(default="", description="Full name")
@@ -55,15 +56,22 @@ class PersonalInfo(StrictBaseModel):
     gender: str = Field(default="", description="Gender")
     political_status: str = Field(default="", description="Political status")
     education_level: str = Field(default="", description="Education level")
+    ethnicity: str = Field(default="", description="Ethnicity")
+    hometown: str = Field(default="", description="Hometown")
+    marital_status: str = Field(default="", description="Marital status")
+    years_of_experience: str = Field(default="", description="Years of experience")
+    wechat: str = Field(default="", description="WeChat")
+    website: str = Field(default="", description="Personal website")
+    linkedin: str = Field(default="", description="LinkedIn")
 
 
-class Summary(StrictBaseModel):
+class Summary(NoneToDefaultMixin, StrictBaseModel):
     """个人简介"""
 
     text: str = Field(default="", description="Summary text")
 
 
-class EducationItem(StrictBaseModel):
+class EducationItem(NoneToDefaultMixin, StrictBaseModel):
     """教育经历条目"""
 
     institution: str = Field(default="", description="School / institution name")
@@ -78,7 +86,7 @@ class EducationItem(StrictBaseModel):
     )
 
 
-class WorkExperienceItem(StrictBaseModel):
+class WorkExperienceItem(NoneToDefaultMixin, StrictBaseModel):
     """工作经历条目"""
 
     company: str = Field(default="", description="Company / organization name")
@@ -88,12 +96,13 @@ class WorkExperienceItem(StrictBaseModel):
     end_date: str = Field(default="", description="End date")
     current: bool = Field(default=False, description="Is current position")
     description: str = Field(default="", description="Job description")
+    technologies: list[str] = Field(default_factory=list, description="Tech stack")
     highlights: list[str] = Field(
         default_factory=list, description="Achievements / highlights"
     )
 
 
-class ProjectItem(StrictBaseModel):
+class ProjectItem(NoneToDefaultMixin, StrictBaseModel):
     """项目经历条目"""
 
     name: str = Field(default="", description="Project name")
@@ -107,7 +116,7 @@ class ProjectItem(StrictBaseModel):
     end_date: str = Field(default="", description="End date")
 
 
-class SkillCategory(StrictBaseModel):
+class SkillCategory(NoneToDefaultMixin, StrictBaseModel):
     """技能分类"""
 
     name: str = Field(
@@ -118,7 +127,7 @@ class SkillCategory(StrictBaseModel):
     )
 
 
-class LanguageItem(StrictBaseModel):
+class LanguageItem(NoneToDefaultMixin, StrictBaseModel):
     """语言能力条目"""
 
     language: str = Field(default="", description="Language name")
@@ -126,15 +135,16 @@ class LanguageItem(StrictBaseModel):
     description: str = Field(default="", description="Additional description")
 
 
-class CertificationItem(StrictBaseModel):
+class CertificationItem(NoneToDefaultMixin, StrictBaseModel):
     """证书条目"""
 
     name: str = Field(default="", description="Certificate name")
     issuer: str = Field(default="", description="Issuing organization")
     date: str = Field(default="", description="Date obtained")
+    description: str = Field(default="", description="Description")
 
 
-class GitHubItem(StrictBaseModel):
+class GitHubItem(NoneToDefaultMixin, StrictBaseModel):
     """GitHub 仓库条目"""
 
     repo_url: str = Field(default="", description="Repository URL")
@@ -144,7 +154,7 @@ class GitHubItem(StrictBaseModel):
     description: str = Field(default="", description="Repository description")
 
 
-class CustomItem(StrictBaseModel):
+class CustomItem(NoneToDefaultMixin, StrictBaseModel):
     """自定义条目"""
 
     title: str = Field(default="", description="Entry title")

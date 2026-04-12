@@ -2,6 +2,7 @@ export interface WorkTask {
   id: string;
   taskType: string;
   status: string;
+  workspaceId?: string;
   metaInfo: {
     fileName?: string;
     src?: string;

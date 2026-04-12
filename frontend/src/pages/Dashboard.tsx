@@ -43,11 +43,11 @@ export default function Dashboard() {
     timerRef.current = setTimeout(() => setDebouncedQuery(value), 300)
   }, [])
 
-  const refreshWorkspaces = () => {
+  const refreshWorkspaces = useCallback(() => {
     fetchWorkspaces().then((data) => {
       setWorkspaces(data)
     })
-  }
+  }, [])
 
   useEffect(() => {
     fetchWorkspaces().then((data) => {
@@ -55,6 +55,12 @@ export default function Dashboard() {
       setLoading(false)
     })
   }, [])
+
+  useEffect(() => {
+    const handler = () => { refreshWorkspaces() }
+    window.addEventListener('global-sse-complete', handler)
+    return () => { window.removeEventListener('global-sse-complete', handler) }
+  }, [refreshWorkspaces])
 
   const filteredWorkspaces = useMemo(() => {
     if (!debouncedQuery.trim()) return workspaces
@@ -77,6 +83,7 @@ export default function Dashboard() {
       <WorkspaceDetail
         workspace={selectedWorkspace}
         onBack={() => setSelectedWorkspace(null)}
+        onRefreshWs={refreshWorkspaces}
       />
     )
   }
