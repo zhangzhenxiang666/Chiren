@@ -13,6 +13,7 @@ export interface PersonalInfoContent {
   ethnicity?: string;
   hometown?: string;
   maritalStatus?: string;
+  expectedPosition?: string;
   yearsOfExperience?: string;
   educationLevel?: string;
   email: string;
@@ -119,7 +120,6 @@ export interface LanguagesContent {
 export interface CustomItem {
   id: string;
   title: string;
-  subtitle?: string;
   date?: string;
   description: string;
 }

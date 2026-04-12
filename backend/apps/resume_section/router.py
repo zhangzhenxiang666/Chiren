@@ -1,4 +1,5 @@
 import json
+import logging
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -8,6 +9,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from shared.database import get_session
 from shared.models import ResumeSection
 from shared.types.resume import ResumeSectionSchema
+
+log = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/resume-section", tags=["resume-section"])
 
@@ -64,26 +67,44 @@ async def create_section(
     return section.to_pydantic()
 
 
-@router.put("/update", summary="修改区块")
+@router.put("/update", summary="修改区块，不存在时自动创建")
 async def update_section(
     data: ResumeSectionSchema,
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResumeSectionSchema:
     result = await db.execute(select(ResumeSection).where(ResumeSection.id == data.id))
     resume_section = result.scalar_one_or_none()
-    if not resume_section:
-        raise HTTPException(status_code=404, detail="没有该区块")
 
-    for key, value in data.model_dump(exclude_unset=True).items():
-        if key == "content":
-            value = json.dumps(value)
+    if resume_section is None:
+        # 不存在则创建（upsert）
+        section = ResumeSection.from_pydantic(data)
+        db.add(section)
+        try:
+            await db.commit()
+            await db.refresh(section)
+        except Exception:
+            await db.rollback()
+            raise HTTPException(status_code=500, detail="新增失败")
+        return section.to_pydantic()
+
+    updates = data.model_dump(exclude_unset=True)
+    # content 字段做 shallow merge，避免部分更新丢失未发送的字段
+    if "content" in updates and updates["content"]:
+        existing_content = json.loads(resume_section.content)
+        if isinstance(existing_content, dict):
+            merged = {**existing_content, **updates["content"]}
+            updates["content"] = json.dumps(merged, ensure_ascii=False)
+        else:
+            updates["content"] = json.dumps(updates["content"], ensure_ascii=False)
+    for key, value in updates.items():
         setattr(resume_section, key, value)
     try:
         await db.commit()
         await db.refresh(resume_section)
-    except Exception:
+    except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail="修改失败")
+        log.error("更新区块失败: %s", e, exc_info=True)
+        raise HTTPException(status_code=500, detail=f"修改失败: {str(e)}")
     return resume_section.to_pydantic()
 
 

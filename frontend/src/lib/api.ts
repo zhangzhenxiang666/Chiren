@@ -104,3 +104,28 @@ export async function fetchResumeSections(resumeId: string): Promise<ResumeSecti
   const { data } = await api.get<any[]>(`/resume-section/${resumeId}`);
   return data;
 }
+
+export async function updateResumeSection(section: any): Promise<any> {
+  const { data } = await api.put('/resume-section/update', section);
+  return data;
+}
+
+export async function createResumeSection(section: any): Promise<any> {
+  const { data } = await api.post('/resume-section/create', section);
+  return data;
+}
+
+export async function fetchResumeDetail(resumeId: string): Promise<any> {
+  const { data } = await api.get(`/resume/${resumeId}`);
+  return data;
+}
+
+export async function updateResume(data: {
+  id: string;
+  title?: string;
+  template?: string;
+  themeConfig?: Record<string, unknown>;
+}): Promise<any> {
+  const { data: res } = await api.put('/resume/update', data);
+  return res;
+}

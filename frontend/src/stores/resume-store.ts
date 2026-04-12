@@ -3,6 +3,7 @@ import type { Resume, ResumeSection, SectionContent } from '@/types/resume';
 import { AUTOSAVE_DELAY } from '@/lib/constants';
 import { generateId } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings-store';
+import { updateResumeSection, updateResume } from '@/lib/api';
 
 interface ResumeStore {
   currentResume: Resume | null;
@@ -164,23 +165,25 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
 
     set({ isSaving: true });
     try {
-      await fetch(`/api/resume/${currentResume.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          title: currentResume.title,
-          template: currentResume.template,
-          themeConfig: currentResume.themeConfig,
-          sections: sections.map((s, i) => ({
-            id: s.id,
-            type: s.type,
-            title: s.title,
-            sortOrder: i,
-            visible: s.visible,
-            content: s.content,
-          })),
-        }),
-      });
+      const savePromises: Promise<void>[] = [];
+      for (let i = 0; i < sections.length; i++) {
+        const s = sections[i];
+        const payload = {
+          id: s.id,
+          resumeId: currentResume.id,
+          type: s.type,
+          title: s.title,
+          sortOrder: i,
+          visible: s.visible,
+          content: s.content,
+        };
+        savePromises.push(
+          updateResumeSection(payload).then(() => {}).catch((err) => {
+            console.error('保存区块失败:', s.type, s.id, err);
+          }),
+        );
+      }
+      await Promise.all(savePromises);
       set({ isDirty: false });
     } catch (error) {
       console.error('Failed to save resume:', error);

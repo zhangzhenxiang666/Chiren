@@ -61,6 +61,7 @@ class WorkExperienceItem(StrictBaseModel):
     end_date: str = Field(default="", description="结束时间")
     current: bool = Field(default=False, description="是否至今")
     description: str = Field(default="", description="工作描述")
+    technologies: list[str] = Field(default_factory=list, description="技术栈")
     highlights: list[str] = Field(default_factory=list, description="工作 highlights")
 
 
@@ -115,6 +116,7 @@ class CertificationItem(StrictBaseModel):
     name: str = Field(default="", description="证书名称")
     issuer: str = Field(default="", description="颁发机构")
     date: str = Field(default="", description="获得日期")
+    description: str = Field(default="", description="描述")
 
 
 class QrCodeItem(StrictBaseModel):
@@ -155,6 +157,14 @@ class PersonalInfo(StrictBaseModel):
     gender: str = Field(default="", description="性别")
     political_status: str = Field(default="", description="政治面貌")
     education_level: str = Field(default="", description="学历")
+    ethnicity: str = Field(default="", description="民族")
+    hometown: str = Field(default="", description="籍贯")
+    marital_status: str = Field(default="", description="婚姻状况")
+    years_of_experience: str = Field(default="", description="工作年限")
+    wechat: str = Field(default="", description="微信号")
+    website: str = Field(default="", description="个人网站")
+    linkedin: str = Field(default="", description="LinkedIn")
+    avatar: str = Field(default="", description="头像")
 
 
 class Summary(StrictBaseModel):

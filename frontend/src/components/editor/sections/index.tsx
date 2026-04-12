@@ -261,12 +261,14 @@ export function QrCodes({ section, onUpdate }: SectionComponentProps) {
   const removeItem = (idx: number) => onUpdate({ items: items.filter((_, i) => i !== idx) });
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {items.map((item) => (
-        <div key={item.id} className="flex items-center gap-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <F label="标签" value={item.label} onChange={(e) => updateItem(items.indexOf(item), 'label', e.target.value)} className="flex-1" />
-          <F label="URL" value={item.url} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} className="flex-1" />
-          <button type="button" onClick={() => removeItem(items.indexOf(item))} className="shrink-0 text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button>
+        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
+          <div className="grid grid-cols-1 gap-x-4 gap-y-2">
+            <F label="标签" value={item.label} onChange={(e) => updateItem(items.indexOf(item), 'label', e.target.value)} />
+            <F label="URL" value={item.url} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} />
+          </div>
+          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
         </div>
       ))}
       <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加二维码</button>
@@ -276,18 +278,17 @@ export function QrCodes({ section, onUpdate }: SectionComponentProps) {
 
 export function CustomSection({ section, onUpdate }: SectionComponentProps) {
   const d = c(section);
-  const items: Array<{ id: string; title: string; subtitle?: string; date?: string; description: string }> = d.items || [];
+  const items: Array<{ id: string; title: string; date?: string; description: string }> = d.items || [];
   const updateItem = (idx: number, field: string, value: any) => { const n = [...items]; n[idx] = { ...n[idx], [field]: value }; onUpdate({ items: n }); };
-  const addItem = () => onUpdate({ items: [...items, { id: makeId(), title: '', subtitle: '', date: '', description: '' }] });
+  const addItem = () => onUpdate({ items: [...items, { id: makeId(), title: '', date: '', description: '' }] });
   const removeItem = (idx: number) => onUpdate({ items: items.filter((_, i) => i !== idx) });
 
   return (
     <div className="space-y-4">
       {items.map((item) => (
         <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-3 gap-x-4 gap-y-2">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
             <F label="标题" value={item.title || ''} onChange={(e) => updateItem(items.indexOf(item), 'title', e.target.value)} />
-            <F label="副标题" value={item.subtitle || ''} onChange={(e) => updateItem(items.indexOf(item), 'subtitle', e.target.value)} />
             <YearMonthPicker label="日期" value={item.date || ''} onChange={(v) => updateItem(items.indexOf(item), 'date', v)} />
           </div>
           <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />

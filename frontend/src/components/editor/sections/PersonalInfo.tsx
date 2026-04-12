@@ -102,7 +102,7 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
       </FieldWrapper>
       <FieldWrapper>
         <F label="籍贯" value={(d.hometown as string) || ''} onChange={(e) => u('hometown', e.target.value)} />
-        <S label="婚姻状况" value={(d.maritalStatus as string) || ''} options={maritalStatusOptions} onChange={(v) => u('maritalStatus', v)} />
+        <F label="期望岗位" value={(d.expectedPosition as string) || ''} onChange={(e) => u('expectedPosition', e.target.value)} />
       </FieldWrapper>
       <FieldWrapper>
         <F label="工作年限" value={(d.yearsOfExperience as string) || ''} onChange={(e) => u('yearsOfExperience', e.target.value)} />
