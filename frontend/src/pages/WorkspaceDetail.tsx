@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { Sparkles, Download, MoreVertical, Plus, ArrowLeft, FileText } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Sparkles, MoreVertical, Plus, ArrowLeft, FileText, FileEdit, Star } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Workspace, SubResume } from '../types/workspace'
 import type { Resume, ResumeSection } from '../types/resume'
@@ -11,25 +12,60 @@ import { ThemeEditor } from '../components/editor/ThemeEditor'
 import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel'
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
-import { fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, getProviderConfig } from '../lib/api'
+import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, getProviderConfig } from '../lib/api'
 import { markUnread, addNotificationTask } from '../lib/notification'
 import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
+import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover'
 
-interface WorkspaceDetailProps {
-  workspace: Workspace
-  onBack: () => void
-  onRefreshWs?: () => void
-}
-
-export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: WorkspaceDetailProps) {
+export default function WorkspaceDetail() {
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const [workspace, setWorkspace] = useState<Workspace | null>(null)
+  const [wsLoading, setWsLoading] = useState(true)
   const [sections, setSections] = useState<ResumeSection[]>([])
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
   const [subResumes, setSubResumes] = useState<SubResume[]>([])
   const [subResumesLoading, setSubResumesLoading] = useState(true)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
+  const [openMorePopover, setOpenMorePopover] = useState<string | null>(null)
+
+  const refreshWorkspaces = useCallback(async () => {
+    try {
+      const data = await fetchWorkspaces()
+      if (id) {
+        const ws = data.find((w) => w.id === id)
+        if (ws) setWorkspace(ws)
+      }
+    } catch {
+    }
+  }, [id])
+
+  useEffect(() => {
+    if (!id) {
+      toast.error('缺少工作空间 ID')
+      return
+    }
+    fetchWorkspaces()
+      .then((data) => {
+        const ws = data.find((w) => w.id === id)
+        if (ws) {
+          setWorkspace(ws)
+        } else {
+          toast.error('未找到该工作空间')
+        }
+      })
+      .catch((err) => {
+        console.error('Failed to fetch workspace:', err)
+        toast.error('加载工作空间失败')
+      })
+      .finally(() => {
+        setWsLoading(false)
+      })
+  }, [id])
 
   const refreshSubResumes = useCallback(async () => {
+    if (!workspace) return
     try {
       const data = await fetchResumeDetail(workspace.id)
       const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
@@ -51,12 +87,13 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
         }),
       )
       setSubResumes(subs)
-      onRefreshWs?.()
+      refreshWorkspaces()
     } catch {
     }
-  }, [workspace.id, onRefreshWs])
+  }, [workspace, refreshWorkspaces])
 
   useEffect(() => {
+    if (!workspace) return
     fetchResumeSections(workspace.id)
       .then((data) => {
         setSections(data.sort((a, b) => a.sortOrder - b.sortOrder))
@@ -68,9 +105,10 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
       .finally(() => {
         setLoading(false)
       })
-  }, [workspace.id])
+  }, [workspace])
 
   useEffect(() => {
+    if (!workspace) return
     fetchResumeDetail(workspace.id)
       .then(async (data) => {
         const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
@@ -105,7 +143,7 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
       .finally(() => {
         setSubResumesLoading(false)
       })
-  }, [workspace.id])
+  }, [workspace])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -117,18 +155,31 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
     return () => { window.removeEventListener('global-sse-complete', handler) }
   }, [refreshSubResumes])
 
-  const resumeData: Resume = useMemo(() => ({
-    id: workspace.id,
-    userId: '',
-    title: workspace.title,
-    template: workspace.template,
-    themeConfig: workspace.themeConfig as unknown as Resume['themeConfig'],
-    isDefault: workspace.isDefault,
-    language: workspace.language,
-    sections,
-    createdAt: new Date(workspace.createdAt),
-    updatedAt: new Date(workspace.updatedAt),
-  }), [workspace.id, workspace.title, workspace.template, workspace.themeConfig, workspace.isDefault, workspace.language, workspace.createdAt, workspace.updatedAt, sections])
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { taskType: string }
+      if (detail?.taskType !== 'jd_score') return
+      refreshSubResumes()
+    }
+    window.addEventListener('global-sse-complete', handler)
+    return () => { window.removeEventListener('global-sse-complete', handler) }
+  }, [refreshSubResumes])
+
+  const resumeData: Resume | null = useMemo(() => {
+    if (!workspace) return null
+    return {
+      id: workspace.id,
+      userId: '',
+      title: workspace.title,
+      template: workspace.template,
+      themeConfig: workspace.themeConfig as unknown as Resume['themeConfig'],
+      isDefault: workspace.isDefault,
+      language: workspace.language,
+      sections,
+      createdAt: new Date(workspace.createdAt),
+      updatedAt: new Date(workspace.updatedAt),
+    }
+  }, [workspace, sections])
 
   const { currentResume, sections: storeSections, updateSection, addSection, removeSection, reorderSections } = useResumeStore()
   const { showThemeEditor } = useEditorStore()
@@ -158,6 +209,14 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
         setSections(data.sort((a, b) => a.sortOrder - b.sortOrder))
       })
       .catch(console.error)
+  }
+
+  if (wsLoading || !workspace) {
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        加载中...
+      </div>
+    )
   }
 
   if (isEditing) {
@@ -205,7 +264,7 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
   return (
     <div className="flex flex-col h-full">
       <nav className="flex items-center gap-2 text-sm mb-4 shrink-0" aria-label="breadcrumb">
-        <button type="button" onClick={onBack} className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+        <button type="button" onClick={() => navigate('/')} className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           工作空间
         </button>
@@ -231,7 +290,7 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        <div className="flex gap-6 h-full">
+        <div className="flex gap-3 h-full">
           <div className="flex-1 flex flex-col min-w-0">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-pink-500" />
@@ -240,25 +299,25 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
               </span>
             </div>
 
-              <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
-                <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
-                  <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => setIsEditing(true)} />
-                </div>
+            <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
+              <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
+                <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => setIsEditing(true)} />
               </div>
+            </div>
           </div>
 
-             <div className="w-[420px] shrink-0 flex flex-col" style={{ height: '630px' }}>
-             <div className="flex items-center justify-between mb-4">
-               <div className="flex items-center gap-2">
-                 <span className="w-2 h-2 rounded-full bg-blue-500" />
-                 <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
-                   已生成的子简历 (Tailored Versions)
-                 </span>
-               </div>
-               <span className="text-gray-500 text-xs">共 {subResumes.length} 份</span>
-             </div>
+          <div className="w-[420px] shrink-0 flex flex-col" style={{ height: '630px' }}>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
+                  已生成的子简历 (Tailored Versions)
+                </span>
+              </div>
+              <span className="text-gray-500 text-xs">共 {subResumes.length} 份</span>
+            </div>
 
-             <div className="space-y-3 overflow-y-auto pr-1" style={{ height: 'calc(100% - 48px)' }}>
+            <div className="space-y-3 overflow-y-auto pr-1" style={{ height: 'calc(100% - 48px)' }}>
               {subResumesLoading ? (
                 <div className="flex items-center justify-center h-full text-gray-500 text-sm">
                   加载中...
@@ -321,13 +380,14 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
                         {resume.matchScore !== undefined ? (
                           <>
                             <p
-                              className={`text-xl font-bold ${
-                                resume.matchScore >= 95
-                                  ? 'text-pink-400'
-                                  : resume.matchScore >= 85
-                                    ? 'text-indigo-400'
-                                    : 'text-yellow-400'
-                              }`}
+                              className={`text-xl font-bold ${resume.matchScore >= 90
+                                  ? 'text-green-400'
+                                  : resume.matchScore >= 75
+                                    ? 'text-yellow-400'
+                                    : resume.matchScore >= 60
+                                      ? 'text-orange-400'
+                                      : 'text-red-400'
+                                }`}
                             >
                               {resume.matchScore}%
                             </p>
@@ -340,26 +400,85 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
                           </>
                         )}
                       </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toast.info('即将下载')
-                        }}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
-                      >
-                        <Download className="w-4 h-4" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          toast.info('更多操作')
-                        }}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
+                      <span className="group relative inline-flex">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            toast.info('即将编辑')
+                          }}
+                          className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                        >
+                          <FileEdit className="w-4 h-4" />
+                        </button>
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-gray-200 bg-[#1c1c1e] border border-[#2a2a2e] shadow-md group-hover:block">
+                          编辑
+                        </span>
+                      </span>
+                        <span className="group relative inline-flex">
+                          <Popover open={openMorePopover === resume.id} onOpenChange={(isOpen) => setOpenMorePopover(isOpen ? resume.id : null)}>
+                            <PopoverTrigger asChild>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                              }}
+                              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                            >
+                              <MoreVertical className="w-4 h-4" />
+                            </button>
+                          </PopoverTrigger>
+                          <PopoverContent
+                            side="bottom"
+                            align="end"
+                            className="w-36 p-1 bg-[#141416] border border-[#1e1e20] shadow-md"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex flex-col gap-0.5">
+                              <button
+                                type="button"
+                                onClick={async (e) => {
+                                  e.stopPropagation()
+                                  try {
+                                    const config = await getProviderConfig()
+                                    const activeConfig = config.providers[config.active]
+                                    if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+                                      toast.error('请先在设置中配置 AI 提供商')
+                                      return
+                                    }
+                                    const { taskId } = await createMatchTask({
+                                      resume_id: resume.id,
+                                      type: config.active,
+                                      base_url: activeConfig.baseUrl,
+                                      api_key: activeConfig.apiKey,
+                                      model: activeConfig.model,
+                                    })
+                                    const title = resume.title || resume.jobTitle || '未命名'
+                                    markUnread()
+                                    addNotificationTask({ id: taskId, taskType: 'jd_score', status: 'running', workspaceId: workspace.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+                                    setOpenMorePopover(null)
+                                    toast.success(
+                                      <div className="flex flex-col gap-1">
+                                        <span className="font-medium text-sm">JD 匹配评分任务已启动</span>
+                                        <span className="text-xs text-gray-400 truncate">「{title}」正在评分中</span>
+                                      </div>,
+                                    )
+                                  } catch (err: any) {
+                                    toast.error(err.message || '评分请求失败')
+                                  }
+                                }}
+                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-gray-400 hover:text-white hover:bg-[#1e1e20] transition-colors"
+                              >
+                                <Star className="w-3.5 h-3.5 text-yellow-400" />
+                                <span>评分</span>
+                              </button>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-gray-200 bg-[#1c1c1e] border border-[#2a2a2e] shadow-md group-hover:block">
+                          更多操作
+                        </span>
+                      </span>
                     </div>
                   </div>
                 ))
@@ -441,7 +560,7 @@ export default function WorkspaceDetail({ workspace, onBack, onRefreshWs }: Work
               }),
             )
             setSubResumes(subs)
-            onRefreshWs?.()
+            refreshWorkspaces()
           } catch {
             toast.error('创建子简历失败')
           }

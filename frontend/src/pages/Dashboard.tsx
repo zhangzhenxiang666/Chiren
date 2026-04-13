@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Plus, Search, X } from 'lucide-react'
 import WorkspaceCard from '../components/workspace/WorkspaceCard'
 import CreateWorkspaceModal from '../components/workspace/CreateWorkspaceModal'
-import WorkspaceDetail from './WorkspaceDetail'
 import { fetchWorkspaces, createWorkspace } from '../lib/api'
 import type { Workspace } from '../types/workspace'
 
@@ -28,12 +28,12 @@ function formatRelativeTime(dateString: string): string {
 }
 
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [workspaces, setWorkspaces] = useState<Workspace[]>([])
   const [loading, setLoading] = useState(true)
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [debouncedQuery, setDebouncedQuery] = useState('')
-  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null)
 
   const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -76,16 +76,6 @@ export default function Dashboard() {
 
   if (loading) {
     return <div className="text-gray-400">加载中...</div>
-  }
-
-  if (selectedWorkspace) {
-    return (
-      <WorkspaceDetail
-        workspace={selectedWorkspace}
-        onBack={() => setSelectedWorkspace(null)}
-        onRefreshWs={refreshWorkspaces}
-      />
-    )
   }
 
   return (
@@ -136,7 +126,7 @@ export default function Dashboard() {
               lastModified={formatRelativeTime(ws.updatedAt)}
               templateName={ws.template}
               isActive={ws.isDefault}
-              onClick={() => setSelectedWorkspace(ws)}
+              onClick={() => navigate(`/workspace/${ws.id}`)}
             />
           ))}
         </div>

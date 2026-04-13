@@ -85,6 +85,17 @@ registerSSEHandler('parse', {
   onError: () => '工作空间解析失败',
 })
 
+registerSSEHandler('jd_score', {
+  onSuccess: (task) => {
+    toast.success(
+      <div className="flex flex-col gap-1">
+        <span className="font-medium text-sm">JD 匹配评分「{task.metaInfo?.title || '未命名'}」完成</span>
+      </div>,
+    )
+  },
+  onError: () => 'JD 匹配评分失败',
+})
+
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false)
 

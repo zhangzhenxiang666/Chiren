@@ -238,3 +238,22 @@ export async function retryTask(params: RetryTaskParams): Promise<TaskIdResponse
   const { data } = await api.post<TaskIdResponse>(`/parser/retry/${params.taskId}`, formData);
   return data;
 }
+
+export interface CreateMatchTaskParams {
+  resume_id: string;
+  type: ProviderType;
+  base_url: string;
+  api_key: string;
+  model: string;
+}
+
+export async function createMatchTask(params: CreateMatchTaskParams): Promise<TaskIdResponse> {
+  const { data } = await api.post<TaskIdResponse>('/jd-analysis/match', {
+    resume_id: params.resume_id,
+    type: params.type,
+    base_url: params.base_url,
+    api_key: params.api_key,
+    model: params.model,
+  });
+  return data;
+}
