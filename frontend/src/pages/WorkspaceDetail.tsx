@@ -10,6 +10,7 @@ import { EditorSidebar } from '../components/editor/EditorSidebar'
 import { EditorCanvas } from '../components/editor/EditorCanvas'
 import { ThemeEditor } from '../components/editor/ThemeEditor'
 import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel'
+import { CoverLetterDialog } from '../components/editor/CoverLetterDialog'
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
 import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, getProviderConfig } from '../lib/api'
@@ -29,6 +30,7 @@ export default function WorkspaceDetail() {
   const [subResumesLoading, setSubResumesLoading] = useState(true)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [openMorePopover, setOpenMorePopover] = useState<string | null>(null)
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false)
 
   const refreshWorkspaces = useCallback(async () => {
     try {
@@ -223,7 +225,7 @@ export default function WorkspaceDetail() {
     if (!editorReadyRef.current || !currentResume) {
       return (
         <div className="flex flex-col h-full">
-          <EditorToolbar title={workspace.title} onBack={handleExitEdit} />
+          <EditorToolbar title={workspace.title} onBack={handleExitEdit} onCoverLetterOpen={() => setCoverLetterOpen(true)} />
           <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
             加载编辑器...
           </div>
@@ -233,7 +235,7 @@ export default function WorkspaceDetail() {
 
     return (
       <div className="flex flex-col h-screen -m-6">
-        <EditorToolbar title={currentResume.title} onBack={handleExitEdit} />
+        <EditorToolbar title={currentResume.title} onBack={handleExitEdit} onCoverLetterOpen={() => setCoverLetterOpen(true)} />
         <div className="flex flex-1 overflow-hidden">
           <EditorSidebar
             sections={storeSections}
@@ -249,6 +251,12 @@ export default function WorkspaceDetail() {
           {showThemeEditor && <ThemeEditor />}
           <EditorPreviewPanel />
         </div>
+        <CoverLetterDialog
+          resumeId={currentResume.id}
+          hasJobDescription={!!currentResume.metaInfo?.job_description}
+          open={coverLetterOpen}
+          onOpenChange={setCoverLetterOpen}
+        />
       </div>
     )
   }

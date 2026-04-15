@@ -17,13 +17,14 @@ import {
 interface EditorToolbarProps {
   title?: string
   onBack?: () => void
+  onCoverLetterOpen?: () => void
 }
 
 /**
  * Editor toolbar with action buttons.
  * Migrated from JadeAI editor. Button handlers are TODO placeholders.
  */
-export default function EditorToolbar({ title = '未命名简历', onBack }: EditorToolbarProps) {
+export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen }: EditorToolbarProps) {
   // TODO: Save status display and save handler (autoSave / manual save)
   const saveStatus: 'saved' | 'saving' | 'dirty' = 'saved'
 
@@ -135,6 +136,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack }: Edi
         <button
           type="button"
           title="求职信"
+          onClick={onCoverLetterOpen}
           className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
         >
           <FileText className="h-4 w-4" />
