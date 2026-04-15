@@ -35,7 +35,7 @@ export function CreativeTemplate({ resume }: { resume: Resume }) {
 
         <div className="relative flex items-center gap-6">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={96} className="shrink-0" wrapperClassName="shrink-0 p-0.5" wrapperStyle={{ border: '4px solid rgba(255,255,255,0.3)' }} />
+            <AvatarImage src={pi.avatar} size={96} className="shrink-0" wrapperClassName="shrink-0 p-0.5" wrapperStyle={{ border: '4px solid rgba(255,255,255,0.3)' }} />
           )}
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>

@@ -20,7 +20,7 @@ export function NordicTemplate({ resume }: { resume: Resume }) {
           <AvatarImage
             src={pi.avatar}
             size={64}
-            avatarStyle={resume.themeConfig?.avatarStyle}
+
             className="mx-auto mb-3"
             style={{ border: `2px solid ${SLATE_400}` }}
           />

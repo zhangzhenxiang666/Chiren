@@ -37,7 +37,7 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
 
         <div className="relative flex items-center gap-5">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} wrapperClassName="shrink-0 p-1" wrapperStyle={{ border: `3px dashed ${HIGHLIGHT}` }} />
+            <AvatarImage src={pi.avatar} size={80} wrapperClassName="shrink-0 p-1" wrapperStyle={{ border: `3px dashed ${HIGHLIGHT}` }} />
           )}
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>

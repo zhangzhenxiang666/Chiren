@@ -26,7 +26,7 @@ export function CleanTemplate({ resume }: { resume: Resume }) {
       <div className="mb-6">
         <div className="flex items-center gap-4">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={64} className="shrink-0" style={{ border: `2px solid ${BLUE}` }} />
+            <AvatarImage src={pi.avatar} size={64} className="shrink-0" style={{ border: `2px solid ${BLUE}` }} />
           )}
           <div>
             <h1 className="text-2xl font-bold" style={{ color: BLUE }}>{pi.fullName || 'Your Name'}</h1>

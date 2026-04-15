@@ -52,7 +52,7 @@ export function CoderTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={80}
               wrapperClassName="mx-auto mb-3 w-fit overflow-hidden"
             />

@@ -38,7 +38,7 @@ export function BerlinTemplate({ resume }: { resume: Resume }) {
 
         <div className="relative flex items-center gap-6">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} size={80} avatarStyle={resume.themeConfig?.avatarStyle} wrapperClassName="shrink-0 border-4 p-0.5" wrapperStyle={{ borderColor: YELLOW }} />
+            <AvatarImage src={pi.avatar} size={80} wrapperClassName="shrink-0 border-4 p-0.5" wrapperStyle={{ borderColor: YELLOW }} />
           )}
           <div>
             <h1 className="text-3xl font-extrabold uppercase tracking-tight">{pi.fullName || 'Your Name'}</h1>

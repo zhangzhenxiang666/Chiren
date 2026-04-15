@@ -36,7 +36,7 @@ export function EuroTemplate({ resume }: { resume: Resume }) {
           </div>
         </div>
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={88} className="shrink-0 border-2" style={{ borderColor: BLUE }} />
+          <AvatarImage src={pi.avatar} size={88} className="shrink-0 border-2" style={{ borderColor: BLUE }} />
         )}
       </div>
 

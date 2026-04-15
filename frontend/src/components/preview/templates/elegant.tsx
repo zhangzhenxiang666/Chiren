@@ -15,7 +15,7 @@ export function ElegantTemplate({ resume }: { resume: Resume }) {
       {/* Header */}
       <div className="mb-8 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} className="mx-auto mb-3" style={{ border: `2px solid ${GOLD}` }} />
+          <AvatarImage src={pi.avatar} size={80} className="mx-auto mb-3" style={{ border: `2px solid ${GOLD}` }} />
         )}
         <h1 className="text-3xl font-bold tracking-wide" style={{ color: '#2c2c2c' }}>{pi.fullName || 'Your Name'}</h1>
         {pi.jobTitle && <p className="mt-1 text-base tracking-widest text-zinc-500 uppercase">{pi.jobTitle}</p>}

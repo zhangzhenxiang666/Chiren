@@ -1,6 +1,5 @@
 interface AvatarImageProps {
   src: string;
-  avatarStyle?: 'circle' | 'oneInch';
   size: number;
   className?: string;
   style?: React.CSSProperties;
@@ -10,17 +9,15 @@ interface AvatarImageProps {
 
 export function AvatarImage({
   src,
-  avatarStyle = 'oneInch',
   size,
   className = '',
   style,
   wrapperClassName,
   wrapperStyle,
 }: AvatarImageProps) {
-  const isCircle = avatarStyle !== 'oneInch';
   const width = size;
-  const height = isCircle ? size : Math.round(size * 1.4);
-  const borderRadius = isCircle ? '9999px' : '4px';
+  const height = Math.round(size * 1.4);
+  const borderRadius = '4px';
 
   const imgEl = (
     <img

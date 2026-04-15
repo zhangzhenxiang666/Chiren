@@ -20,7 +20,7 @@ export function CorporateTemplate({ resume }: { resume: Resume }) {
             <AvatarImage
               src={pi.avatar}
               size={80}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               className="shrink-0"
               style={{ border: `2px solid ${BLUE}` }}
             />

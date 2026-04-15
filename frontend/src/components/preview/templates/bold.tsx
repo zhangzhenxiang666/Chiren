@@ -26,7 +26,7 @@ export function BoldTemplate({ resume }: { resume: Resume }) {
       <div className="bg-black px-8 py-8 text-white">
         <div className="flex items-center gap-5">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} className="shrink-0" style={{ border: '3px solid white' }} />
+            <AvatarImage src={pi.avatar} size={80} className="shrink-0" style={{ border: '3px solid white' }} />
           )}
           <div>
             <h1 className="text-4xl font-black tracking-tight">{pi.fullName || 'Your Name'}</h1>

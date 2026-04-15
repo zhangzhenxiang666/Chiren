@@ -43,7 +43,7 @@ export function SidebarTemplate({ resume }: { resume: Resume }) {
             <AvatarImage
               src={pi.avatar}
               size={80}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               wrapperClassName="mx-auto mb-3 w-fit overflow-hidden"
             />
           )}

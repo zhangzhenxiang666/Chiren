@@ -36,7 +36,7 @@ export function WatercolorTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={80}
               className="border-2 border-white"
               wrapperClassName="shrink-0 p-1"

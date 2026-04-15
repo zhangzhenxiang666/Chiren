@@ -36,7 +36,7 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
 
         <div className="flex items-center gap-5">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} wrapperClassName="shrink-0 border-3 border-white/40 p-0.5" />
+            <AvatarImage src={pi.avatar} size={80} wrapperClassName="shrink-0 border-3 border-white/40 p-0.5" />
           )}
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">{pi.fullName || 'Your Name'}</h1>

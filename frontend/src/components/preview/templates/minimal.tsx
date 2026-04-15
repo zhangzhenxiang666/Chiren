@@ -14,7 +14,7 @@ export function MinimalTemplate({ resume }: { resume: Resume }) {
       <div className="mb-8">
         <div className="flex items-center gap-3">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={48} className="shrink-0" />
+            <AvatarImage src={pi.avatar} size={48} className="shrink-0" />
           )}
           <div>
             <h1 className="text-xl font-medium text-zinc-900">{pi.fullName || 'Your Name'}</h1>

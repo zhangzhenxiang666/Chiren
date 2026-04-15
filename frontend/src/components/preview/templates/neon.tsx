@@ -36,7 +36,7 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={80}
               wrapperClassName="shrink-0 p-0.5"
               wrapperStyle={{ border: `2px solid ${CYAN}`, boxShadow: `0 0 12px ${CYAN}60` }}

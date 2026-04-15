@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Camera, X, Circle, RectangleVertical } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import type { SectionComponentProps } from './helpers';
 import { F, FieldWrapper, S } from './helpers';
 
@@ -13,11 +13,6 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
   const maritalStatusOptions = ['未婚', '已婚', '离异'];
   const educationLevelOptions = ['初中', '高中', '中专', '大专', '本科', '硕士', '博士', '博士后'];
   const ethnicityOptions = ['汉族', '蒙古族', '回族', '藏族', '维吾尔族', '苗族', '彝族', '壮族', '布依族', '朝鲜族', '满族', '侗族', '瑶族', '白族', '土家族', '哈尼族', '哈萨克族', '傣族', '黎族', '傈僳族', '佤族', '畲族', '高山族', '拉祜族', '水族', '东乡族', '纳西族', '景颇族', '柯尔克孜族', '土族', '达斡尔族', '仫佬族', '羌族', '布朗族', '撒拉族', '毛南族', '仡佬族', '锡伯族', '阿昌族', '普米族', '塔吉克族', '怒族', '乌孜别克族', '俄罗斯族', '鄂温克族', '德昂族', '保安族', '裕固族', '京族', '塔塔尔族', '独龙族', '鄂伦春族', '赫哲族', '门巴族', '珞巴族', '基诺族'];
-
-  const avatarStyle = 'circle';
-  const updateAvatarStyle = (_style: 'circle' | 'oneInch') => {
-    // TODO: 接入主题配置后实现
-  };
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -37,7 +32,7 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-zinc-500 dark:hover:bg-zinc-700"
+          className="relative flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-zinc-500 dark:hover:bg-zinc-700"
         >
           {(d.avatar as string) ? (
             <img src={d.avatar as string} alt="Avatar" className="h-full w-full object-cover" />
@@ -46,28 +41,6 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
           )}
         </button>
         <div className="flex flex-col gap-2">
-          <div className="inline-flex rounded-lg bg-zinc-100 p-0.5 dark:bg-zinc-800">
-            {(
-              [
-                { value: 'circle' as const, icon: Circle, label: '圆形' },
-                { value: 'oneInch' as const, icon: RectangleVertical, label: '1寸照' },
-              ] as const
-            ).map(({ value, icon: Icon, label }) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => updateAvatarStyle(value)}
-                className={`inline-flex cursor-pointer items-center gap-1.5 rounded-md px-2.5 py-1 text-xs transition-all duration-200 ${
-                  avatarStyle === value
-                    ? 'bg-white font-medium text-zinc-900 shadow-sm dark:bg-zinc-700 dark:text-zinc-100'
-                    : 'text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200'
-                }`}
-              >
-                <Icon className="h-3 w-3" />
-                {label}
-              </button>
-            ))}
-          </div>
           {(d.avatar as string) && (
             <button
               type="button"
@@ -101,12 +74,12 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
         <S label="民族" value={(d.ethnicity as string) || ''} options={ethnicityOptions} onChange={(v) => u('ethnicity', v)} />
       </FieldWrapper>
       <FieldWrapper>
-        <F label="籍贯" value={(d.hometown as string) || ''} onChange={(e) => u('hometown', e.target.value)} />
-        <F label="期望岗位" value={(d.expectedPosition as string) || ''} onChange={(e) => u('expectedPosition', e.target.value)} />
-      </FieldWrapper>
-      <FieldWrapper>
         <F label="工作年限" value={(d.yearsOfExperience as string) || ''} onChange={(e) => u('yearsOfExperience', e.target.value)} />
         <S label="最高学历" value={(d.educationLevel as string) || ''} options={educationLevelOptions} onChange={(v) => u('educationLevel', v)} />
+      </FieldWrapper>
+      <FieldWrapper>
+        <F label="籍贯" value={(d.hometown as string) || ''} onChange={(e) => u('hometown', e.target.value)} />
+        <F label="所在地" value={(d.location as string) || ''} onChange={(e) => u('location', e.target.value)} />
       </FieldWrapper>
       <FieldWrapper>
         <F label="邮箱" value={(d.email as string) || ''} onChange={(e) => u('email', e.target.value)} />
@@ -114,7 +87,7 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
       </FieldWrapper>
       <FieldWrapper>
         <F label="微信" value={(d.wechat as string) || ''} onChange={(e) => u('wechat', e.target.value)} />
-        <F label="所在地" value={(d.location as string) || ''} onChange={(e) => u('location', e.target.value)} />
+        <S label="婚姻状况" value={(d.maritalStatus as string) || ''} options={maritalStatusOptions} onChange={(v) => u('maritalStatus', v)} />
       </FieldWrapper>
       <FieldWrapper>
         <F label="期望薪资" value={(d.salary as string) || ''} onChange={(e) => u('salary', e.target.value)} />

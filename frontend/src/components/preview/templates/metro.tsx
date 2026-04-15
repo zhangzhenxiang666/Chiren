@@ -32,7 +32,7 @@ export function MetroTemplate({ resume }: { resume: Resume }) {
         {pi.avatar && (
           <AvatarImage
             src={pi.avatar}
-            avatarStyle={resume.themeConfig?.avatarStyle}
+
             size={64}
             className="shrink-0"
             style={{ border: `3px solid ${AMBER}` }}

@@ -23,7 +23,7 @@ export function ScientistTemplate({ resume }: { resume: Resume }) {
       {/* Header - scientific paper style */}
       <div className="mb-6 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={56} className="mx-auto mb-3" style={{ border: `2px solid ${ACCENT}` }} />
+          <AvatarImage src={pi.avatar} size={56} className="mx-auto mb-3" style={{ border: `2px solid ${ACCENT}` }} />
         )}
         <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>
           {pi.fullName || 'Your Name'}

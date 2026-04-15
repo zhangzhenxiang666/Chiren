@@ -28,7 +28,7 @@ export function ArchitectTemplate({ resume }: { resume: Resume }) {
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
             {pi.avatar && (
-              <AvatarImage src={pi.avatar} size={64} avatarStyle={resume.themeConfig?.avatarStyle} className="shrink-0" style={{ border: `2px solid ${PRIMARY}` }} />
+              <AvatarImage src={pi.avatar} size={64} className="shrink-0" style={{ border: `2px solid ${PRIMARY}` }} />
             )}
             <div>
               <h1

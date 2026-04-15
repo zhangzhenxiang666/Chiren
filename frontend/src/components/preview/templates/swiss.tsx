@@ -29,7 +29,7 @@ export function SwissTemplate({ resume }: { resume: Resume }) {
       <div className="mb-8">
         <div className="flex items-start gap-6">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} size={64} avatarStyle={resume.themeConfig?.avatarStyle} className="shrink-0" />
+            <AvatarImage src={pi.avatar} size={64} className="shrink-0" />
           )}
           <div className="flex-1">
             <h1 className="text-3xl font-bold uppercase tracking-tight" style={{ color: TEXT }}>{pi.fullName || 'Your Name'}</h1>

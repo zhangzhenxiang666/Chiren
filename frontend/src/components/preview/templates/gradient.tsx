@@ -38,7 +38,7 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={80}
               className="border-2 border-white/20"
               wrapperClassName="shrink-0 p-[3px] bg-white/20"
