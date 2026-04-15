@@ -476,6 +476,12 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         index=True,
         comment="职位描述分析所属简历 ID",
     )
+    job_description: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+        comment="职位描述",
+    )
     overall_score: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
@@ -529,6 +535,7 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         return JobDescriptionAnalysisSchema(
             id=self.id,
             resume_id=self.resume_id,
+            job_description=self.job_description,
             overall_score=self.overall_score,
             ats_score=self.ats_score,
             summary=self.summary,
@@ -545,6 +552,7 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         suggestions = [suggestion.model_dump() for suggestion in schema.suggestions]
         return cls(
             resume_id=schema.resume_id,
+            job_description=schema.job_description,
             overall_score=schema.overall_score,
             ats_score=schema.ats_score,
             summary=schema.summary,

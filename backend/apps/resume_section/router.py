@@ -2,7 +2,7 @@ import json
 import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Path, Query
 from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,18 +17,13 @@ router = APIRouter(prefix="/resume-section", tags=["resume-section"])
 
 @router.get(
     "/one",
-    summary="获取指定简历的指定区块信息",
+    summary="根据区块Id获取区块",
 )
 async def get_by_id_and_type(
-    id: str,
-    type: str,
+    id: Annotated[str, Query(description="区块ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> ResumeSectionSchema:
-    result = await db.execute(
-        select(ResumeSection).where(
-            ResumeSection.resume_id == id, ResumeSection.type == type
-        )
-    )
+    result = await db.execute(select(ResumeSection).where(ResumeSection.id == id))
     resume_section = result.scalar_one_or_none()
     if not resume_section:
         raise HTTPException(status_code=404, detail="数据不存在")
@@ -40,7 +35,7 @@ async def get_by_id_and_type(
     summary="根据简历id获取区块列表",
 )
 async def get_by_resumeid(
-    id: str,
+    id: Annotated[str, Path(description="简历ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[ResumeSectionSchema]:
     result = await db.execute(

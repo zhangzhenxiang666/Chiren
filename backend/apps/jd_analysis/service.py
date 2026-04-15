@@ -51,6 +51,7 @@ async def run_match_task(
 
         job_description_analysis = JobDescriptionAnalysis(
             resume_id=resume_id,
+            job_description=job_description,
             summary=match_result.summary,
             overall_score=match_result.overall_score,
             ats_score=match_result.ats_score,

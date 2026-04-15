@@ -1,8 +1,21 @@
+export interface JdAnalysis {
+  id: number;
+  resumeId: string;
+  overallScore: number;
+  atsScore: number;
+  summary: string;
+  keywordMatches: string[];
+  missingKeywords: string[];
+  suggestions: any[];
+  createdAt: string;
+}
+
 export interface SubResume {
   id: string;
   title: string;
   jobTitle?: string;
   matchScore?: number;
+  latestAnalysis?: JdAnalysis;
   createdAt: string;
   updatedAt: string;
 }

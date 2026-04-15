@@ -14,6 +14,7 @@ class SuggestionItem(StrictBaseModel):
 class JobDescriptionAnalysisSchema(StrictBaseModel):
     id: int = Field(description="职位描述分析唯一标识")
     resume_id: str = Field(description="职位描述分析所属简历 ID")
+    job_description: str = Field(description="职位描述")
     overall_score: int = Field(description="职位描述分析总分(0-100)")
     ats_score: int = Field(description="职位描述分析ATS得分(0-100)")
     summary: str = Field(description="职位描述分析总结")

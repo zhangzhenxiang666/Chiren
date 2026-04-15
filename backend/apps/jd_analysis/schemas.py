@@ -21,8 +21,8 @@ class SuggestionItem(StrictBaseModel):
 
 class MatchResult(StrictBaseModel):
     summary: str = Field(description="Job description analysis summary")
-    overall_score: int = Field(description="Overall match score (0-100)")
-    ats_score: int = Field(description="ATS compatibility score (0-100)")
+    overall_score: int = Field(description="Overall match score (0-100)", ge=0, le=100)
+    ats_score: int = Field(description="ATS compatibility score (0-100)", ge=0, le=100)
     keyword_matches: list[str] = Field(
         default_factory=list, description="Matched keywords from job description"
     )

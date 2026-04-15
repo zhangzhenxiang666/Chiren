@@ -105,6 +105,11 @@ export async function fetchResumeSections(resumeId: string): Promise<ResumeSecti
   return data;
 }
 
+export async function fetchResumeSectionById(sectionId: string): Promise<any> {
+  const { data } = await api.get<any>(`/resume-section/one?id=${sectionId}`);
+  return data;
+}
+
 export async function updateResumeSection(section: any): Promise<any> {
   const { data } = await api.put('/resume-section/update', section);
   return data;
@@ -133,6 +138,7 @@ export async function updateResume(data: {
 export interface JdAnalysis {
   id: number;
   resumeId: string;
+  jobDescription: string;
   overallScore: number;
   atsScore: number;
   summary: string;

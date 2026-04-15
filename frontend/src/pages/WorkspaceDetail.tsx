@@ -12,9 +12,11 @@ import { ThemeEditor } from '../components/editor/ThemeEditor'
 import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel'
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
+import type { JdAnalysis } from '../lib/api'
 import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, getProviderConfig } from '../lib/api'
 import { markUnread, addNotificationTask } from '../lib/notification'
 import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
+import ScoreDetailModal from '../components/workspace/ScoreDetailModal'
 import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover'
 
 export default function WorkspaceDetail() {
@@ -29,6 +31,9 @@ export default function WorkspaceDetail() {
   const [subResumesLoading, setSubResumesLoading] = useState(true)
   const [showGenerateModal, setShowGenerateModal] = useState(false)
   const [openMorePopover, setOpenMorePopover] = useState<string | null>(null)
+  const [showScoreDetail, setShowScoreDetail] = useState(false)
+  const [currentScoreResumeId, setCurrentScoreResumeId] = useState<string | null>(null)
+  const [resumeAnalyses, setResumeAnalyses] = useState<Map<string, JdAnalysis[]>>(new Map())
 
   const refreshWorkspaces = useCallback(async () => {
     try {
@@ -81,6 +86,12 @@ export default function WorkspaceDetail() {
             const analyses = await fetchJdAnalysisList(sub.id)
             if (analyses.length > 0) {
               sub.matchScore = analyses[0].overallScore
+              sub.latestAnalysis = analyses[0]
+              setResumeAnalyses((prev) => {
+                const newMap = new Map(prev)
+                newMap.set(sub.id, analyses)
+                return newMap
+              })
             }
           } catch {
           }
@@ -125,11 +136,15 @@ export default function WorkspaceDetail() {
             try {
               const analyses = await fetchJdAnalysisList(sub.id)
               if (analyses.length > 0) {
-                // 取最新一条的 overallScore
                 sub.matchScore = analyses[0].overallScore
+                sub.latestAnalysis = analyses[0]
+                setResumeAnalyses((prev) => {
+                  const newMap = new Map(prev)
+                  newMap.set(sub.id, analyses)
+                  return newMap
+                })
               }
             } catch (err) {
-              // 评分数据不存在或获取失败，保持 undefined
               console.warn(`Failed to fetch score for resume ${sub.id}:`, err)
             }
           }),
@@ -193,6 +208,7 @@ export default function WorkspaceDetail() {
       return
     }
     if (!sections.length) return
+    if (!resumeData) return
 
     useResumeStore.getState().setResume(resumeData)
     editorReadyRef.current = true
@@ -204,6 +220,7 @@ export default function WorkspaceDetail() {
     useEditorStore.getState().reset()
     setIsEditing(false)
     // Refresh workspace data
+    if (!workspace) return
     fetchResumeSections(workspace.id)
       .then((data) => {
         setSections(data.sort((a, b) => a.sortOrder - b.sortOrder))
@@ -301,7 +318,7 @@ export default function WorkspaceDetail() {
 
             <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
               <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
-                <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => setIsEditing(true)} />
+                {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => setIsEditing(true)} />}
               </div>
             </div>
           </div>
@@ -376,30 +393,36 @@ export default function WorkspaceDetail() {
                     </div>
 
                     <div className="flex items-center gap-3 shrink-0">
-                      <div className="text-right">
-                        {resume.matchScore !== undefined ? (
-                          <>
-                            <p
-                              className={`text-xl font-bold ${resume.matchScore >= 90
-                                  ? 'text-green-400'
-                                  : resume.matchScore >= 75
-                                    ? 'text-yellow-400'
-                                    : resume.matchScore >= 60
-                                      ? 'text-orange-400'
-                                      : 'text-red-400'
-                                }`}
-                            >
-                              {resume.matchScore}%
-                            </p>
-                            <p className="text-gray-500 text-xs">AI 匹配得分</p>
-                          </>
-                        ) : (
-                          <>
-                            <p className="text-xl font-bold text-gray-500">--</p>
-                            <p className="text-gray-500 text-xs">AI 匹配得分</p>
-                          </>
-                        )}
-                      </div>
+                      {resume.matchScore !== undefined ? (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setCurrentScoreResumeId(resume.id)
+                            setShowScoreDetail(true)
+                          }}
+                          className="text-right cursor-pointer group/score rounded-lg px-2 py-1 -m-1 hover:bg-[#2a2a2e] transition-colors"
+                        >
+                          <p
+                            className={`text-xl font-bold ${resume.matchScore >= 90
+                                ? 'text-green-400'
+                                : resume.matchScore >= 75
+                                  ? 'text-yellow-400'
+                                  : resume.matchScore >= 60
+                                    ? 'text-orange-400'
+                                    : 'text-red-400'
+                              } group-hover/score:opacity-80 transition-opacity`}
+                          >
+                            {resume.matchScore}%
+                          </p>
+                          <p className="text-gray-500 text-xs">点击查看详情</p>
+                        </button>
+                      ) : (
+                        <div className="text-right">
+                          <p className="text-xl font-bold text-gray-500">--</p>
+                          <p className="text-gray-500 text-xs">AI 匹配得分</p>
+                        </div>
+                      )}
                       <span className="group relative inline-flex">
                         <button
                           type="button"
@@ -554,6 +577,12 @@ export default function WorkspaceDetail() {
                   const analyses = await fetchJdAnalysisList(sub.id)
                   if (analyses.length > 0) {
                     sub.matchScore = analyses[0].overallScore
+                    sub.latestAnalysis = analyses[0]
+                    setResumeAnalyses((prev) => {
+                      const newMap = new Map(prev)
+                      newMap.set(sub.id, analyses)
+                      return newMap
+                    })
                   }
                 } catch {
                 }
@@ -565,6 +594,13 @@ export default function WorkspaceDetail() {
             toast.error('创建子简历失败')
           }
         }}
+      />
+
+      <ScoreDetailModal
+        open={showScoreDetail}
+        onClose={() => setShowScoreDetail(false)}
+        resumeTitle={subResumes.find((r) => r.id === currentScoreResumeId)?.title || ''}
+        analyses={currentScoreResumeId ? (resumeAnalyses.get(currentScoreResumeId) || []) : []}
       />
     </div>
   )
