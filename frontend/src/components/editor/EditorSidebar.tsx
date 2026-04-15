@@ -194,7 +194,9 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
           ? { text: '' }
           : type === 'skills'
             ? { categories: [] }
-            : { items: [] },
+            : type === 'custom'
+              ? { id: '', title: '', date: '', description: '' }
+              : { items: [] },
       createdAt: new Date(),
       updatedAt: new Date(),
     };

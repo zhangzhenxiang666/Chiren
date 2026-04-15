@@ -34,7 +34,7 @@ export function DesignerTemplate({ resume }: { resume: Resume }) {
           </div>
         </div>
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={128} wrapperClassName="w-32 shrink-0" />
+          <AvatarImage src={pi.avatar} size={128} wrapperClassName="w-32 shrink-0" />
         )}
       </div>
 

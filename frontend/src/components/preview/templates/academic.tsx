@@ -31,7 +31,7 @@ export function AcademicTemplate({ resume }: { resume: Resume }) {
             <AvatarImage
               src={pi.avatar}
               size={64}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               wrapperClassName="shrink-0 overflow-hidden"
             />
           )}

@@ -34,7 +34,7 @@ export function BlocksTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={56}
               className="shrink-0"
             />

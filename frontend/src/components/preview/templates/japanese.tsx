@@ -29,7 +29,7 @@ export function JapaneseTemplate({ resume }: { resume: Resume }) {
       {/* Header - generous whitespace */}
       <div className="mb-12 pt-4 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} size={64} avatarStyle={resume.themeConfig?.avatarStyle} className="mx-auto mb-4" style={{ border: `1px solid ${ACCENT}` }} />
+          <AvatarImage src={pi.avatar} size={64} className="mx-auto mb-4" style={{ border: `1px solid ${ACCENT}` }} />
         )}
         <h1 className="text-2xl font-normal tracking-wide" style={{ color: PRIMARY }}>{pi.fullName || 'Your Name'}</h1>
         {pi.jobTitle && <p className="mt-2 text-xs font-normal tracking-[0.2em] uppercase" style={{ color: PRIMARY }}>{pi.jobTitle}</p>}

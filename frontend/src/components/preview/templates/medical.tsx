@@ -21,7 +21,7 @@ export function MedicalTemplate({ resume }: { resume: Resume }) {
             <AvatarImage
               src={pi.avatar}
               size={72}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               className="shrink-0"
               style={{ border: `3px solid ${TEAL_500}` }}
             />

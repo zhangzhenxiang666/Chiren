@@ -35,7 +35,7 @@ export function ZigzagTemplate({ resume }: { resume: Resume }) {
       {/* Header */}
       <div className="mb-6 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} className="mx-auto mb-3" style={{ border: `3px solid ${ACCENT}` }} />
+          <AvatarImage src={pi.avatar} size={80} className="mx-auto mb-3" style={{ border: `3px solid ${ACCENT}` }} />
         )}
         <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>{pi.fullName || 'Your Name'}</h1>
         {pi.jobTitle && <p className="mt-1 text-sm font-medium" style={{ color: ACCENT }}>{pi.jobTitle}</p>}

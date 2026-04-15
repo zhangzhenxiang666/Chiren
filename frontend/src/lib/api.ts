@@ -125,6 +125,10 @@ export async function fetchResumeDetail(resumeId: string): Promise<any> {
   return data;
 }
 
+export async function deleteResumeSection(id: string): Promise<void> {
+  await api.delete('/resume-section/delete', { params: { id } });
+}
+
 export async function updateResume(data: {
   id: string;
   title?: string;

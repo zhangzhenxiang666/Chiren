@@ -117,15 +117,11 @@ export interface LanguagesContent {
   items: LanguageItem[];
 }
 
-export interface CustomItem {
+export interface CustomContent {
   id: string;
   title: string;
-  date?: string;
+  date: string;
   description: string;
-}
-
-export interface CustomContent {
-  items: CustomItem[];
 }
 
 export interface GitHubRepoItem {
@@ -174,7 +170,6 @@ export interface ThemeConfig {
   lineSpacing: number;
   margin: { top: number; right: number; bottom: number; left: number };
   sectionSpacing: number;
-  avatarStyle?: 'circle' | 'oneInch';
 }
 
 export interface Resume {
@@ -185,6 +180,7 @@ export interface Resume {
   themeConfig: ThemeConfig;
   isDefault: boolean;
   language: string;
+  metaInfo?: Record<string, unknown>;
   sections: ResumeSection[];
   createdAt: Date;
   updatedAt: Date;

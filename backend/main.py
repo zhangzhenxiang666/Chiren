@@ -8,6 +8,7 @@ from fastapi.routing import APIRoute
 
 from apps.config import router as config_router
 from apps.conversation_message import router as conversation_message_router
+from apps.cover_letter import router as cover_letter_router
 from apps.jd_analysis import router as jd_analysis_router
 from apps.parser import router as parser_router
 from apps.resume import router as resume_router
@@ -43,6 +44,7 @@ app.include_router(resume_router)
 app.include_router(resume_section_router)
 app.include_router(template_router)
 app.include_router(jd_analysis_router)
+app.include_router(cover_letter_router)
 app.include_router(resume_assistant_router)
 app.include_router(conversation_message_router)
 

@@ -18,7 +18,7 @@ export function StartupTemplate({ resume }: { resume: Resume }) {
         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.1) 10px, rgba(255,255,255,0.1) 20px)' }} />
         <div className="relative flex items-center gap-5">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={72} className="shrink-0" style={{ border: '2px solid rgba(255,255,255,0.3)' }} />
+            <AvatarImage src={pi.avatar} size={72} className="shrink-0" style={{ border: '2px solid rgba(255,255,255,0.3)' }} />
           )}
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>

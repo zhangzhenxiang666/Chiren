@@ -23,7 +23,7 @@ export function ConsultantTemplate({ resume }: { resume: Resume }) {
             <AvatarImage
               src={pi.avatar}
               size={64}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               className="shrink-0"
               style={{ border: `2px solid ${BLUE_600}` }}
             />

@@ -46,7 +46,7 @@ export function MosaicTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={72}
               className="shrink-0"
               style={{ border: `3px solid ${TILE_COLORS[0]}` }}

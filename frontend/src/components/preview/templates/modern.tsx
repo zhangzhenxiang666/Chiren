@@ -26,7 +26,7 @@ export function ModernTemplate({ resume }: { resume: Resume }) {
 
         <div className="relative flex items-center gap-6">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={80} className="border-2 border-white/10" wrapperClassName="shrink-0 p-[2px]" wrapperStyle={{ background: 'linear-gradient(135deg, #e94560, #0f3460)' }} />
+            <AvatarImage src={pi.avatar} size={80} className="border-2 border-white/10" wrapperClassName="shrink-0 p-[2px]" wrapperStyle={{ background: 'linear-gradient(135deg, #e94560, #0f3460)' }} />
           )}
           <div className="min-w-0 flex-1">
             <h1 className="text-3xl font-bold tracking-tight">{pi.fullName || 'Your Name'}</h1>

@@ -3,7 +3,7 @@ import type { Resume, ResumeSection, SectionContent } from '@/types/resume';
 import { AUTOSAVE_DELAY } from '@/lib/constants';
 import { generateId } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings-store';
-import { updateResumeSection, updateResume } from '@/lib/api';
+import { updateResumeSection, updateResume, deleteResumeSection } from '@/lib/api';
 
 interface ResumeStore {
   currentResume: Resume | null;
@@ -11,6 +11,7 @@ interface ResumeStore {
   isDirty: boolean;
   isSaving: boolean;
   _saveTimeout: ReturnType<typeof setTimeout> | null;
+  _originalSectionIds: Set<string>;
 
   setResume: (resume: Resume) => void;
   updateSection: (sectionId: string, content: Partial<SectionContent>) => void;
@@ -32,6 +33,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   isDirty: false,
   isSaving: false,
   _saveTimeout: null,
+  _originalSectionIds: new Set(),
 
   setResume: (resume) => {
     const { _saveTimeout } = get();
@@ -61,6 +63,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       sections,
       isDirty: false,
       _saveTimeout: null,
+      _originalSectionIds: new Set((resume.sections || []).map((s) => s.id)),
     });
   },
 
@@ -160,11 +163,20 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   save: async () => {
-    const { currentResume, sections, isDirty } = get();
+    const { currentResume, sections, isDirty, _originalSectionIds } = get();
     if (!currentResume || !isDirty) return;
 
     set({ isSaving: true });
     try {
+      const currentSectionIds = new Set(sections.map((s) => s.id));
+      const removedIds = [..._originalSectionIds].filter((id) => !currentSectionIds.has(id));
+
+      const deletePromises = removedIds.map((id) =>
+        deleteResumeSection(id).catch((err) => {
+          console.error('删除区块失败:', id, err);
+        }),
+      );
+
       const savePromises: Promise<void>[] = [];
       for (let i = 0; i < sections.length; i++) {
         const s = sections[i];
@@ -177,14 +189,17 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
           visible: s.visible,
           content: s.content,
         };
+        if (s.type === 'personal_info') {
+          console.log('[save] 个人信息区块 payload:', JSON.stringify(payload, null, 2));
+        }
         savePromises.push(
           updateResumeSection(payload).then(() => {}).catch((err) => {
             console.error('保存区块失败:', s.type, s.id, err);
           }),
         );
       }
-      await Promise.all(savePromises);
-      set({ isDirty: false });
+      await Promise.all([...deletePromises, ...savePromises]);
+      set({ isDirty: false, _originalSectionIds: currentSectionIds });
     } catch (error) {
       console.error('Failed to save resume:', error);
     } finally {

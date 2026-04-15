@@ -21,7 +21,7 @@ export function CompactTemplate({ resume }: { resume: Resume }) {
       {/* Compact header */}
       <div className="border-b border-zinc-200 px-6 py-4">
         <div className="flex items-center gap-3">
-          {pi.avatar && <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={48} className="shrink-0" />}
+          {pi.avatar && <AvatarImage src={pi.avatar} size={48} className="shrink-0" />}
           <div className="flex-1">
             <h1 className="text-xl font-bold text-zinc-900">{pi.fullName || 'Your Name'}</h1>
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-zinc-500">

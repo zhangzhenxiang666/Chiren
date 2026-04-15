@@ -19,7 +19,7 @@ export function LegalTemplate({ resume }: { resume: Resume }) {
       {/* Header */}
       <div className="mb-6 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} size={64} avatarStyle={resume.themeConfig?.avatarStyle} className="mx-auto mb-3" style={{ border: `2px solid ${PRIMARY}` }} />
+          <AvatarImage src={pi.avatar} size={64} className="mx-auto mb-3" style={{ border: `2px solid ${PRIMARY}` }} />
         )}
         <h1 className="text-2xl font-bold tracking-wide" style={{ color: PRIMARY }}>
           {pi.fullName || 'Your Name'}

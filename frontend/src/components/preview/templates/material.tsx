@@ -36,7 +36,7 @@ export function MaterialTemplate({ resume }: { resume: Resume }) {
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
-              avatarStyle={resume.themeConfig?.avatarStyle}
+
               size={80}
               wrapperClassName="shrink-0 bg-white/20 p-1 shadow-lg"
             />

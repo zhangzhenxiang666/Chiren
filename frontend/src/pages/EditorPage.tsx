@@ -8,6 +8,7 @@ import { EditorSidebar } from '@/components/editor/EditorSidebar';
 import { EditorCanvas } from '@/components/editor/EditorCanvas';
 import { ThemeEditor } from '@/components/editor/ThemeEditor';
 import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
+import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
 import { mockResume } from '@/data/mockResume';
 
 export default function EditorPage() {
@@ -17,6 +18,7 @@ export default function EditorPage() {
   const { updateSection, addSection, removeSection, reorderSections, loadResume } = useEditor(id || 'mock-1');
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
+  const [coverLetterOpen, setCoverLetterOpen] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -38,7 +40,11 @@ export default function EditorPage() {
 
   return (
     <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
-      <EditorToolbar title={currentResume.title} onBack={() => navigate('/')} />
+      <EditorToolbar
+        title={currentResume.title}
+        onBack={() => navigate('/')}
+        onCoverLetterOpen={() => setCoverLetterOpen(true)}
+      />
       <div className="flex flex-1 overflow-hidden">
         <EditorSidebar
           sections={sections}
@@ -54,6 +60,12 @@ export default function EditorPage() {
         {showThemeEditor && <ThemeEditor />}
         <EditorPreviewPanel />
       </div>
+      <CoverLetterDialog
+        resumeId={currentResume.id}
+        hasJobDescription={!!currentResume.metaInfo?.job_description}
+        open={coverLetterOpen}
+        onOpenChange={setCoverLetterOpen}
+      />
     </div>
   );
 }

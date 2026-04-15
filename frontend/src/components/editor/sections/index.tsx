@@ -278,24 +278,21 @@ export function QrCodes({ section, onUpdate }: SectionComponentProps) {
 
 export function CustomSection({ section, onUpdate }: SectionComponentProps) {
   const d = c(section);
-  const items: Array<{ id: string; title: string; date?: string; description: string }> = d.items || [];
-  const updateItem = (idx: number, field: string, value: any) => { const n = [...items]; n[idx] = { ...n[idx], [field]: value }; onUpdate({ items: n }); };
-  const addItem = () => onUpdate({ items: [...items, { id: makeId(), title: '', date: '', description: '' }] });
-  const removeItem = (idx: number) => onUpdate({ items: items.filter((_, i) => i !== idx) });
+  const updateField = (field: string, value: any) => onUpdate({ ...d, [field]: value });
+  const resetFields = () => onUpdate({ id: makeId(), title: '', date: '', description: '' });
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="标题" value={item.title || ''} onChange={(e) => updateItem(items.indexOf(item), 'title', e.target.value)} />
-            <YearMonthPicker label="日期" value={item.date || ''} onChange={(v) => updateItem(items.indexOf(item), 'date', v)} />
-          </div>
-          <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
+      <div className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+          <F label="标题" value={d.title || ''} onChange={(e) => updateField('title', e.target.value)} />
+          <YearMonthPicker label="日期" value={d.date || ''} onChange={(v) => updateField('date', v)} />
         </div>
-      ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加条目</button>
+        <TA label="描述" value={d.description || ''} onChange={(e) => updateField('description', e.target.value)} rows={2} />
+      </div>
+      <button type="button" onClick={resetFields} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors">
+        <span className="text-lg leading-none">+</span> 清空重置
+      </button>
     </div>
   );
 }

@@ -25,7 +25,7 @@ export function ClassicTemplate({ resume }: { resume: Resume }) {
       <div className="mb-6 border-b-2 border-zinc-800 pb-4">
         <div className="flex items-center justify-center gap-4">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={64} className="shrink-0" />
+            <AvatarImage src={pi.avatar} size={64} className="shrink-0" />
           )}
           <div className="text-center">
             <h1 className="text-2xl font-bold text-zinc-900">{pi.fullName || 'Your Name'}</h1>

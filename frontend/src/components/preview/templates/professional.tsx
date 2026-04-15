@@ -28,7 +28,7 @@ export function ProfessionalTemplate({ resume }: { resume: Resume }) {
       <div className="mb-6 text-center">
         <div className="flex items-center justify-center gap-4">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} avatarStyle={resume.themeConfig?.avatarStyle} size={72} className="shrink-0" style={{ border: '2px solid #1e3a5f' }} />
+            <AvatarImage src={pi.avatar} size={72} className="shrink-0" style={{ border: '2px solid #1e3a5f' }} />
           )}
           <div>
             <h1 className="text-3xl font-bold tracking-wide" style={{ color: '#1e3a5f' }}>
