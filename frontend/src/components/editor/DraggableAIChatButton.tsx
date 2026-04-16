@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Sparkles, Brain, Wrench, ChevronRight, ChevronDown, CheckCircle, AlertCircle, Loader2, ArrowDown } from 'lucide-react';
@@ -26,7 +26,9 @@ interface StreamingMessage {
   toolCalls: ToolCall[];
 }
 
-const STORAGE_KEY = 'ai-chat-button-position';
+const BUTTON_SIZE = 48;
+
+const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
 
 const generateUniqueId = () =>
   `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
@@ -54,25 +56,43 @@ interface Position {
   y: number;
 }
 
+interface AIChatContextValue {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}
+
+const AIChatContext = createContext<AIChatContextValue | null>(null);
+
+export function useAIChat() {
+  const ctx = useContext(AIChatContext);
+  if (!ctx) {
+    throw new Error('useAIChat must be used within AIChatProvider');
+  }
+  return ctx;
+}
+
+interface AIChatProviderProps {
+  children: React.ReactNode;
+}
+
+export function AIChatProvider({ children }: AIChatProviderProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <AIChatContext.Provider value={{ isOpen, setIsOpen }}>
+      {children}
+    </AIChatContext.Provider>
+  );
+}
+
 export function DraggableAIChatButton() {
   const [position, setPosition] = useState<Position>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch {
-        }
-      }
-    }
-    return { x: -1, y: -1 };
+    // 每次进入页面重置为默认位置
+    return { x: window.innerWidth - BUTTON_SIZE - 24, y: window.innerHeight - BUTTON_SIZE - 24 };
   });
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen } = useAIChat();
   const dragState = useRef({ isDragging: false, startX: 0, startY: 0, startPosX: 0, startPosY: 0 });
 
-  const actualPosition = position.x === -1 && position.y === -1
-    ? { x: window.innerWidth - 80, y: window.innerHeight - 80 }
-    : position;
+  const actualPosition = position;
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
     if (e.button !== 0) return;
@@ -91,15 +111,17 @@ export function DraggableAIChatButton() {
     const deltaY = e.clientY - dragState.current.startY;
     const newX = dragState.current.startPosX + deltaX;
     const newY = dragState.current.startPosY + deltaY;
-    setPosition({ x: newX, y: newY });
+    const maxX = window.innerWidth - BUTTON_SIZE;
+    const maxY = window.innerHeight - BUTTON_SIZE;
+    setPosition({
+      x: clamp(newX, 0, maxX),
+      y: clamp(newY, 0, maxY),
+    });
   }, []);
 
   const handleMouseUp = useCallback(() => {
-    if (dragState.current.isDragging) {
-      dragState.current.isDragging = false;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(position));
-    }
-  }, [position]);
+    dragState.current.isDragging = false;
+  }, []);
 
   useEffect(() => {
     document.addEventListener('mousemove', handleMouseMove);
@@ -110,16 +132,16 @@ export function DraggableAIChatButton() {
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
     const movedX = e.clientX - dragState.current.startX;
     const movedY = e.clientY - dragState.current.startY;
     const distance = Math.sqrt(movedX * movedX + movedY * movedY);
     if (distance < 5) {
-      setIsOpen((prev) => !prev);
+      setIsOpen(!isOpen);
     }
-  };
+  }, [setIsOpen, isOpen]);
 
   return (
     <>
@@ -137,7 +159,7 @@ export function DraggableAIChatButton() {
           onMouseDown={handleMouseDown}
           onClick={handleClick}
           className={`
-            group relative flex h-14 w-14 items-center justify-center rounded-full
+            group relative flex h-12 w-12 items-center justify-center rounded-full
             bg-pink-500
             hover:bg-pink-600
             active:scale-95
@@ -145,7 +167,7 @@ export function DraggableAIChatButton() {
             cursor-grab
           `}
         >
-          <Sparkles className="h-6 w-6 text-white" />
+          <Sparkles className="h-5 w-5 text-white" />
         </button>
       </div>
 

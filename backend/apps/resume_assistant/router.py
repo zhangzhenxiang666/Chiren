@@ -54,18 +54,29 @@ async def resume_assistant(
     + **done**: 会话正常结束。
     + **error**: 发生错误。payload: ``{"message": "错误信息"}``。
     """
-    result = await db.execute(
+    sections_result = await db.execute(
         select(ResumeSection)
         .where(
             ResumeSection.resume_id == request.resume_id, ResumeSection.visible == True
         )
         .order_by(ResumeSection.sort_order.asc())
     )
-    resume_section_list = result.scalars().all()
+    resume_section_list = sections_result.scalars().all()
 
     sections = [resume.to_pydantic() for resume in resume_section_list]
 
-    return await resume_assistant_service(request, sections, db)
+    resume_result = await db.execute(
+        select(Resume).where(Resume.id == request.resume_id)
+    )
+    resume = resume_result.scalar_one_or_none()
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"简历不存在: {request.resume_id}",
+        )
+
+    return await resume_assistant_service(request, resume, sections, db)
 
 
 @router.post(
@@ -115,7 +126,7 @@ async def create_sub_resume(
     db.add(work)
     await db.commit()
 
-    create_task(task_id)
+    create_task(task_id, TaskType.JD_GENERATE)
 
     client = get_client(request.type, request.api_key, request.base_url)
 

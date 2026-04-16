@@ -63,15 +63,15 @@ import { registerSSEHandler } from '../../lib/notification'
  * 注意：这里注册的是与页面组件生命周期无关的通用 handler。
  * 页面组件可以在各自的 useEffect 中注册额外的 handler（会被这里的覆盖或共存）。
  */
-registerSSEHandler('ai_resume', {
+registerSSEHandler('jd_generate', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
-        <span className="font-medium text-sm">AI 简历「{task.metaInfo?.title || '未命名'}」生成完成</span>
+        <span className="font-medium text-sm">子简历「{task.metaInfo?.title || '未命名'}」生成完成</span>
       </div>,
     )
   },
-  onError: () => 'AI 简历生成失败',
+  onError: () => '子简历生成失败',
 })
 
 registerSSEHandler('parse', {

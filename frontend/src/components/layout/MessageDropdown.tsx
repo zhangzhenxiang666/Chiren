@@ -1,4 +1,5 @@
-import { Clock, FileText } from 'lucide-react';
+import { Clock, FileText, FilePen, Star } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import type { WorkTask } from '../../types/work';
 
 interface MessageListProps {
@@ -61,6 +62,42 @@ function getStatusDot(status: string): string {
   return map[status] || 'bg-gray-400';
 }
 
+function getTaskTypeTitle(taskType: string): string {
+  const map: Record<string, string> = {
+    parse: '解析任务',
+    jd_generate: '子简历生成',
+    jd_score: 'JD 评分',
+  };
+  return map[taskType] || '未知任务';
+}
+
+function getTaskTypeTitleStyle(taskType: string): string {
+  const map: Record<string, string> = {
+    parse: 'text-white',
+    jd_generate: 'text-purple-400',
+    jd_score: 'text-amber-400',
+  };
+  return map[taskType] || 'text-white';
+}
+
+function getTaskTypeIcon(taskType: string): LucideIcon {
+  const map: Record<string, LucideIcon> = {
+    parse: FileText,
+    jd_generate: FilePen,
+    jd_score: Star,
+  };
+  return map[taskType] || FileText;
+}
+
+function getTaskTypeColors(taskType: string): { bg: string; text: string } {
+  const map: Record<string, { bg: string; text: string }> = {
+    parse: { bg: 'bg-pink-500/10', text: 'text-pink-400' },
+    jd_generate: { bg: 'bg-purple-500/10', text: 'text-purple-400' },
+    jd_score: { bg: 'bg-amber-500/10', text: 'text-amber-400' },
+  };
+  return map[taskType] || map.parse;
+}
+
 export default function MessageList({ tasks }: MessageListProps) {
   return (
     <>
@@ -82,13 +119,16 @@ export default function MessageList({ tasks }: MessageListProps) {
             {tasks.map((task: WorkTask) => (
               <li key={task.id} className="px-4 py-3 hover:bg-[#222225] transition-colors">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[#2a1a22] flex items-center justify-center shrink-0">
-                    <FileText className="w-4 h-4 text-pink-400" />
+                  <div className={`w-8 h-8 rounded-lg ${getTaskTypeColors(task.taskType).bg} flex items-center justify-center shrink-0`}>
+                    {(() => {
+                      const Icon = getTaskTypeIcon(task.taskType);
+                      return <Icon className={`w-4 h-4 ${getTaskTypeColors(task.taskType).text}`} />;
+                    })()}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <p className="text-sm text-white truncate" title={task.metaInfo?.fileName}>
-                        {task.metaInfo?.fileName || '未命名文件'}
+                      <p className={`text-sm truncate ${getTaskTypeTitleStyle(task.taskType)}`} title={getTaskTypeTitle(task.taskType)}>
+                        {getTaskTypeTitle(task.taskType)}
                       </p>
                       <span className={`flex items-center gap-1.5 text-[10px] px-2 py-0.5 rounded border shrink-0 ${getStatusBadgeBg(task.status)}`}>
                         <span className={`w-1.5 h-1.5 rounded-full ${getStatusDot(task.status)}`} />
@@ -97,6 +137,9 @@ export default function MessageList({ tasks }: MessageListProps) {
                         </span>
                       </span>
                     </div>
+                    {task.metaInfo?.fileName && (
+                      <p className="text-xs text-gray-500 truncate mb-1">{task.metaInfo.fileName}</p>
+                    )}
                     {task.metaInfo?.title && (
                       <p className="text-xs text-gray-500 truncate mb-1">{task.metaInfo.title}</p>
                     )}

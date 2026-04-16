@@ -5,7 +5,7 @@ import json
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any
 
-from shared.types.task import TaskStatus
+from shared.types.task import TaskStatus, TaskType
 
 tasks: dict[str, dict[str, Any]] = {}
 task_events: dict[str, asyncio.Queue] = {}
@@ -19,10 +19,14 @@ class TaskEventHub:
         self._events = task_events
 
     def create(
-        self, task_id: str, initial_data: dict[str, Any] | None = None
+        self,
+        task_id: str,
+        task_type: TaskType,
+        initial_data: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         task_data = {
             "task_id": task_id,
+            "task_type": task_type.value,
             "status": TaskStatus.PENDING,
             "result": None,
             "error": None,
@@ -42,7 +46,18 @@ class TaskEventHub:
             elif event == "error":
                 self._tasks[task_id]["error"] = data
         if task_id in self._events:
-            await self._events[task_id].put({"event": event, "data": data})
+            await self._events[task_id].put(
+                {
+                    "event": event,
+                    "data": json.dumps(
+                        {
+                            "content": data,
+                            "type": self._tasks[task_id]["task_type"],
+                        },
+                        ensure_ascii=False,
+                    ),
+                }
+            )
 
     async def subscribe(self, task_id: str) -> AsyncIterator[dict[str, Any]]:
         queue = self._events.get(task_id)
@@ -77,9 +92,9 @@ hub = TaskEventHub()
 
 
 def create_task(
-    task_id: str, initial_data: dict[str, Any] | None = None
+    task_id: str, task_type: TaskType, initial_data: dict[str, Any] | None = None
 ) -> dict[str, Any]:
-    return hub.create(task_id, initial_data)
+    return hub.create(task_id, task_type, initial_data)
 
 
 async def update_task_status(task_id: str, status: TaskStatus) -> None:

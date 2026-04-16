@@ -9,8 +9,10 @@ import { EditorCanvas } from '@/components/editor/EditorCanvas';
 import { ThemeEditor } from '@/components/editor/ThemeEditor';
 import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
 import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
-import { DraggableAIChatButton } from '@/components/editor/DraggableAIChatButton';
+import { DraggableAIChatButton, AIChatProvider } from '@/components/editor/DraggableAIChatButton';
+import { Inbox, FileX } from 'lucide-react';
 import { mockResume } from '@/data/mockResume';
+import { fetchWorkspaces, fetchResumeDetail } from '@/lib/api';
 
 export default function EditorPage() {
   const { id, resumeId } = useParams<{ id: string; resumeId?: string }>();
@@ -21,16 +23,82 @@ export default function EditorPage() {
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [workspaceNotFound, setWorkspaceNotFound] = useState(false);
+  const [resumeNotFound, setResumeNotFound] = useState(false);
 
   useEffect(() => {
     if (!effectiveResumeId) return;
-    loadResume().finally(() => {
-      if (!useResumeStore.getState().currentResume) {
-        setResume(mockResume);
-      }
-      setLoading(false);
-    });
-  }, [effectiveResumeId, loadResume, setResume]);
+
+    // 校验 workspace (id) 和子简历 (resumeId) 是否存在
+    Promise.all([
+      id ? fetchWorkspaces().catch(() => null) : Promise.resolve(null),
+      fetchResumeDetail(effectiveResumeId).catch(() => null),
+    ])
+      .then(([workspaces, resumeData]) => {
+        if (id) {
+          const ws = workspaces?.find((w) => w.id === id);
+          if (!ws) {
+            setWorkspaceNotFound(true);
+            return;
+          }
+        }
+        if (resumeId && !resumeData) {
+          setResumeNotFound(true);
+          return;
+        }
+        return loadResume();
+      })
+      .finally(() => {
+        if (!workspaceNotFound && !resumeNotFound) {
+          if (!useResumeStore.getState().currentResume) {
+            setResume(mockResume);
+          }
+        }
+        setLoading(false);
+      });
+  }, [effectiveResumeId, id, resumeId, loadResume, setResume, workspaceNotFound, resumeNotFound]);
+
+  if (workspaceNotFound) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
+          <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
+          <div className="text-center">
+            <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
+            <p className="text-sm text-gray-500">访问的工作空间可能已被删除或不存在</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => navigate('/workspace')}
+            className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
+          >
+            返回工作空间列表
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (resumeNotFound) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
+          <FileX className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
+          <div className="text-center">
+            <p className="text-lg text-gray-300 mb-1">子简历不存在</p>
+            <p className="text-sm text-gray-500">访问的子简历可能已被删除或不存在</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => id ? navigate(`/workspace/${id}`) : navigate('/workspace')}
+            className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
+          >
+            返回工作空间详情
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || !currentResume) {
     return (
@@ -49,28 +117,30 @@ export default function EditorPage() {
         onBack={() => navigate(backUrl)}
         onCoverLetterOpen={() => setCoverLetterOpen(true)}
       />
-      <div className="flex flex-1 overflow-hidden">
-        <EditorSidebar
-          sections={sections}
-          onAddSection={addSection}
-          onReorderSections={reorderSections}
-        />
-        <EditorCanvas
-          sections={sections}
-          onUpdateSection={updateSection}
-          onRemoveSection={removeSection}
-          onReorderSections={reorderSections}
-        />
-        {showThemeEditor && <ThemeEditor />}
-        <EditorPreviewPanel />
-      </div>
+      <AIChatProvider>
+        <div className="flex flex-1 overflow-hidden">
+          <EditorSidebar
+            sections={sections}
+            onAddSection={addSection}
+            onReorderSections={reorderSections}
+          />
+          <EditorCanvas
+            sections={sections}
+            onUpdateSection={updateSection}
+            onRemoveSection={removeSection}
+            onReorderSections={reorderSections}
+          />
+          {showThemeEditor && <ThemeEditor />}
+          <EditorPreviewPanel />
+        </div>
+        <DraggableAIChatButton />
+      </AIChatProvider>
       <CoverLetterDialog
         resumeId={currentResume.id}
         hasJobDescription={!!currentResume.metaInfo?.job_description}
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
       />
-      <DraggableAIChatButton />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Eye, EyeOff, Trash2, GripVertical, Sparkles, Pencil } from 'lucide-reac
 import { useResumeStore } from '@/stores/resume-store';
 import { cn } from '@/lib/utils';
 import { useDragHandle } from './dnd/sortable-section';
+import { useAIChat } from './DraggableAIChatButton';
 import { PersonalInfo } from './sections/PersonalInfo';
 import { Summary } from './sections/Summary';
 import {
@@ -44,6 +45,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
   const [renameValue, setRenameValue] = useState(section.title);
   const inputRef = useRef<HTMLInputElement>(null);
   const { attributes, listeners } = useDragHandle();
+  const { setIsOpen } = useAIChat();
 
   useEffect(() => {
     if (isRenaming) {
@@ -113,6 +115,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           type="button"
           className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-pink-500 dark:hover:bg-zinc-800"
           title="AI 润色"
+          onClick={() => setIsOpen(true)}
         >
           <Sparkles className="h-4 w-4" />
         </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Sparkles, MoreVertical, Plus, ArrowLeft, FileText, FileEdit, Star } from 'lucide-react'
+import { Sparkles, MoreVertical, Plus, ArrowLeft, FileText, FileEdit, Star, Inbox } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Workspace, SubResume } from '../types/workspace'
 import type { Resume, ResumeSection } from '../types/resume'
@@ -26,7 +26,6 @@ export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>()
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [wsLoading, setWsLoading] = useState(true)
-  const [workspaceNotFound, setWorkspaceNotFound] = useState(false)
   const [sections, setSections] = useState<ResumeSection[]>([])
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -62,7 +61,7 @@ export default function WorkspaceDetail() {
           setWorkspace(ws)
         } else {
           toast.error('未找到该工作空间')
-          setWorkspaceNotFound(true)
+          setWorkspace(null)
         }
       })
       .catch((err) => {
@@ -168,7 +167,7 @@ export default function WorkspaceDetail() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { taskType: string }
-      if (detail?.taskType !== 'ai_resume') return
+      if (detail?.taskType !== 'jd_generate') return
       refreshSubResumes()
     }
     window.addEventListener('global-sse-complete', handler)
@@ -245,7 +244,7 @@ export default function WorkspaceDetail() {
   if (!workspace) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
-        <div className="text-6xl opacity-30">📭</div>
+        <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
         <div className="text-center">
           <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
           <p className="text-sm text-gray-500">访问的工作空间可能已被删除或不存在</p>
@@ -394,11 +393,11 @@ export default function WorkspaceDetail() {
                     key={resume.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)}
+                    onClick={() => navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)
+                        navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
                       }
                     }}
                     className="w-full text-left bg-[#1e1e20] rounded-xl border border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors p-4 flex items-center gap-3 cursor-pointer"
@@ -460,7 +459,7 @@ export default function WorkspaceDetail() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)
+                            navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
                           }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
                         >
@@ -510,7 +509,7 @@ export default function WorkspaceDetail() {
                                     })
                                     const title = resume.title || resume.jobTitle || '未命名'
                                     markUnread()
-                                    addNotificationTask({ id: taskId, taskType: 'jd_score', status: 'running', workspaceId: workspace.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+                                    addNotificationTask({ id: taskId, taskType: 'jd_score', status: 'running', workspaceId: workspace!.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
                                     setOpenMorePopover(null)
                                     toast.success(
                                       <div className="flex flex-col gap-1">
@@ -555,7 +554,7 @@ export default function WorkspaceDetail() {
               return
             }
             const { taskId } = await createSubResumeWithAI({
-              workspaceId: workspace.id,
+              workspaceId: workspace!.id,
               jobDescription: payload.jdDescription,
               jobTitle: payload.jobTitle || undefined,
               title: payload.name || undefined,
@@ -568,7 +567,7 @@ export default function WorkspaceDetail() {
             const title = payload.name || payload.jobTitle || ''
             setShowGenerateModal(false)
             markUnread()
-            addNotificationTask({ id: taskId, taskType: 'ai_resume', status: 'running', workspaceId: workspace.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
+            addNotificationTask({ id: taskId, taskType: 'jd_generate', status: 'running', workspaceId: workspace!.id, metaInfo: { title }, errorMessage: null, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
             toast.success(
               <div className="flex flex-col gap-1">
                 <span className="font-medium text-sm">AI 子简历生成任务已启动</span>
@@ -586,7 +585,7 @@ export default function WorkspaceDetail() {
         onCreateDirect={async (payload) => {
           try {
             await createSubResume({
-              workspaceId: workspace.id,
+              workspaceId: workspace!.id,
               jobDescription: payload.jdDescription,
               title: payload.name || undefined,
               jobTitle: payload.jobTitle || undefined,
@@ -595,7 +594,7 @@ export default function WorkspaceDetail() {
             toast.success('子简历创建成功')
             setShowGenerateModal(false)
 
-            const data = await fetchResumeDetail(workspace.id)
+const data = await fetchResumeDetail(workspace!.id)
             const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
               id: sub.id,
               title: sub.title,

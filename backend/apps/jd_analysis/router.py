@@ -101,7 +101,7 @@ async def create_score_task(
 
     client = get_client(data.type, data.api_key, data.base_url)
 
-    create_task(task_id)
+    create_task(task_id, TaskType.JD_SCORE)
 
     background_tasks.add_task(
         run_match_task,

@@ -75,7 +75,8 @@ export function useGlobalSSE() {
       const eventSource = new EventSource(`http://localhost:8000/work/stream/${task.id}`)
 
       eventSource.addEventListener('status', (e: MessageEvent) => {
-        if (e.data === 'error') {
+        const payload = JSON.parse(e.data)
+        if (payload.content === 'error') {
           updateNotificationTask(task.id, { status: 'error' })
           markUnread()
           eventSource.close()
@@ -100,14 +101,15 @@ export function useGlobalSSE() {
         markUnread()
       })
 
-      eventSource.addEventListener('result', () => {
+      eventSource.addEventListener('result', (e: MessageEvent) => {
+        const payload = JSON.parse(e.data)
         updateNotificationTask(task.id, { status: 'success' })
         eventSource.close()
         sourcesRef.current.delete(task.id)
 
         // dispatch 全局事件（包含 taskType，方便页面按需监听）
         window.dispatchEvent(new CustomEvent(GLOBAL_SSE_COMPLETE, {
-          detail: { taskId: task.id, workspaceId: task.workspaceId, taskType: task.taskType },
+          detail: { taskId: task.id, workspaceId: task.workspaceId, taskType: payload.type || task.taskType },
         }))
 
         // 调用注册的 success handler

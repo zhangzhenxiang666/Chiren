@@ -31,3 +31,21 @@ Your task is to help users enhance the professionalism, impact, and ATS-friendli
 # The resume currently contains the following sections
 {sections}
 """
+
+
+SUB_SYSTEM = """
+
+
+# Job Description (JD)
+---
+{job_description}
+---
+
+Please optimize the resume based on this JD to improve role alignment and ATS performance.
+
+Requirements:
+- Use keywords and phrasing from the JD where appropriate
+- Highlight the most relevant experience and skills
+- Keep the content concise and focused
+
+Note: Do not fabricate or introduce any information not provided by the user"""

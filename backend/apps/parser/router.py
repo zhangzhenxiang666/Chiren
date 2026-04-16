@@ -57,7 +57,7 @@ async def parse_document(
         raise HTTPException(status_code=400, detail=str(e))
 
     task_id = str(uuid.uuid4())
-    create_task(task_id)
+    create_task(task_id, TaskType.PARSE)
 
     from apps.parser.storage import save_upload_file
 
@@ -125,7 +125,7 @@ async def retry_failed_task(
     template = meta_info.get("template", "classic")
     title = meta_info.get("title", "未命名简历")
 
-    create_task(task_id)
+    create_task(task_id, TaskType.PARSE)
 
     client = get_client(type, api_key, base_url)
 

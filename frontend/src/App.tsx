@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard'
 import TemplateGallery from './pages/TemplateGallery'
 import EditorPage from './pages/EditorPage'
 import WorkspaceDetail from './pages/WorkspaceDetail'
+import NotFoundPage from './pages/NotFoundPage'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
         </Route>
         <Route path="workspace/:id/template/edit" element={<EditorPage />} />
         <Route path="workspace/:id/resumes/:resumeId/edit" element={<EditorPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

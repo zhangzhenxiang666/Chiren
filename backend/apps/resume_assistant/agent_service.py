@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette import EventSourceResponse
 
 from apps.resume_assistant.conversation_store import ConversationStore
-from apps.resume_assistant.prompt import SYSTEM, build_sections_prompt
+from apps.resume_assistant.prompt import SUB_SYSTEM, SYSTEM, build_sections_prompt
 from apps.resume_assistant.schemas import ResumeAssistantRequest
 from apps.resume_assistant.tools import (
     AddSectionTool,
@@ -21,7 +21,7 @@ from shared.api.client import (
     ApiTextDeltaEvent,
     SupportsStreamingMessages,
 )
-from shared.models import ConversationMessageRecord
+from shared.models import ConversationMessageRecord, Resume
 from shared.types.base_tool import ToolExecutionContext, ToolRegistry
 from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseBlock
 from shared.types.resume import ResumeSectionSchema
@@ -31,6 +31,7 @@ log = logging.getLogger(__name__)
 
 async def resume_assistant_service(
     request: ResumeAssistantRequest,
+    resume: Resume,
     sections: list[ResumeSectionSchema],
     db: AsyncSession,
 ) -> EventSourceResponse:
@@ -42,11 +43,14 @@ async def resume_assistant_service(
         new_section = section.model_dump()
         sections_list.append(new_section)
 
-    return EventSourceResponse(generate_content(request, sections_list, id_to_type, db))
+    return EventSourceResponse(
+        generate_content(request, resume, sections_list, id_to_type, db)
+    )
 
 
 async def generate_content(
     request: ResumeAssistantRequest,
+    resume: Resume,
     sections: list[dict[str, Any]],
     id_to_type: dict[str, str],
     db: AsyncSession,
@@ -86,6 +90,8 @@ async def generate_content(
         if resume_info != _cached_resume_info:
             _cached_resume_info = resume_info
             system = SYSTEM.format(sections=build_sections_prompt(sections))
+            job_description: str | None = resume.meta_info.get("job_description")
+            system += SUB_SYSTEM.format(job_description=job_description)
             tools_schema = tool_registry.to_api_schema_v2(sections)
 
         new_messages = insert_resume_info(messages, resume_info, count)
