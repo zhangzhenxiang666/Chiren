@@ -215,7 +215,8 @@ export default function WorkspaceDetail() {
     if (!sections.length) return
     if (!resumeData) return
 
-    useResumeStore.getState().setResume(resumeData)
+    useResumeStore.getState().setResume(resumeData!)
+
     editorReadyRef.current = true
   }, [isEditing, resumeData, sections])
 
@@ -264,7 +265,7 @@ export default function WorkspaceDetail() {
     if (!editorReadyRef.current || !currentResume) {
       return (
         <div className="flex flex-col h-full">
-          <EditorToolbar title={workspace.title} onBack={handleExitEdit} onCoverLetterOpen={() => setCoverLetterOpen(true)} />
+          <EditorToolbar title={workspace!.title} onBack={handleExitEdit} onCoverLetterOpen={() => setCoverLetterOpen(true)} />
           <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
             加载编辑器...
           </div>
@@ -317,7 +318,7 @@ export default function WorkspaceDetail() {
           工作空间
         </button>
         <span className="text-gray-600">›</span>
-        <span className="text-pink-400">{workspace.title}</span>
+        <span className="text-pink-400">{workspace!.title}</span>
       </nav>
 
       <div className="flex items-start justify-between mb-8 shrink-0">
@@ -349,7 +350,7 @@ export default function WorkspaceDetail() {
 
             <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
               <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
-                {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => navigate(`/workspace/${workspace.id}/template/edit`)} />}
+                {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace!.template }} onClick={() => navigate(`/workspace/${workspace!.id}/template/edit`)} />}
               </div>
             </div>
           </div>

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { X, Copy, Sparkles, Loader2, AlertCircle } from 'lucide-react';
-import { useSettingsStore } from '@/stores/settings-store';
-import { generateId } from '@/lib/utils';
+import { getProviderConfig } from '@/lib/api';
 
 interface CoverLetterDialogProps {
   resumeId: string;
@@ -22,11 +21,35 @@ export function CoverLetterDialog({
   const [content, setContent] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [coverLetterId, setCoverLetterId] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [aiConfig, setAiConfig] = useState<{
+    type: 'openai' | 'anthropic';
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+  } | null>(null);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
-  const { aiProvider, aiApiKey, aiBaseURL, aiModel } = useSettingsStore();
+  // 从 API 加载 AI 配置
+  useEffect(() => {
+    if (open) {
+      getProviderConfig()
+        .then((config) => {
+          const activeProvider = config.providers[config.active];
+          if (activeProvider) {
+            setAiConfig({
+              type: config.active,
+              baseUrl: activeProvider.baseUrl || '',
+              apiKey: activeProvider.apiKey || '',
+              model: activeProvider.model || '',
+            });
+          }
+        })
+        .catch(console.error);
+    }
+  }, [open]);
 
   // Auto-scroll content
   useEffect(() => {
@@ -44,8 +67,7 @@ export function CoverLetterDialog({
   }, [open]);
 
   const handleGenerate = useCallback(async () => {
-    const provider = aiProvider;
-    if (!provider || !aiApiKey) {
+    if (!aiConfig || !aiConfig.type || !aiConfig.apiKey) {
       setStatus('error');
       setErrorMessage('请先在设置中配置 AI 供应商和 API Key');
       return;
@@ -65,10 +87,10 @@ export function CoverLetterDialog({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resume_id: resumeId,
-          type: provider,
-          base_url: aiBaseURL,
-          api_key: aiApiKey,
-          model: aiModel,
+          type: aiConfig.type,
+          base_url: aiConfig.baseUrl,
+          api_key: aiConfig.apiKey,
+          model: aiConfig.model,
         }),
         signal: abortController.signal,
       });
@@ -134,11 +156,13 @@ export function CoverLetterDialog({
       setStatus('error');
       setErrorMessage(err instanceof Error ? err.message : '未知错误');
     }
-  }, [aiProvider, aiApiKey, aiBaseURL, aiModel, resumeId]);
+  }, [aiConfig, resumeId]);
 
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       // Fallback for older browsers
       const textarea = document.createElement('textarea');
@@ -147,6 +171,8 @@ export function CoverLetterDialog({
       textarea.select();
       document.execCommand('copy');
       document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   }, [content]);
 
@@ -237,14 +263,19 @@ export function CoverLetterDialog({
                 <span className="text-sm font-medium text-green-600 dark:text-green-400">
                   生成完成
                 </span>
-                <button
-                  type="button"
-                  onClick={handleCopy}
-                  className="flex items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  复制
-                </button>
+                <div className="flex items-center gap-2">
+                  {copied && (
+                    <span className="text-sm text-green-500">已复制</span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="flex items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                  >
+                    <Copy className="h-3.5 w-3.5" />
+                    复制
+                  </button>
+                </div>
               </div>
               <div
                 ref={contentRef}

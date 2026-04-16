@@ -44,6 +44,7 @@ The Target Job Description (JD).
 Goal: Create a highly customized cover letter that aligns the candidate's strengths with the job requirements, 
 thereby significantly increasing the likelihood of securing an interview.
 Output only the generated cover letter content, without including your own reasoning logic.
+Please output the language in Simplified Chinese,
 ---"""
 
 
