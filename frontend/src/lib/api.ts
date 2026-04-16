@@ -74,6 +74,170 @@ export async function switchProviderConfig(
   return data;
 }
 
+export interface TextBlock {
+  type: 'text';
+  text: string;
+}
+
+export interface ToolUseBlock {
+  type: 'tool_use';
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+export interface ToolResultBlock {
+  type: 'tool_result';
+  toolUseId: string;
+  content: string;
+  isError: boolean;
+}
+
+export type ContentBlock = TextBlock | ToolUseBlock | ToolResultBlock;
+
+export interface ConversationMessage {
+  id: number;
+  conversationId: string;
+  role: 'user' | 'assistant';
+  content: ContentBlock[];
+  reasoning: string | null;
+  createdAt: string | null;
+}
+
+export async function getConversationMessages(
+  conversationId: string,
+): Promise<ConversationMessage[]> {
+  const { data } = await api.get<ConversationMessage[]>(`/conversation-message/list/${conversationId}`);
+  return data;
+}
+
+export interface CreateMessageParams {
+  conversationId: string;
+  userInput: string;
+}
+
+export async function createMessage(params: CreateMessageParams): Promise<ConversationMessage> {
+  const { data } = await api.post<ConversationMessage>('/conversation-message/create', {
+    conversationId: params.conversationId,
+    userInput: params.userInput,
+  });
+  return data;
+}
+
+export interface ResumeAssistantParams {
+  resumeId: string;
+  type: 'openai' | 'anthropic';
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+  input: string;
+}
+
+export interface SSEToolResultEvent {
+  type: 'tool_result';
+  data: {
+    is_error: boolean;
+    tool_use_id: string;
+    content: string;
+    section_content?: Record<string, unknown>;
+  };
+}
+
+export type SSEEventType =
+  | 'next'
+  | 'thinking_start'
+  | 'thinking_delta'
+  | 'text_start'
+  | 'text_delta'
+  | 'tool_use'
+  | 'tool_result'
+  | 'done'
+  | 'error';
+
+export interface SSEEvent {
+  type: SSEEventType;
+  data: Record<string, unknown>;
+}
+
+export function streamResumeAssistant(
+  params: ResumeAssistantParams,
+  onEvent: (event: SSEEvent) => void,
+): { eventSource: null; cleanup: () => void } {
+  let aborted = false;
+
+  const cleanup = () => {
+    aborted = true;
+  };
+
+  const baseURL = api.defaults.baseURL || 'http://localhost:8000';
+
+  fetch(`${baseURL}/resume-assistant`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      resumeId: params.resumeId,
+      type: params.type,
+      baseUrl: params.baseUrl,
+      apiKey: params.apiKey,
+      model: params.model,
+      input: params.input,
+    }),
+  }).then(async (response) => {
+    if (!response.ok) {
+      onEvent({ type: 'error', data: { message: `HTTP ${response.status}: ${response.statusText}` } });
+      return;
+    }
+    if (!response.body) {
+      onEvent({ type: 'error', data: { message: 'Response body is null' } });
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let currentEventType = '';
+
+    while (true) {
+      if (aborted) break;
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('event:')) {
+          currentEventType = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          const data = line.slice(5).trim();
+          if (currentEventType === 'done' || data === '[DONE]') {
+            onEvent({ type: 'done', data: {} });
+            return;
+          }
+          if (currentEventType && data) {
+            try {
+              const eventData = JSON.parse(data);
+              onEvent({ type: currentEventType as SSEEventType, data: eventData });
+            } catch {
+              console.error('Failed to parse SSE data:', data);
+            }
+          }
+          currentEventType = '';
+        }
+      }
+    }
+  }).catch((err) => {
+    if (!aborted) {
+      onEvent({ type: 'error', data: { message: err.message } });
+    }
+  });
+
+  return { eventSource: null, cleanup };
+}
+
 export interface UploadParseParams {
   type: ProviderType;
   baseUrl: string;

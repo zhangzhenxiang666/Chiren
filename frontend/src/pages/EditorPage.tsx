@@ -9,26 +9,28 @@ import { EditorCanvas } from '@/components/editor/EditorCanvas';
 import { ThemeEditor } from '@/components/editor/ThemeEditor';
 import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
 import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
+import { DraggableAIChatButton } from '@/components/editor/DraggableAIChatButton';
 import { mockResume } from '@/data/mockResume';
 
 export default function EditorPage() {
-  const { id } = useParams<{ id: string }>();
+  const { id, resumeId } = useParams<{ id: string; resumeId?: string }>();
+  const effectiveResumeId = resumeId || id;
   const navigate = useNavigate();
   const { showThemeEditor } = useEditorStore();
-  const { updateSection, addSection, removeSection, reorderSections, loadResume } = useEditor(id || 'mock-1');
+  const { updateSection, addSection, removeSection, reorderSections, loadResume } = useEditor(effectiveResumeId || 'mock-1');
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!effectiveResumeId) return;
     loadResume().finally(() => {
       if (!useResumeStore.getState().currentResume) {
         setResume(mockResume);
       }
       setLoading(false);
     });
-  }, [id, loadResume, setResume]);
+  }, [effectiveResumeId, loadResume, setResume]);
 
   if (loading || !currentResume) {
     return (
@@ -38,11 +40,13 @@ export default function EditorPage() {
     );
   }
 
+  const backUrl = id ? `/workspace/${id}` : '/';
+
   return (
     <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
       <EditorToolbar
         title={currentResume.title}
-        onBack={() => navigate('/')}
+        onBack={() => navigate(backUrl)}
         onCoverLetterOpen={() => setCoverLetterOpen(true)}
       />
       <div className="flex flex-1 overflow-hidden">
@@ -66,6 +70,7 @@ export default function EditorPage() {
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
       />
+      <DraggableAIChatButton />
     </div>
   );
 }

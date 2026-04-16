@@ -1,6 +1,8 @@
 import json
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette import EventSourceResponse
+
 from apps.cover_letter.prompt import SYSTEM, build_user_prompt
 from apps.cover_letter.schemas import AiRequest
 from shared.api import get_client

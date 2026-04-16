@@ -335,6 +335,24 @@ async def _handle_tool_calls(
                 is_error=tool_result.is_error,
             )
         )
+        # 如果是更新工具就给sse中的tool_result消息插入额外的更新后的section的完整信息
+        if tool_use.name == "update_section":
+            for section in sections:
+                if section["id"] == tool_use.input["section_id"]:
+                    result["section_content"] = {
+                        "data": section["content"],
+                        "id": section["id"],
+                    }
+                    break
+
+        if tool_use.name == "add_section":
+            for section in sections:
+                if (
+                    section["type"] == tool_use.input["type"]
+                    and section["title"] == tool_use.input["title"]
+                ):
+                    result["section_content"] = {**section}
+                    break
         yield make_sse_event("tool_result", result)
 
     if tool_results:

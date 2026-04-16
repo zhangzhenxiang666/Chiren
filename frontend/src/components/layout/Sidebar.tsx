@@ -72,8 +72,10 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
         style={{ width: collapsed ? '64px' : '208px' }}
       >
         <div className="h-14 flex items-center px-4 border-b border-[#1e1e20] shrink-0 gap-3">
-          <img src={logoSvg} alt="Chiren" className="w-7 h-7 shrink-0" />
-          <span className="text-pink-500 font-bold text-lg whitespace-nowrap transition-opacity duration-300" style={{ opacity: collapsed ? 0 : 1 }}>Chiren</span>
+          <button type="button" onClick={() => navigate('/workspace')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <img src={logoSvg} alt="Chiren" className="w-7 h-7 shrink-0" />
+            <span className="text-pink-500 font-bold text-lg whitespace-nowrap transition-opacity duration-300" style={{ opacity: collapsed ? 0 : 1 }}>Chiren</span>
+          </button>
         </div>
 
         <nav className="flex-1 p-3 flex flex-col">

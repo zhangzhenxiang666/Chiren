@@ -3,7 +3,7 @@ import type { Resume, ResumeSection, SectionContent } from '@/types/resume';
 import { AUTOSAVE_DELAY } from '@/lib/constants';
 import { generateId } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings-store';
-import { updateResumeSection, updateResume, deleteResumeSection } from '@/lib/api';
+import { updateResumeSection, deleteResumeSection } from '@/lib/api';
 
 interface ResumeStore {
   currentResume: Resume | null;
@@ -189,11 +189,9 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
           visible: s.visible,
           content: s.content,
         };
-        if (s.type === 'personal_info') {
-          console.log('[save] 个人信息区块 payload:', JSON.stringify(payload, null, 2));
-        }
+
         savePromises.push(
-          updateResumeSection(payload).then(() => {}).catch((err) => {
+          updateResumeSection(payload).then(() => { }).catch((err) => {
             console.error('保存区块失败:', s.type, s.id, err);
           }),
         );

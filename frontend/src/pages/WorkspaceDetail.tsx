@@ -11,6 +11,7 @@ import { EditorCanvas } from '../components/editor/EditorCanvas'
 import { ThemeEditor } from '../components/editor/ThemeEditor'
 import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel'
 import { CoverLetterDialog } from '../components/editor/CoverLetterDialog'
+import { DraggableAIChatButton } from '../components/editor/DraggableAIChatButton'
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
 import type { JdAnalysis } from '../lib/api'
@@ -25,6 +26,7 @@ export default function WorkspaceDetail() {
   const { id } = useParams<{ id: string }>()
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [wsLoading, setWsLoading] = useState(true)
+  const [workspaceNotFound, setWorkspaceNotFound] = useState(false)
   const [sections, setSections] = useState<ResumeSection[]>([])
   const [loading, setLoading] = useState(true)
   const [isEditing, setIsEditing] = useState(false)
@@ -60,6 +62,7 @@ export default function WorkspaceDetail() {
           setWorkspace(ws)
         } else {
           toast.error('未找到该工作空间')
+          setWorkspaceNotFound(true)
         }
       })
       .catch((err) => {
@@ -230,10 +233,29 @@ export default function WorkspaceDetail() {
       .catch(console.error)
   }
 
-  if (wsLoading || !workspace) {
+  if (wsLoading) {
     return (
       <div className="flex items-center justify-center h-full text-gray-400">
         加载中...
+      </div>
+    )
+  }
+
+  if (!workspace) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
+        <div className="text-6xl opacity-30">📭</div>
+        <div className="text-center">
+          <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
+          <p className="text-sm text-gray-500">访问的工作空间可能已被删除或不存在</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/workspace')}
+          className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
+        >
+          返回工作空间列表
+        </button>
       </div>
     )
   }
@@ -274,6 +296,7 @@ export default function WorkspaceDetail() {
           open={coverLetterOpen}
           onOpenChange={setCoverLetterOpen}
         />
+        <DraggableAIChatButton />
       </div>
     )
   }
@@ -326,7 +349,7 @@ export default function WorkspaceDetail() {
 
             <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
               <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
-                {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => setIsEditing(true)} />}
+                {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace.template }} onClick={() => navigate(`/workspace/${workspace.id}/template/edit`)} />}
               </div>
             </div>
           </div>
@@ -365,16 +388,16 @@ export default function WorkspaceDetail() {
                   </button>
                 </div>
               ) : (
-                subResumes.map((resume) => (
+                  subResumes.map((resume) => (
                   <div
                     key={resume.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => toast.info(`即将打开：${resume.title}`)}
+                    onClick={() => navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        toast.info(`即将打开：${resume.title}`)
+                        navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)
                       }
                     }}
                     className="w-full text-left bg-[#1e1e20] rounded-xl border border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors p-4 flex items-center gap-3 cursor-pointer"
@@ -436,7 +459,7 @@ export default function WorkspaceDetail() {
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation()
-                            toast.info('即将编辑')
+                            navigate(`/workspace/${workspace.id}/resumes/${resume.id}/edit`)
                           }}
                           className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
                         >

@@ -1,8 +1,10 @@
 from typing import Annotated
+
 from fastapi import APIRouter, Body, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
+
 from apps.cover_letter.schemas import AiRequest
 from apps.cover_letter.service import cover_letter_service
 from shared.database import get_session
