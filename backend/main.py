@@ -1,5 +1,6 @@
 """FastAPI 应用入口。"""
 
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -26,6 +27,8 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+logging.basicConfig(level=logging.INFO)
 
 # CORS 中间件配置
 app.add_middleware(

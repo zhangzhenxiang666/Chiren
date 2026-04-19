@@ -4,6 +4,7 @@ from collections.abc import Iterator
 from apps.resume_assistant.agent.events import (
     AgentEvent,
     TextDeltaEvent,
+    TextStartEvent,
     ThinkingDeltaEvent,
     ThinkingStartEvent,
 )

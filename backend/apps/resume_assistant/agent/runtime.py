@@ -202,6 +202,7 @@ class AgentRuntime:
                 build_sections_prompt_fn=build_sections_prompt_fn,
                 db=self.db,
                 resume_id=request.resume_id,
+                store=self.store,
             ):
                 yield to_sse_event(agent_event)
         finally:
