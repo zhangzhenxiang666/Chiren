@@ -2,7 +2,7 @@ import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sse_starlette.sse import EventSourceResponse
 
@@ -29,8 +29,6 @@ async def get_work_list(
         query = query.where(BaseWork.task_type == task_type)
     if status:
         query = query.where(BaseWork.status == status)
-    result = await db.execute(query)
-    work_list = result.scalars().all()
     if meta_contains:
         try:
             filter_dict = json.loads(meta_contains)
@@ -38,16 +36,15 @@ async def get_work_list(
                 raise HTTPException(
                     status_code=400, detail="meta_contains必须是JSON对象"
                 )
-            work_list = [
-                item
-                for item in work_list
-                if item.meta_info is not None
-                and all(item.meta_info.get(k) == v for k, v in filter_dict.items())
+            json_filters = [
+                BaseWork.meta_info[k].as_string() == str(v)
+                for k, v in filter_dict.items()
             ]
+            query = query.where(and_(*json_filters))
         except json.JSONDecodeError:
-            raise HTTPException(
-                status_code=400, detail="meta_contains必须是有效JSON"
-            )
+            raise HTTPException(status_code=400, detail="meta_contains必须是有效JSON")
+    result = await db.execute(query)
+    work_list = result.scalars().all()
     return [WorkSchema.model_validate(item) for item in work_list]
 
 
