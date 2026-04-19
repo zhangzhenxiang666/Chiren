@@ -15,7 +15,7 @@ import { DraggableAIChatButton } from '../components/editor/DraggableAIChatButto
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
 import type { JdAnalysis } from '../lib/api'
-import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, getProviderConfig } from '../lib/api'
+import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, checkRunningMatchTask, getProviderConfig } from '../lib/api'
 import { markUnread, addNotificationTask } from '../lib/notification'
 import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
 import ScoreDetailModal from '../components/workspace/ScoreDetailModal'
@@ -500,6 +500,11 @@ export default function WorkspaceDetail() {
                                       toast.error('请先在设置中配置 AI 提供商')
                                       return
                                     }
+                                    const existingTask = await checkRunningMatchTask(resume.id)
+                                    if (existingTask) {
+                                      toast.error('该简历已有正在进行的评分任务')
+                                      return
+                                    }
                                     const { taskId } = await createMatchTask({
                                       resume_id: resume.id,
                                       type: config.active,
@@ -630,8 +635,10 @@ const data = await fetchResumeDetail(workspace!.id)
       <ScoreDetailModal
         open={showScoreDetail}
         onClose={() => setShowScoreDetail(false)}
+        resumeId={currentScoreResumeId || ''}
         resumeTitle={subResumes.find((r) => r.id === currentScoreResumeId)?.title || ''}
         analyses={currentScoreResumeId ? (resumeAnalyses.get(currentScoreResumeId) || []) : []}
+        workspaceId={workspace?.id || ''}
       />
     </div>
   )

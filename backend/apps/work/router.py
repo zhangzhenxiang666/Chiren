@@ -1,3 +1,4 @@
+import json
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -19,6 +20,9 @@ async def get_work_list(
     db: Annotated[AsyncSession, Depends(get_session)],
     task_type: Annotated[str | None, Query(description="任务类型")] = None,
     status: Annotated[str | None, Query(description="任务状态")] = None,
+    meta_contains: Annotated[
+        str | None, Query(description='meta_info包含的JSON，如{"resume_id":"xxx"}')
+    ] = None,
 ) -> list[WorkSchema]:
     query = select(BaseWork)
     if task_type:
@@ -27,6 +31,23 @@ async def get_work_list(
         query = query.where(BaseWork.status == status)
     result = await db.execute(query)
     work_list = result.scalars().all()
+    if meta_contains:
+        try:
+            filter_dict = json.loads(meta_contains)
+            if not isinstance(filter_dict, dict):
+                raise HTTPException(
+                    status_code=400, detail="meta_contains必须是JSON对象"
+                )
+            work_list = [
+                item
+                for item in work_list
+                if item.meta_info is not None
+                and all(item.meta_info.get(k) == v for k, v in filter_dict.items())
+            ]
+        except json.JSONDecodeError:
+            raise HTTPException(
+                status_code=400, detail="meta_contains必须是有效JSON"
+            )
     return [WorkSchema.model_validate(item) for item in work_list]
 
 

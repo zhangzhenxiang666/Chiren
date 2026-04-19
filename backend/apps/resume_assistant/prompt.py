@@ -1,11 +1,69 @@
+from typing import Any
+
+from shared.models import utc_now
+from shared.types.jd_analysis import (
+    JobDescriptionAnalysisSchema,
+    SuggestionItem,
+)
+
+
 def build_sections_prompt(sections: list[dict]) -> str:
-    """根据 sections 列表构建 prompt 中需要填充的 sections 部分"""
     lines = []
     for section in sections:
         lines.append(
             f'  - [{section["type"]}] "{section["title"]}" (section_id: {section["id"]})'
         )
     return "\n".join(lines)
+
+
+def build_jd_prompt(
+    jd_analysis: JobDescriptionAnalysisSchema,
+    sections: list[dict[str, Any]],
+) -> str:
+    now = utc_now().isoformat()
+    jd_analysis_time = (
+        jd_analysis.created_at.isoformat() if jd_analysis.created_at else "N/A"
+    )
+
+    section_id_to_type = {s["id"]: s["type"] for s in sections}
+
+    suggestions_by_section: dict[str, list[SuggestionItem]] = {}
+    for sug in jd_analysis.suggestions:
+        sec_type = section_id_to_type.get(sug.section_id, sug.section_id)
+        if sec_type not in suggestions_by_section:
+            suggestions_by_section[sec_type] = []
+        suggestions_by_section[sec_type].append(sug)
+
+    suggestions_lines = []
+    for sec_type, items in suggestions_by_section.items():
+        suggestions_lines.append(f"### [{sec_type}]")
+        for item in items:
+            suggestions_lines.append(f"- **Current**: {item.current}")
+            suggestions_lines.append(f"  **Suggested**: {item.suggested}")
+        suggestions_lines.append("")
+
+    suggestions_text = "\n".join(suggestions_lines)
+
+    jd_result_parts = [
+        f"**Overall Score**: {jd_analysis.overall_score}/100",
+        f"**ATS Score**: {jd_analysis.ats_score}/100",
+        "",
+        f"**Summary**: {jd_analysis.summary}",
+        "",
+        f"**Matched Keywords**: {', '.join(jd_analysis.keyword_matches) or 'N/A'}",
+        f"**Missing Keywords**: {', '.join(jd_analysis.missing_keywords) or 'N/A'}",
+        "",
+        "## Optimization Suggestions",
+        suggestions_text,
+    ]
+
+    jd_analysis_result = "\n".join(jd_result_parts)
+
+    return JD_ANALYSIS.format(
+        now=now,
+        jd_analysis_time=jd_analysis_time,
+        jd_analysis_result=jd_analysis_result,
+    )
 
 
 SYSTEM = """\
@@ -49,3 +107,18 @@ Requirements:
 - Keep the content concise and focused
 
 Note: Do not fabricate or introduce any information not provided by the user"""
+
+
+JD_ANALYSIS = """
+
+# Resume Optimization Suggestions Based on JD Analysis
+
+Based on the latest JD analysis results, provide resume optimization suggestions.
+
+Current Time: {now}
+JD Analysis Time: {jd_analysis_time}
+
+## JD Analysis Results
+---
+{jd_analysis_result}
+---"""

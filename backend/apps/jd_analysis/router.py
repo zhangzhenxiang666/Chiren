@@ -83,6 +83,18 @@ async def create_score_task(
             detail="简历缺少职位描述(job_description),无法进行评分",
         )
 
+    # 检查是否存在正在进行的相同任务,返回已有的task_id
+    existing = await db.execute(
+        select(BaseWork).where(
+            BaseWork.task_type == TaskType.JD_SCORE.value,
+            BaseWork.status == TaskStatus.RUNNING.value,
+        )
+    )
+    running_tasks = existing.scalars().all()
+    for task in running_tasks:
+        if task.meta_info and task.meta_info.get("resume_id") == data.resume_id:
+            return TaskIdResponse(task_id=task.id)
+
     meta_info = resume.meta_info
 
     job_description: str = meta_info.get("job_description")
@@ -95,6 +107,7 @@ async def create_score_task(
         id=task_id,
         task_type=TaskType.JD_SCORE.value,
         status=TaskStatus.PENDING.value,
+        meta_info={"resume_id": resume.id},
     )
     db.add(work)
     await db.commit()

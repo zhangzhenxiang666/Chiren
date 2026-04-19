@@ -421,6 +421,17 @@ export interface CreateMatchTaskParams {
   model: string;
 }
 
+export async function checkRunningMatchTask(resumeId: string): Promise<TaskIdResponse | null> {
+  const { data } = await api.get<WorkTask[]>('/work/list', {
+    params: {
+      task_type: 'jd_score',
+      status: 'running',
+      meta_contains: JSON.stringify({ resume_id: resumeId }),
+    },
+  });
+  return data.length > 0 ? { taskId: data[0].id } : null;
+}
+
 export async function createMatchTask(params: CreateMatchTaskParams): Promise<TaskIdResponse> {
   const { data } = await api.post<TaskIdResponse>('/jd-analysis/match', {
     resume_id: params.resume_id,

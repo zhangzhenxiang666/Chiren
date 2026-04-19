@@ -10,15 +10,19 @@ import {
   Loader2,
   TrendingDown,
   Minus,
+  Star,
 } from 'lucide-react'
-import { fetchResumeSectionById } from '../../lib/api'
-import type { JdAnalysis } from '../../lib/api'
+import { toast } from 'sonner'
+import { fetchResumeSectionById, getProviderConfig, createMatchTask, checkRunningMatchTask, type JdAnalysis } from '../../lib/api'
+import { markUnread, addNotificationTask } from '../../lib/notification'
 
 export interface ScoreDetailModalProps {
   open: boolean
   onClose: () => void
+  resumeId: string
   resumeTitle: string
   analyses: JdAnalysis[]
+  workspaceId: string
 }
 
 // ─── Color helpers ────────────────────────────────────────────────────────────
@@ -205,20 +209,19 @@ function JDPreview({ jd }: { jd?: string }) {
   if (!jd) return null
 
   return (
-    <div className="group relative mt-1 max-w-full">
-      <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+    <div className="relative mt-1 max-w-full">
+      <div className="group/jd inline-flex items-center gap-1.5 text-[11px] text-gray-500 relative">
         <span className="opacity-60">JD:</span>
         <p className="truncate max-w-[420px] cursor-default">
           {jd}
         </p>
-      </div>
 
-      {/* Tooltip */}
-      <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover:block w-[520px]">
-        <div className="rounded-lg border border-[#2a2a2e] bg-[#111113] p-3 shadow-xl">
-          <p className="text-[12px] text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {jd}
-          </p>
+        <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/jd:block w-[520px]">
+          <div className="rounded-lg border border-[#2a2a2e] bg-[#111113] p-3 shadow-xl">
+            <p className="text-[12px] text-gray-300 leading-relaxed whitespace-pre-wrap">
+              {jd}
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -250,8 +253,10 @@ function TrendIcon({ delta }: { delta: number }) {
 export default function ScoreDetailModal({
   open,
   onClose,
+  resumeId,
   resumeTitle,
   analyses,
+  workspaceId,
 }: ScoreDetailModalProps) {
   const sortedAnalyses = useMemo(() =>
     [...analyses].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
@@ -267,6 +272,48 @@ export default function ScoreDetailModal({
   const isViewingHistory = selectedIndex > 0
 
   const handleResetAndClose = useCallback(() => { setSelectedIndex(0); onClose() }, [onClose])
+
+  const handleStartScoring = useCallback(async () => {
+    try {
+      const config = await getProviderConfig()
+      const activeConfig = config.providers[config.active]
+      if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+        toast.error('请先在设置中配置 AI 提供商')
+        return
+      }
+      const existingTask = await checkRunningMatchTask(resumeId)
+      if (existingTask) {
+        toast.error('该简历已有正在进行的评分任务')
+        return
+      }
+      const { taskId } = await createMatchTask({
+        resume_id: resumeId,
+        type: config.active,
+        base_url: activeConfig.baseUrl,
+        api_key: activeConfig.apiKey,
+        model: activeConfig.model,
+      })
+      markUnread()
+      addNotificationTask({
+        id: taskId,
+        taskType: 'jd_score',
+        status: 'running',
+        workspaceId,
+        metaInfo: { title: resumeTitle },
+        errorMessage: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      toast.success(
+        <div className="flex flex-col gap-1">
+          <span className="font-medium text-sm">JD 匹配评分任务已启动</span>
+          <span className="text-xs text-gray-400 truncate">「{resumeTitle}」正在评分中</span>
+        </div>,
+      )
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : '评分请求失败')
+    }
+  }, [resumeId, resumeTitle, workspaceId])
 
   const groupedSuggestions = useMemo(() => {
     if (!currentAnalysis?.suggestions?.length) return []
@@ -333,7 +380,6 @@ export default function ScoreDetailModal({
           <div className="flex-1 min-w-0">
             <h2 className="text-[15px] font-semibold text-white leading-tight truncate">{resumeTitle}</h2>
 
-            {/* 👇 JD Preview（新加） */}
             {currentAnalysis && (
               <JDPreview jd={currentAnalysis.jobDescription} />
             )}
@@ -357,13 +403,25 @@ export default function ScoreDetailModal({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={handleResetAndClose}
-            className="flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors shrink-0"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-1 shrink-0">
+            {currentAnalysis && (
+              <button
+                type="button"
+                onClick={handleStartScoring}
+                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] text-yellow-400 hover:text-yellow-300 hover:bg-yellow-500/10 transition-colors"
+              >
+                <Star className="w-3 h-3" />
+                <span>重新评分</span>
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={handleResetAndClose}
+              className="flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
