@@ -34,8 +34,7 @@ from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseB
 log = logging.getLogger(__name__)
 
 
-async def create_tool_executor(
-    db: AsyncSession,
+def create_tool_executor(
     tool_registry: ToolRegistry,
     id_to_type: dict[str, str],
 ) -> ToolExecutor:
@@ -189,8 +188,7 @@ class AgentRuntime:
             metadata={},
         )
 
-        tool_executor_fn = await create_tool_executor(
-            db=self.db,
+        tool_executor_fn = create_tool_executor(
             tool_registry=self.tool_registry,
             id_to_type=id_to_type,
         )

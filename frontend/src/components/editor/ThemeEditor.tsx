@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Palette, Type, Space, ChevronDown, ChevronRight, RotateCcw, LayoutGrid } from 'lucide-react';
+import { Palette, Type, Space, ChevronDown, ChevronRight, RotateCcw, LayoutGrid, Sparkles } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
 import { useResumeStore } from '@/stores/resume-store';
 import type { ThemeConfig } from '@/types/resume';
 import { TEMPLATES, TEMPLATE_NAMES } from '@/lib/constants';
@@ -21,6 +23,9 @@ const PRESET_THEMES = [
   { id: 'classic', colors: ['#1a1a1a', '#3b82f6', '#ffffff', '#374151'], config: { primaryColor: '#1a1a1a', accentColor: '#3b82f6', fontFamily: 'Georgia', fontSize: 'medium' as const, lineSpacing: 1.5, margin: { top: 24, right: 24, bottom: 24, left: 24 }, sectionSpacing: 16 } },
   { id: 'modern', colors: ['#0f172a', '#6366f1', '#f8fafc', '#475569'], config: { primaryColor: '#0f172a', accentColor: '#6366f1', fontFamily: 'Inter', fontSize: 'medium' as const, lineSpacing: 1.6, margin: { top: 20, right: 20, bottom: 20, left: 20 }, sectionSpacing: 14 } },
   { id: 'minimal', colors: ['#27272a', '#a1a1aa', '#ffffff', '#52525b'], config: { primaryColor: '#27272a', accentColor: '#a1a1aa', fontFamily: 'Helvetica', fontSize: 'small' as const, lineSpacing: 1.4, margin: { top: 28, right: 28, bottom: 28, left: 28 }, sectionSpacing: 12 } },
+  { id: 'elegant', colors: ['#1c1917', '#b45309', '#fffbeb', '#57534e'], config: { primaryColor: '#1c1917', accentColor: '#b45309', fontFamily: 'Palatino', fontSize: 'medium' as const, lineSpacing: 1.6, margin: { top: 26, right: 26, bottom: 26, left: 26 }, sectionSpacing: 18 } },
+  { id: 'bold', colors: ['#020617', '#e11d48', '#fff1f2', '#334155'], config: { primaryColor: '#020617', accentColor: '#e11d48', fontFamily: 'Arial', fontSize: 'large' as const, lineSpacing: 1.5, margin: { top: 20, right: 20, bottom: 20, left: 20 }, sectionSpacing: 16 } },
+  { id: 'creative', colors: ['#134e4a', '#0d9488', '#f0fdfa', '#115e59'], config: { primaryColor: '#134e4a', accentColor: '#0d9488', fontFamily: 'Verdana', fontSize: 'medium' as const, lineSpacing: 1.5, margin: { top: 22, right: 22, bottom: 22, left: 22 }, sectionSpacing: 14 } },
 ];
 
 const FONT_OPTIONS = ['Inter', 'Georgia', 'Helvetica', 'Arial', 'Palatino', 'Verdana'];
@@ -72,7 +77,7 @@ export function ThemeEditor() {
                     onClick={() => useResumeStore.getState().setTemplate(tpl)}
                   >
                     <div className="bg-zinc-50 p-1 dark:bg-zinc-800/50">
-                      <TemplateThumbnail template={tpl} className="mx-auto h-8 w-[22px] shadow-sm ring-1 ring-zinc-200/50" />
+                      <TemplateThumbnail template={tpl} className="mx-auto h-[56px] w-[40px] shadow-sm ring-1 ring-zinc-200/50" />
                     </div>
                     <div className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? 'bg-pink-50 text-pink-700' : 'text-zinc-500'}`}>{TEMPLATE_NAMES[tpl] ?? tpl}</div>
                   </button>
@@ -81,12 +86,12 @@ export function ThemeEditor() {
             </div>
           </CollapsibleSection>
           <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
-          <CollapsibleSection title="预设主题" icon={Palette as React.ElementType}>
+          <CollapsibleSection title="预设主题" icon={Sparkles as React.ElementType}>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_THEMES.map((preset) => (
                 <button key={preset.id} type="button" onClick={() => updateTheme(preset.config)} className="group flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-zinc-200 p-2 transition-all hover:border-zinc-400 hover:shadow-sm dark:border-zinc-700">
                   <div className="flex gap-0.5">{preset.colors.map((color) => <div key={color} className="h-3 w-3 rounded-full border border-zinc-200" style={{ backgroundColor: color }} />)}</div>
-                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">{preset.id}</span>
+                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">{preset.id === 'classic' ? '经典' : preset.id === 'modern' ? '现代' : preset.id === 'minimal' ? '简约' : preset.id === 'elegant' ? '优雅' : preset.id === 'bold' ? '大胆' : '创意'}</span>
                 </button>
               ))}
             </div>
@@ -169,11 +174,45 @@ export function ThemeEditor() {
 function ColorPicker({ label, value, onChange }: { label: string; value: string; onChange: (c: string) => void }) {
   return (
     <div className="flex items-center justify-between">
-      <span className="text-xs text-zinc-600 dark:text-zinc-400">{label}</span>
-      <div className="flex items-center gap-1.5 rounded border border-zinc-200 px-1.5 py-0.5 dark:border-zinc-700">
-        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-3.5 w-3.5 cursor-pointer rounded border-0 p-0" />
-        <span className="font-mono text-[10px] text-zinc-500">{value}</span>
-      </div>
+      <Label className="text-xs text-zinc-600 dark:text-zinc-400">{label}</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <button
+            type="button"
+            className="flex cursor-pointer items-center gap-2 rounded-md border border-zinc-200 px-2 py-1 text-xs transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600"
+          >
+            <div className="h-4 w-4 rounded-sm border border-zinc-200" style={{ backgroundColor: value }} />
+            <span className="font-mono text-zinc-500">{value}</span>
+          </button>
+        </PopoverTrigger>
+        <PopoverContent className="w-56 p-2 bg-white dark:bg-zinc-900 shadow-lg border border-zinc-100 dark:border-zinc-700" align="end">
+          <div className="relative h-6 w-full border border-white/30 dark:border-zinc-700/50 overflow-hidden">
+            <div
+              className="absolute inset-0"
+              style={{ backgroundColor: value }}
+            />
+            <input
+              type="color"
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+            />
+          </div>
+          <div className="h-2" />
+          <input
+            type="text"
+            value={value}
+            onChange={(e) => {
+              const v = e.target.value;
+              if (/^#[0-9a-fA-F]{0,6}$/.test(v)) {
+                onChange(v);
+              }
+            }}
+            placeholder="#000000"
+            className="h-8 w-full rounded border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 text-xs font-mono text-zinc-800 dark:text-zinc-200 outline-none"
+          />
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
