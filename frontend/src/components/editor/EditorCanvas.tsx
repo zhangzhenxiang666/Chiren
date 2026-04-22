@@ -26,6 +26,7 @@ interface EditorCanvasProps {
   onUpdateSection: (sectionId: string, content: Partial<SectionContent>) => void;
   onRemoveSection: (sectionId: string) => void;
   onReorderSections: (sections: ResumeSection[]) => void;
+  className?: string;
 }
 
 export function EditorCanvas({
@@ -33,6 +34,7 @@ export function EditorCanvas({
   onUpdateSection,
   onRemoveSection,
   onReorderSections,
+  className = 'flex-[4]',
 }: EditorCanvasProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { setDragging } = useEditorStore();
@@ -75,7 +77,7 @@ export function EditorCanvas({
   const activeSection = activeId ? sections.find((s) => s.id === activeId) : null;
 
   return (
-    <div className="min-w-0 flex-[4] overflow-hidden bg-zinc-50 dark:bg-zinc-950">
+    <div className={`min-w-0 overflow-hidden bg-zinc-50 dark:bg-zinc-950 ${className}`}>
       <ScrollArea className="h-full">
         <div className="p-4">
           <DndContext

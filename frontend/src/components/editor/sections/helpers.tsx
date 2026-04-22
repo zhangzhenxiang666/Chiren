@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarDays, X, Plus } from 'lucide-react';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 
 const CURRENT_YEAR = new Date().getFullYear();
-const YEARS = Array.from({ length: CURRENT_YEAR - 1960 + 1 }, (_, i) => CURRENT_YEAR - i);
 const MONTH_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
 export const YearMonthPicker = ({
@@ -38,16 +38,16 @@ export const YearMonthPicker = ({
   };
 
   return (
-    <label className="block text-xs text-zinc-500">
-      <span>{label}</span>
+    <label className="block">
+      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="mt-1 flex w-full items-center justify-between rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 transition-colors hover:border-zinc-300 focus:border-pink-300 focus:outline-none"
+            className="mt-1 flex w-full items-center justify-between rounded border border-zinc-300 bg-zinc-100 px-2.5 py-1.5 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 transition-colors hover:border-zinc-300 focus:border-pink-300 focus:outline-none"
           >
             <span className={!value ? 'text-zinc-400 dark:text-zinc-500' : ''}>{display}</span>
-            <CalendarIcon className="ml-1 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+            <CalendarDays className="ml-1 h-3.5 w-3.5 shrink-0 text-zinc-400" />
           </button>
         </PopoverTrigger>
         <PopoverContent className="w-auto border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900" align="start" sideOffset={8}>
@@ -89,9 +89,9 @@ export const YearMonthPicker = ({
 };
 
 export const F = ({ label, ...props }: { label: string } & Omit<ComponentProps<'input'>, 'ref'>) => (
-  <label className="block text-xs text-zinc-500">
-    <span>{label}</span>
-    <input className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none" {...props} />
+  <label className="block">
+    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+    <input className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5" {...props} />
   </label>
 );
 
@@ -109,15 +109,15 @@ function AutoResizeTextarea(props: Omit<ComponentProps<'textarea'>, 'ref'>) {
     <textarea
       ref={ref}
       rows={1}
-      className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none resize-none overflow-hidden"
+      className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none resize-none overflow-hidden px-2.5 py-2 min-h-[2.5rem]"
       {...props}
     />
   );
 }
 
 export const TA = ({ label, ...props }: { label: string } & Omit<ComponentProps<'textarea'>, 'ref'>) => (
-  <label className="block text-xs text-zinc-500">
-    <span>{label}</span>
+  <label className="block">
+    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
     <AutoResizeTextarea {...props} />
   </label>
 );
@@ -158,9 +158,9 @@ export const S = ({ label, value, options, onChange, placeholder }: {
   const id = `select-${label}`;
   return (
     <div>
-      <span id={id} className="block text-xs text-zinc-500">{label}</span>
+      <span id={id} className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
       <Select value={value || ''} onValueChange={onChange} aria-labelledby={id}>
-        <SelectTrigger className="mt-1 border-zinc-700 bg-zinc-800/50 text-zinc-100" aria-labelledby={id}>
+        <SelectTrigger className="mt-1 border-zinc-700 bg-zinc-800/50 text-zinc-100 h-8" aria-labelledby={id}>
           <SelectValue placeholder={placeholder || '请选择'} />
         </SelectTrigger>
         <SelectContent className="border-zinc-700 bg-zinc-900 text-zinc-200">
@@ -174,3 +174,108 @@ export const S = ({ label, value, options, onChange, placeholder }: {
     </div>
   );
 };
+
+export function EditableList({ label, items, onChange, placeholder }: {
+  label: string;
+  items: string[];
+  onChange: (items: string[]) => void;
+  placeholder?: string;
+}) {
+  const updateItem = (index: number, value: string) => {
+    const updated = [...items];
+    updated[index] = value;
+    onChange(updated);
+  };
+
+  const removeItem = (index: number) => {
+    onChange(items.filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-1">
+      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+      <div className="space-y-1.5">
+        {items.map((item, index) => (
+          <div key={index} className="flex items-center gap-1">
+            <input
+              type="text"
+              value={item}
+              onChange={(e) => updateItem(index, e.target.value)}
+              placeholder={placeholder}
+              className="flex-1 rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5"
+            />
+            <button
+              type="button"
+              onClick={() => removeItem(index)}
+              className="h-8 w-8 shrink-0 rounded text-zinc-400 hover:bg-accent hover:text-red-500 transition-colors flex items-center justify-center cursor-pointer"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ))}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => onChange([...items, ''])}
+          className="h-7 cursor-pointer gap-1 text-xs"
+        >
+          <Plus className="h-3 w-3" />添加
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function TagInput({ label, tags, onChange, placeholder }: {
+  label: string;
+  tags: string[];
+  onChange: (tags: string[]) => void;
+  placeholder?: string;
+}) {
+  const addItem = () => onChange([...(tags || []), '']);
+
+  const updateItem = (index: number, value: string) => {
+    const updated = [...(tags || [])];
+    updated[index] = value;
+    onChange(updated);
+  };
+
+  const removeItem = (index: number) => {
+    onChange((tags || []).filter((_, i) => i !== index));
+  };
+
+  return (
+    <div className="space-y-1">
+      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+      <div className="space-y-1.5">
+        {(tags || []).map((tag, index) => (
+          <div key={index} className="flex items-center gap-1">
+            <input
+              type="text"
+              value={tag}
+              onChange={(e) => updateItem(index, e.target.value)}
+              placeholder={placeholder}
+              className="flex-1 rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => removeItem(index)}
+              className="h-8 w-8 shrink-0 cursor-pointer p-0 text-zinc-400 hover:text-red-500"
+            >
+              <X className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+        ))}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={addItem}
+          className="h-7 cursor-pointer gap-1 text-xs"
+        >
+          <Plus className="h-3 w-3" />添加
+        </Button>
+      </div>
+    </div>
+  );
+}

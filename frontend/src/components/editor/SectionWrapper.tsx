@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Eye, EyeOff, Trash2, GripVertical, Sparkles, Pencil } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
+import { useEditorStore } from '@/stores/editor-store';
 import { cn } from '@/lib/utils';
 import { useDragHandle } from './dnd/sortable-section';
 import { useAIChat } from './DraggableAIChatButton';
@@ -41,6 +42,7 @@ interface SectionWrapperProps {
 
 export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperProps) {
   const { toggleSectionVisibility } = useResumeStore();
+  const { selectedSectionId, selectSection } = useEditorStore();
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(section.title);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -65,15 +67,22 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
   };
 
   const isRenamable = section.type !== 'personal_info';
+  const isSelected = selectedSectionId === section.id;
   const SectionComponent = sectionComponents[section.type] || (() => (
     <p className="text-sm text-zinc-500">未知段落类型: {section.type}</p>
   ));
 
   return (
-    <div className={cn(
-      'rounded-lg border bg-white p-4 shadow-sm transition-colors dark:bg-zinc-900 dark:border-zinc-800',
-      section.visible ? '' : 'opacity-60'
-    )}>
+    <div
+      data-section-id={section.id}
+      className={cn(
+        'rounded-lg border bg-white p-4 shadow-sm transition-all duration-200 dark:bg-zinc-900 cursor-pointer',
+        isSelected
+          ? 'border-[#fda5d5] ring-2 ring-[#fda5d5]/50 dark:border-[#fda5d5] dark:ring-[#fda5d5]/30'
+          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700',
+      )}
+      onClick={() => selectSection(section.id)}
+    >
       <div className="mb-3 flex items-center gap-2 border-b pb-3">
         <div
           className="cursor-grab rounded p-1 text-zinc-300 hover:bg-zinc-100 hover:text-zinc-500 active:cursor-grabbing dark:hover:bg-zinc-800 dark:hover:text-zinc-400"
@@ -105,7 +114,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           <button
             type="button"
             className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-            onClick={() => { setRenameValue(section.title); setIsRenaming(true); }}
+            onClick={(e) => { e.stopPropagation(); setRenameValue(section.title); setIsRenaming(true); }}
           >
             <Pencil className="h-3.5 w-3.5" />
           </button>
@@ -115,7 +124,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           type="button"
           className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-pink-500 dark:hover:bg-zinc-800"
           title="AI 润色"
-          onClick={() => setIsOpen(true)}
+          onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
         >
           <Sparkles className="h-4 w-4" />
         </button>
@@ -124,7 +133,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           type="button"
           className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
           title={section.visible ? '隐藏' : '显示'}
-          onClick={() => toggleSectionVisibility(section.id)}
+          onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(section.id); }}
         >
           {section.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
         </button>
@@ -133,13 +142,18 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           type="button"
           className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-500 dark:hover:bg-zinc-800"
           title="删除"
-          onClick={onRemove}
+          onClick={(e) => { e.stopPropagation(); onRemove(); }}
         >
           <Trash2 className="h-4 w-4" />
         </button>
       </div>
 
-      {section.visible && <SectionComponent section={section} onUpdate={onUpdate} />}
+      <div className={cn(
+        'transition-all duration-200',
+        !section.visible && 'opacity-50 pointer-events-none select-none'
+      )}>
+        <SectionComponent section={section} onUpdate={onUpdate} />
+      </div>
     </div>
   );
 }

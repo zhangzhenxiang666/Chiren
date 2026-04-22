@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useResumeStore } from '@/stores/resume-store';
 import type { ThemeConfig } from '@/types/resume';
-import { TEMPLATES } from '@/lib/constants';
+import { TEMPLATES, TEMPLATE_NAMES } from '@/lib/constants';
 import { TemplateThumbnail } from '../template/TemplateThumbnail';
 
 const DEFAULT_THEME: ThemeConfig = {
@@ -41,14 +41,11 @@ function CollapsibleSection({ title, icon: Icon, children, defaultOpen = true }:
 
 export function ThemeEditor() {
   const { currentResume } = useResumeStore();
+  const { setThemeConfig } = useResumeStore();
   const themeConfig: ThemeConfig = { ...DEFAULT_THEME, ...(currentResume?.themeConfig || {}) };
   const updateTheme = (updates: Partial<ThemeConfig>) => {
     if (!currentResume) return;
-    useResumeStore.getState().updateSectionTitle;
-    useResumeStore.setState((state) => ({
-      currentResume: state.currentResume ? { ...state.currentResume, themeConfig: { ...themeConfig, ...updates } } : null,
-      isDirty: true,
-    }));
+    setThemeConfig(updates);
   };
 
   return (
@@ -56,7 +53,7 @@ export function ThemeEditor() {
       <div className="flex items-center justify-between border-b px-4 py-3 dark:border-zinc-800">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
           <Palette className="h-4 w-4 text-zinc-500" />
-          主题
+          主题编辑
         </h3>
         <button type="button" onClick={() => updateTheme(DEFAULT_THEME)} className="cursor-pointer rounded p-1 text-zinc-400 hover:text-zinc-600">
           <RotateCcw className="h-3.5 w-3.5" />
@@ -64,24 +61,26 @@ export function ThemeEditor() {
       </div>
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-4 py-3 space-y-1">
-          <CollapsibleSection title="模板" icon={LayoutGrid}>
-            <div className="grid grid-cols-3 gap-2">
-              {TEMPLATES.map((tpl) => (
-                <button
-                  key={tpl}
-                  type="button"
-                  className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? 'border-pink-500 shadow-sm' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700'}`}
-                  onClick={() => useResumeStore.getState().setTemplate(tpl)}
-                >
-                  <div className="bg-zinc-50 p-1 dark:bg-zinc-800/50">
-                    <TemplateThumbnail template={tpl} className="mx-auto h-8 w-[22px] shadow-sm ring-1 ring-zinc-200/50" />
-                  </div>
-                  <div className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? 'bg-pink-50 text-pink-700' : 'text-zinc-500'}`}>{tpl}</div>
-                </button>
-              ))}
+          <CollapsibleSection title="切换模板" icon={LayoutGrid} defaultOpen={false}>
+            <div className="h-48 overflow-y-auto">
+              <div className="grid grid-cols-3 gap-2">
+                {TEMPLATES.map((tpl) => (
+                  <button
+                    key={tpl}
+                    type="button"
+                    className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? 'border-pink-500 shadow-sm' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700'}`}
+                    onClick={() => useResumeStore.getState().setTemplate(tpl)}
+                  >
+                    <div className="bg-zinc-50 p-1 dark:bg-zinc-800/50">
+                      <TemplateThumbnail template={tpl} className="mx-auto h-8 w-[22px] shadow-sm ring-1 ring-zinc-200/50" />
+                    </div>
+                    <div className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? 'bg-pink-50 text-pink-700' : 'text-zinc-500'}`}>{TEMPLATE_NAMES[tpl] ?? tpl}</div>
+                  </button>
+                ))}
+              </div>
             </div>
           </CollapsibleSection>
-          <Separator />
+          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
           <CollapsibleSection title="预设主题" icon={Palette as React.ElementType}>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_THEMES.map((preset) => (
@@ -92,35 +91,74 @@ export function ThemeEditor() {
               ))}
             </div>
           </CollapsibleSection>
-          <Separator />
+          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
           <CollapsibleSection title="颜色" icon={Palette as React.ElementType}>
             <div className="space-y-2">
               <ColorPicker label="主色" value={themeConfig.primaryColor} onChange={(c) => updateTheme({ primaryColor: c })} />
               <ColorPicker label="强调色" value={themeConfig.accentColor} onChange={(c) => updateTheme({ accentColor: c })} />
             </div>
           </CollapsibleSection>
-          <Separator />
+          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
           <CollapsibleSection title="排版" icon={Type as React.ElementType}>
             <label className="block text-xs text-zinc-500">字体
               <select
                 value={themeConfig.fontFamily}
                 onChange={(e) => updateTheme({ fontFamily: e.target.value })}
-                className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm dark:border-zinc-700 dark:bg-zinc-800/50 focus.border-pink-300 focus:outline-none"
+                className="mt-1 w-full cursor-pointer rounded border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 transition-colors hover:border-pink-300 focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-pink-600 dark:focus:border-pink-400 dark:focus:ring-pink-400/20"
               >
                 {FONT_OPTIONS.map((f) => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
               </select>
             </label>
+            <label className="block text-xs text-zinc-500">字号</label>
+            <div className="mt-1.5 grid grid-cols-3 gap-1.5">
+              {[
+                { value: 'small', label: '小' },
+                { value: 'medium', label: '中' },
+                { value: 'large', label: '大' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => updateTheme({ fontSize: opt.value })}
+                  className={`rounded border px-1.5 py-px text-[10px] font-medium transition-all ${
+                    themeConfig.fontSize === opt.value
+                      ? 'border-pink-500 bg-pink-50 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400'
+                      : 'border-zinc-200 text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
             <label className="block text-xs text-zinc-500">行距
               <input type="range" min={1.0} max={2.5} step={0.1} value={themeConfig.lineSpacing} onChange={(e) => updateTheme({ lineSpacing: Number(e.target.value) })} className="mt-1 w-full" />
               <span className="text-xs text-zinc-400">{themeConfig.lineSpacing.toFixed(1)}</span>
             </label>
           </CollapsibleSection>
-          <Separator />
+          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
           <CollapsibleSection title="间距" icon={Space as React.ElementType}>
-            <label className="block text-xs text-zinc-500">段落间距
+            <label className="block text-xs text-zinc-500">区块间距
               <input type="range" min={4} max={32} step={2} value={themeConfig.sectionSpacing} onChange={(e) => updateTheme({ sectionSpacing: Number(e.target.value) })} className="mt-1 w-full" />
               <span className="text-xs text-zinc-400">{themeConfig.sectionSpacing}px</span>
             </label>
+            <div className="mt-1.5 space-y-2">
+              <span className="text-xs text-zinc-500">页边距</span>
+              <div className="grid grid-cols-4 gap-1">
+                {(['top', 'right', 'bottom', 'left'] as const).map((dir) => (
+                  <div key={dir} className="flex flex-col items-center">
+                    <span className="mb-1 text-[9px] text-zinc-400">{dir === 'top' ? '上' : dir === 'right' ? '右' : dir === 'bottom' ? '下' : '左'}</span>
+                    <input
+                      type="number"
+                      min={0}
+                      max={50}
+                      value={themeConfig.margin[dir]}
+                      onChange={(e) => updateTheme({ margin: { ...themeConfig.margin, [dir]: Number(e.target.value) } })}
+                      className="w-full rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-center text-[10px] text-zinc-800 transition-colors hover:border-zinc-300 focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-600 dark:focus:border-pink-400 dark:focus:ring-pink-400/20"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </CollapsibleSection>
         </div>
       </ScrollArea>
@@ -132,9 +170,9 @@ function ColorPicker({ label, value, onChange }: { label: string; value: string;
   return (
     <div className="flex items-center justify-between">
       <span className="text-xs text-zinc-600 dark:text-zinc-400">{label}</span>
-      <div className="flex items-center gap-2 rounded-md border border-zinc-200 px-2 py-1 dark:border-zinc-700">
-        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-4 w-4 cursor-pointer rounded border-0 p-0" />
-        <span className="font-mono text-xs text-zinc-500">{value}</span>
+      <div className="flex items-center gap-1.5 rounded border border-zinc-200 px-1.5 py-0.5 dark:border-zinc-700">
+        <input type="color" value={value} onChange={(e) => onChange(e.target.value)} className="h-3.5 w-3.5 cursor-pointer rounded border-0 p-0" />
+        <span className="font-mono text-[10px] text-zinc-500">{value}</span>
       </div>
     </div>
   );

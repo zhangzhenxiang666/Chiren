@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { Plus, X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import type { SectionComponentProps } from './helpers';
-import { F, S, TA, c, makeId, YearMonthPicker } from './helpers';
+import { F, S, TA, c, makeId, YearMonthPicker, TagInput, EditableList } from './helpers';
 
 const degreeOptions = ['初中', '高中', '中专', '大专', '本科', '学士', '硕士', '博士', '博士后'];
 
@@ -10,28 +12,35 @@ export function WorkExperience({ section, onUpdate }: SectionComponentProps) {
   const updateItem = (idx: number, field: string, value: any) => {
     const n = [...items]; n[idx] = { ...n[idx], [field]: value }; onUpdate({ items: n });
   };
-  const addItem = () => onUpdate({ items: [...items, { id: makeId(), company: '', position: '', location: '', startDate: '', endDate: null, current: false, description: '', technologies: [], highlights: [] }] });
+  const addItem = () => onUpdate({ items: [...items, { id: makeId(), company: '', position: '', location: '', startDate: '', endDate: '', current: false, description: '', technologies: [], highlights: [] }] });
   const removeItem = (idx: number) => onUpdate({ items: items.filter((_, i) => i !== idx) });
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="公司名称" value={item.company || ''} onChange={(e) => updateItem(items.indexOf(item), 'company', e.target.value)} />
-            <F label="职位" value={item.position || ''} onChange={(e) => updateItem(items.indexOf(item), 'position', e.target.value)} />
-            <YearMonthPicker label="开始日期" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
-            <YearMonthPicker label="结束日期" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
-          </div>
-          <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
-          <div className="flex justify-end">
-            <button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button>
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <F label="公司名称" value={item.company || ''} onChange={(e) => updateItem(items.indexOf(item), 'company', e.target.value)} />
+              <F label="职位" value={item.position || ''} onChange={(e) => updateItem(items.indexOf(item), 'position', e.target.value)} />
+              <YearMonthPicker label="开始日期" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
+              <YearMonthPicker label="结束日期" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
+              <F label="地点" value={item.location || ''} onChange={(e) => updateItem(items.indexOf(item), 'location', e.target.value)} />
+            </div>
+            <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
+            <TagInput label="技术栈" tags={item.technologies || []} onChange={(tags) => updateItem(items.indexOf(item), 'technologies', tags)} placeholder="输入技术后回车添加" />
+            <TagInput label="亮点" tags={item.highlights || []} onChange={(tags) => updateItem(items.indexOf(item), 'highlights', tags)} placeholder="输入亮点后回车添加" />
           </div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors">
-        <span className="text-lg leading-none">+</span> 添加经历
-      </button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加经历</Button>
     </div>
   );
 }
@@ -47,24 +56,32 @@ export function Education({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="学校" value={item.institution || ''} onChange={(e) => updateItem(items.indexOf(item), 'institution', e.target.value)} />
-            <S label="学位" value={item.degree || ''} options={degreeOptions} onChange={(v) => updateItem(items.indexOf(item), 'degree', v)} />
-            <F label="专业" value={item.field || ''} onChange={(e) => updateItem(items.indexOf(item), 'field', e.target.value)} />
-            <F label="GPA" value={item.gpa || ''} onChange={(e) => updateItem(items.indexOf(item), 'gpa', e.target.value)} />
-            <YearMonthPicker label="入学时间" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
-            <YearMonthPicker label="毕业时间" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
-          </div>
-          <div className="flex justify-end">
-            <button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button>
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <F label="学校" value={item.institution || ''} onChange={(e) => updateItem(items.indexOf(item), 'institution', e.target.value)} />
+              <F label="地点" value={item.location || ''} onChange={(e) => updateItem(items.indexOf(item), 'location', e.target.value)} />
+              <S label="学位" value={item.degree || ''} options={degreeOptions} onChange={(v) => updateItem(items.indexOf(item), 'degree', v)} />
+              <F label="GPA" value={item.gpa || ''} onChange={(e) => updateItem(items.indexOf(item), 'gpa', e.target.value)} />
+              <F label="专业" value={item.field || ''} onChange={(e) => updateItem(items.indexOf(item), 'field', e.target.value)} />
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <YearMonthPicker label="入学时间" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
+              <YearMonthPicker label="毕业时间" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
+            </div>
+            <TagInput label="亮点" tags={item.highlights || []} onChange={(tags) => updateItem(items.indexOf(item), 'highlights', tags)} placeholder="输入亮点后回车添加" />
           </div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors">
-        <span className="text-lg leading-none">+</span> 添加教育经历
-      </button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加教育经历</Button>
     </div>
   );
 }
@@ -80,80 +97,21 @@ export function Skills({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {categories.map((cat) => (
-        <div key={cat.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="flex items-center justify-between">
-            <input
-              type="text"
-              placeholder="输入分类名称"
-              value={cat.name || ''}
-              onChange={(e) => updateCategory(categories.indexOf(cat), { name: e.target.value })}
-              className="flex-1 rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none"
-            />
-            <button
-              type="button"
-              onClick={() => removeCategory(categories.indexOf(cat))}
-              className="ml-2 shrink-0 text-xs text-zinc-400 hover:text-red-500 transition-colors"
-            >
-              删除
-            </button>
+      {categories.map((cat, index) => (
+        <div key={cat.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <F label="分类名称" value={cat.name || ''} onChange={(e) => updateCategory(index, { name: e.target.value })} placeholder="输入分类名称" />
+              <Button variant="ghost" size="sm" className="mt-5 h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeCategory(index)}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <EditableList label="技能" items={cat.skills} onChange={(skills) => updateCategory(index, { skills })} placeholder="输入技能后回车添加" />
           </div>
-          <SkillTags skills={cat.skills} onChange={(skills) => updateCategory(categories.indexOf(cat), { skills })} />
         </div>
       ))}
-      <button type="button" onClick={addCategory} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors">
-        <span className="text-lg leading-none">+</span> 添加技能分类
-      </button>
-    </div>
-  );
-}
-
-function SkillTags({ skills, onChange }: { skills: string[]; onChange: (s: string[]) => void }) {
-  const [input, setInput] = useState('');
-
-  const addSkill = () => {
-    const v = input.trim();
-    if (v && !skills.includes(v)) {
-      onChange([...skills, v]);
-      setInput('');
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addSkill();
-    }
-  };
-
-  return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-1.5">
-        {skills.map((skill) => (
-          <span key={skill} className="inline-flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300">
-            {skill}
-            <button type="button" onClick={() => onChange(skills.filter((s) => s !== skill))} className="text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200">×</button>
-          </span>
-        ))}
-      </div>
-      <div className="flex items-center gap-1.5">
-        <input
-          type="text"
-          placeholder="输入技能名称后回车添加…"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 rounded border border-zinc-200 bg-zinc-50 px-2.5 py-1.5 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none"
-        />
-        <button
-          type="button"
-          onClick={addSkill}
-          disabled={!input.trim()}
-          className="shrink-0 rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-zinc-700 disabled:cursor-not-allowed disabled:opacity-40 dark:bg-zinc-200 dark:text-zinc-800 dark:hover:bg-zinc-300"
-        >
-          添加
-        </button>
-      </div>
+      <Button variant="outline" size="sm" onClick={addCategory} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加技能分类</Button>
     </div>
   );
 }
@@ -167,19 +125,29 @@ export function Projects({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="项目名称" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
-            <F label="项目链接" value={item.url || ''} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} />
-            <YearMonthPicker label="开始时间" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
-            <YearMonthPicker label="结束时间" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <F label="项目名称" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
+              <F label="项目链接" value={item.url || ''} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} />
+              <YearMonthPicker label="开始时间" value={item.startDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'startDate', v)} />
+              <YearMonthPicker label="结束时间" value={item.endDate || ''} onChange={(v) => updateItem(items.indexOf(item), 'endDate', v)} />
+            </div>
+            <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
+            <TagInput label="技术栈" tags={item.technologies || []} onChange={(tags) => updateItem(items.indexOf(item), 'technologies', tags)} placeholder="输入技术后回车添加" />
+            <TagInput label="亮点" tags={item.highlights || []} onChange={(tags) => updateItem(items.indexOf(item), 'highlights', tags)} placeholder="输入亮点后回车添加" />
           </div>
-          <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加项目</button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加项目</Button>
     </div>
   );
 }
@@ -188,22 +156,31 @@ export function Certifications({ section, onUpdate }: SectionComponentProps) {
   const d = c(section);
   const items: any[] = d.items || [];
   const updateItem = (idx: number, field: string, value: any) => { const n = [...items]; n[idx] = { ...n[idx], [field]: value }; onUpdate({ items: n }); };
-  const addItem = () => onUpdate({ items: [...items, { id: makeId(), name: '', date: '', description: '' }] });
+  const addItem = () => onUpdate({ items: [...items, { id: makeId(), name: '', issuer: '', date: '', description: '' }] });
   const removeItem = (idx: number) => onUpdate({ items: items.filter((_, i) => i !== idx) });
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="名称" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
-            <YearMonthPicker label="日期" value={item.date || ''} onChange={(v) => updateItem(items.indexOf(item), 'date', v)} />
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <F label="名称" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
+              <F label="颁发机构" value={item.issuer || ''} onChange={(e) => updateItem(items.indexOf(item), 'issuer', e.target.value)} />
+              <YearMonthPicker label="日期" value={item.date || ''} onChange={(v) => updateItem(items.indexOf(item), 'date', v)} />
+            </div>
+            <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
           </div>
-          <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加证书</button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加证书</Button>
     </div>
   );
 }
@@ -217,17 +194,24 @@ export function Languages({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-            <F label="语言" value={item.language || ''} onChange={(e) => updateItem(items.indexOf(item), 'language', e.target.value)} />
-            <F label="水平" value={item.proficiency || ''} onChange={(e) => updateItem(items.indexOf(item), 'proficiency', e.target.value)} />
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+              <F label="语言" value={item.language || ''} onChange={(e) => updateItem(items.indexOf(item), 'language', e.target.value)} />
+              <div className="flex items-end gap-1">
+                <F label="水平" value={item.proficiency || ''} onChange={(e) => updateItem(items.indexOf(item), 'proficiency', e.target.value)} />
+                <Button variant="ghost" size="sm" className="h-8 w-8 cursor-pointer p-0 text-zinc-400 hover:text-red-500" onClick={() => removeItem(index)}>
+                  <X className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+            <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
           </div>
-          <TA label="描述" value={item.description || ''} onChange={(e) => updateItem(items.indexOf(item), 'description', e.target.value)} rows={2} />
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加语言</button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加语言</Button>
     </div>
   );
 }
@@ -241,14 +225,22 @@ export function GitHub({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <F label="仓库名" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
-          <F label="仓库地址" value={item.repoUrl || ''} onChange={(e) => updateItem(items.indexOf(item), 'repoUrl', e.target.value)} />
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <F label="仓库名" value={item.name || ''} onChange={(e) => updateItem(items.indexOf(item), 'name', e.target.value)} />
+            <F label="仓库地址" value={item.repoUrl || ''} onChange={(e) => updateItem(items.indexOf(item), 'repoUrl', e.target.value)} />
+          </div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加仓库</button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加仓库</Button>
     </div>
   );
 }
@@ -262,16 +254,24 @@ export function QrCodes({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      {items.map((item) => (
-        <div key={item.id} className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
-          <div className="grid grid-cols-1 gap-x-4 gap-y-2">
-            <F label="标签" value={item.label} onChange={(e) => updateItem(items.indexOf(item), 'label', e.target.value)} />
-            <F label="URL" value={item.url} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} />
+      {items.map((item, index) => (
+        <div key={item.id}>
+          {index > 0 && <Separator className="mb-4" />}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-zinc-400">#{index + 1}</span>
+              <Button variant="ghost" size="sm" className="h-7 cursor-pointer p-1 text-zinc-400 hover:text-red-500" onClick={() => removeItem(items.indexOf(item))}>
+                <X className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 gap-x-4 gap-y-2">
+              <F label="标签" value={item.label} onChange={(e) => updateItem(items.indexOf(item), 'label', e.target.value)} />
+              <F label="URL" value={item.url} onChange={(e) => updateItem(items.indexOf(item), 'url', e.target.value)} />
+            </div>
           </div>
-          <div className="flex justify-end"><button type="button" onClick={() => removeItem(items.indexOf(item))} className="text-xs text-zinc-400 hover:text-red-500 transition-colors">删除</button></div>
         </div>
       ))}
-      <button type="button" onClick={addItem} className="flex items-center gap-1 rounded-md px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-zinc-700 dark:hover:bg-zinc-800 dark:hover:text-zinc-300 transition-colors"><span className="text-lg leading-none">+</span> 添加二维码</button>
+      <Button variant="outline" size="sm" onClick={addItem} className="w-full cursor-pointer gap-1"><Plus className="h-3.5 w-3.5" />添加二维码</Button>
     </div>
   );
 }
@@ -283,7 +283,7 @@ export function CustomSection({ section, onUpdate }: SectionComponentProps) {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3 rounded-md border border-zinc-100 p-3 dark:border-zinc-800">
+      <div className="space-y-3">
         <div className="grid grid-cols-2 gap-x-4 gap-y-2">
           <F label="标题" value={d.title || ''} onChange={(e) => updateField('title', e.target.value)} />
           <YearMonthPicker label="日期" value={d.date || ''} onChange={(v) => updateField('date', v)} />

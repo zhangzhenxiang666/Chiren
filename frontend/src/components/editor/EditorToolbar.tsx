@@ -13,20 +13,24 @@ import {
   SpellCheck,
   Share2,
 } from 'lucide-react'
+import { useResumeStore } from '@/stores/resume-store';
 
 interface EditorToolbarProps {
   title?: string
   onBack?: () => void
   onCoverLetterOpen?: () => void
+  onThemeToggle?: () => void
+  themeActive?: boolean
 }
 
 /**
  * Editor toolbar with action buttons.
  * Migrated from JadeAI editor. Button handlers are TODO placeholders.
  */
-export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen }: EditorToolbarProps) {
-  // TODO: Save status display and save handler (autoSave / manual save)
-  const saveStatus: 'saved' | 'saving' | 'dirty' = 'saved'
+export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen, onThemeToggle, themeActive }: EditorToolbarProps) {
+  const { isSaving, isDirty } = useResumeStore();
+
+  const saveLabel = isSaving ? '保存中...' : isDirty ? '未保存' : '已保存';
 
   return (
     <div className="flex h-12 items-center justify-between border-b border-[#2a2a2e] bg-[#18181a] px-3">
@@ -47,11 +51,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
           {title}
         </span>
 
-        <span className="text-xs text-zinc-500">
-          {saveStatus === 'saving' && '保存中...'}
-          {saveStatus === 'dirty' && '未保存'}
-          {saveStatus === 'saved' && '已保存'}
-        </span>
+        <span className="text-xs text-zinc-500">{saveLabel}</span>
 
         {false && (
           <button
@@ -157,7 +157,8 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         <button
           type="button"
           title="主题"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          onClick={onThemeToggle}
+          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? 'bg-pink-500/20 text-pink-400' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'}`}
         >
           <Palette className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">主题</span>

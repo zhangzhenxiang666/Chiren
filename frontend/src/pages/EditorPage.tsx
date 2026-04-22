@@ -18,7 +18,7 @@ export default function EditorPage() {
   const { id, resumeId } = useParams<{ id: string; resumeId?: string }>();
   const effectiveResumeId = resumeId || id;
   const navigate = useNavigate();
-  const { showThemeEditor } = useEditorStore();
+  const { showThemeEditor, toggleThemeEditor } = useEditorStore();
   const { updateSection, addSection, removeSection, reorderSections, loadResume } = useEditor(effectiveResumeId || 'mock-1');
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
@@ -116,6 +116,8 @@ export default function EditorPage() {
         title={currentResume.title}
         onBack={() => navigate(backUrl)}
         onCoverLetterOpen={() => setCoverLetterOpen(true)}
+        onThemeToggle={toggleThemeEditor}
+        themeActive={showThemeEditor}
       />
       <AIChatProvider>
         <div className="flex flex-1 overflow-hidden">
@@ -129,6 +131,7 @@ export default function EditorPage() {
             onUpdateSection={updateSection}
             onRemoveSection={removeSection}
             onReorderSections={reorderSections}
+            className="flex-[4]"
           />
           {showThemeEditor && <ThemeEditor />}
           <EditorPreviewPanel />

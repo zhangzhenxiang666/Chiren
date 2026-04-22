@@ -6,7 +6,11 @@ import type { Resume } from '@/types/resume';
 
 const A4_WIDTH = 794;
 
-export function EditorPreviewPanel() {
+interface EditorPreviewPanelProps {
+  className?: string;
+}
+
+export function EditorPreviewPanel({ className }: EditorPreviewPanelProps = {}) {
   const { currentResume, sections } = useResumeStore();
   const [zoom, setZoom] = useState(80);
 
@@ -20,7 +24,7 @@ export function EditorPreviewPanel() {
   const scale = zoom / 100;
 
   return (
-    <div className="flex min-w-0 flex-[6] flex-col border-l bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800">
+    <div className={`flex min-w-0 flex-[6] flex-col border-l bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800 ${className ?? ''}`}>
       <div className="flex shrink-0 items-center justify-between border-b bg-white px-4 py-2 dark:bg-zinc-900 dark:border-zinc-800">
         <span className="text-xs font-medium text-zinc-500">预览</span>
         <div className="flex items-center gap-1">

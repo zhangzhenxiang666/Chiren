@@ -1,9 +1,9 @@
 import { create } from 'zustand';
-import type { Resume, ResumeSection, SectionContent } from '@/types/resume';
+import type { Resume, ResumeSection, SectionContent, ThemeConfig } from '@/types/resume';
 import { AUTOSAVE_DELAY } from '@/lib/constants';
 import { generateId } from '@/lib/utils';
 import { useSettingsStore } from '@/stores/settings-store';
-import { updateResumeSection, deleteResumeSection } from '@/lib/api';
+import { updateResumeSection, deleteResumeSection, updateResume } from '@/lib/api';
 
 interface ResumeStore {
   currentResume: Resume | null;
@@ -12,6 +12,8 @@ interface ResumeStore {
   isSaving: boolean;
   _saveTimeout: ReturnType<typeof setTimeout> | null;
   _originalSectionIds: Set<string>;
+  _dirtySections: Set<string>;
+  _pendingDeletions: Set<string>; // 只保存被修改的 sections
 
   setResume: (resume: Resume) => void;
   updateSection: (sectionId: string, content: Partial<SectionContent>) => void;
@@ -21,6 +23,7 @@ interface ResumeStore {
   reorderSections: (sections: ResumeSection[]) => void;
   toggleSectionVisibility: (sectionId: string) => void;
   setTemplate: (template: string) => void;
+  setThemeConfig: (themeConfig: Partial<ThemeConfig>) => void;
   setTitle: (title: string) => void;
   save: () => Promise<void>;
   _scheduleSave: () => void;
@@ -34,6 +37,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   isSaving: false,
   _saveTimeout: null,
   _originalSectionIds: new Set(),
+  _dirtySections: new Set(),
+  _pendingDeletions: new Set(),
 
   setResume: (resume) => {
     const { _saveTimeout } = get();
@@ -64,6 +69,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       isDirty: false,
       _saveTimeout: null,
       _originalSectionIds: new Set((resume.sections || []).map((s) => s.id)),
+      _dirtySections: new Set(),
+      _pendingDeletions: new Set(),
     });
   },
 
@@ -72,10 +79,13 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       const sections = state.sections.map((s) =>
         s.id === sectionId ? { ...s, content: { ...s.content, ...content } as SectionContent } : s
       );
+      const _dirtySections = new Set(state._dirtySections);
+      _dirtySections.add(sectionId);
       return {
         sections,
         currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
         isDirty: true,
+        _dirtySections,
       };
     });
     get()._scheduleSave();
@@ -86,10 +96,13 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       const sections = state.sections.map((s) =>
         s.id === sectionId ? { ...s, title } : s
       );
+      const _dirtySections = new Set(state._dirtySections);
+      _dirtySections.add(sectionId);
       return {
         sections,
         currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
         isDirty: true,
+        _dirtySections,
       };
     });
     get()._scheduleSave();
@@ -98,10 +111,13 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   addSection: (section) => {
     set((state) => {
       const sections = [...state.sections, section];
+      const _dirtySections = new Set(state._dirtySections);
+      _dirtySections.add(section.id);
       return {
         sections,
         currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
         isDirty: true,
+        _dirtySections,
       };
     });
     get()._scheduleSave();
@@ -110,21 +126,29 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   removeSection: (sectionId) => {
     set((state) => {
       const sections = state.sections.filter((s) => s.id !== sectionId);
+      const _pendingDeletions = new Set(state._pendingDeletions);
+      _pendingDeletions.add(sectionId);
       return {
         sections,
         currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
         isDirty: true,
+        _pendingDeletions,
       };
     });
     get()._scheduleSave();
   },
 
   reorderSections: (sections) => {
-    set((state) => ({
-      sections,
-      currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
-      isDirty: true,
-    }));
+    set((state) => {
+      const _dirtySections = new Set(state._dirtySections);
+      sections.forEach((s) => _dirtySections.add(s.id));
+      return {
+        sections,
+        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        isDirty: true,
+        _dirtySections,
+      };
+    });
     get()._scheduleSave();
   },
 
@@ -133,23 +157,40 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       const sections = state.sections.map((s) =>
         s.id === sectionId ? { ...s, visible: !s.visible } : s
       );
+      const _dirtySections = new Set(state._dirtySections);
+      _dirtySections.add(sectionId);
       return {
         sections,
         currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
         isDirty: true,
+        _dirtySections,
       };
     });
     get()._scheduleSave();
   },
 
   setTemplate: (template) => {
+    const { currentResume } = get();
     set((state) => ({
       currentResume: state.currentResume
         ? { ...state.currentResume, template }
         : null,
-      isDirty: true,
     }));
-    get()._scheduleSave();
+    if (currentResume?.id) {
+      updateResume({ id: currentResume.id, template });
+    }
+  },
+
+  setThemeConfig: (themeConfig: Partial<ThemeConfig>) => {
+    const { currentResume } = get();
+    set((state) => ({
+      currentResume: state.currentResume
+        ? { ...state.currentResume, themeConfig: { ...state.currentResume.themeConfig, ...themeConfig } }
+        : null,
+    }));
+    if (currentResume?.id) {
+      updateResume({ id: currentResume.id, themeConfig: { ...currentResume.themeConfig, ...themeConfig } });
+    }
   },
 
   setTitle: (title) => {
@@ -163,23 +204,24 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   save: async () => {
-    const { currentResume, sections, isDirty, _originalSectionIds } = get();
+    const { currentResume, sections, isDirty, _dirtySections, _pendingDeletions } = get();
     if (!currentResume || !isDirty) return;
 
     set({ isSaving: true });
     try {
-      const currentSectionIds = new Set(sections.map((s) => s.id));
-      const removedIds = [..._originalSectionIds].filter((id) => !currentSectionIds.has(id));
-
-      const deletePromises = removedIds.map((id) =>
+      const deletePromises = [..._pendingDeletions].map((id) =>
         deleteResumeSection(id).catch((err) => {
           console.error('删除区块失败:', id, err);
         }),
       );
 
       const savePromises: Promise<void>[] = [];
+      const dirtyIds = new Set(_dirtySections);
+
       for (let i = 0; i < sections.length; i++) {
         const s = sections[i];
+        if (!dirtyIds.has(s.id)) continue;
+
         const payload = {
           id: s.id,
           resumeId: currentResume.id,
@@ -196,8 +238,15 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
           }),
         );
       }
+
       await Promise.all([...deletePromises, ...savePromises]);
-      set({ isDirty: false, _originalSectionIds: currentSectionIds });
+      const currentSectionIds = new Set(sections.map((s) => s.id));
+      set({
+        isDirty: false,
+        _dirtySections: new Set(),
+        _pendingDeletions: new Set(),
+        _originalSectionIds: currentSectionIds,
+      });
     } catch (error) {
       console.error('Failed to save resume:', error);
     } finally {
@@ -233,6 +282,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       isDirty: false,
       isSaving: false,
       _saveTimeout: null,
+      _dirtySections: new Set(),
+      _pendingDeletions: new Set(),
     });
   },
 }));
