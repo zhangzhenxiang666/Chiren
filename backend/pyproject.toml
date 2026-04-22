@@ -21,8 +21,6 @@ dependencies = [
 [tool.ruff.lint]
 select = ["I", "FAST", "UP", "F401"]
 
+
 [dependency-groups]
-dev = [
-    "notebook>=7.5.5",
-    "rich>=14.3.3",
-]
+dev = ["notebook>=7.5.5", "rich>=14.3.3"]

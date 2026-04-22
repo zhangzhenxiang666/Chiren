@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 
+from shared.types.messages import ConversationMessage
+
 
 @dataclass
 class NextEvent:
@@ -116,6 +118,37 @@ class ErrorEvent:
     message: str
 
 
+@dataclass
+class AssistantMessageEvent:
+    """事件类型：assistant_message
+
+    触发条件：API 返回完整 assistant 消息时
+    语义：通知外部新的 assistant 消息已生成，用于持久化
+    """
+
+    message: ConversationMessage
+
+
+@dataclass
+class ToolResultMessageEvent:
+    """事件类型：tool_result_message
+
+    触发条件：工具调用结果作为 user 消息追加到 state.messages 时
+    语义：通知外部新的 tool_result 消息已生成，用于持久化
+    """
+
+    message: ConversationMessage
+
+
+@dataclass
+class MessagesCompactedEvent:
+    """事件类型：messages_compacted
+
+    触发条件：auto_compact 发生，messages 被重写时
+    语义：通知外部 compact 已发生，用于追踪/日志
+    """
+
+
 AgentEvent = (
     NextEvent
     | ThinkingStartEvent
@@ -127,3 +160,6 @@ AgentEvent = (
     | DoneEvent
     | ErrorEvent
 )
+
+
+InternalEvent = AssistantMessageEvent | ToolResultMessageEvent | MessagesCompactedEvent

@@ -5,20 +5,18 @@ import logging
 from collections.abc import AsyncIterator, Awaitable, Callable
 from typing import Any
 
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from apps.resume_assistant.agent.compact import auto_compact_if_needed
 from apps.resume_assistant.agent.context import QueryContext
-from apps.resume_assistant.conversation_store import ConversationStore
-from shared.models import ConversationMessageRecord
-
-log = logging.getLogger(__name__)
 from apps.resume_assistant.agent.events import (
     AgentEvent,
+    AssistantMessageEvent,
     DoneEvent,
     ErrorEvent,
+    InternalEvent,
+    MessagesCompactedEvent,
     NextEvent,
     ToolResultEvent,
+    ToolResultMessageEvent,
     ToolUseEvent,
 )
 from apps.resume_assistant.agent.formatters import StreamingFormatter
@@ -29,6 +27,8 @@ from shared.api.client import (
     ApiTextDeltaEvent,
 )
 from shared.types.messages import ToolResultBlock, ToolUseBlock
+
+log = logging.getLogger(__name__)
 
 ToolExecutor = Callable[
     [ToolUseBlock, list[dict[str, Any]], QueryContext],
@@ -112,30 +112,27 @@ class AgentCore:
         system_template: str,
         system_suffix: str | None,
         build_sections_prompt_fn: BuildSectionsPromptFn,
-        db: AsyncSession,
-        resume_id: str,
-        store: ConversationStore,
-    ) -> AsyncIterator[AgentEvent]:
+    ) -> AsyncIterator[AgentEvent | InternalEvent]:
         """运行主循环，直到达到停止条件或最大迭代次数。
 
         Args:
-            initial_state: 初始迭代状态，包含 messages, pending 等。
+            initial_state: 初始迭代状态，包含 messages 等。
             sections: 简历 sections 列表。
             system_template: system prompt 模板，其中包含 ``{sections}`` 占位符。
             system_suffix: system prompt 后缀（包含 JD 子系统提示和 JD 分析结果），可为 None。
             build_sections_prompt_fn: 构建 sections prompt 的函数。
-            db: 数据库会话，用于持久化对话消息。
-            resume_id: 当前简历对话的 ID。
-            store: 对话缓存存储，写入压缩后的 system 消息。
 
         Yields:
-            AgentEvent: 各类事件，按顺序包括：
+            AgentEvent | InternalEvent: 各类事件，按顺序包括：
                 - NextEvent: 标记新一轮迭代开始。
                 - StreamingFormatter 产生的文本/思考事件：API 流式响应片段。
                 - ToolUseEvent: 工具调用事件。
                 - ToolResultEvent: 工具结果事件。
                 - DoneEvent: 正常结束事件。
                 - ErrorEvent: 异常结束事件。
+                - AssistantMessageEvent: 内部事件，新 assistant 消息已生成。
+                - ToolResultMessageEvent: 内部事件，新 tool_result 消息已生成。
+                - MessagesCompactedEvent: 内部事件，compact 发生了。
         """
         state = initial_state
         formatter = StreamingFormatter()
@@ -144,13 +141,11 @@ class AgentCore:
             state.count += 1
             formatter.reset()
 
-            #  计算当前 resume 的缓存 key
             resume_info = await make_current_resume_info(sections)
 
             if resume_info != state._cached_resume_info:
                 state._cached_resume_info = resume_info
 
-                # 构建 system prompt
                 sections_prompt = build_sections_prompt_fn(sections)
                 system = system_template.format(sections=sections_prompt)
                 if system_suffix:
@@ -161,24 +156,19 @@ class AgentCore:
                     sections
                 )
 
-            # 自动摘要(如果需要的话)
             state.messages, was_compacted = await auto_compact_if_needed(
                 state.messages,
                 api_client=self.context.api_client,
                 model=self.context.model,
                 system_prompt=state.system,
             )
-
             if was_compacted:
-                state.pending = state.pending[-6:]
-                store.write(resume_id, state.messages[:1])
+                yield MessagesCompactedEvent()
 
-            # 插入 resume_info 到 messages
             state.messages = await insert_resume_info(
                 state.messages, resume_info, state.count
             )
 
-            # 构建 API 请求
             api_request = ApiMessageRequest(
                 model=self.context.model,
                 messages=state.messages,
@@ -188,10 +178,8 @@ class AgentCore:
                 temperature=self.context.temperature,
             )
 
-            # yield NextEvent 表示开始新一轮迭代
             yield NextEvent()
 
-            # 流式处理 API 响应
             complete_event = None
             try:
                 async for api_event in self.context.api_client.stream_message(
@@ -207,33 +195,13 @@ class AgentCore:
                 yield ErrorEvent(message=str(e))
                 break
 
-            # 如果没有 complete_event，结束
             if complete_event is None:
                 yield DoneEvent()
                 break
 
-            # 添加 assistant 消息到 state.messages
             state.messages.append(complete_event.message)
+            yield AssistantMessageEvent(message=complete_event.message)
 
-            # 保存 assistant 消息到数据库
-            db.add(
-                ConversationMessageRecord(
-                    conversation_id=resume_id,
-                    role="assistant",
-                    content=json.dumps(
-                        [
-                            block.model_dump()
-                            for block in complete_event.message.content
-                        ],
-                        ensure_ascii=False,
-                    ),
-                    reasoning=complete_event.message._reasoning
-                    if hasattr(complete_event.message, "_reasoning")
-                    else None,
-                )
-            )
-
-            # 处理工具调用
             if complete_event.message.tool_uses:
                 async for event in self._handle_tool_calls(
                     complete_event.message.tool_uses,
@@ -242,30 +210,8 @@ class AgentCore:
                 ):
                     yield event
 
-            # 保存 tool result 消息并提交
-            if complete_event.message.tool_uses:
-                db.add(
-                    ConversationMessageRecord(
-                        conversation_id=resume_id,
-                        role="user",
-                        content=json.dumps(
-                            [
-                                block.model_dump()
-                                for block in state.messages[-1].content
-                            ],
-                            ensure_ascii=False,
-                        ),
-                    )
-                )
-            await db.commit()
+                yield ToolResultMessageEvent(message=state.messages[-1])
 
-            # 更新 pending 消息
-            if state.messages[-1].role == "user":
-                state.pending.extend(state.messages[-2:])
-            else:
-                state.pending.append(state.messages[-1])
-
-            # 检查停止条件
             if complete_event.stop_reason in self.context.stop_reasons:
                 yield DoneEvent()
                 break

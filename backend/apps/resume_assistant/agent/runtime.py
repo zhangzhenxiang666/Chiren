@@ -1,5 +1,4 @@
-"""AgentRuntime - I/O 胶水层，连接 AgentCore 和外部世界"""
-
+import json
 import logging
 from collections.abc import AsyncIterator
 from typing import Any
@@ -12,17 +11,25 @@ from apps.resume_assistant.agent.context import QueryContext
 from apps.resume_assistant.agent.core import (
     AgentCore,
     BuildSectionsPromptFn,
+    InternalEvent,
     ToolExecutor,
 )
-from apps.resume_assistant.agent.events import ToolResultEvent
+from apps.resume_assistant.agent.events import (
+    AgentEvent,
+    AssistantMessageEvent,
+    MessagesCompactedEvent,
+    ToolResultEvent,
+    ToolResultMessageEvent,
+)
 from apps.resume_assistant.agent.formatters import to_sse_event
 from apps.resume_assistant.agent.state import IterationState
+from apps.resume_assistant.conversation_store import ConversationStore
 from apps.resume_assistant.prompt import build_jd_prompt
 from apps.resume_assistant.schemas import ResumeAssistantRequest
 from shared.api.client import SupportsStreamingMessages
-from shared.models import JobDescriptionAnalysis, Resume
+from shared.models import ConversationMessageRecord, JobDescriptionAnalysis, Resume
 from shared.types.base_tool import ToolExecutionContext, ToolRegistry
-from shared.types.messages import ToolResultBlock, ToolUseBlock
+from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseBlock
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +84,6 @@ async def create_tool_executor(
                     "id_to_type": id_to_type,
                     "client": client,
                     "model": model_name,
-                    "db": db,
                 },
             ),
         )
@@ -115,12 +121,10 @@ async def create_tool_executor(
 
 
 class AgentRuntime:
-    """AgentRuntime - I/O 胶水层，连接 AgentCore 和外部世界"""
-
     def __init__(
         self,
         db: AsyncSession,
-        store,
+        store: ConversationStore,
         api_client: SupportsStreamingMessages,
         tool_registry: ToolRegistry,
         model: str,
@@ -192,19 +196,47 @@ class AgentRuntime:
         )
 
         core = AgentCore(context=context, tool_executor=tool_executor_fn)
+        pending: list[ConversationMessage] = []
+
+        if initial_state.messages[-1].role == "user":
+            pending.append(initial_state.messages[-1])
 
         try:
-            async for agent_event in core.run(
+            async for event in core.run(
                 initial_state=initial_state,
                 sections=sections,
                 system_template=system_template,
                 system_suffix=system_suffix,
                 build_sections_prompt_fn=build_sections_prompt_fn,
-                db=self.db,
-                resume_id=request.resume_id,
-                store=self.store,
             ):
-                yield to_sse_event(agent_event)
+                if isinstance(event, InternalEvent):
+                    if isinstance(event, MessagesCompactedEvent):
+                        pending = pending[-6:]
+                        self.store.write(request.resume_id, initial_state.messages[:1])
+                    else:
+                        self._handle_internal_event(event, request.resume_id, pending)
+                elif isinstance(event, AgentEvent):
+                    yield to_sse_event(event)
+
         finally:
-            self.store.extend(request.resume_id, initial_state.pending)
-            initial_state.pending.clear()
+            self.store.extend(request.resume_id, pending)
+            await self.db.commit()
+
+    def _handle_internal_event(
+        self, event: InternalEvent, resume_id: str, pending: list[ConversationMessage]
+    ) -> None:
+        if isinstance(event, (AssistantMessageEvent, ToolResultMessageEvent)):
+            self.db.add(
+                ConversationMessageRecord(
+                    conversation_id=resume_id,
+                    role=event.message.role,
+                    content=json.dumps(
+                        [block.model_dump() for block in event.message.content],
+                        ensure_ascii=False,
+                    ),
+                    reasoning=event.message._reasoning
+                    if hasattr(event.message, "_reasoning")
+                    else None,
+                )
+            )
+            pending.append(event.message)

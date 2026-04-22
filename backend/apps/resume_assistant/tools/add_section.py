@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from shared.database import async_session
 from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 from shared.types.resume import (
@@ -135,7 +136,6 @@ class AddSectionTool(BaseTool):
     async def execute(
         self, arguments: AddSectionToolInput, context: ToolExecutionContext
     ) -> ToolResult:
-        # 验证type的合法性
         existing_types = {s.get("type") for s in context.sections}
         if arguments.type in existing_types and arguments.type != "custom":
             return ToolResult(
@@ -143,48 +143,42 @@ class AddSectionTool(BaseTool):
                 output=f"Section of type '{arguments.type}' already exists",
             )
 
-        db: AsyncSession = context.metadata["db"]
         resume_id = context.sections[0]["resume_id"]
         next_sort_order = context.sections[-1]["sort_order"] + 1
-
         now = utc_now()
 
-        # 处理 custom 类型
-        if arguments.type == "custom":
-            section = CustomSection(
-                id=str(uuid.uuid4()),
-                resume_id=resume_id,
-                title=arguments.title,
-                sort_order=next_sort_order,
-                content=CustomContent(),
-                created_at=now,
-                updated_at=now,
-            )
-            db.add(ResumeSection.from_pydantic(section))
-            context.sections.append(section.model_dump())
-        else:
-            # 尝试恢复已隐藏的 section
-            resume_section = await _restore_hidden_section(
-                db, resume_id, arguments.type
-            )
-            if resume_section is not None:
-                resume_section.updated_at = now
-                db.add(resume_section)
-                context.sections.append(resume_section.to_pydantic().model_dump())
-            else:
-                # 创建新的 section
-                section, _ = _create_section(
-                    arguments.type, resume_id, arguments.title, next_sort_order
+        async with async_session() as db:
+            if arguments.type == "custom":
+                section = CustomSection(
+                    id=str(uuid.uuid4()),
+                    resume_id=resume_id,
+                    title=arguments.title,
+                    sort_order=next_sort_order,
+                    content=CustomContent(),
+                    created_at=now,
+                    updated_at=now,
                 )
                 db.add(ResumeSection.from_pydantic(section))
                 context.sections.append(section.model_dump())
+            else:
+                resume_section = await _restore_hidden_section(
+                    db, resume_id, arguments.type
+                )
+                if resume_section is not None:
+                    resume_section.updated_at = now
+                    db.add(resume_section)
+                    context.sections.append(resume_section.to_pydantic().model_dump())
+                else:
+                    section, _ = _create_section(
+                        arguments.type, resume_id, arguments.title, next_sort_order
+                    )
+                    db.add(ResumeSection.from_pydantic(section))
+                    context.sections.append(section.model_dump())
 
-        # 添加id_to_type的映射
-        section_id = context.sections[-1]["id"]
-        context.metadata["id_to_type"][section_id] = arguments.type
-
-        # 重新排序
-        context.sections = sorted(context.sections, key=lambda x: x["sort_order"])
+            section_id = context.sections[-1]["id"]
+            context.metadata["id_to_type"][section_id] = arguments.type
+            context.sections = sorted(context.sections, key=lambda x: x["sort_order"])
+            await db.commit()
 
         return ToolResult(output=f"Successfully added section {section_id}.")
 

@@ -54,7 +54,6 @@ async def generate_content(
 
     initial_state = IterationState(
         messages=messages,
-        pending=[messages[-1]],
     )
 
     tool_registry = ToolRegistry()

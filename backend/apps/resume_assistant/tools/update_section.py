@@ -5,13 +5,13 @@ from typing import Any
 
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-_ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
-
+from shared.database import async_session
 from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 from shared.types.resume import SECTION_TYPE_TO_MODEL
+
+_ID_FORMAT = re.compile(r"^[0-9a-f]{8}-\d{4}$")
 
 # 各 section 类型的字段结构和示例
 _SECTION_CONTENT_SCHEMAS = {
@@ -270,26 +270,27 @@ class UpdateSectionTool(BaseTool):
                 content.update(arguments.value)
             break
 
-        # 同步更新数据库
-        db: AsyncSession = context.metadata["db"]
+        # 同步更新到数据库
         resume_id = context.sections[0]["resume_id"]
-        result = await db.execute(
-            select(ResumeSection).where(
-                ResumeSection.id == arguments.section_id,
-                ResumeSection.resume_id == resume_id,
+        async with async_session() as db:
+            result = await db.execute(
+                select(ResumeSection).where(
+                    ResumeSection.id == arguments.section_id,
+                    ResumeSection.resume_id == resume_id,
+                )
             )
-        )
-        db_section = result.scalar_one_or_none()
-        if db_section is not None:
-            # 从 context.sections 中获取更新后的 content
-            for section in context.sections:
-                if section["id"] == arguments.section_id:
-                    db_section.content = json.dumps(
-                        section.get("content", {}), ensure_ascii=False
-                    )
-                    break
-            db_section.updated_at = utc_now()
-            db.add(db_section)
+            db_section = result.scalar_one_or_none()
+            if db_section is not None:
+                # 从 context.sections 中获取更新后的 content
+                for section in context.sections:
+                    if section["id"] == arguments.section_id:
+                        db_section.content = json.dumps(
+                            section.get("content", {}), ensure_ascii=False
+                        )
+                        break
+                db_section.updated_at = utc_now()
+                db.add(db_section)
+            await db.commit()
 
         return ToolResult(
             output=f"Successfully updated section {arguments.section_id}."

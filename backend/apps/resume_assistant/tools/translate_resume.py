@@ -6,7 +6,6 @@ from collections import Counter
 import json_repair
 from pydantic import BaseModel, Field, ValidationError
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.api.client import (
     ApiMessageCompleteEvent,
@@ -14,6 +13,7 @@ from shared.api.client import (
     ApiTextDeltaEvent,
     SupportsStreamingMessages,
 )
+from shared.database import async_session
 from shared.models import ResumeSection, utc_now
 from shared.types.base_tool import BaseTool, ToolExecutionContext, ToolResult
 from shared.types.messages import ConversationMessage, TextBlock
@@ -294,29 +294,30 @@ class TranslateResumeTool(BaseTool):
 
         # 同步成功的翻译结果到数据库
         if success:
-            db: AsyncSession = context.metadata["db"]
             resume_id = context.sections[0]["resume_id"]
             now = utc_now()
-            for r in section_results:
-                if not r["success"]:
-                    continue
-                section_id = r["section_id"]
-                for section in context.sections:
-                    if section["id"] == section_id:
-                        result = await db.execute(
-                            select(ResumeSection).where(
-                                ResumeSection.id == section_id,
-                                ResumeSection.resume_id == resume_id,
+            async with async_session() as db:
+                for r in section_results:
+                    if not r["success"]:
+                        continue
+                    section_id = r["section_id"]
+                    for section in context.sections:
+                        if section["id"] == section_id:
+                            result = await db.execute(
+                                select(ResumeSection).where(
+                                    ResumeSection.id == section_id,
+                                    ResumeSection.resume_id == resume_id,
+                                )
                             )
-                        )
-                        db_section = result.scalar_one_or_none()
-                        if db_section is not None:
-                            db_section.content = json.dumps(
-                                section.get("content", {}), ensure_ascii=False
-                            )
-                            db_section.updated_at = now
-                            db.add(db_section)
-                        break
+                            db_section = result.scalar_one_or_none()
+                            if db_section is not None:
+                                db_section.content = json.dumps(
+                                    section.get("content", {}), ensure_ascii=False
+                                )
+                                db_section.updated_at = now
+                                db.add(db_section)
+                            break
+                await db.commit()
 
         return ToolResult(output="\n".join(lines))
 
