@@ -67,6 +67,8 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
   };
 
   const isRenamable = section.type !== 'personal_info';
+  const isVisibilityChangable = section.type !== 'personal_info';
+  const isDeletable = section.type !== 'personal_info';
   const isSelected = selectedSectionId === section.id;
   const SectionComponent = sectionComponents[section.type] || (() => (
     <p className="text-sm text-zinc-500">未知段落类型: {section.type}</p>
@@ -129,23 +131,27 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
           <Sparkles className="h-4 w-4" />
         </button>
 
-        <button
-          type="button"
-          className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
-          title={section.visible ? '隐藏' : '显示'}
-          onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(section.id); }}
-        >
-          {section.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-        </button>
+        {isVisibilityChangable && (
+          <button
+            type="button"
+            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            title={section.visible ? '隐藏' : '显示'}
+            onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(section.id); }}
+          >
+            {section.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+          </button>
+        )}
 
-        <button
-          type="button"
-          className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-500 dark:hover:bg-zinc-800"
-          title="删除"
-          onClick={(e) => { e.stopPropagation(); onRemove(); }}
-        >
-          <Trash2 className="h-4 w-4" />
-        </button>
+        {isDeletable && (
+          <button
+            type="button"
+            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-500 dark:hover:bg-zinc-800"
+            title="删除"
+            onClick={(e) => { e.stopPropagation(); onRemove(); }}
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       <div className={cn(
