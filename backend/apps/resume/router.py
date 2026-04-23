@@ -14,7 +14,7 @@ from apps.resume.schemas import (
 )
 from apps.resume.service import copy_sections_from_workspace, create_default_sections
 from shared.database import get_session
-from shared.models import Resume
+from shared.models import ConversationMessageRecord, Resume
 from shared.types.resume import ResumeSchema
 
 router = APIRouter(prefix="/resume", tags=["resume"])
@@ -187,9 +187,30 @@ async def delete_resume(
     id: Annotated[str, Query(description="简历ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> None:
-    await db.execute(delete(Resume).where(Resume.id == id))
+    from apps.resume_assistant.conversation_store import ConversationStore
+
+    result = await db.execute(
+        select(Resume).where(Resume.id == id).options(selectinload(Resume.versions))
+    )
+    parent = result.scalar_one_or_none()
+    if not parent:
+        raise HTTPException(status_code=404, detail="简历不存在")
+
+    all_resume_ids = [parent.id] + [v.id for v in parent.versions]
+
+    await db.execute(
+        delete(ConversationMessageRecord).where(
+            ConversationMessageRecord.conversation_id.in_(all_resume_ids)
+        )
+    )
+
+    await db.delete(parent)
+
     try:
         await db.commit()
+        conversation_store = ConversationStore()
+        for resume_id in all_resume_ids:
+            conversation_store.delete(resume_id)
     except Exception:
         await db.rollback()
         raise HTTPException(status_code=500, detail="删除失败")

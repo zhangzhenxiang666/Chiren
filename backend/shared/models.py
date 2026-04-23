@@ -124,12 +124,24 @@ class Resume(PydanticMixin, Base):
         comment="子简历元数据，包含 JD、目标公司等",
     )
 
-    workspace = relationship("Resume", remote_side=[id], back_populates="versions")
+    workspace = relationship(
+        "Resume",
+        remote_side=[id],
+        back_populates="versions",
+    )
     versions = relationship(
-        "Resume", back_populates="workspace", foreign_keys=[workspace_id]
+        "Resume",
+        back_populates="workspace",
+        foreign_keys=[workspace_id],
+        cascade="all, delete-orphan",
     )
     sections = relationship(
         "ResumeSection", back_populates="resume", cascade="all, delete-orphan"
+    )
+    job_description_analyses = relationship(
+        "JobDescriptionAnalysis",
+        back_populates="resume",
+        cascade="all, delete-orphan",
     )
 
     def to_pydantic(self) -> ResumeSchema:
@@ -525,6 +537,8 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         onupdate=utc_now,
         comment="创建时间",
     )
+
+    resume = relationship("Resume", back_populates="job_description_analyses")
 
     def to_pydantic(self) -> JobDescriptionAnalysisSchema:
         suggestions = [

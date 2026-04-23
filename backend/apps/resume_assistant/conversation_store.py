@@ -5,6 +5,8 @@ from pathlib import Path
 
 from shared.types.messages import ConversationMessage
 
+_BASE_DIR = Path(__file__).parent.parent.parent / ".conversation_store"
+
 
 class ConversationStore:
     """对话缓存存储工具类。
@@ -12,8 +14,14 @@ class ConversationStore:
     操作 .conversation_store 目录下的 JSONL 缓存文件。
     """
 
-    def __init__(self, base_dir: str = ".conversation_store"):
-        self.base_dir = Path(base_dir)
+    def __init__(self, base_dir: str | Path = _BASE_DIR):
+        if isinstance(base_dir, str):
+            self.base_dir = Path(base_dir)
+        elif isinstance(base_dir, Path):
+            self.base_dir = Path(base_dir)
+        else:
+            raise ValueError("base_dir must be a string or Path")
+
         self.base_dir.mkdir(parents=True, exist_ok=True)
 
     def _get_cache_file(self, resume_id: str) -> Path:
@@ -71,3 +79,9 @@ class ConversationStore:
             for msg in messages:
                 line = json.dumps(msg.model_dump(mode="json"), ensure_ascii=False)
                 f.write(line + "\n")
+
+    def delete(self, resume_id: str) -> None:
+        """删除指定 resume_id 的缓存文件。"""
+        cache_file = self._get_cache_file(resume_id)
+        if cache_file.exists():
+            cache_file.unlink()
