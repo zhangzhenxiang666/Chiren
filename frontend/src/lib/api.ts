@@ -442,3 +442,18 @@ export async function createMatchTask(params: CreateMatchTaskParams): Promise<Ta
   });
   return data;
 }
+
+export async function exportPdf(html: string, timeoutMs: number = 30000): Promise<Blob> {
+  const { data } = await api.post('/export/pdf', { html, timeoutMs }, { responseType: 'blob' });
+  return data;
+}
+
+export async function exportTxt(resumeId: string): Promise<Blob> {
+  const { data } = await api.get(`/export/txt/${resumeId}`, { responseType: 'blob' });
+  return data;
+}
+
+export async function exportJson(resumeId: string): Promise<Blob> {
+  const { data } = await api.get(`/export/json/${resumeId}`, { responseType: 'blob' });
+  return data;
+}

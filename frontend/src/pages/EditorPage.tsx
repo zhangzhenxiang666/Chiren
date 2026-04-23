@@ -9,6 +9,7 @@ import { EditorCanvas } from '@/components/editor/EditorCanvas';
 import { ThemeEditor } from '@/components/editor/ThemeEditor';
 import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
 import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
+import { ExportDialog } from '@/components/editor/ExportDialog';
 import { DraggableAIChatButton, AIChatProvider } from '@/components/editor/DraggableAIChatButton';
 import SettingsModal from '@/components/settings/SettingsModal';
 import { Inbox, FileX } from 'lucide-react';
@@ -24,6 +25,7 @@ export default function EditorPage() {
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [workspaceNotFound, setWorkspaceNotFound] = useState(false);
   const [resumeNotFound, setResumeNotFound] = useState(false);
@@ -118,6 +120,7 @@ export default function EditorPage() {
         title={currentResume.title}
         onBack={() => navigate(backUrl)}
         onCoverLetterOpen={() => setCoverLetterOpen(true)}
+        onExport={() => setExportOpen(true)}
         onThemeToggle={toggleThemeEditor}
         onSettings={() => setShowSettings(true)}
         themeActive={showThemeEditor}
@@ -141,6 +144,12 @@ export default function EditorPage() {
         </div>
         <DraggableAIChatButton />
       </AIChatProvider>
+      <ExportDialog
+        resumeId={currentResume.id}
+        resumeTitle={currentResume.title}
+        open={exportOpen}
+        onOpenChange={setExportOpen}
+      />
       <CoverLetterDialog
         resumeId={currentResume.id}
         hasJobDescription={!!currentResume.metaInfo?.job_description}

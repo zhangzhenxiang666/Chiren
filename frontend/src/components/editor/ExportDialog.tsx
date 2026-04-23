@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { X, Loader2, AlertCircle, FileJson, FileText, Code2, File } from 'lucide-react';
+import { X, Loader2, AlertCircle, FileDown, Globe, AlignLeft, Braces, Download } from 'lucide-react';
 import { useResumeStore } from '@/stores/resume-store';
 import { exportJson, exportTxt, exportPdf } from '@/lib/api';
 import { extractPreviewHtml, downloadHtml, downloadBlob } from '@/lib/export-utils';
@@ -14,10 +14,10 @@ interface ExportDialogProps {
 type ExportStatus = 'idle' | 'exporting' | 'done' | 'error';
 
 const FORMAT_OPTIONS = [
-  { key: 'json', label: 'JSON', description: '结构化数据格式，便于二次编辑', icon: FileJson },
-  { key: 'txt', label: 'TXT', description: '纯文本格式，通用性强', icon: FileText },
-  { key: 'html', label: 'HTML', description: '网页格式，保留排版样式', icon: Code2 },
-  { key: 'pdf', label: 'PDF', description: '打印级文档，适合投递', icon: File },
+  { key: 'pdf', label: 'PDF', description: '可打印文档', icon: FileDown },
+  { key: 'html', label: 'HTML', description: '网页格式', icon: Globe },
+  { key: 'txt', label: '纯文本', description: '简单文本文件', icon: AlignLeft },
+  { key: 'json', label: 'JSON', description: '结构化数据', icon: Braces },
 ] as const;
 
 export function ExportDialog({
@@ -34,13 +34,15 @@ export function ExportDialog({
     if (status === 'done') {
       const timer = setTimeout(() => {
         setStatus('idle');
+        setSelectedFormat(null);
       }, 2000);
       return () => clearTimeout(timer);
     }
   }, [status]);
 
-  const handleExport = useCallback(async (format: string) => {
-    setSelectedFormat(format);
+  const handleExport = useCallback(async () => {
+    if (!selectedFormat) return;
+
     setStatus('exporting');
     setErrorMessage('');
 
@@ -48,16 +50,17 @@ export function ExportDialog({
       await useResumeStore.getState().save();
 
       const safeTitle = resumeTitle || 'resume';
+      const filename = `${safeTitle}-${Date.now()}`;
 
-      switch (format) {
+      switch (selectedFormat) {
         case 'json': {
           const blob = await exportJson(resumeId);
-          downloadBlob(blob, `${safeTitle}.json`);
+          downloadBlob(blob, `${filename}.json`);
           break;
         }
         case 'txt': {
           const blob = await exportTxt(resumeId);
-          downloadBlob(blob, `${safeTitle}.txt`);
+          downloadBlob(blob, `${filename}.txt`);
           break;
         }
         case 'html': {
@@ -65,7 +68,7 @@ export function ExportDialog({
           if (!html) {
             throw new Error('无法提取简历预览内容，请确认预览区域已加载');
           }
-          downloadHtml(html, `${safeTitle}.html`);
+          downloadHtml(html, `${filename}.html`);
           break;
         }
         case 'pdf': {
@@ -74,11 +77,11 @@ export function ExportDialog({
             throw new Error('无法提取简历预览内容，请确认预览区域已加载');
           }
           const blob = await exportPdf(html);
-          downloadBlob(blob, `${safeTitle}.pdf`);
+          downloadBlob(blob, `${filename}.pdf`);
           break;
         }
         default:
-          throw new Error(`不支持的格式: ${format}`);
+          throw new Error(`不支持的格式: ${selectedFormat}`);
       }
 
       setStatus('done');
@@ -86,7 +89,7 @@ export function ExportDialog({
       setStatus('error');
       setErrorMessage(err instanceof Error ? err.message : '导出失败，请重试');
     }
-  }, [resumeId, resumeTitle]);
+  }, [resumeId, resumeTitle, selectedFormat]);
 
   const handleClose = useCallback(() => {
     setStatus('idle');
@@ -98,50 +101,92 @@ export function ExportDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex w-[500px] max-h-[80vh] flex-col rounded-lg bg-white shadow-xl dark:bg-zinc-900">
-        <div className="flex items-center justify-between border-b px-6 py-4 dark:border-zinc-700">
-          <div className="flex items-center gap-2">
-            <File className="h-5 w-5 text-blue-500" />
-            <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">
-              导出简历
-            </h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+      <div className="flex w-[480px] max-h-[85vh] flex-col rounded-xl bg-[#1c1c1e] border border-[#2a2a2e] shadow-2xl">
+        <div className="flex items-center justify-between px-6 py-5">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10">
+              <Download className="h-4 w-4 text-pink-400" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold text-zinc-100">
+                导出简历
+              </h2>
+              <p className="text-xs text-zinc-500">
+                选择导出格式下载简历
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6">
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto px-6 pb-6">
           {status === 'idle' && (
-            <div className="grid grid-cols-2 gap-4">
-              {FORMAT_OPTIONS.map(({ key, label, description, icon: Icon }) => (
+            <>
+              <div className="grid grid-cols-2 gap-3">
+                {FORMAT_OPTIONS.map(({ key, label, description, icon: Icon }) => {
+                  const isSelected = selectedFormat === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setSelectedFormat(key)}
+                      className={`flex flex-col items-center gap-2 rounded-xl border p-5 transition-all ${
+                        isSelected
+                          ? 'border-pink-500 bg-pink-500/10'
+                          : 'border-[#2a2a2e] bg-[#252528] hover:border-zinc-600'
+                      }`}
+                    >
+                      <Icon
+                        className={`h-7 w-7 ${
+                          isSelected ? 'text-pink-400' : 'text-zinc-400'
+                        }`}
+                      />
+                      <span
+                        className={`text-sm font-medium ${
+                          isSelected ? 'text-pink-400' : 'text-zinc-200'
+                        }`}
+                      >
+                        {label}
+                      </span>
+                      <span className="text-xs text-zinc-500">
+                        {description}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="mt-6 flex items-center justify-end gap-3">
                 <button
-                  key={key}
                   type="button"
-                  onClick={() => handleExport(key)}
-                  className="flex flex-col items-center gap-2 rounded-lg border border-zinc-200 p-6 transition-colors hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                  onClick={handleClose}
+                  className="rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
                 >
-                  <Icon className="h-8 w-8 text-zinc-600 dark:text-zinc-400" />
-                  <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-                    {label}
-                  </span>
-                  <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                    {description}
-                  </span>
+                  取消
                 </button>
-              ))}
-            </div>
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={!selectedFormat}
+                  className="rounded-lg bg-pink-500 px-5 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  导出
+                </button>
+              </div>
+            </>
           )}
 
           {status === 'exporting' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
+              <p className="text-sm text-zinc-400">
                 正在生成{selectedFormat ? ` ${FORMAT_OPTIONS.find(f => f.key === selectedFormat)?.label}` : ''}...
               </p>
             </div>
@@ -150,7 +195,7 @@ export function ExportDialog({
           {status === 'error' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 py-8">
               <AlertCircle className="h-10 w-10 text-red-500" />
-              <p className="text-sm text-red-600 dark:text-red-400">
+              <p className="text-sm text-red-400">
                 {errorMessage}
               </p>
               <button
@@ -158,9 +203,8 @@ export function ExportDialog({
                 onClick={() => {
                   setStatus('idle');
                   setErrorMessage('');
-                  setSelectedFormat(null);
                 }}
-                className="rounded-lg bg-blue-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-600"
+                className="rounded-lg bg-pink-500 px-6 py-2 text-sm font-medium text-white transition-colors hover:bg-pink-600"
               >
                 重试
               </button>
@@ -169,9 +213,9 @@ export function ExportDialog({
 
           {status === 'done' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-500/10">
                 <svg
-                  className="h-6 w-6 text-green-600 dark:text-green-400"
+                  className="h-6 w-6 text-green-400"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -180,7 +224,7 @@ export function ExportDialog({
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="text-sm font-medium text-green-600 dark:text-green-400">
+              <p className="text-sm font-medium text-green-400">
                 导出成功
               </p>
             </div>

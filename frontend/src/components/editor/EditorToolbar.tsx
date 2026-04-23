@@ -21,6 +21,7 @@ interface EditorToolbarProps {
   onCoverLetterOpen?: () => void
   onThemeToggle?: () => void
   onSettings?: () => void
+  onExport?: () => void
   themeActive?: boolean
 }
 
@@ -28,7 +29,7 @@ interface EditorToolbarProps {
  * Editor toolbar with action buttons.
  * Migrated from JadeAI editor. Button handlers are TODO placeholders.
  */
-export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen, onThemeToggle, onSettings, themeActive }: EditorToolbarProps) {
+export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen, onThemeToggle, onSettings, onExport, themeActive }: EditorToolbarProps) {
   const { isSaving, isDirty } = useResumeStore();
 
   const saveLabel = isSaving ? '保存中...' : isDirty ? '未保存' : '已保存';
@@ -89,7 +90,8 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
 
         <button
           type="button"
-          title="导出 PDF"
+          title="导出"
+          onClick={onExport}
           className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
         >
           <Download className="h-4 w-4" />
