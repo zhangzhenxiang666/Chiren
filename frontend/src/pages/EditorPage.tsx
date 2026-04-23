@@ -10,6 +10,7 @@ import { ThemeEditor } from '@/components/editor/ThemeEditor';
 import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
 import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
 import { DraggableAIChatButton, AIChatProvider } from '@/components/editor/DraggableAIChatButton';
+import SettingsModal from '@/components/settings/SettingsModal';
 import { Inbox, FileX } from 'lucide-react';
 import { mockResume } from '@/data/mockResume';
 import { fetchWorkspaces, fetchResumeDetail } from '@/lib/api';
@@ -23,6 +24,7 @@ export default function EditorPage() {
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [workspaceNotFound, setWorkspaceNotFound] = useState(false);
   const [resumeNotFound, setResumeNotFound] = useState(false);
 
@@ -117,6 +119,7 @@ export default function EditorPage() {
         onBack={() => navigate(backUrl)}
         onCoverLetterOpen={() => setCoverLetterOpen(true)}
         onThemeToggle={toggleThemeEditor}
+        onSettings={() => setShowSettings(true)}
         themeActive={showThemeEditor}
       />
       <AIChatProvider>
@@ -144,6 +147,7 @@ export default function EditorPage() {
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
       />
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 }

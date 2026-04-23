@@ -17,7 +17,6 @@ const PROVIDER_OPTIONS: { value: ProviderType; label: string }[] = [
 export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   const [tab, setTab] = useState<SettingsTab>('ai')
   const [loading, setLoading] = useState(false)
-  const [saving, setSaving] = useState(false)
 
   const [activeProvider, setActiveProvider] = useState<ProviderType>('openai')
   const [config, setConfig] = useState<Record<ProviderType, { baseUrl: string; apiKey: string; model: string }>>({
@@ -65,13 +64,10 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
 
     if (Object.keys(payload).length === 0) return
 
-    setSaving(true)
     try {
       await updateProviderConfig(activeProvider, payload)
     } catch (error) {
       console.error('Failed to save config:', error)
-    } finally {
-      setSaving(false)
     }
   }
 
@@ -191,14 +187,11 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                           clearTimeout(saveTimeoutRef.current)
                         }
                         saveTimeoutRef.current = setTimeout(async () => {
-                          setSaving(true)
                           try {
                             await switchProviderConfig(nextProvider)
                           } catch (error) {
                             console.error('Failed to switch provider:', error)
                             setActiveProvider(prevProvider)
-                          } finally {
-                            setSaving(false)
                           }
                         }, 400)
                       }}
