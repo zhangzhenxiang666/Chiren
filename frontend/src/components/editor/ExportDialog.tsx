@@ -102,17 +102,17 @@ export function ExportDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="flex w-[480px] max-h-[85vh] flex-col rounded-xl bg-[#1c1c1e] border border-[#2a2a2e] shadow-2xl">
+      <div className="flex w-[480px] max-h-[85vh] flex-col rounded-xl bg-card border-border shadow-2xl">
         <div className="flex items-center justify-between px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-pink-500/10">
               <Download className="h-4 w-4 text-pink-400" />
             </div>
             <div>
-              <h2 className="text-base font-semibold text-zinc-100">
+              <h2 className="text-base font-semibold text-foreground">
                 导出简历
               </h2>
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 选择导出格式下载简历
               </p>
             </div>
@@ -120,7 +120,7 @@ export function ExportDialog({
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-lg p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -139,23 +139,23 @@ export function ExportDialog({
                       onClick={() => setSelectedFormat(key)}
                       className={`flex flex-col items-center gap-2 rounded-xl border p-5 transition-all ${
                         isSelected
-                          ? 'border-pink-500 bg-pink-500/10'
-                          : 'border-[#2a2a2e] bg-[#252528] hover:border-zinc-600'
+                          ? 'border-pink-500/40 bg-pink-500/10'
+                          : 'border-border bg-muted hover:border-muted-foreground/50'
                       }`}
                     >
                       <Icon
                         className={`h-7 w-7 ${
-                          isSelected ? 'text-pink-400' : 'text-zinc-400'
+                          isSelected ? 'text-pink-400' : 'text-muted-foreground'
                         }`}
                       />
                       <span
                         className={`text-sm font-medium ${
-                          isSelected ? 'text-pink-400' : 'text-zinc-200'
+                          isSelected ? 'text-pink-400' : 'text-foreground'
                         }`}
                       >
                         {label}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted-foreground">
                         {description}
                       </span>
                     </button>
@@ -167,7 +167,7 @@ export function ExportDialog({
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="rounded-lg bg-zinc-800 px-5 py-2 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700"
+                  className="rounded-lg bg-secondary px-5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
                 >
                   取消
                 </button>
@@ -186,7 +186,7 @@ export function ExportDialog({
           {status === 'exporting' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-3 py-8">
               <Loader2 className="h-8 w-8 animate-spin text-pink-500" />
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-muted-foreground">
                 正在生成{selectedFormat ? ` ${FORMAT_OPTIONS.find(f => f.key === selectedFormat)?.label}` : ''}...
               </p>
             </div>

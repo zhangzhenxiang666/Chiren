@@ -15,8 +15,8 @@ export default function TemplateGallery() {
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 mb-8">
-        <h1 className="text-3xl font-bold text-white">模板</h1>
-        <p className="text-sm text-gray-500 mt-1">选择一个模板开始创建你的简历</p>
+        <h1 className="text-3xl font-bold text-foreground">模板</h1>
+        <p className="text-sm text-muted-foreground mt-1">选择一个模板开始创建你的简历</p>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
@@ -58,32 +58,32 @@ function PreviewModal({ templateId, onClose, onUse }: { templateId: string; onCl
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm" onClick={onClose}>
       <div
-        className="relative w-full max-w-4xl h-[90vh] flex flex-col bg-[#121214] rounded-xl border border-[#2a2a2e] overflow-hidden"
+        className="relative w-full max-w-4xl h-[90vh] flex flex-col bg-background rounded-xl border border-border overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#2a2a2e]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border">
           <div className="flex items-center gap-6">
-            <h2 className="text-lg font-semibold text-white">
+            <h2 className="text-lg font-semibold text-foreground">
               预览：<span className="text-pink-400">{templateLabelsMap[templateId]}</span>
             </h2>
             <button
               onClick={() => onUse(templateId)}
-              className="px-4 py-1.5 rounded-lg bg-[#e94560] text-white hover:bg-[#d63653] transition-colors text-sm font-medium"
+              className="px-4 py-1.5 rounded-lg bg-[#e94560] text-primary-foreground hover:bg-[#d63653] transition-colors text-sm font-medium"
             >
               使用此模板
             </button>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-auto bg-[#1a1a1e] p-8">
+        <div className="flex-1 overflow-auto bg-card p-8">
           <div className="flex justify-center">
-            <div className="w-[595px]">
+            <div className="w-[595px] border border-foreground/10 rounded-lg overflow-hidden">
               <ResumePreview resume={previewResume} />
             </div>
           </div>

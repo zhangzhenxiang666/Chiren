@@ -76,14 +76,14 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
           <button
             type="button"
             onClick={prevYear}
-            className="rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </button>
           <button
             type="button"
             onClick={prevMonth}
-            className="rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -95,14 +95,14 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
           <button
             type="button"
             onClick={nextMonth}
-            className="rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
           <button
             type="button"
             onClick={nextYear}
-            className="rounded p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            className="rounded p-0.5 text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </button>
@@ -112,7 +112,7 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
       {/* Weekday headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map((d) => (
-          <div key={d} className="h-7 text-center text-[10px] text-zinc-400 dark:text-zinc-500 leading-7">
+          <div key={d} className="h-7 text-center text-[10px] text-muted-foreground leading-7">
             {d}
           </div>
         ))}
@@ -128,8 +128,8 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
             className={cn(
               'h-7 w-7 mx-auto rounded-full text-xs transition-colors flex items-center justify-center',
               cell.current
-                ? 'text-zinc-800 dark:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700'
-                : 'text-zinc-300 dark:text-zinc-600 hover:bg-zinc-50 dark:hover:bg-zinc-800/30',
+                ? 'text-foreground hover:bg-accent'
+                : 'text-muted-foreground hover:bg-muted',
               isSelected(cell.date) && 'bg-pink-500 text-white hover:bg-pink-600',
               !isSelected(cell.date) && isToday(cell.date) && 'ring-1 ring-pink-400',
             )}

@@ -24,24 +24,24 @@ export function EditorPreviewPanel({ className }: EditorPreviewPanelProps = {}) 
   const scale = zoom / 100;
 
   return (
-    <div className={`flex min-w-0 flex-[6] flex-col border-l bg-zinc-50 dark:bg-zinc-900 dark:border-zinc-800 ${className ?? ''}`}>
-      <div className="flex shrink-0 items-center justify-between border-b bg-white px-4 py-2 dark:bg-zinc-900 dark:border-zinc-800">
-        <span className="text-xs font-medium text-zinc-500">预览</span>
+    <div className={`flex min-w-0 flex-[6] flex-col border-l border-border bg-background ${className ?? ''}`}>
+      <div className="flex shrink-0 items-center justify-between border-b border-border bg-card px-4 py-2">
+        <span className="text-xs font-medium text-muted-foreground">预览</span>
         <div className="flex items-center gap-1">
           <button
             type="button"
             onClick={() => setZoom((z) => Math.max(30, z - 10))}
             disabled={zoom <= 30}
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded transition-colors hover:bg-zinc-100 disabled:opacity-40 dark:hover:bg-zinc-800"
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"
           >
             <ZoomOut className="h-3.5 w-3.5" />
           </button>
-          <span className="w-10 text-center text-xs text-zinc-500">{zoom}%</span>
+          <span className="w-10 text-center text-xs text-muted-foreground">{zoom}%</span>
           <button
             type="button"
             onClick={() => setZoom((z) => Math.min(150, z + 10))}
             disabled={zoom >= 150}
-            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded transition-colors hover:bg-zinc-100 disabled:opacity-40 dark:hover:bg-zinc-800"
+            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded transition-colors hover:bg-accent disabled:opacity-40"
           >
             <ZoomIn className="h-3.5 w-3.5" />
           </button>

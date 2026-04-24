@@ -77,7 +77,7 @@ export function EditorCanvas({
   const activeSection = activeId ? sections.find((s) => s.id === activeId) : null;
 
   return (
-    <div className={`min-w-0 overflow-hidden bg-zinc-50 dark:bg-zinc-950 ${className}`}>
+    <div className={`min-w-0 overflow-hidden bg-background ${className}`}>
       <ScrollArea className="h-full">
         <div className="p-4">
           <DndContext
@@ -105,8 +105,8 @@ export function EditorCanvas({
 
             <DragOverlay>
               {activeSection && (
-                <div className="rounded-lg border-2 border-pink-300 bg-white dark:bg-zinc-800 p-4 opacity-80 shadow-xl">
-                  <p className="font-medium text-zinc-700 dark:text-zinc-200">{activeSection.title}</p>
+                <div className="rounded-lg border-2 border-pink-400 bg-card p-4 opacity-80 shadow-xl">
+                  <p className="font-medium text-foreground">{activeSection.title}</p>
                 </div>
               )}
             </DragOverlay>

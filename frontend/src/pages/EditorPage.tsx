@@ -64,7 +64,7 @@ export default function EditorPage() {
 
   if (workspaceNotFound) {
     return (
-      <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex h-screen items-center justify-center bg-muted">
         <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
           <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
           <div className="text-center">
@@ -85,7 +85,7 @@ export default function EditorPage() {
 
   if (resumeNotFound) {
     return (
-      <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex h-screen items-center justify-center bg-muted">
         <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
           <FileX className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
           <div className="text-center">
@@ -106,7 +106,7 @@ export default function EditorPage() {
 
   if (loading || !currentResume) {
     return (
-      <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex h-screen items-center justify-center bg-muted">
         <div className="space-y-4 text-zinc-500">加载中...</div>
       </div>
     );
@@ -115,7 +115,7 @@ export default function EditorPage() {
   const backUrl = id ? `/workspace/${id}` : '/';
 
   return (
-    <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex h-screen flex-col bg-muted">
       <EditorToolbar
         title={currentResume.title}
         onBack={() => navigate(backUrl)}

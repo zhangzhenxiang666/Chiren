@@ -150,29 +150,29 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetAndClose} />
 
-      <div className="relative w-[896px] h-[768px] bg-[#1c1c1e] border border-[#2a2a2e] rounded-2xl shadow-2xl flex flex-col">
+      <div className="relative w-[896px] h-[768px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
-            <h2 className="text-xl font-semibold text-white">新建工作空间</h2>
-            <p className="text-gray-400 text-sm mt-1">选择模板或上传简历文件开始创建</p>
+            <h2 className="text-xl font-semibold text-foreground">新建工作空间</h2>
+            <p className="text-muted-foreground text-sm mt-1">选择模板或上传简历文件开始创建</p>
           </div>
           <button
             onClick={resetAndClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-300 transition-colors p-1"
+            className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors p-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="mx-6 mt-4 flex gap-1 rounded-lg bg-zinc-800 p-1">
+        <div className="mx-6 mt-4 flex gap-1 rounded-lg bg-muted p-1">
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === 'template'
-                ? 'bg-zinc-700 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab('template')}
           >
@@ -182,8 +182,8 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === 'upload'
-                ? 'bg-zinc-700 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab('upload')}
           >
@@ -198,14 +198,14 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="输入工作空间名称..."
-            className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+            className="w-full px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
           />
         </div>
 
-        <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
+<div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
           {tab === 'template' ? (
             <div className="flex flex-col flex-1 min-h-0">
-              <p className="mb-3 text-sm font-medium text-gray-300 shrink-0">
+              <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">
                 选择模板
               </p>
               <div className="flex-1 overflow-y-auto pr-1 min-h-0">
@@ -219,19 +219,19 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                           className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                             isSelected
                               ? 'border-pink-500 shadow-md shadow-pink-500/10'
-                              : 'border-zinc-700 hover:border-zinc-600'
+                              : 'border-foreground/10 hover:border-foreground/30'
                           }`}
                           onClick={() => setSelectedTemplate(tpl)}
                         >
                           {/* Thumbnail */}
-                          <div className="relative bg-zinc-800/50 p-2">
+                          <div className="relative bg-muted p-2">
                             <TemplateThumbnail
                               template={tpl}
-                              className="mx-auto h-[100px] w-[71px] shadow-sm ring-1 ring-zinc-700/50"
+                              className="mx-auto h-[100px] w-[71px] shadow-sm ring-1 ring-foreground/10"
                             />
                             {/* Selected check */}
                             {isSelected && (
-                              <div className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-white shadow-sm">
+                              <div className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-primary-foreground shadow-sm">
                                 <Check className="h-3 w-3" strokeWidth={3} />
                               </div>
                             )}
@@ -240,7 +240,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                           <div className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
                             isSelected
                               ? 'bg-pink-500/10 text-pink-400'
-                              : 'text-zinc-400 hover:text-zinc-300'
+                              : 'text-muted-foreground hover:text-foreground'
                           }`}>
                             {templateLabelsMap[tpl]}
                           </div>
@@ -259,7 +259,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                     ? 'border-pink-400 bg-pink-500/10'
                     : file
                       ? 'border-green-500/50 bg-green-500/5'
-                      : 'border-zinc-600 hover:border-zinc-500'
+                      : 'border-foreground/20 hover:border-foreground/40'
                 }`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -269,14 +269,14 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                   <div className="flex items-center gap-3">
                     <FileIcon className="h-8 w-8 text-green-400" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-zinc-200">{file.name}</p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">
                         {(file.size / 1024).toFixed(0)} KB
                       </p>
                     </div>
                     <button
                       type="button"
-                      className="cursor-pointer rounded-full p-1 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300"
+                      className="cursor-pointer rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
                       onClick={() => setFile(null)}
                     >
                       <X className="h-4 w-4" />
@@ -284,12 +284,12 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                   </div>
                 ) : (
                   <>
-                    <Upload className="mb-2 h-8 w-8 text-zinc-500" />
-                    <p className="text-sm text-zinc-400">拖拽文件到此处，或点击下方按钮选择</p>
-                    <p className="mt-1 text-xs text-zinc-600">支持 PDF（最大 10MB）</p>
+                    <Upload className="mb-2 h-8 w-8 text-muted-foreground" />
+                    <p className="text-sm text-muted-foreground">拖拽文件到此处，或点击下方按钮选择</p>
+                    <p className="mt-1 text-xs text-muted-foreground/60">支持 PDF（最大 10MB）</p>
                     <button
                       type="button"
-                      className="mt-3 cursor-pointer rounded-md bg-zinc-700 px-3 py-1.5 text-sm font-medium text-zinc-300 hover:bg-zinc-600 hover:text-zinc-200"
+                      className="mt-3 cursor-pointer rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                       onClick={() => {
                         const input = document.createElement('input')
                         input.type = 'file'
@@ -313,7 +313,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
 
               {/* Template selector for upload */}
               <div className="flex flex-col flex-1 min-h-0 mt-4">
-                <p className="mb-3 text-sm font-medium text-gray-300 shrink-0">
+                <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">
                   选择模板
                 </p>
                 <div className="flex-1 overflow-y-auto pr-1 min-h-0">
@@ -327,17 +327,17 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                           className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                             isSelected
                               ? 'border-pink-500 shadow-md shadow-pink-500/10'
-                              : 'border-zinc-700 hover:border-zinc-600'
+                              : 'border-foreground/10 hover:border-foreground/30'
                           }`}
                           onClick={() => setSelectedTemplate(tpl)}
                         >
-                          <div className="relative bg-zinc-800/50 p-2">
+                          <div className="relative bg-muted p-2">
                             <TemplateThumbnail
                               template={tpl}
-                              className="mx-auto h-[100px] w-[71px] shadow-sm ring-1 ring-zinc-700/50"
+                              className="mx-auto h-[100px] w-[71px] shadow-sm ring-1 ring-foreground/10"
                             />
                             {isSelected && (
-                              <div className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-white shadow-sm">
+                              <div className="absolute right-1.5 top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-pink-500 text-primary-foreground shadow-sm">
                                 <Check className="h-3 w-3" strokeWidth={3} />
                               </div>
                             )}
@@ -345,7 +345,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
                           <div className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
                             isSelected
                               ? 'bg-pink-500/10 text-pink-400'
-                              : 'text-zinc-400 hover:text-zinc-300'
+                              : 'text-muted-foreground hover:text-foreground'
                           }`}>
                             {templateLabelsMap[tpl]}
                           </div>
@@ -360,10 +360,10 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-[#2a2a2e]">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-foreground/10">
           <button
             onClick={resetAndClose}
-            className="cursor-pointer px-5 py-2 rounded-lg border border-[#2a2a2e] text-gray-400 hover:text-white hover:border-[#3a3a3c] transition-colors text-sm font-medium"
+            className="cursor-pointer px-5 py-2 rounded-lg border border-foreground/10 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
           >
             取消
           </button>
@@ -371,7 +371,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
             <button
               onClick={handleCreate}
               disabled={isCreating}
-              className="cursor-pointer px-5 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
+              className="cursor-pointer px-5 py-2 rounded-lg bg-pink-500 text-primary-foreground hover:bg-pink-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
             >
               {isCreating ? (
                 <>
@@ -386,7 +386,7 @@ export default function CreateWorkspaceModal({ open, onClose, onCreate, onRefres
             <button
               onClick={handleUploadParse}
               disabled={!file || isParsing}
-              className="cursor-pointer px-5 py-2 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
+              className="cursor-pointer px-5 py-2 rounded-lg bg-pink-500 text-primary-foreground hover:bg-pink-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center gap-1.5"
             >
               {isParsing ? (
                 <>

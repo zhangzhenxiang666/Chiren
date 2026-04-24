@@ -35,25 +35,25 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
   const saveLabel = isSaving ? '保存中...' : isDirty ? '未保存' : '已保存';
 
   return (
-    <div className="flex h-12 items-center justify-between border-b border-[#2a2a2e] bg-[#18181a] px-3">
+    <div className="flex h-12 items-center justify-between border-b border-border bg-muted px-3">
       <div className="flex items-center gap-2">
         {onBack && (
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+            className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
           </button>
         )}
 
-        <div className="h-6 w-px bg-[#2a2a2e]" />
+        <div className="h-6 w-px bg-muted-foreground/20"></div>
 
-        <span className="max-w-48 truncate text-sm font-medium text-zinc-100">
+        <span className="max-w-48 truncate text-sm font-medium text-foreground">
           {title}
         </span>
 
-        <span className="text-xs text-zinc-500">{saveLabel}</span>
+        <span className="text-xs text-muted-foreground">{saveLabel}</span>
 
         {false && (
           <button
@@ -72,7 +72,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
           type="button"
           title="撤销 (Ctrl+Z)"
           disabled={true}
-          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-40"
+          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-accent hover:text-zinc-100 disabled:opacity-40"
         >
           <Undo2 className="h-4 w-4" />
         </button>
@@ -81,18 +81,18 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
           type="button"
           title="重做 (Ctrl+Shift+Z)"
           disabled={true}
-          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100 disabled:opacity-40"
+          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-accent hover:text-zinc-100 disabled:opacity-40"
         >
           <Redo2 className="h-4 w-4" />
         </button>
 
-        <div className="h-6 w-px bg-[#2a2a2e]" />
+        <div className="h-6 w-px bg-muted-foreground/20"></div>
 
         <button
           type="button"
           title="导出"
           onClick={onExport}
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Download className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">导出</span>
@@ -101,7 +101,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         <button
           type="button"
           title="导入"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Upload className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">导入</span>
@@ -110,18 +110,18 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         <button
           type="button"
           title="分享"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Share2 className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">分享</span>
         </button>
 
-        <div className="h-6 w-px bg-[#2a2a2e]" />
+        <div className="h-6 w-px bg-muted-foreground/20"></div>
 
         <button
           type="button"
           title="JD 匹配分析"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <FileSearch className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">JD 分析</span>
@@ -130,7 +130,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         <button
           type="button"
           title="翻译"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Languages className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">翻译</span>
@@ -140,7 +140,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
           type="button"
           title="求职信"
           onClick={onCoverLetterOpen}
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <FileText className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">求职信</span>
@@ -149,31 +149,31 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         <button
           type="button"
           title="语法检查"
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <SpellCheck className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">语法</span>
         </button>
 
-        <div className="h-6 w-px bg-[#2a2a2e]" />
+        <div className="h-6 w-px bg-muted-foreground/20"></div>
 
         <button
           type="button"
           title="主题"
           onClick={onThemeToggle}
-          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? 'bg-pink-500/20 text-pink-400' : 'text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100'}`}
+          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? 'bg-pink-500/30 text-pink-400' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
         >
           <Palette className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">主题</span>
         </button>
 
-        <div className="h-6 w-px bg-[#2a2a2e]" />
+        <div className="h-6 w-px bg-muted-foreground/20"></div>
 
         <button
           type="button"
           title="设置"
           onClick={onSettings}
-          className="flex items-center gap-1 rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-100"
+          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
         >
           <Settings className="h-4 w-4" />
         </button>

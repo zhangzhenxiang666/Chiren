@@ -104,7 +104,7 @@ export default function MainLayout() {
   useGlobalSSE()
 
   return (
-    <div className="h-screen w-full flex bg-[#121214]">
+    <div className="h-screen w-full flex bg-background">
       <Sidebar collapsed={collapsed} onToggle={() => setCollapsed(prev => !prev)} />
       <main className="flex-1 min-h-0 p-6">
         <Outlet />
@@ -113,9 +113,9 @@ export default function MainLayout() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#1c1c1e',
-            border: '1px solid #2a2a2e',
-            color: '#fff',
+            background: 'hsl(var(--card))',
+            border: '1px solid hsl(var(--border))',
+            color: 'hsl(var(--card-foreground))',
           },
         }}
       />

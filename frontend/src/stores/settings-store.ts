@@ -1,6 +1,8 @@
 import { create } from 'zustand';
+import { applyThemeMode } from '../lib/theme';
 
 export type AIProvider = 'openai' | 'anthropic' | 'gemini';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface SettingsStore {
   aiProvider: AIProvider;
@@ -9,6 +11,7 @@ interface SettingsStore {
   aiModel: string;
   autoSave: boolean;
   autoSaveInterval: number;
+  themeMode: ThemeMode;
   _hydrated: boolean;
 
   setAIProvider: (provider: AIProvider) => void;
@@ -17,11 +20,27 @@ interface SettingsStore {
   setAIModel: (model: string) => void;
   setAutoSave: (enabled: boolean) => void;
   setAutoSaveInterval: (interval: number) => void;
+  setThemeMode: (mode: ThemeMode) => void;
   hydrate: () => void;
 }
 
 const API_KEY_STORAGE_KEY = 'jade_api_key';
 const PROVIDER_CONFIGS_KEY = 'jade_provider_configs';
+const THEME_MODE_KEY = 'jade_theme_mode';
+
+function loadThemeMode(): ThemeMode {
+  if (typeof window === 'undefined') return 'system';
+  try {
+    const raw = localStorage.getItem(THEME_MODE_KEY);
+    if (raw === 'light' || raw === 'dark' || raw === 'system') return raw;
+    return 'system';
+  } catch { return 'system'; }
+}
+
+function saveThemeMode(mode: ThemeMode) {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(THEME_MODE_KEY, mode); } catch {}
+}
 
 interface ProviderConfig {
   baseURL: string;
@@ -79,6 +98,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   aiModel: 'gpt-4o',
   autoSave: true,
   autoSaveInterval: 500,
+  themeMode: loadThemeMode(),
   _hydrated: false,
 
   setAIProvider: (provider) => {
@@ -105,6 +125,12 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   setAutoSave: (enabled) => set({ autoSave: enabled }),
 
   setAutoSaveInterval: (interval) => set({ autoSaveInterval: interval }),
+
+  setThemeMode: (mode) => {
+    set({ themeMode: mode });
+    saveThemeMode(mode);
+    applyThemeMode();
+  },
 
   hydrate: () => {
     if (get()._hydrated) return;

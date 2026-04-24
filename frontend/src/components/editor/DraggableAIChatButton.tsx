@@ -682,23 +682,23 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
     <div
       ref={dialogRef}
       style={dialogStyle}
-      className="w-[500px] bg-[#1e1e20] border border-[#2a2a2e] rounded-lg shadow-xl overflow-hidden"
+      className="w-[500px] bg-background border border-border rounded-lg shadow-xl overflow-hidden"
     >
       <div
         role="toolbar"
-        className="flex items-center justify-between border-b border-[#2a2a2e] px-4 py-2 cursor-move"
+        className="flex items-center justify-between border-b border-border px-4 py-2 cursor-move"
         onMouseDown={onMouseDown}
       >
         <div className="flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600">
             <Sparkles className="h-3.5 w-3.5 text-white" />
           </div>
-          <span className="font-medium text-white">AI 助手</span>
+          <span className="font-medium text-foreground">AI 助手</span>
         </div>
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); onClose(); }}
-          className="rounded-md p-1 text-gray-400 hover:bg-[#2a2a2e] hover:text-white transition-colors"
+          className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <title>关闭</title>
@@ -708,11 +708,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
       </div>
 
       <div className="flex flex-col">
-        <div ref={scrollRef} className="relative h-[460px] overflow-y-auto p-4 space-y-3" onScroll={handleScroll}>
+        <div ref={scrollRef} className="relative h-[460px] overflow-y-auto p-4 space-y-3 bg-card" onScroll={handleScroll}>
           {loading ? (
-            <div className="text-center text-gray-500 text-xs py-8">加载中...</div>
+            <div className="text-center text-muted-foreground text-xs py-8">加载中...</div>
           ) : messages.length === 0 ? (
-            <div className="text-center text-gray-500 text-xs py-8">暂无消息</div>
+            <div className="text-center text-muted-foreground text-xs py-8">暂无消息</div>
           ) : (
             messages.map((msg, index) => {
               const isToolResultOnlyUser =
@@ -724,7 +724,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 const userText = textBlockForUser?.text || '消息发送成功';
                 return (
                   <div key={msg.id} className="flex justify-end">
-                    <div className="max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-xs leading-relaxed bg-pink-500/20 text-gray-200">
+                    <div className="max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-xs leading-relaxed bg-primary text-primary-foreground">
                       {userText}
                     </div>
                   </div>
@@ -748,12 +748,12 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white">
                     <Sparkles className="h-3 w-3" />
                   </div>
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-[#2a2a2e] text-gray-300">
+                  <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
                     {reasoning && (
                       <>
                         <button
                           type="button"
-                          className="text-[10px] text-gray-500 cursor-pointer hover:text-gray-400 flex items-center gap-1"
+                          className="text-[10px] text-muted-foreground flex items-center gap-1"
                           onClick={() => toggleThinking(`${msgKey}-reasoning`)}
                         >
                           {expandedMessages.has(`${msgKey}-reasoning`) ? (
@@ -766,7 +766,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                           </span>
                         </button>
                         {expandedMessages.has(`${msgKey}-reasoning`) && (
-                          <div className="text-[10px] text-gray-500 pl-4 border-l border-gray-700 whitespace-pre-wrap">
+                          <div className="text-[10px] text-muted-foreground pl-4 border-l border-border whitespace-pre-wrap">
                             {reasoning}
                           </div>
                         )}
@@ -787,15 +787,15 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               <table className="w-full text-xs border-collapse my-2">{children}</table>
                             ),
                             thead: ({ children }) => (
-                              <thead className="bg-[#2a2a2e]">{children}</thead>
+                              <thead className="bg-secondary text-secondary-foreground">{children}</thead>
                             ),
                             th: ({ children }) => (
-                              <th className="border border-[#3a3a3e] px-3 py-1 text-left font-medium text-gray-300">
+                              <th className="border-border px-3 py-1 text-left font-medium text-foreground">
                                 {children}
                               </th>
                             ),
                             td: ({ children }) => (
-                              <td className="border border-[#3a3a3e] px-3 py-1 text-gray-400">{children}</td>
+                              <td className="border-border px-3 py-1 text-foreground">{children}</td>
                             ),
                             tr: ({ children }) => (
                               <tr className="border-b border-[#3a3a3e]">{children}</tr>
@@ -827,14 +827,14 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               <span>工具请求: {toolUse.name}</span>
                             </button>
                             {expandedMessages.has(toolKey) && (
-                              <pre className="text-gray-400 whitespace-pre-wrap text-[10px] bg-[#1e1e20] rounded p-2 overflow-auto">
+                              <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted-foreground/10 rounded p-2 overflow-auto">
                                 {JSON.stringify(toolUse.input, null, 2)}
                               </pre>
                             )}
                           </div>
                           {result && (
                             <div
-                              className={`rounded-lg border p-2 space-y-2 ${result.isError
+                              className={`rounded-lg border border-border p-2 space-y-2 ${result.isError
                                 ? 'border-red-500/30 bg-red-500/5'
                                 : 'border-green-500/30 bg-green-500/5'
                                 }`}
@@ -883,11 +883,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white">
                 <Sparkles className="h-3 w-3" />
               </div>
-              <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-[#2a2a2e] text-gray-300">
+              <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
                 {streamingMessage.thinking && (
                   <button
                     type="button"
-                    className="text-[10px] text-gray-500 cursor-pointer hover:text-gray-400 flex items-center gap-1"
+                    className="text-[10px] text-muted-foreground flex items-center gap-1"
                     onClick={() =>
                       // ✅ FIX: 只切换 visible，不会触发任何 setMessages 副作用
                       updateStreaming((prev) =>
@@ -913,7 +913,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                   </button>
                 )}
                 {streamingMessage.thinking?.visible && (
-                  <div className="text-[10px] text-gray-500 pl-4 border-l border-gray-700 whitespace-pre-wrap">
+                  <div className="text-[10px] text-muted-foreground pl-4 border-l border-border whitespace-pre-wrap">
                     {streamingMessage.thinking.content}
                   </div>
                 )}
@@ -939,20 +939,20 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         <span>工具请求: {toolCall.name}</span>
                         {toolCall.status === 'executing' && (
                           <>
-                            <span className="text-gray-500">执行中...</span>
+                            <span className="text-muted-foreground">执行中...</span>
                             <Loader2 className="h-3 w-3 animate-spin text-purple-400" />
                           </>
                         )}
                       </button>
                       {expandedToolCalls.has(toolCall.id) && (
-                        <pre className="text-gray-400 whitespace-pre-wrap text-[10px] bg-[#1e1e20] rounded p-2 overflow-auto">
+                        <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted-foreground/10 rounded p-2 overflow-auto">
                           {JSON.stringify(toolCall.input, null, 2)}
                         </pre>
                       )}
                     </div>
                     {(toolCall.result || toolCall.status === 'executing') && (
                       <div
-                        className={`rounded-lg border p-2 space-y-2 ${toolCall.status === 'executing'
+                        className={`rounded-lg border border-border p-2 space-y-2 ${toolCall.status === 'executing'
                           ? 'border-purple-500/30 bg-purple-500/5'
                           : toolCall.result!.isError
                             ? 'border-red-500/30 bg-red-500/5'
@@ -1019,12 +1019,12 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               onClick={() => {
                 scrollToBottom(true);
               }}
-              className="absolute -top-10 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-[#2a2a2e]/90 hover:bg-[#2a2a2e] text-gray-400 hover:text-gray-300 shadow-md transition-colors"
+              className="absolute -top-10 left-1/2 -translate-x-1/2 flex h-8 w-8 items-center justify-center rounded-full bg-secondary text-secondary-foreground/90 hover:bg-secondary text-secondary-foreground text-foreground hover:text-foreground shadow-md transition-colors"
             >
               <ArrowDown className="h-4 w-4" />
             </button>
           )}
-          <div className="flex flex-col rounded-2xl bg-[#2a2a2e] overflow-hidden min-h-[98px]">
+          <div className="flex flex-col rounded-2xl bg-secondary text-secondary-foreground overflow-hidden min-h-[98px]">
             <div className="flex-1 overflow-y-auto px-4 pt-3">
               <textarea
                 placeholder="描述你想优化的内容..."
@@ -1032,11 +1032,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-xs text-white placeholder-gray-500 border-none focus:outline-none resize-none"
+                className="w-full bg-transparent text-xs text-white placeholder:text-muted-foreground border-none focus:outline-none resize-none"
               />
             </div>
             <div className="flex items-center justify-between px-4 pb-3">
-              <div className="flex items-center gap-2 text-xs text-gray-400">
+              <div className="flex items-center gap-2 text-xs text-foreground">
                 <span className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   {currentModel || '未配置模型'}

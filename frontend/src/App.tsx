@@ -1,13 +1,39 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import MainLayout from './components/layout/MainLayout'
 import Dashboard from './pages/Dashboard'
 import TemplateGallery from './pages/TemplateGallery'
 import EditorPage from './pages/EditorPage'
 import WorkspaceDetail from './pages/WorkspaceDetail'
 import NotFoundPage from './pages/NotFoundPage'
+import { applyThemeMode } from './lib/theme'
+import { useSettingsStore } from './stores/settings-store'
 import './App.css'
 
 function App() {
+  useEffect(() => {
+    applyThemeMode()
+
+    const mql = window.matchMedia('(prefers-color-scheme: dark)')
+    const handleSystemChange = () => {
+      if (useSettingsStore.getState().themeMode === 'system') {
+        applyThemeMode()
+      }
+    }
+    mql.addEventListener('change', handleSystemChange)
+
+    const unsubscribe = useSettingsStore.subscribe((state, prevState) => {
+      if (state.themeMode !== prevState.themeMode) {
+        applyThemeMode()
+      }
+    })
+
+    return () => {
+      mql.removeEventListener('change', handleSystemChange)
+      unsubscribe()
+    }
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>

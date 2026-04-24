@@ -34,32 +34,32 @@ function getStatusLabel(status: string): string {
 
 function getStatusBadgeBg(status: string): string {
   const map: Record<string, string> = {
-    pending: 'border-gray-500/50 bg-gray-500/10',
+    pending: 'border-muted-foreground/50 bg-muted',
     running: 'border-amber-500/50 bg-amber-500/10',
     success: 'border-emerald-500/50 bg-emerald-500/10',
     error: 'border-red-500/50 bg-red-500/10',
   };
-  return map[status] || 'border-gray-500/50 bg-gray-500/10';
+  return map[status] || 'border-muted-foreground/50 bg-muted';
 }
 
 function getStatusTextColor(status: string): string {
   const map: Record<string, string> = {
-    pending: 'text-gray-400',
+    pending: 'text-muted-foreground',
     running: 'text-amber-400',
     success: 'text-emerald-400',
     error: 'text-red-400',
   };
-  return map[status] || 'text-gray-400';
+  return map[status] || 'text-muted-foreground';
 }
 
 function getStatusDot(status: string): string {
   const map: Record<string, string> = {
-    pending: 'bg-gray-400',
+    pending: 'bg-muted-foreground',
     running: 'bg-amber-400 animate-pulse',
     success: 'bg-emerald-400',
     error: 'bg-red-400',
   };
-  return map[status] || 'bg-gray-400';
+  return map[status] || 'bg-muted-foreground';
 }
 
 function getTaskTypeTitle(taskType: string): string {
@@ -73,11 +73,11 @@ function getTaskTypeTitle(taskType: string): string {
 
 function getTaskTypeTitleStyle(taskType: string): string {
   const map: Record<string, string> = {
-    parse: 'text-white',
+    parse: 'text-foreground',
     jd_generate: 'text-purple-400',
     jd_score: 'text-amber-400',
   };
-  return map[taskType] || 'text-white';
+  return map[taskType] || 'text-foreground';
 }
 
 function getTaskTypeIcon(taskType: string): LucideIcon {
@@ -101,9 +101,9 @@ function getTaskTypeColors(taskType: string): { bg: string; text: string } {
 export default function MessageList({ tasks }: MessageListProps) {
   return (
     <>
-      <div className="px-4 py-3 border-b border-[#1e1e20] flex items-center justify-between">
-        <h3 className="text-sm font-medium text-white">任务通知</h3>
-        <span className="text-xs text-gray-500">{tasks.length} 个任务</span>
+      <div className="px-4 py-3 border-b border-muted-foreground/20 flex items-center justify-between">
+        <h3 className="text-sm font-medium text-foreground">任务通知</h3>
+        <span className="text-xs text-muted-foreground">{tasks.length} 个任务</span>
       </div>
 
       <div className="max-h-96 overflow-y-auto">
@@ -115,9 +115,9 @@ export default function MessageList({ tasks }: MessageListProps) {
         )}
 
         {tasks.length > 0 && (
-          <ul className="divide-y divide-[#1e1e20]">
+          <ul className="divide-y divide-muted-foreground/20">
             {tasks.map((task: WorkTask) => (
-              <li key={task.id} className="px-4 py-3 hover:bg-[#222225] transition-colors">
+              <li key={task.id} className="px-4 py-3 hover:bg-muted transition-colors">
                 <div className="flex items-start gap-3">
                   <div className={`w-8 h-8 rounded-lg ${getTaskTypeColors(task.taskType).bg} flex items-center justify-center shrink-0`}>
                     {(() => {
@@ -138,12 +138,12 @@ export default function MessageList({ tasks }: MessageListProps) {
                       </span>
                     </div>
                     {task.metaInfo?.fileName && (
-                      <p className="text-xs text-gray-500 truncate mb-1">{task.metaInfo.fileName}</p>
+                      <p className="text-xs text-muted-foreground truncate mb-1">{task.metaInfo.fileName}</p>
                     )}
                     {task.metaInfo?.title && (
-                      <p className="text-xs text-gray-500 truncate mb-1">{task.metaInfo.title}</p>
+                      <p className="text-xs text-muted-foreground truncate mb-1">{task.metaInfo.title}</p>
                     )}
-                    <div className="flex items-center gap-1 text-xs text-gray-600">
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground/60">
                       <Clock className="w-3 h-3" />
                       <span>{formatTime(task.createdAt)}</span>
                     </div>

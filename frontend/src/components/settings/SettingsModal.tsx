@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
-import { X, Eye, EyeOff, Loader2, ChevronDown, Settings, Cpu } from 'lucide-react'
+import { X, Eye, EyeOff, Loader2, ChevronDown, Settings, Cpu, Sun, Moon, Monitor } from 'lucide-react'
 import { getProviderConfig, updateProviderConfig, switchProviderConfig, type ProviderType } from '../../lib/api'
+import { useSettingsStore, type ThemeMode } from '../../stores/settings-store'
 
 export interface SettingsModalProps {
   open: boolean
@@ -113,27 +114,27 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
-      <div className="relative w-[560px] bg-[#1c1c1e] border border-[#2a2a2e] rounded-2xl shadow-2xl flex flex-col">
+      <div className="relative w-[560px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
           <div className="flex items-center gap-2">
-            <Settings className="w-5 h-5 text-gray-400" />
-            <h2 className="text-xl font-semibold text-white">设置</h2>
+            <Settings className="w-5 h-5 text-muted-foreground" />
+            <h2 className="text-xl font-semibold text-foreground">设置</h2>
           </div>
           <button
             onClick={handleClose}
-            className="cursor-pointer text-gray-500 hover:text-gray-300 transition-colors p-1"
+            className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors p-1"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="mx-6 mb-6 flex gap-1 rounded-lg bg-zinc-800 p-1">
+        <div className="mx-6 mb-6 flex gap-1 rounded-lg bg-muted p-1">
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
               tab === 'ai'
-                ? 'bg-zinc-700 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab('ai')}
           >
@@ -144,8 +145,8 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === 'appearance'
-                ? 'bg-zinc-700 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab('appearance')}
           >
@@ -155,8 +156,8 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
               tab === 'editor'
-                ? 'bg-zinc-700 text-white shadow-sm'
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
             onClick={() => setTab('editor')}
           >
@@ -168,12 +169,12 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
           {tab === 'ai' ? (
             loading ? (
               <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 text-gray-400 animate-spin" />
+                <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
               </div>
             ) : (
               <div className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     模型协议
                   </label>
                   <div className="relative">
@@ -195,7 +196,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                           }
                         }, 400)
                       }}
-                      className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                      className="w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground appearance-none cursor-pointer focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                     >
                       {PROVIDER_OPTIONS.map((option) => (
                         <option key={option.value} value={option.value}>
@@ -203,12 +204,12 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                         </option>
                       ))}
                     </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     API Key
                   </label>
                   <div className="relative">
@@ -217,12 +218,12 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                       value={currentProvider.apiKey}
                       onChange={(e) => updateCurrentProviderConfig('apiKey', e.target.value)}
                       placeholder="输入 API Key..."
-                      className="w-full px-4 py-2.5 pr-10 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                      className="w-full px-4 py-2.5 pr-10 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                     />
                     <button
                       type="button"
                       onClick={() => setShowApiKey(!showApiKey)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
                       {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -231,7 +232,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     API 地址
                   </label>
                   <input
@@ -239,12 +240,12 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={currentProvider.baseUrl}
                     onChange={(e) => updateCurrentProviderConfig('baseUrl', e.target.value)}
                     placeholder="https://api.openai.com/v1"
-                    className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                    className="w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
                     默认模型
                   </label>
                   <input
@@ -252,29 +253,67 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                     value={currentProvider.model}
                     onChange={(e) => updateCurrentProviderConfig('model', e.target.value)}
                     placeholder="gpt-4"
-                    className="w-full px-4 py-2.5 bg-[#121214] border border-[#2a2a2e] rounded-lg text-white placeholder:text-gray-600 focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                    className="w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                   />
                 </div>
               </div>
             )
           ) : tab === 'appearance' ? (
-            <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
-              外观配置开发中...
-            </div>
+            <AppearanceSettings />
           ) : (
-            <div className="flex items-center justify-center py-12 text-gray-500 text-sm">
+            <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
               编辑器配置开发中...
             </div>
           )}
         </div>
 
-        <div className="flex justify-end px-6 py-4 border-t border-[#2a2a2e]">
+        <div className="flex justify-end px-6 py-4 border-t border-border">
           <button
             onClick={handleClose}
-            className="cursor-pointer px-5 py-2 rounded-lg border border-[#2a2a2e] text-gray-400 hover:text-white hover:border-[#3a3a3c] transition-colors text-sm font-medium"
+            className="cursor-pointer px-5 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:border-input transition-colors text-sm font-medium"
           >
             关闭
           </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+const THEME_OPTIONS: { value: ThemeMode; label: string; icon: React.ElementType }[] = [
+  { value: 'light', label: '亮色', icon: Sun },
+  { value: 'dark', label: '暗色', icon: Moon },
+  { value: 'system', label: '跟随系统', icon: Monitor },
+]
+
+function AppearanceSettings() {
+  const themeMode = useSettingsStore((s) => s.themeMode)
+  const setThemeMode = useSettingsStore((s) => s.setThemeMode)
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <label className="block text-sm font-medium text-muted-foreground mb-3">主题模式</label>
+        <div className="grid grid-cols-3 gap-3">
+          {THEME_OPTIONS.map((option) => {
+            const Icon = option.icon
+            const active = themeMode === option.value
+            return (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setThemeMode(option.value)}
+                className={`cursor-pointer rounded-xl border px-4 py-4 text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
+                  active
+                    ? 'border-foreground bg-secondary text-foreground shadow-sm'
+                    : 'border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <Icon className="w-5 h-5" />
+                {option.label}
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

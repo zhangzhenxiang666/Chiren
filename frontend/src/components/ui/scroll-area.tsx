@@ -46,7 +46,7 @@ function ScrollBar({
       <ScrollAreaPrimitive.ScrollAreaThumb
         data-slot="scroll-area-thumb"
         className="relative flex-1 rounded-full"
-        style={{ backgroundColor: '#212224' }}
+        style={{ backgroundColor: 'hsl(var(--muted-foreground) / 0.3)' }}
       />
     </ScrollAreaPrimitive.ScrollAreaScrollbar>
   )

@@ -39,24 +39,23 @@ export const YearMonthPicker = ({
 
   return (
     <label className="block">
-      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="mt-1 flex w-full items-center justify-between rounded border border-zinc-300 bg-zinc-100 px-2.5 py-1.5 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 transition-colors hover:border-zinc-300 focus:border-pink-300 focus:outline-none"
+            className="mt-1 flex w-full items-center justify-between rounded border border-input bg-muted px-2.5 py-1.5 text-sm text-foreground transition-colors hover:border-foreground/30 focus:border-pink-300 focus:outline-none"
           >
-            <span className={!value ? 'text-zinc-400 dark:text-zinc-500' : ''}>{display}</span>
-            <CalendarDays className="ml-1 h-3.5 w-3.5 shrink-0 text-zinc-400" />
+            <span className={!value ? 'text-muted-foreground' : ''}>{display}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto border border-zinc-200 bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900" align="start" sideOffset={8}>
+        <PopoverContent className="w-auto border border-input bg-card p-3" align="start" sideOffset={8}>
           {/* Year nav */}
           <div className="flex items-center justify-between mb-3">
             <button type="button" onClick={prevYear} className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm font-medium text-zinc-800 dark:text-zinc-200">{pickerYear}年</span>
+            <span className="text-sm font-medium text-foreground">{pickerYear}年</span>
             <button type="button" onClick={nextYear} className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
               <ChevronRight className="h-4 w-4" />
             </button>
@@ -74,7 +73,7 @@ export const YearMonthPicker = ({
                     'h-8 rounded-lg text-xs font-medium transition-colors',
                     isSelected
                       ? 'bg-pink-500 text-white hover:bg-pink-600'
-                      : 'bg-zinc-50 text-zinc-700 hover:bg-zinc-100 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:bg-zinc-700',
+                      : 'bg-muted text-muted-foreground hover:bg-accent',
                   )}
                 >
                   {label}
@@ -90,8 +89,8 @@ export const YearMonthPicker = ({
 
 export const F = ({ label, ...props }: { label: string } & Omit<ComponentProps<'input'>, 'ref'>) => (
   <label className="block">
-    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
-    <input className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5" {...props} />
+    <span className="text-xs font-medium text-muted-foreground">{label}</span>
+    <input className="mt-1 w-full rounded border border-input bg-background h-8 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none px-2.5" {...props} />
   </label>
 );
 
@@ -109,7 +108,7 @@ function AutoResizeTextarea(props: Omit<ComponentProps<'textarea'>, 'ref'>) {
     <textarea
       ref={ref}
       rows={1}
-      className="mt-1 w-full rounded border border-zinc-200 bg-zinc-50 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none resize-none overflow-hidden px-2.5 py-2 min-h-[2.5rem]"
+      className="mt-1 w-full rounded border border-input bg-background text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none resize-none overflow-hidden px-2.5 py-2 min-h-[2.5rem]"
       {...props}
     />
   );
@@ -117,7 +116,7 @@ function AutoResizeTextarea(props: Omit<ComponentProps<'textarea'>, 'ref'>) {
 
 export const TA = ({ label, ...props }: { label: string } & Omit<ComponentProps<'textarea'>, 'ref'>) => (
   <label className="block">
-    <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+    <span className="text-xs font-medium text-muted-foreground">{label}</span>
     <AutoResizeTextarea {...props} />
   </label>
 );
@@ -160,12 +159,12 @@ export const S = ({ label, value, options, onChange, placeholder }: {
     <div>
       <span id={id} className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
       <Select value={value || ''} onValueChange={onChange} aria-labelledby={id}>
-        <SelectTrigger className="mt-1 border-zinc-700 bg-zinc-800/50 text-zinc-100 h-8" aria-labelledby={id}>
+        <SelectTrigger className="mt-1 border border-input bg-background text-foreground h-8" aria-labelledby={id}>
           <SelectValue placeholder={placeholder || '请选择'} />
         </SelectTrigger>
-        <SelectContent className="border-zinc-700 bg-zinc-900 text-zinc-200">
+        <SelectContent className="border-input bg-card text-foreground">
           {options.map((opt) => (
-            <SelectItem key={opt} value={opt} className="text-zinc-200 focus:bg-zinc-700 focus:text-zinc-100">
+            <SelectItem key={opt} value={opt} className="text-foreground focus:bg-muted focus:text-foreground">
               {opt}
             </SelectItem>
           ))}
@@ -193,7 +192,7 @@ export function EditableList({ label, items, onChange, placeholder }: {
 
   return (
     <div className="space-y-1">
-      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <div className="space-y-1.5">
         {items.map((item, index) => (
           <div key={index} className="flex items-center gap-1">
@@ -202,7 +201,7 @@ export function EditableList({ label, items, onChange, placeholder }: {
               value={item}
               onChange={(e) => updateItem(index, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5"
+              className="flex-1 rounded border border-input bg-background h-8 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none px-2.5"
             />
             <button
               type="button"
@@ -246,7 +245,7 @@ export function TagInput({ label, tags, onChange, placeholder }: {
 
   return (
     <div className="space-y-1">
-      <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
+      <span className="text-xs font-medium text-muted-foreground">{label}</span>
       <div className="space-y-1.5">
         {(tags || []).map((tag, index) => (
           <div key={index} className="flex items-center gap-1">
@@ -255,7 +254,7 @@ export function TagInput({ label, tags, onChange, placeholder }: {
               value={tag}
               onChange={(e) => updateItem(index, e.target.value)}
               placeholder={placeholder}
-              className="flex-1 rounded border border-zinc-200 bg-zinc-50 h-8 text-sm text-zinc-900 placeholder:text-zinc-400 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-100 dark:placeholder:text-zinc-500 transition-colors focus:border-pink-300 focus:outline-none px-2.5"
+              className="flex-1 rounded border border-input bg-background h-8 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none px-2.5"
             />
             <Button
               variant="ghost"

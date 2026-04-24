@@ -189,9 +189,9 @@ export function CoverLetterDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="flex h-[80vh] w-[700px] flex-col rounded-lg bg-white shadow-xl dark:bg-zinc-900">
+      <div className="flex h-[80vh] w-[700px] flex-col rounded-lg bg-background shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b px-6 py-4 dark:border-zinc-700">
+        <div className="flex items-center justify-between border-b border-border px-6 py-4">
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-pink-500" />
             <h2 className="text-lg font-semibold text-zinc-800 dark:text-zinc-200">
@@ -201,7 +201,7 @@ export function CoverLetterDialog({
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-md p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded-md p-1 text-zinc-400 hover:bg-accent hover:text-accent-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -248,7 +248,7 @@ export function CoverLetterDialog({
               </div>
               <div
                 ref={contentRef}
-                className="flex-1 overflow-y-auto rounded-md border border-zinc-200 bg-zinc-50 p-4 font-mono text-sm leading-relaxed text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                className="flex-1 overflow-y-auto rounded-md border border-input bg-muted text-foreground placeholder:text-muted-foreground"
               >
                 {content || (
                   <span className="text-zinc-400">等待响应...</span>
@@ -270,7 +270,7 @@ export function CoverLetterDialog({
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="flex items-center gap-1.5 rounded-md border border-zinc-300 px-3 py-1 text-sm text-zinc-600 transition-colors hover:bg-zinc-100 dark:border-zinc-600 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-1.5 rounded-md border border-border"
                   >
                     <Copy className="h-3.5 w-3.5" />
                     复制
@@ -279,7 +279,7 @@ export function CoverLetterDialog({
               </div>
               <div
                 ref={contentRef}
-                className="flex-1 overflow-y-auto rounded-md border border-zinc-200 bg-zinc-50 p-4 font-mono text-sm leading-relaxed text-zinc-800 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                className="flex-1 overflow-y-auto rounded-md border border-input bg-muted text-foreground placeholder:text-muted-foreground"
               >
                 {content}
               </div>

@@ -54,13 +54,13 @@ export function ThemeEditor() {
   };
 
   return (
-    <div className="flex h-full w-72 shrink-0 flex-col border-l bg-white dark:bg-zinc-900 dark:border-zinc-800">
-      <div className="flex items-center justify-between border-b px-4 py-3 dark:border-zinc-800">
-        <h3 className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-zinc-200">
-          <Palette className="h-4 w-4 text-zinc-500" />
+    <div className="flex h-full w-72 shrink-0 flex-col border-l border-border bg-background">
+      <div className="flex items-center justify-between border-b border-border px-4 py-3">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-foreground">
+          <Palette className="h-4 w-4 text-muted-foreground" />
           主题编辑
         </h3>
-        <button type="button" onClick={() => updateTheme(DEFAULT_THEME)} className="cursor-pointer rounded p-1 text-zinc-400 hover:text-zinc-600">
+        <button type="button" onClick={() => updateTheme(DEFAULT_THEME)} className="cursor-pointer rounded p-1 text-muted-foreground hover:text-foreground hover:bg-accent">
           <RotateCcw className="h-3.5 w-3.5" />
         </button>
       </div>
@@ -73,10 +73,10 @@ export function ThemeEditor() {
                   <button
                     key={tpl}
                     type="button"
-                    className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? 'border-pink-500 shadow-sm' : 'border-zinc-200 hover:border-zinc-300 dark:border-zinc-700'}`}
+                    className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? 'border-pink-500 shadow-sm' : 'border-border hover:border-muted-foreground'}`}
                     onClick={() => useResumeStore.getState().setTemplate(tpl)}
                   >
-                    <div className="bg-zinc-50 p-1 dark:bg-zinc-800/50">
+                    <div className="bg-background p-1">
                       <TemplateThumbnail template={tpl} className="mx-auto h-[56px] w-[40px] shadow-sm ring-1 ring-zinc-200/50" />
                     </div>
                     <div className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? 'bg-pink-50 text-pink-700' : 'text-zinc-500'}`}>{TEMPLATE_NAMES[tpl] ?? tpl}</div>
@@ -85,31 +85,31 @@ export function ThemeEditor() {
               </div>
             </div>
           </CollapsibleSection>
-          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
+          <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="预设主题" icon={Sparkles as React.ElementType}>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_THEMES.map((preset) => (
-                <button key={preset.id} type="button" onClick={() => updateTheme(preset.config)} className="group flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-zinc-200 p-2 transition-all hover:border-zinc-400 hover:shadow-sm dark:border-zinc-700">
-                  <div className="flex gap-0.5">{preset.colors.map((color) => <div key={color} className="h-3 w-3 rounded-full border border-zinc-200" style={{ backgroundColor: color }} />)}</div>
+                <button key={preset.id} type="button" onClick={() => updateTheme(preset.config)} className="group flex cursor-pointer flex-col items-center gap-1.5 rounded-lg border border-border">
+                  <div className="flex gap-0.5">{preset.colors.map((color) => <div key={color} className="h-3 w-3 rounded-full border border-border" style={{ backgroundColor: color }} />)}</div>
                   <span className="text-[10px] text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">{preset.id === 'classic' ? '经典' : preset.id === 'modern' ? '现代' : preset.id === 'minimal' ? '简约' : preset.id === 'elegant' ? '优雅' : preset.id === 'bold' ? '大胆' : '创意'}</span>
                 </button>
               ))}
             </div>
           </CollapsibleSection>
-          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
+          <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="颜色" icon={Palette as React.ElementType}>
             <div className="space-y-2">
               <ColorPicker label="主色" value={themeConfig.primaryColor} onChange={(c) => updateTheme({ primaryColor: c })} />
               <ColorPicker label="强调色" value={themeConfig.accentColor} onChange={(c) => updateTheme({ accentColor: c })} />
             </div>
           </CollapsibleSection>
-          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
+          <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="排版" icon={Type as React.ElementType}>
             <label className="block text-xs text-zinc-500">字体
               <select
                 value={themeConfig.fontFamily}
                 onChange={(e) => updateTheme({ fontFamily: e.target.value })}
-                className="mt-1 w-full cursor-pointer rounded border border-zinc-200 bg-white px-2 py-1 text-xs text-zinc-700 transition-colors hover:border-pink-300 focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-300 dark:hover:border-pink-600 dark:focus:border-pink-400 dark:focus:ring-pink-400/20"
+                className="mt-1 w-full cursor-pointer rounded border-border bg-background text-foreground"
               >
                 {FONT_OPTIONS.map((f) => <option key={f} value={f} style={{ fontFamily: f }}>{f}</option>)}
               </select>
@@ -128,7 +128,7 @@ export function ThemeEditor() {
                   className={`rounded border px-1.5 py-px text-[10px] font-medium transition-all ${
                     themeConfig.fontSize === opt.value
                       ? 'border-pink-500 bg-pink-50 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400'
-                      : 'border-zinc-200 text-zinc-700 hover:border-zinc-400 dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-zinc-600'
+                      : 'border-border text-muted-foreground hover:border-muted-foreground'
                   }`}
                 >
                   {opt.label}
@@ -140,7 +140,7 @@ export function ThemeEditor() {
               <span className="text-xs text-zinc-400">{themeConfig.lineSpacing.toFixed(1)}</span>
             </label>
           </CollapsibleSection>
-          <Separator className="my-2 bg-zinc-200 dark:bg-zinc-700" />
+          <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="间距" icon={Space as React.ElementType}>
             <label className="block text-xs text-zinc-500">区块间距
               <input type="range" min={4} max={32} step={2} value={themeConfig.sectionSpacing} onChange={(e) => updateTheme({ sectionSpacing: Number(e.target.value) })} className="mt-1 w-full" />
@@ -158,7 +158,7 @@ export function ThemeEditor() {
                       max={50}
                       value={themeConfig.margin[dir]}
                       onChange={(e) => updateTheme({ margin: { ...themeConfig.margin, [dir]: Number(e.target.value) } })}
-                      className="w-full rounded border border-zinc-200 bg-white px-1.5 py-0.5 text-center text-[10px] text-zinc-800 transition-colors hover:border-zinc-300 focus:border-pink-400 focus:outline-none focus:ring-1 focus:ring-pink-400/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:border-zinc-600 dark:focus:border-pink-400 dark:focus:ring-pink-400/20"
+                      className="w-full rounded border-border bg-background text-foreground"
                     />
                   </div>
                 ))}
@@ -179,14 +179,14 @@ function ColorPicker({ label, value, onChange }: { label: string; value: string;
         <PopoverTrigger asChild>
           <button
             type="button"
-            className="flex cursor-pointer items-center gap-2 rounded-md border border-zinc-200 px-2 py-1 text-xs transition-colors hover:border-zinc-300 dark:border-zinc-700 dark:hover:border-zinc-600"
+            className="flex cursor-pointer items-center gap-2 rounded-md border-border bg-background text-foreground"
           >
-            <div className="h-4 w-4 rounded-sm border border-zinc-200" style={{ backgroundColor: value }} />
+            <div className="h-4 w-4 rounded-sm border border-border" style={{ backgroundColor: value }} />
             <span className="font-mono text-zinc-500">{value}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-56 p-2 bg-white dark:bg-zinc-900 shadow-lg border border-zinc-100 dark:border-zinc-700" align="end">
-          <div className="relative h-6 w-full border border-white/30 dark:border-zinc-700/50 overflow-hidden">
+        <PopoverContent className="w-56 p-2 bg-popover shadow-lg border border-input" align="end">
+          <div className="relative h-6 w-full border border-border overflow-hidden">
             <div
               className="absolute inset-0"
               style={{ backgroundColor: value }}
@@ -209,7 +209,7 @@ function ColorPicker({ label, value, onChange }: { label: string; value: string;
               }
             }}
             placeholder="#000000"
-            className="h-8 w-full rounded border border-zinc-100 dark:border-zinc-700 bg-white dark:bg-zinc-800 px-2 text-xs font-mono text-zinc-800 dark:text-zinc-200 outline-none"
+            className="h-8 w-full rounded border-border bg-background text-foreground"
           />
         </PopoverContent>
       </Popover>

@@ -75,7 +75,7 @@ export default function Dashboard() {
   }, [])
 
   if (loading) {
-    return <div className="text-gray-400">加载中...</div>
+    return <div className="text-muted-foreground">加载中...</div>
   }
 
   return (
@@ -83,30 +83,30 @@ export default function Dashboard() {
       <div className="flex items-center justify-between mb-8 shrink-0">
         <div>
           <div className="text-pink-500 text-xs font-medium tracking-widest mb-2">MANAGEMENT</div>
-          <h1 className="text-4xl font-bold text-white mb-2">工作空间管理</h1>
-          <p className="text-gray-400 text-sm">
+          <h1 className="text-4xl font-bold text-foreground mb-2">工作空间管理</h1>
+          <p className="text-muted-foreground text-sm">
             管理您的职业身份。Chiren 为不同岗位精准定制简历，帮助您在每个领域都展现出最佳状态。
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <button type="button" className="flex items-center gap-2 bg-[#1a1a1c] rounded-lg px-3 py-2 border border-[#2a2a2e] w-64">
-            <Search className="w-4 h-4 text-gray-500 shrink-0" />
+          <button type="button" className="flex items-center gap-2 bg-card rounded-lg px-3 py-2 border border-muted-foreground/20 w-64">
+            <Search className="w-4 h-4 text-muted-foreground shrink-0" />
             <input
               type="text"
               placeholder="搜索工作空间..."
               value={searchQuery}
               onChange={handleSearchChange}
-              className="bg-transparent text-gray-300 text-sm outline-none placeholder-gray-500 min-w-0 flex-1"
+              className="bg-transparent text-foreground text-sm outline-none placeholder:text-muted-foreground min-w-0 flex-1"
             />
             {searchQuery && (
-              <button type="button" onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }} className="text-gray-500 hover:text-gray-300 transition-colors shrink-0">
+              <button type="button" onClick={() => { setSearchQuery(''); setDebouncedQuery(''); }} className="text-muted-foreground hover:text-foreground transition-colors shrink-0">
                 <X className="w-3.5 h-3.5" />
               </button>
             )}
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pink-500 text-white hover:bg-pink-600 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pink-500 text-primary-foreground hover:bg-pink-600 transition-colors text-sm font-medium"
             onClick={() => setCreateModalOpen(true)}
           >
             <Plus className="w-4 h-4" />

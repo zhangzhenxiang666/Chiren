@@ -46,7 +46,7 @@ function ScoreRing({ score, size = 108 }: { score: number; size?: number }) {
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90" style={{ display: 'block' }}>
-        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="#2a2a2e" strokeWidth={stroke} />
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--muted-foreground) / 0.2)" strokeWidth={stroke} />
         <circle
           cx={size / 2} cy={size / 2} r={r}
           fill="none"
@@ -60,7 +60,7 @@ function ScoreRing({ score, size = 108 }: { score: number; size?: number }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className={`text-4xl font-black leading-none tracking-tight ${c.text}`}>{score}</span>
-        <span className="text-[9px] font-semibold text-gray-500 uppercase tracking-[0.12em] mt-1">总体匹配</span>
+        <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.12em] mt-1">总体匹配</span>
       </div>
     </div>
   )
@@ -73,18 +73,18 @@ function ATSBar({ score }: { score: number }) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-gray-400 tracking-wide">ATS 兼容性</span>
+        <span className="text-xs font-medium text-muted-foreground tracking-wide">ATS 兼容性</span>
         <div className={`flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded-full border ${c.badge}`}>
           <span>{score}</span>
           <span className="font-normal opacity-60">/ 100</span>
         </div>
       </div>
-      <div className="relative w-full h-2.5 bg-[#1a1a1e] rounded-full overflow-hidden border border-[#2a2a2e]">
+      <div className="relative w-full h-2.5 bg-muted rounded-full overflow-hidden border border-border">
         {/* Tick marks */}
         {[25, 50, 75].map(tick => (
           <div
             key={tick}
-            className="absolute top-0 bottom-0 w-px bg-[#2a2a2e]"
+            className="absolute top-0 bottom-0 w-px bg-border"
             style={{ left: `${tick}%` }}
           />
         ))}
@@ -95,8 +95,8 @@ function ATSBar({ score }: { score: number }) {
       </div>
       <div className="flex justify-between mt-1 px-0.5">
         {['差', '一般', '良好', '优秀'].map((label, i) => (
-          <span key={label} className={`text-[9px] ${i === 0 ? 'text-left' : i === 3 ? 'text-right' : 'text-center'} ${score >= (i + 1) * 25 - 10 ? 'text-gray-500' : 'text-gray-700'
-            }`}>{label}</span>
+          <span key={label} className={`text-[9px] ${i === 0 ? 'text-left' : i === 3 ? 'text-right' : 'text-center'} ${score >= (i + 1) * 25 - 10 ? 'text-muted-foreground' : 'text-muted-foreground/30'
+              }`}>{label}</span>
         ))}
       </div>
     </div>
@@ -128,8 +128,8 @@ function MiniSparkline({ scores }: { scores: number[] }) {
 
 function SuggestionDiff({ current, suggested }: { current: string; suggested: string }) {
   return (
-    <div className="rounded-lg overflow-hidden border border-[#2a2a2e] text-sm">
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/5 border-b border-[#2a2a2e]">
+    <div className="rounded-lg overflow-hidden border border-border text-sm">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/5 border-b border-border">
         <span className="w-3 h-3 rounded-full bg-red-400/30 flex items-center justify-center">
           <span className="block w-1.5 h-px bg-red-400 rounded" />
         </span>
@@ -138,7 +138,7 @@ function SuggestionDiff({ current, suggested }: { current: string; suggested: st
       <p className="px-3 py-2.5 text-red-400/60 line-through leading-relaxed whitespace-pre-wrap bg-red-500/[0.03]">
         {current}
       </p>
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border-t border-b border-[#2a2a2e]">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border-t border-b border-border">
         <span className="w-3 h-3 rounded-full bg-emerald-400/30 flex items-center justify-center">
           <span className="block w-1.5 h-1.5 text-emerald-400 leading-none text-center" style={{ fontSize: 8 }}>+</span>
         </span>
@@ -165,29 +165,29 @@ function SectionSuggestionGroup({
   const [open, setOpen] = useState(false)
 
   return (
-    <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${open ? 'border-[#3a3a3e] bg-[#131316]' : 'border-[#2a2a2e] bg-[#0f0f12] hover:border-[#323236]'
+<div className={`rounded-xl border transition-all duration-200 overflow-hidden ${open ? 'border-border bg-muted/40' : 'border-border bg-background hover:border-muted-foreground'
       }`}>
-      <button
-        type="button"
-        className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors"
-        onClick={() => setOpen(!open)}
-      >
-        <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${open ? 'bg-pink-500/20' : 'bg-[#2a2a2e]'
-          }`}>
-          <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180 text-pink-400' : 'text-gray-500'
-            }`} />
-        </div>
+        <button
+          type="button"
+          className="w-full flex items-center gap-3 px-4 py-3.5 text-left transition-colors"
+          onClick={() => setOpen(!open)}
+        >
+          <div className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${open ? 'bg-pink-500/20' : 'bg-muted'
+            }`}>
+            <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? 'rotate-180 text-pink-400' : 'text-muted-foreground'
+              }`} />
+          </div>
 
-        <span className="flex-1 text-sm font-medium text-gray-200 truncate">
+          <span className="flex-1 text-sm font-medium text-foreground truncate">
           {isLoadingTitle ? (
             <span className="inline-flex items-center gap-1.5">
-              <Loader2 className="w-3 h-3 animate-spin text-gray-500" />
-              <span className="text-gray-600 text-xs">加载中…</span>
+              <Loader2 className="w-3 h-3 animate-spin text-muted-foreground" />
+              <span className="text-muted-foreground/60 text-xs">加载中…</span>
             </span>
           ) : sectionTitle}
         </span>
 
-        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-[#2a2a2e] text-gray-500 font-mono">
+        <span className="shrink-0 text-[10px] px-2 py-0.5 rounded-full bg-muted text-muted-foreground font-mono">
           {suggestions.length}
         </span>
       </button>
@@ -210,15 +210,15 @@ function JDPreview({ jd }: { jd?: string }) {
 
   return (
     <div className="relative mt-1 max-w-full">
-      <div className="group/jd inline-flex items-center gap-1.5 text-[11px] text-gray-500 relative">
+      <div className="group/jd inline-flex items-center gap-1.5 text-[11px] text-muted-foreground relative">
         <span className="opacity-60">JD:</span>
         <p className="truncate max-w-[420px] cursor-default">
           {jd}
         </p>
 
         <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/jd:block w-[520px]">
-          <div className="rounded-lg border border-[#2a2a2e] bg-[#111113] p-3 shadow-xl">
-            <p className="text-[12px] text-gray-300 leading-relaxed whitespace-pre-wrap">
+          <div className="rounded-lg border border-border bg-card p-3 shadow-xl">
+            <p className="text-[12px] text-foreground leading-relaxed whitespace-pre-wrap">
               {jd}
             </p>
           </div>
@@ -245,7 +245,7 @@ function fmtTime(dateStr: string) {
 function TrendIcon({ delta }: { delta: number }) {
   if (delta > 0) return <TrendingUp className="w-2.5 h-2.5 text-emerald-400" />
   if (delta < 0) return <TrendingDown className="w-2.5 h-2.5 text-red-400" />
-  return <Minus className="w-2.5 h-2.5 text-gray-600" />
+  return <Minus className="w-2.5 h-2.5 text-muted-foreground/40" />
 }
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
@@ -307,7 +307,7 @@ export default function ScoreDetailModal({
       toast.success(
         <div className="flex flex-col gap-1">
           <span className="font-medium text-sm">JD 匹配评分任务已启动</span>
-          <span className="text-xs text-gray-400 truncate">「{resumeTitle}」正在评分中</span>
+          <span className="text-xs text-muted-foreground truncate">「{resumeTitle}」正在评分中</span>
         </div>,
       )
     } catch (err: unknown) {
@@ -362,23 +362,18 @@ export default function ScoreDetailModal({
         aria-label="关闭弹窗"
       />
 
-      <div
-        className="relative w-full max-w-5xl h-[82vh] bg-[#18181b] border border-[#2a2a2e] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+<div
+        className="relative w-full max-w-5xl h-[82vh] bg-card rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-border"
         onClick={e => e.stopPropagation()}
-        onKeyDown={e => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label="评分详情"
-        style={{ animation: 'modal-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1)' }}
       >
         {/* ── Header ── */}
-        <div className="flex items-center gap-4 px-5 py-4 border-b border-[#2a2a2e] shrink-0 bg-[#18181b]">
+        <div className="flex items-center gap-4 px-5 py-4 border-b border-border shrink-0 bg-card">
           <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-pink-500/10 border border-pink-500/20 shrink-0">
             <TrendingUp className="w-4 h-4 text-pink-400" />
           </div>
 
           <div className="flex-1 min-w-0">
-            <h2 className="text-[15px] font-semibold text-white leading-tight truncate">{resumeTitle}</h2>
+            <h2 className="text-[15px] font-semibold text-foreground leading-tight truncate">{resumeTitle}</h2>
 
             {currentAnalysis && (
               <JDPreview jd={currentAnalysis.jobDescription} />
@@ -395,7 +390,7 @@ export default function ScoreDetailModal({
                   返回最新
                 </button>
               )}
-              <span className="text-[11px] text-gray-500">
+              <span className="text-[11px] text-muted-foreground">
                 {isViewingHistory && currentAnalysis
                   ? `${fmtDate(currentAnalysis.createdAt)} ${fmtTime(currentAnalysis.createdAt)} 快照`
                   : '最新评分结果'}
@@ -417,7 +412,7 @@ export default function ScoreDetailModal({
             <button
               type="button"
               onClick={handleResetAndClose}
-              className="flex items-center justify-center w-7 h-7 rounded-lg text-gray-500 hover:text-gray-300 hover:bg-white/5 transition-colors"
+              className="flex items-center justify-center w-7 h-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -426,7 +421,7 @@ export default function ScoreDetailModal({
 
         <div className="flex flex-1 overflow-hidden">
           {!currentAnalysis ? (
-            <div className="flex flex-col items-center justify-center flex-1 gap-2 text-gray-500">
+            <div className="flex flex-col items-center justify-center flex-1 gap-2 text-muted-foreground">
               <TrendingUp className="w-12 h-12 opacity-10" />
               <p className="text-sm">暂无评分记录</p>
               <p className="text-xs opacity-60">请先启动 JD 匹配评分任务</p>
@@ -434,19 +429,19 @@ export default function ScoreDetailModal({
           ) : (
             <>
               {/* ── Left: Timeline ── */}
-              <div className="w-[152px] border-r border-[#2a2a2e] flex flex-col shrink-0 bg-[#111113]">
+              <div className="w-[152px] border-r border-border flex flex-col shrink-0 bg-muted/60">
                 {/* Timeline header with sparkline */}
-                <div className="px-3 pt-3 pb-2.5 border-b border-[#1e1e21]">
+                <div className="px-3 pt-3 pb-2.5 border-b border-border/50">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-semibold text-gray-600 uppercase tracking-widest">历史</span>
-                    <span className="text-[10px] font-mono text-gray-600 bg-[#1e1e21] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-semibold text-muted-foreground/60 uppercase tracking-widest">历史</span>
+                    <span className="text-[10px] font-mono text-muted-foreground/60 bg-muted px-1.5 py-0.5 rounded">
                       {sortedAnalyses.length}
                     </span>
                   </div>
                   {sparklineScores.length >= 2 && (
                     <div className="flex items-center gap-2">
                       <MiniSparkline scores={sparklineScores} />
-                      <span className="text-[9px] text-gray-600">趋势</span>
+                      <span className="text-[9px] text-muted-foreground/60">趋势</span>
                     </div>
                   )}
                 </div>
@@ -465,22 +460,22 @@ export default function ScoreDetailModal({
                         key={analysis.id}
                         type="button"
                         onClick={() => setSelectedIndex(index)}
-                        className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-150 group ${isSelected ? 'bg-pink-500/8' : 'hover:bg-white/[0.025]'
+                        className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-150 group ${isSelected ? 'bg-pink-500/8' : 'hover:bg-muted'
                           }`}
                       >
                         {/* Left accent */}
-                        <div className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full transition-all duration-200 ${isSelected ? 'bg-pink-500' : isLatest ? 'bg-[#2a3a4a]' : 'bg-transparent group-hover:bg-[#2a2a2e]'
+                        <div className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full transition-all duration-200 ${isSelected ? 'bg-pink-500' : isLatest ? 'bg-blue-500/30' : 'bg-transparent group-hover:bg-border'
                           }`} />
 
                         {/* Score badge */}
                         <div className={`flex flex-col items-center justify-center w-10 h-10 rounded-lg shrink-0 transition-all duration-150 border ${isSelected
                             ? `border-pink-500/30 bg-pink-500/10`
-                            : `border-[#222226] bg-[#0f0f12] group-hover:border-[#2a2a2e]`
+                            : `border-border bg-muted group-hover:border-muted-foreground`
                           }`}>
                           <span className={`text-[15px] font-black leading-none ${c.text}`}>
                             {analysis.overallScore}
                           </span>
-                          <div className="w-5 h-[2px] bg-[#1e1e21] rounded-full mt-1 overflow-hidden">
+                          <div className="w-5 h-[2px] bg-border rounded-full mt-1 overflow-hidden">
                             <div
                               className={`h-full rounded-full ${c.bar}`}
                               style={{ width: `${analysis.overallScore}%` }}
@@ -495,11 +490,11 @@ export default function ScoreDetailModal({
                               最新
                             </span>
                           )}
-                          <div className="text-[11px] font-medium text-gray-400 leading-none">
+                          <div className="text-[11px] font-medium text-muted-foreground leading-none">
                             {fmtDate(analysis.createdAt)}
                           </div>
                           <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-[10px] text-gray-600">{fmtTime(analysis.createdAt)}</span>
+                            <span className="text-[10px] text-muted-foreground/60">{fmtTime(analysis.createdAt)}</span>
                             {index < sortedAnalyses.length - 1 && (
                               <TrendIcon delta={delta} />
                             )}
@@ -511,21 +506,22 @@ export default function ScoreDetailModal({
                 </div>
               </div>
 
-              {/* ── Right: Content ── */}
-              <div className="flex-1 overflow-y-auto bg-[#18181b]">
+{/* ── Right: Content ── */}
+              <div className="flex-1 overflow-y-auto bg-background">
                 <div className="px-6 py-5 space-y-5">
 
                   {/* ── Score Overview ── */}
-                  <div className="flex items-start gap-5 p-4 rounded-2xl border border-[#242428] bg-[#111113]">
+                  <div className="flex items-start gap-5 p-4 rounded-2xl border border-border bg-card">
+
                     <ScoreRing score={currentAnalysis.overallScore} />
 
                     <div className="flex-1 space-y-4 min-w-0">
                       <ATSBar score={currentAnalysis.atsScore} />
 
                       {currentAnalysis.summary && (
-                        <div className="relative rounded-lg border border-[#242428] bg-[#0d0d10] px-4 py-3 overflow-hidden">
+                        <div className="relative rounded-lg border border-border bg-background px-4 py-3 overflow-hidden">
                           <div className="absolute left-0 inset-y-0 w-[3px] bg-gradient-to-b from-pink-500/60 to-pink-500/10 rounded-l-lg" />
-                          <p className="text-[13px] text-gray-400 leading-relaxed pl-2">
+                          <p className="text-[13px] text-muted-foreground leading-relaxed pl-2">
                             {currentAnalysis.summary}
                           </p>
                         </div>
@@ -536,17 +532,17 @@ export default function ScoreDetailModal({
                   {/* ── Keywords ── */}
                   <div className="grid grid-cols-2 gap-3">
                     {/* Matched */}
-                    <div className="rounded-xl border border-[#242428] bg-[#111113] overflow-hidden">
-                      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1e1e21]">
+                    <div className="rounded-xl border border-border bg-card overflow-hidden">
+                      <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-xs font-semibold text-gray-300">已匹配</span>
+                        <span className="text-xs font-semibold text-foreground">已匹配</span>
                         <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                           {currentAnalysis.keywordMatches?.length ?? 0}
                         </span>
                       </div>
                       <div className="px-3 py-3 flex flex-wrap gap-1.5 min-h-[52px]">
                         {(currentAnalysis.keywordMatches ?? []).length === 0 ? (
-                          <span className="text-xs text-gray-700 italic self-center mx-auto">无匹配关键词</span>
+                          <span className="text-xs text-muted-foreground/40 italic self-center mx-auto">无匹配关键词</span>
                         ) : (
                           currentAnalysis.keywordMatches.map(kw => (
                             <span
@@ -561,17 +557,17 @@ export default function ScoreDetailModal({
                     </div>
 
                     {/* Missing */}
-                    <div className="rounded-xl border border-[#242428] bg-[#111113] overflow-hidden">
-                      <div className="flex items-center gap-2 px-4 py-3 border-b border-[#1e1e21]">
+                    <div className="rounded-xl border border-border bg-card overflow-hidden">
+                      <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                         <AlertCircle className="w-3.5 h-3.5 text-orange-400" />
-                        <span className="text-xs font-semibold text-gray-300">待补充</span>
+                        <span className="text-xs font-semibold text-foreground">待补充</span>
                         <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/20">
                           {currentAnalysis.missingKeywords?.length ?? 0}
                         </span>
                       </div>
                       <div className="px-3 py-3 flex flex-wrap gap-1.5 min-h-[52px]">
                         {(currentAnalysis.missingKeywords ?? []).length === 0 ? (
-                          <span className="text-xs text-gray-700 italic self-center mx-auto">无缺失关键词</span>
+                          <span className="text-xs text-muted-foreground/40 italic self-center mx-auto">无缺失关键词</span>
                         ) : (
                           currentAnalysis.missingKeywords.map(kw => (
                             <span
@@ -592,18 +588,18 @@ export default function ScoreDetailModal({
                       <div className="flex items-center justify-center w-5 h-5 rounded-md bg-yellow-500/10 border border-yellow-500/20">
                         <Lightbulb className="w-3 h-3 text-yellow-400" />
                       </div>
-                      <h3 className="text-[13px] font-semibold text-gray-300">改进建议</h3>
+                      <h3 className="text-[13px] font-semibold text-foreground">改进建议</h3>
                       {groupedSuggestions.length > 0 && (
-                        <span className="text-[10px] text-gray-600 font-mono bg-[#1a1a1e] px-1.5 py-0.5 rounded border border-[#2a2a2e]">
+                        <span className="text-[10px] text-muted-foreground/60 font-mono bg-muted px-1.5 py-0.5 rounded border border-border">
                           {groupedSuggestions.length} 个模块
                         </span>
                       )}
                     </div>
 
                     {groupedSuggestions.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-[#242428] bg-[#111113] gap-2">
+                      <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-border bg-card gap-2">
                         <CheckCircle2 className="w-8 h-8 text-emerald-400/20" />
-                        <p className="text-sm text-gray-600">暂无改进建议</p>
+                        <p className="text-sm text-muted-foreground/40">暂无改进建议</p>
                       </div>
                     ) : (
                       <div className="space-y-2">

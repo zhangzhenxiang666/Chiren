@@ -71,23 +71,23 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
   const isDeletable = section.type !== 'personal_info';
   const isSelected = selectedSectionId === section.id;
   const SectionComponent = sectionComponents[section.type] || (() => (
-    <p className="text-sm text-zinc-500">未知段落类型: {section.type}</p>
+    <p className="text-sm text-muted-foreground">未知段落类型: {section.type}</p>
   ));
 
   return (
     <div
       data-section-id={section.id}
       className={cn(
-        'rounded-lg border bg-white p-4 shadow-sm transition-all duration-200 dark:bg-zinc-900 cursor-pointer',
+        'rounded-lg border bg-background p-4 shadow-sm transition-all duration-200 cursor-pointer',
         isSelected
-          ? 'border-[#fda5d5] ring-2 ring-[#fda5d5]/50 dark:border-[#fda5d5] dark:ring-[#fda5d5]/30'
-          : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700',
+          ? 'border-pink-500 ring-2 ring-pink-500/40'
+          : 'border-border hover:border-muted-foreground/50',
       )}
       onClick={() => selectSection(section.id)}
     >
-      <div className="mb-3 flex items-center gap-2 border-b pb-3">
+      <div className="mb-3 flex items-center gap-2 border-b border-border pb-3">
         <div
-          className="cursor-grab rounded p-1 text-zinc-300 hover:bg-zinc-100 hover:text-zinc-500 active:cursor-grabbing dark:hover:bg-zinc-800 dark:hover:text-zinc-400"
+          className="cursor-grab rounded p-1 text-muted-foreground/50 hover:bg-accent hover:text-foreground active:cursor-grabbing"
           {...attributes}
           {...(listeners || {})}
         >
@@ -104,10 +104,10 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
               if (e.key === 'Enter') commitRename();
               if (e.key === 'Escape') { setRenameValue(section.title); setIsRenaming(false); }
             }}
-            className="flex-1 rounded border border-pink-300 bg-transparent px-2 py-0.5 text-sm font-medium outline-none"
+            className="flex-1 rounded border border-input bg-transparent px-2 py-0.5 text-sm font-medium outline-none"
           />
         ) : (
-          <h4 className="flex-1 text-sm font-medium text-zinc-700 dark:text-zinc-200" onDoubleClick={() => isRenamable && setIsRenaming(true)}>
+          <h4 className="flex-1 text-sm font-medium text-foreground" onDoubleClick={() => isRenamable && setIsRenaming(true)}>
             {section.title}
           </h4>
         )}
@@ -115,7 +115,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
         {isRenamable && !isRenaming && (
           <button
             type="button"
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             onClick={(e) => { e.stopPropagation(); setRenameValue(section.title); setIsRenaming(true); }}
           >
             <Pencil className="h-3.5 w-3.5" />
@@ -124,7 +124,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
 
         <button
           type="button"
-          className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-pink-500 dark:hover:bg-zinc-800"
+          className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-pink-500"
           title="AI 润色"
           onClick={(e) => { e.stopPropagation(); setIsOpen(true); }}
         >
@@ -134,7 +134,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
         {isVisibilityChangable && (
           <button
             type="button"
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+            className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
             title={section.visible ? '隐藏' : '显示'}
             onClick={(e) => { e.stopPropagation(); toggleSectionVisibility(section.id); }}
           >
@@ -145,7 +145,7 @@ export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperPr
         {isDeletable && (
           <button
             type="button"
-            className="rounded p-1 text-zinc-400 hover:bg-zinc-100 hover:text-red-500 dark:hover:bg-zinc-800"
+            className="rounded p-1 text-muted-foreground hover:bg-destructive/10 hover:text-red-500"
             title="删除"
             onClick={(e) => { e.stopPropagation(); onRemove(); }}
           >

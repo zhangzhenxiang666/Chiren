@@ -68,10 +68,10 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
   return (
     <>
       <aside
-        className="bg-[#121214] border-r border-[#1e1e20] flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden"
+        className="bg-card border-r border-muted-foreground/20 flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden"
         style={{ width: collapsed ? '64px' : '208px' }}
       >
-        <div className="h-14 flex items-center px-4 border-b border-[#1e1e20] shrink-0 gap-3">
+        <div className="h-14 flex items-center px-4 border-b border-muted-foreground/20 shrink-0 gap-3">
           <button type="button" onClick={() => navigate('/workspace')} className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <img src={logoSvg} alt="Chiren" className="w-7 h-7 shrink-0" />
             <span className="text-pink-500 font-bold text-lg whitespace-nowrap transition-opacity duration-300" style={{ opacity: collapsed ? 0 : 1 }}>Chiren</span>
@@ -89,8 +89,8 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
                     onClick={() => navigate(path)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                       isActive
-                        ? 'text-pink-400 bg-[#2a1a22]'
-                        : 'text-gray-400 hover:text-white hover:bg-[#1e1e20]'
+                        ? 'text-pink-400 bg-accent/20 dark:bg-pink-500/10'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
                     <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-pink-500' : ''}`} />
@@ -106,7 +106,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
               <PopoverTrigger asChild>
                 <button
                   type="button"
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#1e1e20] transition-colors"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                 >
                   <span className="relative shrink-0">
                     <Bell className="w-4 h-4" />
@@ -121,7 +121,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
                 side="right"
                 align="start"
                 sideOffset={12}
-                className="w-96 p-0 bg-[#1a1a1c] border border-[#1e1e20] rounded-xl shadow-2xl"
+                className="w-96 p-0 bg-card rounded-xl border border-muted-foreground/20 shadow-lg"
               >
                 <MessageList tasks={tasks} />
               </PopoverContent>
@@ -130,7 +130,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
             <button
               type="button"
               onClick={() => setShowSettings(true)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#1e1e20] transition-colors"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
             >
               <Settings className="w-4 h-4 shrink-0" />
               <span className="text-sm whitespace-nowrap transition-opacity duration-300" style={{ opacity: collapsed ? 0 : 1 }}>设置</span>
@@ -138,11 +138,11 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
           </div>
         </nav>
 
-        <div className="border-t border-[#1e1e20] p-3">
+        <div className="border-t border-muted-foreground/20 p-3">
           <button
             type="button"
             onClick={onToggle}
-            className="flex items-center justify-center w-full h-8 rounded-lg text-gray-500 hover:text-white hover:bg-[#1e1e20] transition-colors"
+            className="flex items-center justify-center w-full h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
             {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             {!collapsed && <span className="ml-2 text-sm">折叠侧边栏</span>}

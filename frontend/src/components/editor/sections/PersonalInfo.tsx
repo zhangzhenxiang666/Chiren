@@ -32,12 +32,12 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="relative flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded border-2 border-dashed border-zinc-300 bg-zinc-50 transition-colors hover:border-zinc-400 hover:bg-zinc-100 dark:border-zinc-600 dark:bg-zinc-800 dark:hover:border-zinc-500 dark:hover:bg-zinc-700"
+          className="relative flex h-24 w-20 shrink-0 items-center justify-center overflow-hidden rounded border-2 border-dashed border-border bg-muted transition-colors hover:border-muted-foreground hover:bg-muted/80"
         >
           {(d.avatar as string) ? (
             <img src={d.avatar as string} alt="Avatar" className="h-full w-full object-cover" />
           ) : (
-            <Camera className="h-6 w-6 text-zinc-400" />
+            <Camera className="h-6 w-6 text-muted-foreground" />
           )}
         </button>
         <div className="flex flex-col gap-2">
@@ -45,7 +45,7 @@ export function PersonalInfo({ section, onUpdate }: SectionComponentProps) {
             <button
               type="button"
               onClick={() => u('avatar', '')}
-              className="inline-flex w-fit cursor-pointer items-center gap-1 rounded-md px-2 py-0.5 text-[11px] text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-600 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+              className="inline-flex w-fit cursor-pointer items-center gap-1 rounded-md px-2 py-0.5 text-[11px] text-muted-foreground transition-colors hover:bg-accent hover:text-accent-foreground"
             >
               <X className="h-3 w-3" />
               清除

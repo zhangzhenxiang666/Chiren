@@ -235,7 +235,7 @@ export default function WorkspaceDetail() {
 
   if (wsLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-400">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
         加载中...
       </div>
     )
@@ -243,11 +243,11 @@ export default function WorkspaceDetail() {
 
   if (!workspace) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-gray-400 gap-4">
-        <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
+      <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4">
+        <Inbox className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
         <div className="text-center">
-          <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
-          <p className="text-sm text-gray-500">访问的工作空间可能已被删除或不存在</p>
+          <p className="text-lg text-foreground mb-1">工作空间不存在</p>
+          <p className="text-sm text-muted-foreground">访问的工作空间可能已被删除或不存在</p>
         </div>
         <button
           type="button"
@@ -265,7 +265,7 @@ export default function WorkspaceDetail() {
       return (
         <div className="flex flex-col h-full">
           <EditorToolbar title={workspace!.title} onBack={handleExitEdit} onCoverLetterOpen={() => setCoverLetterOpen(true)} />
-          <div className="flex flex-1 items-center justify-center text-gray-400 text-sm">
+          <div className="flex flex-1 items-center justify-center text-muted-foreground text-sm">
             加载编辑器...
           </div>
         </div>
@@ -303,7 +303,7 @@ export default function WorkspaceDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full text-gray-400">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
         加载中...
       </div>
     )
@@ -312,25 +312,25 @@ export default function WorkspaceDetail() {
   return (
     <div className="flex flex-col h-full">
       <nav className="flex items-center gap-2 text-sm mb-4 shrink-0" aria-label="breadcrumb">
-        <button type="button" onClick={() => navigate('/')} className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+        <button type="button" onClick={() => navigate('/')} className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
           <ArrowLeft className="w-3.5 h-3.5" />
           工作空间
         </button>
-        <span className="text-gray-600">›</span>
+        <span className="text-muted-foreground/50">›</span>
         <span className="text-pink-400">{workspace!.title}</span>
       </nav>
 
       <div className="flex items-start justify-between mb-8 shrink-0">
         <div>
-          <h1 className="text-4xl font-bold text-white mb-3">个人履历管理空间</h1>
-          <p className="text-gray-400 text-sm max-w-xl leading-relaxed">
+          <h1 className="text-4xl font-bold text-foreground mb-3">个人履历管理空间</h1>
+          <p className="text-muted-foreground text-sm max-w-xl leading-relaxed">
             基于核心资产管理您的职业经历。通过 AI 驱动的精准匹配，为每个心仪职位生成完美简历。
           </p>
         </div>
         <button
           type="button"
           onClick={() => setShowGenerateModal(true)}
-          className="flex items-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-white hover:from-pink-600 hover:to-pink-700 transition-all text-sm font-medium shrink-0"
+          className="flex items-center gap-2 px-5 py-3 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-primary-foreground hover:from-pink-600 hover:to-pink-700 transition-all text-sm font-medium shrink-0"
         >
           <Sparkles className="w-4 h-4" />
           针对新职位生成
@@ -342,12 +342,12 @@ export default function WorkspaceDetail() {
           <div className="flex-1 flex flex-col min-w-0">
             <div className="flex items-center gap-2 mb-4">
               <span className="w-2 h-2 rounded-full bg-pink-500" />
-              <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
+              <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                 主简历核心资产 (Master Resume)
               </span>
             </div>
 
-            <div className="h-[566px] overflow-hidden" style={{ maxWidth: 'calc(100% - 2rem)' }}>
+            <div className="h-[566px] overflow-hidden border border-foreground/10 rounded-lg" style={{ maxWidth: 'calc(100% - 2rem)' }}>
               <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
                 {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace!.template }} onClick={() => navigate(`/workspace/${workspace!.id}/template/edit`)} />}
               </div>
@@ -358,16 +358,16 @@ export default function WorkspaceDetail() {
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-full bg-blue-500" />
-                <span className="text-gray-300 text-xs font-medium tracking-wider uppercase">
+                <span className="text-muted-foreground text-xs font-medium tracking-wider uppercase">
                   已生成的子简历 (Tailored Versions)
                 </span>
               </div>
-              <span className="text-gray-500 text-xs">共 {subResumes.length} 份</span>
+              <span className="text-muted-foreground text-xs">共 {subResumes.length} 份</span>
             </div>
 
             <div className="space-y-3 overflow-y-auto pr-1" style={{ height: 'calc(100% - 48px)' }}>
               {subResumesLoading ? (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">
+                <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
                   加载中...
                 </div>
               ) : subResumes.length === 0 ? (
@@ -375,14 +375,14 @@ export default function WorkspaceDetail() {
                   <button
                     type="button"
                     onClick={() => setShowGenerateModal(true)}
-                    className="w-full h-full rounded-xl border-2 border-dashed border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors flex flex-col items-center justify-center gap-3 text-gray-500"
+                    className="w-full h-full rounded-xl border-2 border-dashed border-muted-foreground/20 hover:border-muted-foreground/40 transition-colors flex flex-col items-center justify-center gap-3 text-muted-foreground"
                   >
                     <FileText className="w-10 h-10 opacity-40" />
                     <div className="flex flex-col items-center gap-1">
                       <span className="text-sm font-medium">暂无子简历</span>
                       <span className="text-xs">创建新的针对性版本</span>
                     </div>
-                    <div className="w-10 h-10 rounded-full bg-[#2a2a2e] flex items-center justify-center mt-2">
+                    <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mt-2">
                       <Plus className="w-5 h-5" />
                     </div>
                   </button>
@@ -400,19 +400,19 @@ export default function WorkspaceDetail() {
                         navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
                       }
                     }}
-                    className="w-full text-left bg-[#1e1e20] rounded-xl border border-[#2a2a2e] hover:border-[#3a3a3c] transition-colors p-4 flex items-center gap-3 cursor-pointer"
+                    className="w-full text-left bg-card rounded-xl shadow-sm shadow-black/10 hover:shadow-md hover:shadow-black/15 transition-shadow p-4 flex items-center gap-3 cursor-pointer"
                   >
-                    <div className="w-12 h-12 rounded-lg bg-[#2a2a2e] flex items-center justify-center shrink-0">
-                      <FileText className="w-6 h-6 text-gray-400" />
+                    <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <FileText className="w-6 h-6 text-muted-foreground" />
                     </div>
 
                     <div className="flex-1 min-w-0">
-                      <p className="text-white font-semibold text-sm truncate">{resume.title}</p>
-                      <p className="text-gray-400 text-xs mt-0.5 truncate">
+                      <p className="text-foreground font-semibold text-sm truncate">{resume.title}</p>
+                      <p className="text-muted-foreground text-xs mt-0.5 truncate">
                         {resume.jobTitle || '—'}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
-                        <span className="text-gray-500 text-xs">
+                        <span className="text-muted-foreground text-xs">
                           {new Date(resume.createdAt).toLocaleDateString('zh-CN', {
                             year: 'numeric',
                             month: '2-digit',
@@ -432,7 +432,7 @@ export default function WorkspaceDetail() {
                             setCurrentScoreResumeId(resume.id)
                             setShowScoreDetail(true)
                           }}
-                          className="text-right cursor-pointer group/score rounded-lg px-2 py-1 -m-1 hover:bg-[#2a2a2e] transition-colors"
+                          className="text-right cursor-pointer group/score rounded-lg px-2 py-1 -m-1 hover:bg-muted transition-colors"
                         >
                           <p
                             className={`text-xl font-bold ${resume.matchScore >= 90
@@ -446,12 +446,12 @@ export default function WorkspaceDetail() {
                           >
                             {resume.matchScore}%
                           </p>
-                          <p className="text-gray-500 text-xs">点击查看详情</p>
+                          <p className="text-muted-foreground text-xs">点击查看详情</p>
                         </button>
                       ) : (
                         <div className="text-right">
-                          <p className="text-xl font-bold text-gray-500">--</p>
-                          <p className="text-gray-500 text-xs">AI 匹配得分</p>
+                          <p className="text-xl font-bold text-muted-foreground">--</p>
+                          <p className="text-muted-foreground text-xs">AI 匹配得分</p>
                         </div>
                       )}
                       <span className="group relative inline-flex">
@@ -461,11 +461,11 @@ export default function WorkspaceDetail() {
                             e.stopPropagation()
                             navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
                           }}
-                          className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                          className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         >
                           <FileEdit className="w-4 h-4" />
                         </button>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-gray-200 bg-[#1c1c1e] border border-[#2a2a2e] shadow-md group-hover:block">
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-foreground bg-card shadow-lg group-hover:block">
                           编辑
                         </span>
                       </span>
@@ -477,7 +477,7 @@ export default function WorkspaceDetail() {
                               onClick={(e) => {
                                 e.stopPropagation()
                               }}
-                              className="p-1.5 rounded-lg text-gray-400 hover:text-white hover:bg-[#2a2a2e] transition-colors"
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                             >
                               <MoreVertical className="w-4 h-4" />
                             </button>
@@ -485,7 +485,7 @@ export default function WorkspaceDetail() {
                           <PopoverContent
                             side="bottom"
                             align="end"
-                            className="w-36 p-1 bg-[#141416] border border-[#1e1e20] shadow-md"
+                            className="w-36 p-1 bg-card shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="flex flex-col gap-0.5">
@@ -519,14 +519,14 @@ export default function WorkspaceDetail() {
                                     toast.success(
                                       <div className="flex flex-col gap-1">
                                         <span className="font-medium text-sm">JD 匹配评分任务已启动</span>
-                                        <span className="text-xs text-gray-400 truncate">「{title}」正在评分中</span>
+                                        <span className="text-xs text-muted-foreground truncate">「{title}」正在评分中</span>
                                       </div>,
                                     )
                                   } catch (err: any) {
                                     toast.error(err.message || '评分请求失败')
                                   }
                                 }}
-                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-gray-400 hover:text-white hover:bg-[#1e1e20] transition-colors"
+                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                               >
                                 <Star className="w-3.5 h-3.5 text-yellow-400" />
                                 <span>评分</span>
@@ -534,7 +534,7 @@ export default function WorkspaceDetail() {
                             </div>
                           </PopoverContent>
                         </Popover>
-                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-gray-200 bg-[#1c1c1e] border border-[#2a2a2e] shadow-md group-hover:block">
+                        <span className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden whitespace-nowrap rounded-md px-2 py-1 text-xs text-foreground bg-card shadow-lg group-hover:block">
                           更多操作
                         </span>
                       </span>
@@ -577,7 +577,7 @@ export default function WorkspaceDetail() {
               <div className="flex flex-col gap-1">
                 <span className="font-medium text-sm">AI 子简历生成任务已启动</span>
                 {title && (
-                  <span className="text-xs text-gray-400 truncate">
+                  <span className="text-xs text-muted-foreground truncate">
                     「{title}」正在生成中
                   </span>
                 )}

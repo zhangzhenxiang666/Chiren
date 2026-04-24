@@ -88,12 +88,12 @@ function SortableSidebarItem({
       style={style}
       className={`group/item flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors duration-150 ${
         isSelected
-          ? 'bg-pink-50 text-pink-700 dark:bg-pink-950/40 dark:text-pink-300'
-          : 'text-zinc-600 hover:bg-zinc-50 dark:text-zinc-400 dark:hover:bg-zinc-800'
+          ? 'bg-pink-50 dark:bg-pink-950/70 text-pink-700 dark:text-pink-300'
+          : 'text-muted-foreground hover:bg-muted dark:hover:bg-muted'
       }`}
     >
       <GripVertical
-        className="h-3 w-3 shrink-0 cursor-grab text-zinc-300 active:cursor-grabbing"
+        className="h-3 w-3 shrink-0 cursor-grab text-muted-foreground/50 active:cursor-grabbing"
         {...attributes}
         {...listeners}
       />
@@ -114,7 +114,7 @@ function SortableSidebarItem({
               if (e.key === 'Escape') { setRenameValue(section.title); setIsRenaming(false); }
             }}
             onClick={(e) => e.stopPropagation()}
-            className="h-5 w-full min-w-0 rounded border border-pink-300 bg-transparent px-1 text-sm outline-none"
+            className="h-5 w-full min-w-0 rounded border border-border bg-transparent px-1 text-sm outline-none"
           />
         ) : (
           <span className="truncate">{section.title}</span>
@@ -123,7 +123,7 @@ function SortableSidebarItem({
       {isRenamable && !isRenaming && (
         <button
           type="button"
-          className="hidden shrink-0 cursor-pointer rounded p-0.5 text-zinc-300 hover:text-zinc-600 group-hover/item:block dark:hover:text-zinc-200"
+          className="hidden shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:text-foreground"
           onClick={(e) => { e.stopPropagation(); setRenameValue(section.title); setIsRenaming(true); }}
         >
           <Pencil className="h-3 w-3" />
@@ -204,9 +204,9 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
   };
 
   return (
-    <div className="flex h-full w-56 shrink-0 flex-col border-r bg-white dark:bg-zinc-900 dark:border-zinc-800">
+    <div className="flex h-full w-56 shrink-0 flex-col border-r border-border bg-background">
       <div className="p-3 shrink-0">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           段落
         </h3>
       </div>
@@ -242,7 +242,7 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
           <>
             <Separator className="my-3" />
             <div className="px-2 pb-4">
-              <p className="mb-2 px-2 text-xs text-zinc-400">添加段落</p>
+              <p className="mb-2 px-2 text-xs text-muted-foreground">添加段落</p>
               <div className="space-y-0.5">
                 {availableTypes.map((type) => {
                   const Icon = sectionIcons[type] || LayoutList;
@@ -250,7 +250,7 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
                     <button
                       key={type}
                       type="button"
-                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-zinc-500 transition-colors duration-150 hover:bg-zinc-50 hover:text-zinc-700 dark:text-zinc-500 dark:hover:bg-zinc-800 dark:hover:text-zinc-300"
+                      className="flex w-full cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-muted-foreground transition-colors duration-150 hover:bg-accent hover:text-accent-foreground"
                       onClick={() => handleAddSection(type)}
                     >
                       <Plus className="h-3 w-3 shrink-0" />

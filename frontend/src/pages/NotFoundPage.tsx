@@ -5,7 +5,7 @@ export default function NotFoundPage() {
   const navigate = useNavigate()
 
   return (
-    <div className="flex h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex h-screen items-center justify-center bg-muted">
       <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
         <FileQuestion className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
         <div className="text-center">
