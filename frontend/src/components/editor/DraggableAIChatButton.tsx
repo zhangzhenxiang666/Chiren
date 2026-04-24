@@ -775,11 +775,22 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     {textBlocks.map((block, i) => (
                       <div
                         key={`${msgKey}-text-${block.type}-${i}`}
-                        className="whitespace-pre-wrap text-xs leading-relaxed"
+                        className="whitespace-pre-wrap text-xs leading-relaxed text-foreground"
                       >
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
+                            h1: ({ children }) => <h1 className="text-base font-bold text-foreground mb-1">{children}</h1>,
+                            h2: ({ children }) => <h2 className="text-sm font-semibold text-foreground mb-1">{children}</h2>,
+                            h3: ({ children }) => <h3 className="text-xs font-semibold text-foreground mb-1">{children}</h3>,
+                            h4: ({ children }) => <h4 className="text-xs font-medium text-foreground mb-1">{children}</h4>,
+                            p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
+                            ul: ({ children }) => <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">{children}</ul>,
+                            ol: ({ children }) => <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">{children}</ol>,
+                            li: ({ children }) => <li className="text-foreground">{children}</li>,
+                            strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                            em: ({ children }) => <em className="italic text-foreground">{children}</em>,
+                            blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">{children}</blockquote>,
                             a: ({ children }) => (
                               <span className="text-pink-400 cursor-pointer">{children}</span>
                             ),
@@ -918,8 +929,24 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                   </div>
                 )}
                 {streamingMessage.text && (
-                  <div className="whitespace-pre-wrap text-xs leading-relaxed">
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingMessage.text}</ReactMarkdown>
+                  <div className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkGfm]}
+                      components={{
+                        h1: ({ children }) => <h1 className="text-base font-bold text-foreground mb-1">{children}</h1>,
+                        h2: ({ children }) => <h2 className="text-sm font-semibold text-foreground mb-1">{children}</h2>,
+                        h3: ({ children }) => <h3 className="text-xs font-semibold text-foreground mb-1">{children}</h3>,
+                        h4: ({ children }) => <h4 className="text-xs font-medium text-foreground mb-1">{children}</h4>,
+                        p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
+                        ul: ({ children }) => <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">{children}</ul>,
+                        ol: ({ children }) => <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">{children}</ol>,
+                        li: ({ children }) => <li className="text-foreground">{children}</li>,
+                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
+                        em: ({ children }) => <em className="italic text-foreground">{children}</em>,
+                        blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">{children}</blockquote>,
+                        a: ({ children }) => <span className="text-pink-400 cursor-pointer">{children}</span>,
+                      }}
+                    >{streamingMessage.text}</ReactMarkdown>
                   </div>
                 )}
                 {streamingMessage.toolCalls.map((toolCall) => (
@@ -1032,7 +1059,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-xs text-white placeholder:text-muted-foreground border-none focus:outline-none resize-none"
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground border-none focus:outline-none resize-none"
               />
             </div>
             <div className="flex items-center justify-between px-4 pb-3">

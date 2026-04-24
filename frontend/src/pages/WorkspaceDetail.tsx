@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Sparkles, MoreVertical, Plus, ArrowLeft, FileText, FileEdit, Star, Inbox } from 'lucide-react'
+import { Sparkles, MoreVertical, Plus, ArrowLeft, FileText, FileEdit, Star, Inbox, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
 import type { Workspace, SubResume } from '../types/workspace'
 import type { Resume, ResumeSection } from '../types/resume'
@@ -15,11 +15,13 @@ import { DraggableAIChatButton } from '../components/editor/DraggableAIChatButto
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
 import type { JdAnalysis } from '../lib/api'
-import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, checkRunningMatchTask, getProviderConfig } from '../lib/api'
+import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, createMatchTask, checkRunningMatchTask, getProviderConfig, updateResume, deleteWorkspace } from '../lib/api'
 import { markUnread, addNotificationTask } from '../lib/notification'
 import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
 import ScoreDetailModal from '../components/workspace/ScoreDetailModal'
+import EditSubResumeModal from '../components/workspace/EditSubResumeModal'
 import { Popover, PopoverTrigger, PopoverContent } from '../components/ui/popover'
+import ConfirmDialog from '../components/ui/ConfirmDialog'
 
 export default function WorkspaceDetail() {
   const navigate = useNavigate()
@@ -37,6 +39,9 @@ export default function WorkspaceDetail() {
   const [currentScoreResumeId, setCurrentScoreResumeId] = useState<string | null>(null)
   const [resumeAnalyses, setResumeAnalyses] = useState<Map<string, JdAnalysis[]>>(new Map())
   const [coverLetterOpen, setCoverLetterOpen] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingResume, setEditingResume] = useState<SubResume | null>(null)
+  const [confirmDeleteResumeId, setConfirmDeleteResumeId] = useState<string | null>(null)
 
   const refreshWorkspaces = useCallback(async () => {
     try {
@@ -81,6 +86,7 @@ export default function WorkspaceDetail() {
         id: sub.id,
         title: sub.title,
         jobTitle: sub.metaInfo?.job_title,
+        jobDescription: sub.metaInfo?.job_description,
         createdAt: sub.createdAt,
         updatedAt: sub.updatedAt,
       }))
@@ -107,6 +113,26 @@ export default function WorkspaceDetail() {
     }
   }, [workspace, refreshWorkspaces])
 
+  const handleEditSubmit = useCallback(async (payload: { title: string; jobTitle: string; jobDescription: string }) => {
+    if (!editingResume) return
+    try {
+      await updateResume({
+        id: editingResume.id,
+        title: payload.title,
+        metaInfo: {
+          job_title: payload.jobTitle,
+          job_description: payload.jobDescription,
+        },
+      })
+      toast.success('子简历信息已更新')
+      setShowEditModal(false)
+      setEditingResume(null)
+      refreshSubResumes()
+    } catch (err: any) {
+      toast.error(err.message || '更新子简历失败')
+    }
+  }, [editingResume, refreshSubResumes])
+
   useEffect(() => {
     if (!workspace) return
     fetchResumeSections(workspace.id)
@@ -130,6 +156,7 @@ export default function WorkspaceDetail() {
           id: sub.id,
           title: sub.title,
           jobTitle: sub.metaInfo?.job_title,
+          jobDescription: sub.metaInfo?.job_description,
           createdAt: sub.createdAt,
           updatedAt: sub.updatedAt,
         }))
@@ -400,7 +427,7 @@ export default function WorkspaceDetail() {
                         navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
                       }
                     }}
-                    className="w-full text-left bg-card rounded-xl shadow-sm shadow-black/10 hover:shadow-md hover:shadow-black/15 transition-shadow p-4 flex items-center gap-3 cursor-pointer"
+                    className="w-full text-left bg-card rounded-xl border border-border shadow-sm shadow-black/10 hover:shadow-md hover:shadow-black/15 hover:border-border/80 transition-all p-4 flex items-center gap-3 cursor-pointer"
                   >
                     <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center shrink-0">
                       <FileText className="w-6 h-6 text-muted-foreground" />
@@ -469,9 +496,9 @@ export default function WorkspaceDetail() {
                           编辑
                         </span>
                       </span>
-                        <span className="group relative inline-flex">
-                          <Popover open={openMorePopover === resume.id} onOpenChange={(isOpen) => setOpenMorePopover(isOpen ? resume.id : null)}>
-                            <PopoverTrigger asChild>
+                      <span className="group relative inline-flex">
+                        <Popover open={openMorePopover === resume.id} onOpenChange={(isOpen) => setOpenMorePopover(isOpen ? resume.id : null)}>
+                          <PopoverTrigger asChild>
                             <button
                               type="button"
                               onClick={(e) => {
@@ -485,10 +512,23 @@ export default function WorkspaceDetail() {
                           <PopoverContent
                             side="bottom"
                             align="end"
-                            className="w-36 p-1 bg-card shadow-lg"
+                            className="w-36 p-1 bg-card border border-border shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <div className="flex flex-col gap-0.5">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setEditingResume(resume)
+                                  setShowEditModal(true)
+                                  setOpenMorePopover(null)
+                                }}
+                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                                <span>编辑信息</span>
+                              </button>
                               <button
                                 type="button"
                                 onClick={async (e) => {
@@ -530,6 +570,18 @@ export default function WorkspaceDetail() {
                               >
                                 <Star className="w-3.5 h-3.5 text-yellow-400" />
                                 <span>评分</span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setOpenMorePopover(null)
+                                  setConfirmDeleteResumeId(resume.id)
+                                }}
+                                className="flex items-center gap-2 w-full px-2 py-1.5 rounded-md text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                                <span>删除</span>
                               </button>
                             </div>
                           </PopoverContent>
@@ -604,6 +656,7 @@ const data = await fetchResumeDetail(workspace!.id)
               id: sub.id,
               title: sub.title,
               jobTitle: sub.metaInfo?.job_title,
+              jobDescription: sub.metaInfo?.job_description,
               createdAt: sub.createdAt,
               updatedAt: sub.updatedAt,
             }))
@@ -639,6 +692,41 @@ const data = await fetchResumeDetail(workspace!.id)
         resumeTitle={subResumes.find((r) => r.id === currentScoreResumeId)?.title || ''}
         analyses={currentScoreResumeId ? (resumeAnalyses.get(currentScoreResumeId) || []) : []}
         workspaceId={workspace?.id || ''}
+      />
+
+      <EditSubResumeModal
+        open={showEditModal}
+        onClose={() => {
+          setShowEditModal(false)
+          setEditingResume(null)
+        }}
+        onSubmit={handleEditSubmit}
+        initialData={editingResume ? {
+          title: editingResume.title,
+          jobTitle: editingResume.jobTitle,
+          jobDescription: editingResume.jobDescription,
+        } : undefined}
+      />
+
+      <ConfirmDialog
+        open={!!confirmDeleteResumeId}
+        title="删除子简历"
+        description="确定要删除该子简历吗？此操作不可撤销。"
+        confirmText="删除"
+        cancelText="取消"
+        confirmVariant="danger"
+        onConfirm={async () => {
+          if (!confirmDeleteResumeId) return
+          try {
+            await deleteWorkspace(confirmDeleteResumeId)
+            toast.success('子简历已删除')
+            setConfirmDeleteResumeId(null)
+            refreshSubResumes()
+          } catch (err: any) {
+            toast.error(err.message || '删除失败')
+          }
+        }}
+        onCancel={() => setConfirmDeleteResumeId(null)}
       />
     </div>
   )

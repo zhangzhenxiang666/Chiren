@@ -298,9 +298,14 @@ export async function updateResume(data: {
   title?: string;
   template?: string;
   themeConfig?: Record<string, unknown>;
+  metaInfo?: Record<string, unknown>;
 }): Promise<any> {
   const { data: res } = await api.put('/resume/update', data);
   return res;
+}
+
+export async function deleteWorkspace(id: string): Promise<void> {
+  await api.delete('/resume/delete', { params: { id } });
 }
 
 export interface JdAnalysis {

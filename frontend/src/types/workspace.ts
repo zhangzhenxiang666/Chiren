@@ -14,6 +14,7 @@ export interface SubResume {
   id: string;
   title: string;
   jobTitle?: string;
+  jobDescription?: string;
   matchScore?: number;
   latestAnalysis?: JdAnalysis;
   createdAt: string;

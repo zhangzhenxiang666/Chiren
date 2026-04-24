@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { FileText, Sparkles, Palette, Download, ChevronLeft, ChevronRight, Bell, Settings } from 'lucide-react'
+import { FileText, Palette, ChevronLeft, ChevronRight, Bell, Settings } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { fetchErrorTasks } from '../../lib/api'
 import { hasUnreadNotification, onNotificationChange, getNotificationTasks, getNotificationTasksAndClear, onNotificationTasksChange } from '../../lib/notification'
@@ -60,9 +60,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
 
   const navItems = [
     { label: '工作空间', path: '/', icon: FileText },
-    { label: 'AI润色记录', path: '/polish', icon: Sparkles },
     { label: '模板库', path: '/templates', icon: Palette },
-    { label: '导出记录', path: '/export', icon: Download },
   ]
 
   return (

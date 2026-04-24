@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Search, X } from 'lucide-react'
+import { toast } from 'sonner'
 import WorkspaceCard from '../components/workspace/WorkspaceCard'
 import CreateWorkspaceModal from '../components/workspace/CreateWorkspaceModal'
-import { fetchWorkspaces, createWorkspace } from '../lib/api'
+import { fetchWorkspaces, createWorkspace, deleteWorkspace, updateResume } from '../lib/api'
 import type { Workspace } from '../types/workspace'
 
 function formatRelativeTime(dateString: string): string {
@@ -117,9 +118,10 @@ export default function Dashboard() {
 
       <div className="flex-1 overflow-y-auto min-h-0 flex justify-center">
         <div className="grid grid-cols-5 gap-5 pb-4 max-w-[1500px] w-full px-4">
-          {filteredWorkspaces.map((ws, index) => (
+          {filteredWorkspaces.map((ws) => (
             <WorkspaceCard
               key={ws.id}
+              id={ws.id}
               title={ws.title}
               domain={`${ws.template} 模板`}
               subResumeIds={ws.subResumeIds}
@@ -127,6 +129,24 @@ export default function Dashboard() {
               templateName={ws.template}
               isActive={ws.isDefault}
               onClick={() => navigate(`/workspace/${ws.id}`)}
+              onDelete={async (id) => {
+                try {
+                  await deleteWorkspace(id)
+                  toast.success('工作空间已删除')
+                  refreshWorkspaces()
+                } catch (err: any) {
+                  toast.error(err.message || '删除失败')
+                }
+              }}
+              onRename={async (id, newTitle) => {
+                try {
+                  await updateResume({ id, title: newTitle })
+                  toast.success('重命名成功')
+                  refreshWorkspaces()
+                } catch (err: any) {
+                  toast.error(err.message || '重命名失败')
+                }
+              }}
             />
           ))}
         </div>
