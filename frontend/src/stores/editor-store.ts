@@ -1,7 +1,4 @@
 import { create } from 'zustand';
-import type { ResumeSection } from '@/types/resume';
-import type { ResumeSnapshot } from '@/types/editor';
-import { MAX_UNDO_STACK } from '@/lib/constants';
 
 interface EditorStore {
   selectedSectionId: string | null;
@@ -10,8 +7,6 @@ interface EditorStore {
   showAiChat: boolean;
   showThemeEditor: boolean;
   zoom: number;
-  undoStack: ResumeSnapshot[];
-  redoStack: ResumeSnapshot[];
   pendingAiMessage: string | null;
 
   selectSection: (id: string | null) => void;
@@ -21,22 +16,17 @@ interface EditorStore {
   setShowAiChat: (show: boolean) => void;
   toggleThemeEditor: () => void;
   setZoom: (zoom: number) => void;
-  pushSnapshot: (sections: ResumeSection[]) => void;
-  undo: () => ResumeSnapshot | null;
-  redo: () => ResumeSnapshot | null;
   setPendingAiMessage: (message: string | null) => void;
   reset: () => void;
 }
 
-export const useEditorStore = create<EditorStore>((set, get) => ({
+export const useEditorStore = create<EditorStore>((set) => ({
   selectedSectionId: null,
   selectedItemId: null,
   isDragging: false,
   showAiChat: false,
   showThemeEditor: false,
   zoom: 80,
-  undoStack: [],
-  redoStack: [],
   pendingAiMessage: null,
 
   selectSection: (id) => set({ selectedSectionId: id, selectedItemId: null }),
@@ -46,39 +36,6 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
   setShowAiChat: (show) => set({ showAiChat: show }),
   toggleThemeEditor: () => set((s) => ({ showThemeEditor: !s.showThemeEditor })),
   setZoom: (zoom) => set({ zoom }),
-
-  pushSnapshot: (sections) => {
-    set((state) => ({
-      undoStack: [
-        ...state.undoStack.slice(-MAX_UNDO_STACK + 1),
-        { sections, timestamp: Date.now() },
-      ],
-      redoStack: [],
-    }));
-  },
-
-  undo: () => {
-    const { undoStack } = get();
-    if (undoStack.length === 0) return null;
-    const snapshot = undoStack[undoStack.length - 1];
-    set((state) => ({
-      undoStack: state.undoStack.slice(0, -1),
-      redoStack: [...state.redoStack, snapshot],
-    }));
-    return snapshot;
-  },
-
-  redo: () => {
-    const { redoStack } = get();
-    if (redoStack.length === 0) return null;
-    const snapshot = redoStack[redoStack.length - 1];
-    set((state) => ({
-      redoStack: state.redoStack.slice(0, -1),
-      undoStack: [...state.undoStack, snapshot],
-    }));
-    return snapshot;
-  },
-
   setPendingAiMessage: (message) => set({ pendingAiMessage: message }),
 
   reset: () =>
@@ -89,8 +46,6 @@ export const useEditorStore = create<EditorStore>((set, get) => ({
       showAiChat: false,
       showThemeEditor: false,
       zoom: 80,
-      undoStack: [],
-      redoStack: [],
       pendingAiMessage: null,
     }),
 }));

@@ -1,9 +1,6 @@
 import {
   ArrowLeft,
-  Undo2,
-  Redo2,
   Download,
-  Upload,
   Settings,
   Palette,
   Save,
@@ -11,7 +8,6 @@ import {
   Languages,
   FileText,
   SpellCheck,
-  Share2,
 } from 'lucide-react'
 import { useResumeStore } from '@/stores/resume-store';
 
@@ -68,24 +64,6 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
       </div>
 
       <div className="flex items-center gap-1">
-        <button
-          type="button"
-          title="撤销 (Ctrl+Z)"
-          disabled={true}
-          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-accent hover:text-zinc-100 disabled:opacity-40"
-        >
-          <Undo2 className="h-4 w-4" />
-        </button>
-
-        <button
-          type="button"
-          title="重做 (Ctrl+Shift+Z)"
-          disabled={true}
-          className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-accent hover:text-zinc-100 disabled:opacity-40"
-        >
-          <Redo2 className="h-4 w-4" />
-        </button>
-
         <div className="h-6 w-px bg-muted-foreground/20"></div>
 
         <button
@@ -96,24 +74,6 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         >
           <Download className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">导出</span>
-        </button>
-
-        <button
-          type="button"
-          title="导入"
-          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <Upload className="h-4 w-4" />
-          <span className="ml-1 hidden text-xs sm:inline">导入</span>
-        </button>
-
-        <button
-          type="button"
-          title="分享"
-          className="flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-        >
-          <Share2 className="h-4 w-4" />
-          <span className="ml-1 hidden text-xs sm:inline">分享</span>
         </button>
 
         <div className="h-6 w-px bg-muted-foreground/20"></div>

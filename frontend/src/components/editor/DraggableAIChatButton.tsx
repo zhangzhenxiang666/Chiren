@@ -22,6 +22,7 @@ interface StreamingMessage {
   bubbleId: string;
   status: 'streaming' | 'done' | 'error';
   thinking: { visible: boolean; content: string } | null;
+  isThinkingActive: boolean;
   text: string;
   toolCalls: ToolCall[];
 }
@@ -368,6 +369,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
       bubbleId: String(Date.now()),
       status: 'streaming',
       thinking: null,
+      isThinkingActive: false,
       text: '',
       toolCalls: [],
     }));
@@ -448,6 +450,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               bubbleId: generateUniqueId(),
               status: 'streaming',
               thinking: null,
+              isThinkingActive: false,
               text: '',
               toolCalls: [],
             }));
@@ -458,7 +461,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
 
           case 'thinking_start':
             updateStreaming((prev) =>
-              prev ? { ...prev, thinking: { visible: false, content: '' } } : null,
+              prev ? { ...prev, isThinkingActive: true, thinking: { visible: false, content: '' } } : null,
             );
             break;
 
@@ -476,7 +479,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             break;
 
           case 'text_start':
-            updateStreaming((prev) => (prev ? { ...prev, text: '' } : null));
+            updateStreaming((prev) => (prev ? { ...prev, isThinkingActive: false, text: '' } : null));
             break;
 
           case 'text_delta':
@@ -498,6 +501,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             if (streamingMessageRef.current) {
               streamingMessageRef.current = {
                 ...streamingMessageRef.current,
+                isThinkingActive: false,
                 toolCalls: [...streamingMessageRef.current.toolCalls, newToolCall],
               };
             }
@@ -823,10 +827,10 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                       const resultKey = `${msgKey}-result-${i}`;
                       return (
                         <div key={toolKey} className="space-y-2">
-                          <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-2 space-y-2">
+                          <div className="rounded-lg border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 p-2 space-y-2">
                             <button
                               type="button"
-                              className="text-[10px] text-purple-400 cursor-pointer hover:text-purple-300 flex items-center gap-1 w-full"
+                              className="text-[10px] text-indigo-700 dark:text-indigo-300 cursor-pointer hover:opacity-80 flex items-center gap-1 w-full"
                               onClick={() => toggleThinking(toolKey)}
                             >
                               {expandedMessages.has(toolKey) ? (
@@ -838,21 +842,21 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               <span>工具请求: {toolUse.name}</span>
                             </button>
                             {expandedMessages.has(toolKey) && (
-                              <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted-foreground/10 rounded p-2 overflow-auto">
+                              <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted rounded p-2 overflow-auto">
                                 {JSON.stringify(toolUse.input, null, 2)}
                               </pre>
                             )}
                           </div>
                           {result && (
                             <div
-                              className={`rounded-lg border border-border p-2 space-y-2 ${result.isError
-                                ? 'border-red-500/30 bg-red-500/5'
-                                : 'border-green-500/30 bg-green-500/5'
+                              className={`rounded-lg border p-2 space-y-2 ${result.isError
+                                ? 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10'
+                                : 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10'
                                 }`}
                             >
                               <button
                                 type="button"
-                                className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${result.isError ? 'text-red-400' : 'text-green-400'
+                                className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${result.isError ? 'text-red-700 dark:text-red-300' : 'text-emerald-700 dark:text-emerald-300'
                                   }`}
                                 onClick={() => toggleThinking(resultKey)}
                               >
@@ -871,8 +875,8 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               {expandedMessages.has(resultKey) && (
                                 <div
                                   className={`rounded p-2 text-[10px] ${result.isError
-                                    ? 'bg-red-500/10 text-red-300'
-                                    : 'bg-green-500/10 text-green-300'
+                                    ? 'bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300'
+                                    : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
                                     }`}
                                 >
                                   {result.content}
@@ -921,6 +925,13 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     <span className="italic flex items-center gap-1">
                       <Brain className="h-3 w-3" /> 思考过程
                     </span>
+                    {streamingMessage.isThinkingActive && (
+                      <span className="flex gap-0.5 ml-1">
+                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '120ms' }} />
+                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '240ms' }} />
+                      </span>
+                    )}
                   </button>
                 )}
                 {streamingMessage.thinking?.visible && (
@@ -951,10 +962,10 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 )}
                 {streamingMessage.toolCalls.map((toolCall) => (
                   <div key={toolCall.id} className="space-y-2">
-                    <div className="rounded-lg border border-purple-500/30 bg-purple-500/5 p-2 space-y-2">
+                    <div className="rounded-lg border border-indigo-200 dark:border-indigo-500/30 bg-indigo-50 dark:bg-indigo-500/10 p-2 space-y-2">
                       <button
                         type="button"
-                        className="text-[10px] text-purple-400 cursor-pointer hover:text-purple-300 flex items-center gap-1 w-full"
+                        className="text-[10px] text-indigo-700 dark:text-indigo-300 cursor-pointer hover:opacity-80 flex items-center gap-1 w-full"
                         onClick={() => toggleToolCall(toolCall.id)}
                       >
                         {expandedToolCalls.has(toolCall.id) ? (
@@ -967,32 +978,32 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         {toolCall.status === 'executing' && (
                           <>
                             <span className="text-muted-foreground">执行中...</span>
-                            <Loader2 className="h-3 w-3 animate-spin text-purple-400" />
+                            <Loader2 className="h-3 w-3 animate-spin text-indigo-500 dark:text-indigo-400" />
                           </>
                         )}
                       </button>
                       {expandedToolCalls.has(toolCall.id) && (
-                        <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted-foreground/10 rounded p-2 overflow-auto">
+                        <pre className="text-foreground whitespace-pre-wrap text-[10px] bg-muted rounded p-2 overflow-auto">
                           {JSON.stringify(toolCall.input, null, 2)}
                         </pre>
                       )}
                     </div>
                     {(toolCall.result || toolCall.status === 'executing') && (
                       <div
-                        className={`rounded-lg border border-border p-2 space-y-2 ${toolCall.status === 'executing'
-                          ? 'border-purple-500/30 bg-purple-500/5'
+                        className={`rounded-lg border p-2 space-y-2 ${toolCall.status === 'executing'
+                          ? 'border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10'
                           : toolCall.result!.isError
-                            ? 'border-red-500/30 bg-red-500/5'
-                            : 'border-green-500/30 bg-green-500/5'
+                            ? 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10'
+                            : 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10'
                           }`}
                       >
                         <button
                           type="button"
                           className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${toolCall.status === 'executing'
-                            ? 'text-purple-400'
+                            ? 'text-purple-700 dark:text-purple-300'
                             : toolCall.result!.isError
-                              ? 'text-red-400'
-                              : 'text-green-400'
+                              ? 'text-red-700 dark:text-red-300'
+                              : 'text-emerald-700 dark:text-emerald-300'
                             }`}
                           onClick={() => toggleToolResult(toolCall.id)}
                         >
@@ -1003,7 +1014,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                           )}
                           {toolCall.status === 'executing' ? (
                             <>
-                              <Loader2 className="h-3 w-3 animate-spin text-purple-400" />
+                              <Loader2 className="h-3 w-3 animate-spin text-purple-500 dark:text-purple-400" />
                               <span>执行中...</span>
                             </>
                           ) : toolCall.result!.isError ? (
@@ -1021,10 +1032,10 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         {expandedToolResults.has(toolCall.id) && (
                           <div
                             className={`rounded p-2 text-[10px] ${toolCall.status === 'executing'
-                              ? 'bg-purple-500/10 text-purple-300'
+                              ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300'
                               : toolCall.result!.isError
-                                ? 'bg-red-500/10 text-red-300'
-                                : 'bg-green-500/10 text-green-300'
+                                ? 'bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300'
+                                : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
                               }`}
                           >
                             {toolCall.status === 'executing' ? '等待结果...' : toolCall.result!.content}
@@ -1034,6 +1045,13 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     )}
                   </div>
                 ))}
+                {!streamingMessage.text && !streamingMessage.thinking && streamingMessage.toolCalls.length === 0 && (
+                  <div className="flex items-center gap-1 py-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '0ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '150ms' }} />
+                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '300ms' }} />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1059,7 +1077,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground border-none focus:outline-none resize-none"
+                className="w-full bg-transparent text-foreground placeholder:text-muted-foreground border-none focus:outline-none resize-none text-xs"
               />
             </div>
             <div className="flex items-center justify-between px-4 pb-3">

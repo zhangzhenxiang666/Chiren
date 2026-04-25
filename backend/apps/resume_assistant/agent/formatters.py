@@ -1,5 +1,6 @@
 import json
 from collections.abc import Iterator
+from datetime import datetime
 
 from apps.resume_assistant.agent.events import (
     AgentEvent,
@@ -9,6 +10,15 @@ from apps.resume_assistant.agent.events import (
     ThinkingStartEvent,
 )
 from shared.api.client import ApiTextDeltaEvent
+
+
+class _DateTimeEncoder(json.JSONEncoder):
+    """自定义 JSON 编码器，用于序列化 datetime 对象。"""
+
+    def default(self, obj):
+        if isinstance(obj, datetime):
+            return obj.isoformat()
+        return super().default(obj)
 
 
 class StreamingFormatter:
@@ -61,5 +71,5 @@ def to_sse_event(event: AgentEvent) -> dict[str, str]:
 
     return {
         "event": event_type,
-        "data": json.dumps(data, ensure_ascii=False),
+        "data": json.dumps(data, ensure_ascii=False, cls=_DateTimeEncoder),
     }

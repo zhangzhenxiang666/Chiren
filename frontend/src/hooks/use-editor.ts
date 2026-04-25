@@ -7,7 +7,7 @@ import { generateId } from '@/lib/utils';
 
 export function useEditor(resumeId: string) {
   const { setResume, sections, currentResume, updateSection, addSection, removeSection, reorderSections, reset: resetResume } = useResumeStore();
-  const { pushSnapshot, reset: resetEditor } = useEditorStore();
+  const { reset: resetEditor } = useEditorStore();
 
   const loadResume = useCallback(async () => {
     try {
@@ -65,34 +65,30 @@ export function useEditor(resumeId: string) {
 
   const handleUpdateSection = useCallback(
     (sectionId: string, content: any) => {
-      pushSnapshot(sections);
       updateSection(sectionId, content);
     },
-    [sections, pushSnapshot, updateSection]
+    [updateSection]
   );
 
   const handleAddSection = useCallback(
     (section: ResumeSection) => {
-      pushSnapshot(sections);
       addSection(section);
     },
-    [sections, pushSnapshot, addSection]
+    [addSection]
   );
 
   const handleRemoveSection = useCallback(
     (sectionId: string) => {
-      pushSnapshot(sections);
       removeSection(sectionId);
     },
-    [sections, pushSnapshot, removeSection]
+    [removeSection]
   );
 
   const handleReorder = useCallback(
     (newSections: ResumeSection[]) => {
-      pushSnapshot(sections);
       reorderSections(newSections);
     },
-    [sections, pushSnapshot, reorderSections]
+    [reorderSections]
   );
 
   return {

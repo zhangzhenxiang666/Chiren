@@ -374,7 +374,7 @@ export default function WorkspaceDetail() {
               </span>
             </div>
 
-            <div className="h-[566px] overflow-hidden border border-foreground/10 rounded-lg" style={{ maxWidth: 'calc(100% - 2rem)' }}>
+            <div className="h-[566px] overflow-hidden border border-foreground/10 rounded-lg" style={{ width: 'calc(595px * 0.48)' }}>
               <div style={{ transform: 'scale(0.48)', transformOrigin: 'top left', width: '595px' }}>
                 {resumeData && <ResumePreview resume={{ ...resumeData, template: workspace!.template }} onClick={() => navigate(`/workspace/${workspace!.id}/template/edit`)} />}
               </div>
@@ -420,11 +420,11 @@ export default function WorkspaceDetail() {
                     key={resume.id}
                     role="button"
                     tabIndex={0}
-                    onClick={() => navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)}
+                    onClick={() => toast.info('暂未实现')}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
                         e.preventDefault()
-                        navigate(`/workspace/${workspace!.id}/resumes/${resume.id}/edit`)
+                        toast.info('暂未实现')
                       }
                     }}
                     className="w-full text-left bg-card rounded-xl border border-border shadow-sm shadow-black/10 hover:shadow-md hover:shadow-black/15 hover:border-border/80 transition-all p-4 flex items-center gap-3 cursor-pointer"
