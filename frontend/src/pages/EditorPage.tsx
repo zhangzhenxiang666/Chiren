@@ -152,7 +152,6 @@ export default function EditorPage() {
       />
       <CoverLetterDialog
         resumeId={currentResume.id}
-        hasJobDescription={!!currentResume.metaInfo?.job_description}
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
       />
