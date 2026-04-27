@@ -71,7 +71,7 @@ Important: The cover letter MUST include the candidate's name, email and phone n
 Output only the generated cover letter content, without including your own reasoning logic.
 Style Requirements: {style_instruction}
 Language Requirement: {lang_instruction}
----"""
+"""
 
 
 def build_cover_letter_user_prompt(

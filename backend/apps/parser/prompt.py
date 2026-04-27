@@ -11,14 +11,14 @@ You are a professional resume parser. Analyze the provided context and extract i
 
 
 Below is the JSON Schema definition you must strictly follow:
----
+<json_schema>
 {json_schema}
----"""
+</json_schema>"""
 
 
 CONTENT = """\
 Below is the full text extracted from a resume PDF. Extract all resume information using the EXACT JSON schema from the system prompt.
 
----
+<source_content>
 {content}
----"""
+</source_content>"""

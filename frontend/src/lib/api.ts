@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Workspace } from '../types/workspace';
+import type { Workspace, KeywordMatch, MissingKeyword, JdRequirement } from '../types/workspace';
 import type { WorkTask } from '../types/work';
 import type { ResumeSection } from '../types/resume';
 
@@ -315,10 +315,16 @@ export interface JdAnalysis {
   overallScore: number;
   atsScore: number;
   summary: string;
-  keywordMatches: string[];
-  missingKeywords: string[];
+  keywordMatches: KeywordMatch[];
+  missingKeywords: MissingKeyword[];
   suggestions: any[];
   createdAt: string;
+  version?: number;
+  totalRequirements?: number;
+  partialMatches?: any[];
+  skillMatches?: any[];
+  strengths?: any[];
+  jdRequirements?: JdRequirement[];
 }
 
 export async function fetchJdAnalysisList(resumeId: string): Promise<JdAnalysis[]> {

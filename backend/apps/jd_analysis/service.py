@@ -45,7 +45,7 @@ async def run_match_task(
         await _update_work_status(db, task_id, TaskStatus.RUNNING)
         await update_task_status(task_id, TaskStatus.RUNNING)
 
-        match_result = await executor_llm(
+        match_result, extraction = await executor_llm(
             client, model, sections, job_description, job_title
         )
 
@@ -56,15 +56,31 @@ async def run_match_task(
             overall_score=match_result.overall_score,
             ats_score=match_result.ats_score,
             keyword_matches=json.dumps(
-                match_result.keyword_matches,
+                [k.model_dump() for k in match_result.keyword_matches],
                 ensure_ascii=False,
             ),
             missing_keywords=json.dumps(
-                match_result.missing_keywords,
+                [k.model_dump() for k in match_result.missing_keywords],
                 ensure_ascii=False,
             ),
             suggestions=json.dumps(
                 [s.model_dump() for s in match_result.suggestions],
+                ensure_ascii=False,
+            ),
+            partial_matches=json.dumps(
+                [p.model_dump() for p in match_result.partial_matches],
+                ensure_ascii=False,
+            ),
+            skill_matches=json.dumps(
+                [s.model_dump() for s in match_result.skill_matches],
+                ensure_ascii=False,
+            ),
+            strengths=json.dumps(
+                [st.model_dump() for st in match_result.strengths],
+                ensure_ascii=False,
+            ),
+            jd_requirements=json.dumps(
+                [r.model_dump() for r in extraction.requirements],
                 ensure_ascii=False,
             ),
         )

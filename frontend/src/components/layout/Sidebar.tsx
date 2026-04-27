@@ -66,7 +66,7 @@ export default function Sidebar({ collapsed, onToggle }: { collapsed: boolean; o
   return (
     <>
       <aside
-        className="bg-card border-r border-muted-foreground/20 flex flex-col h-full transition-all duration-300 ease-in-out overflow-hidden"
+        className="bg-card border-r border-muted-foreground/20 flex flex-col h-full shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
         style={{ width: collapsed ? '64px' : '208px' }}
       >
         <div className="h-14 flex items-center px-4 border-b border-muted-foreground/20 shrink-0 gap-3">

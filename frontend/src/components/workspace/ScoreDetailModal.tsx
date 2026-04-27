@@ -10,6 +10,7 @@ import {
   Loader2,
   TrendingDown,
   Minus,
+  Plus,
   Star,
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -130,18 +131,14 @@ function SuggestionDiff({ current, suggested }: { current: string; suggested: st
   return (
     <div className="rounded-lg overflow-hidden border border-border text-sm">
       <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/5 border-b border-border">
-        <span className="w-3 h-3 rounded-full bg-red-400/30 flex items-center justify-center">
-          <span className="block w-1.5 h-px bg-red-400 rounded" />
-        </span>
+        <Minus className="w-3 h-3 text-red-400" />
         <span className="text-[10px] font-semibold text-red-400/70 uppercase tracking-wider">当前</span>
       </div>
       <p className="px-3 py-2.5 text-red-400/60 line-through leading-relaxed whitespace-pre-wrap bg-red-500/[0.03]">
         {current}
       </p>
       <div className="flex items-center gap-2 px-3 py-1.5 bg-emerald-500/5 border-t border-b border-border">
-        <span className="w-3 h-3 rounded-full bg-emerald-400/30 flex items-center justify-center">
-          <span className="block w-1.5 h-1.5 text-emerald-400 leading-none text-center" style={{ fontSize: 8 }}>+</span>
-        </span>
+        <Plus className="w-3 h-3 text-emerald-400" />
         <span className="text-[10px] font-semibold text-emerald-400/70 uppercase tracking-wider">建议</span>
       </div>
       <p className="px-3 py-2.5 text-emerald-400 leading-relaxed whitespace-pre-wrap bg-emerald-500/[0.03]">
@@ -425,6 +422,14 @@ export default function ScoreDetailModal({
               <TrendingUp className="w-12 h-12 opacity-10" />
               <p className="text-sm">暂无评分记录</p>
               <p className="text-xs opacity-60">请先启动 JD 匹配评分任务</p>
+              <button
+                type="button"
+                onClick={handleStartScoring}
+                className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20 transition-colors"
+              >
+                <Star className="w-3 h-3" />
+                开始评分
+              </button>
             </div>
           ) : (
             <>
@@ -521,7 +526,7 @@ export default function ScoreDetailModal({
                       {currentAnalysis.summary && (
                         <div className="relative rounded-lg border border-border bg-background px-4 py-3 overflow-hidden">
                           <div className="absolute left-0 inset-y-0 w-[3px] bg-gradient-to-b from-pink-500/60 to-pink-500/10 rounded-l-lg" />
-                          <p className="text-[13px] text-muted-foreground leading-relaxed pl-2">
+                          <p className="text-[13px] text-muted-foreground leading-relaxed pl-2 break-all">
                             {currentAnalysis.summary}
                           </p>
                         </div>

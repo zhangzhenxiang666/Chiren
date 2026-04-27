@@ -70,3 +70,4 @@ data/*.db
 upload/
 .conversation_store/
 target/
+.local-doc/

@@ -382,6 +382,6 @@ You are a professional resume optimization expert and career coach. Please tailo
 
 
 Below is the JSON schema definition you must follow:
----
+<json_schema>
 {json_schema}
----"""
+</json_schema>"""

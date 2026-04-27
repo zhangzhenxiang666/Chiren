@@ -137,6 +137,9 @@ def _convert_assistant_message(msg: ConversationMessage) -> dict[str, Any]:
             for tu in tool_uses
         ]
 
+    if openai_msg["content"] is None and not openai_msg.get("tool_calls"):
+        openai_msg["content"] = ""
+
     return openai_msg
 
 

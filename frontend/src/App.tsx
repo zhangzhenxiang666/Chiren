@@ -42,6 +42,9 @@ function App() {
           <Route path="templates" element={<TemplateGallery />} />
           <Route path="workspace" element={<Dashboard />} />
           <Route path="workspace/:id" element={<WorkspaceDetail />} />
+          <Route path="workspace/:id/resumes/:resumeId/:tab" element={<WorkspaceDetail />} />
+          <Route path="workspace/:id/resumes/:resumeId" element={<Navigate to="overview" replace />} />
+          <Route path="workspace/:id/resumes" element={<Navigate to="../" replace />} />
         </Route>
         <Route path="workspace/:id/template/edit" element={<EditorPage />} />
         <Route path="workspace/:id/resumes/:resumeId/edit" element={<EditorPage />} />

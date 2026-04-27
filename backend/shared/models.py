@@ -13,7 +13,16 @@ from pydantic import BaseModel
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
-from shared.types.jd_analysis import JobDescriptionAnalysisSchema, SuggestionItem
+from shared.types.jd_analysis import (
+    JdRequirementItem,
+    JobDescriptionAnalysisSchema,
+    KeywordMatchItem,
+    KeywordMissingItem,
+    PartialMatchItem,
+    SkillMatchItem,
+    StrengthItem,
+    SuggestionItem,
+)
 from shared.types.messages import ConversationMessageSchema
 from shared.types.resume import ResumeSchema, ResumeSectionSchema, section_adapter
 
@@ -530,6 +539,30 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         default="[]",
         comment="职位描述分析建议",
     )
+    partial_matches: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析部分匹配结果",
+    )
+    skill_matches: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析技能匹配结果",
+    )
+    strengths: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="职位描述分析核心strength",
+    )
+    jd_requirements: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="JD预提取结构化要求列表",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -545,6 +578,30 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
             SuggestionItem.model_validate(suggestion)
             for suggestion in json.loads(self.suggestions)
         ]
+        keyword_matches = [
+            KeywordMatchItem.model_validate(keyword_match)
+            for keyword_match in json.loads(self.keyword_matches)
+        ]
+        missing_keywords = [
+            KeywordMissingItem.model_validate(missing_keyword)
+            for missing_keyword in json.loads(self.missing_keywords)
+        ]
+        partial_matches = [
+            PartialMatchItem.model_validate(partial_match)
+            for partial_match in json.loads(self.partial_matches)
+        ]
+        skill_matches = [
+            SkillMatchItem.model_validate(skill_match)
+            for skill_match in json.loads(self.skill_matches)
+        ]
+        strengths = [
+            StrengthItem.model_validate(strength)
+            for strength in json.loads(self.strengths)
+        ]
+        jd_requirements = [
+            JdRequirementItem.model_validate(req)
+            for req in json.loads(self.jd_requirements)
+        ]
 
         return JobDescriptionAnalysisSchema(
             id=self.id,
@@ -553,9 +610,13 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
             overall_score=self.overall_score,
             ats_score=self.ats_score,
             summary=self.summary,
-            keyword_matches=json.loads(self.keyword_matches),
-            missing_keywords=json.loads(self.missing_keywords),
+            keyword_matches=keyword_matches,
+            missing_keywords=missing_keywords,
             suggestions=suggestions,
+            partial_matches=partial_matches,
+            skill_matches=skill_matches,
+            strengths=strengths,
+            jd_requirements=jd_requirements,
             created_at=self.created_at,
         )
 
@@ -564,13 +625,31 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
         cls, schema: JobDescriptionAnalysisSchema
     ) -> JobDescriptionAnalysis:
         suggestions = [suggestion.model_dump() for suggestion in schema.suggestions]
+        keyword_matches = [
+            keyword_match.model_dump() for keyword_match in schema.keyword_matches
+        ]
+        missing_keywords = [
+            missing_keyword.model_dump() for missing_keyword in schema.missing_keywords
+        ]
+        partial_matches = [
+            partial_match.model_dump() for partial_match in schema.partial_matches
+        ]
+        skill_matches = [
+            skill_match.model_dump() for skill_match in schema.skill_matches
+        ]
+        strengths = [strength.model_dump() for strength in schema.strengths]
+        jd_requirements = [req.model_dump() for req in schema.jd_requirements]
         return cls(
             resume_id=schema.resume_id,
             job_description=schema.job_description,
             overall_score=schema.overall_score,
             ats_score=schema.ats_score,
             summary=schema.summary,
-            keyword_matches=json.dumps(schema.keyword_matches, ensure_ascii=False),
-            missing_keywords=json.dumps(schema.missing_keywords, ensure_ascii=False),
+            keyword_matches=json.dumps(keyword_matches, ensure_ascii=False),
+            missing_keywords=json.dumps(missing_keywords, ensure_ascii=False),
             suggestions=json.dumps(suggestions, ensure_ascii=False),
+            partial_matches=json.dumps(partial_matches, ensure_ascii=False),
+            skill_matches=json.dumps(skill_matches, ensure_ascii=False),
+            strengths=json.dumps(strengths, ensure_ascii=False),
+            jd_requirements=json.dumps(jd_requirements, ensure_ascii=False),
         )

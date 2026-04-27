@@ -224,9 +224,9 @@ def build_sections_user_prompt(sections: list[dict]) -> str:
     return f"""\
 Here is the JSON resume content:
 
----
+<resume_content>
 {json.dumps(filtered, indent=2, ensure_ascii=False)}
----
+</resume_content>
 """
 
 

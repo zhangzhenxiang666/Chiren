@@ -26,7 +26,7 @@ from shared.api.client import (
     ApiMessageRequest,
     ApiTextDeltaEvent,
 )
-from shared.types.messages import ToolResultBlock, ToolUseBlock
+from shared.types.messages import ConversationMessage, ToolResultBlock, ToolUseBlock
 
 log = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ ToolExecutor = Callable[
 ]
 
 
-async def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
+def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
     """计算当前 resume 的缓存 key（JSON 序列化）"""
 
     def json_serializer(obj: Any) -> Any:
@@ -48,14 +48,14 @@ async def make_current_resume_info(sections: list[dict[str, Any]]) -> str:
             return obj.__dict__
         raise TypeError(f"Object of type {type(obj)} is not JSON serializable")
 
-    return json.dumps(sections, ensure_ascii=False, default=json_serializer)
+    return json.dumps(sections, ensure_ascii=False, default=json_serializer, indent=2)
 
 
-async def insert_resume_info(
-    messages: list,  # list[ConversationMessage]
+def insert_resume_info(
+    messages: list[ConversationMessage],
     resume_info: str,
     count: int,
-) -> list:  # list[ConversationMessage]
+) -> list[ConversationMessage]:
     """在最后一条消息中插入 resume_info"""
     from shared.types.messages import ConversationMessage, ToolResultBlock
 
@@ -68,7 +68,8 @@ async def insert_resume_info(
         return [
             *messages[:-1],
             ConversationMessage.from_user_text(
-                f"Current Resume Information: \n---\n{resume_info}\n---"
+                f"Below is the current resume information in JSON format:\n\n"
+                f"<resume_info>\n{resume_info}\n</resume_info>"
             ),
             messages[-1],
         ]
@@ -81,9 +82,10 @@ async def insert_resume_info(
         last_block = last_msg.content[-1]
         new_block = last_block.model_copy(
             update={
-                "content": json.dumps(
-                    {"content": last_block.content, "resume_info": resume_info},
-                    ensure_ascii=False,
+                "content": (
+                    f"{last_block.content}\n\n"
+                    f"Below is the current resume information in JSON format:\n\n"
+                    f"<resume_info>\n{resume_info}\n</resume_info>"
                 )
             }
         )
@@ -141,7 +143,7 @@ class AgentCore:
             state.count += 1
             formatter.reset()
 
-            resume_info = await make_current_resume_info(sections)
+            resume_info = make_current_resume_info(sections)
 
             if resume_info != state._cached_resume_info:
                 state._cached_resume_info = resume_info
@@ -165,7 +167,7 @@ class AgentCore:
             if was_compacted:
                 yield MessagesCompactedEvent()
 
-            state.messages = await insert_resume_info(
+            state.messages = insert_resume_info(
                 state.messages, resume_info, state.count
             )
 

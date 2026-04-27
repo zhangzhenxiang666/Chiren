@@ -94,7 +94,7 @@ export default function EditorPage() {
           </div>
           <button
             type="button"
-            onClick={() => id ? navigate(`/workspace/${id}`) : navigate('/workspace')}
+            onClick={() => id ? (resumeId ? navigate(`/workspace/${id}/resumes/${resumeId}/overview`) : navigate(`/workspace/${id}`)) : navigate('/workspace')}
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
             返回工作空间详情
@@ -112,7 +112,7 @@ export default function EditorPage() {
     );
   }
 
-  const backUrl = id ? `/workspace/${id}` : '/';
+  const backUrl = id ? (resumeId ? `/workspace/${id}/resumes/${resumeId}/overview` : `/workspace/${id}`) : '/';
 
   return (
     <div className="flex h-screen flex-col bg-muted">
