@@ -266,7 +266,11 @@ class OpenAICompatibleClient:
                 finish_reason = chunk_finish
 
             # Accumulate reasoning_content from thinking models (not shown to user)
-            reasoning_piece = getattr(delta, "reasoning_content", None) or ""
+            reasoning_piece = (
+                getattr(delta, "reasoning_content", None)
+                or getattr(delta, "reasoning", None)
+                or ""
+            )
             if reasoning_piece:
                 collected_reasoning += reasoning_piece
                 yield ApiTextDeltaEvent(text=reasoning_piece, is_think=True)

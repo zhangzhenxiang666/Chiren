@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import {
   Plus, ArrowLeft, Inbox,
-  LayoutGrid, FileSearch, Users, Clock,
+  LayoutGrid, FileSearch, Users,
   ChevronRight, Pencil, Trash2, Loader2
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -19,7 +19,7 @@ import { DraggableAIChatButton } from '../components/editor/DraggableAIChatButto
 import { useResumeStore } from '../stores/resume-store'
 import { useEditorStore } from '../stores/editor-store'
 import type { JdAnalysis } from '../lib/api'
-import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, getProviderConfig, createMatchTask, checkRunningMatchTask, updateResume, deleteWorkspace, exportPdf } from '../lib/api'
+import { fetchWorkspaces, fetchResumeSections, fetchResumeDetail, fetchJdAnalysisList, createSubResume, createSubResumeWithAI, getProviderConfig, createMatchTask, checkRunningMatchTask, updateResume, deleteWorkspace } from '../lib/api'
 import { markUnread, addNotificationTask } from '../lib/notification'
 import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal'
 import ScoreDetailModal from '../components/workspace/ScoreDetailModal'
@@ -29,12 +29,11 @@ import ResumeInsightsPanel from '../components/workspace/ResumeInsightsPanel'
 import OverviewTab from '../components/workspace/OverviewTab'
 import JDAnalysisTab from '../components/workspace/JDAnalysisTab'
 import InterviewTab from '../components/workspace/InterviewTab'
-import HistoryTab from '../components/workspace/HistoryTab'
 import { getScoreColorClass } from '../lib/resume-insights'
 
-type MainTab = 'overview' | 'jd' | 'interview' | 'history' | 'meta'
+type MainTab = 'overview' | 'jd' | 'interview' | 'meta'
 
-const VALID_TABS = new Set<string>(['overview', 'jd', 'interview', 'history', 'meta'])
+const VALID_TABS = new Set<string>(['overview', 'jd', 'interview', 'meta'])
 const DEFAULT_TAB: MainTab = 'overview'
 
 export default function WorkspaceDetail() {
@@ -315,28 +314,6 @@ export default function WorkspaceDetail() {
     [resumeAnalyses, selectedSubResumeId]
   )
 
-  const handleExportPdf = useCallback(async () => {
-    if (!workspace) return
-    try {
-      const container = document.getElementById('resume-preview-container')
-      if (!container) {
-        toast.error('预览容器未找到')
-        return
-      }
-      const html = container.innerHTML
-      const blob = await exportPdf(html)
-      const url = window.URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = `${workspace.title}.pdf`
-      a.click()
-      window.URL.revokeObjectURL(url)
-      toast.success('PDF 导出成功')
-    } catch (err: any) {
-      toast.error(err.message || 'PDF 导出失败')
-    }
-  }, [workspace])
-
   const handleScoreJD = useCallback(async () => {
     if (!selectedSubResume || !workspace) return
     try {
@@ -385,7 +362,7 @@ export default function WorkspaceDetail() {
     { id: 'jd', label: 'JD 分析', icon: <FileSearch className="w-3.5 h-3.5" /> },
     { id: 'interview', label: '面试管理', icon: <Users className="w-3.5 h-3.5" /> },
     { id: 'meta', label: '元数据', icon: <Pencil className="w-3.5 h-3.5" /> },
-    { id: 'history', label: '历史记录', icon: <Clock className="w-3.5 h-3.5" /> },
+
   ]
 
   if (wsLoading) {
@@ -527,11 +504,7 @@ export default function WorkspaceDetail() {
           </div>
 
           <div className="mt-3 flex-1 min-h-0 overflow-y-auto">
-            <ResumeInsightsPanel
-              sections={sections}
-              onEditResume={() => setIsEditing(true)}
-              onExportPdf={handleExportPdf}
-            />
+            <ResumeInsightsPanel sections={sections} />
           </div>
         </div>
 
@@ -602,6 +575,7 @@ export default function WorkspaceDetail() {
             {activeTab === 'overview' && (
               <OverviewTab
                 analyses={selectedAnalyses}
+                subResumeId={selectedSubResumeId || ''}
                 onViewInterview={() => {
                   if (selectedSubResumeId) {
                     navigate(`/workspace/${id}/resumes/${selectedSubResumeId}/interview`, { replace: true })
@@ -610,8 +584,9 @@ export default function WorkspaceDetail() {
               />
             )}
             {activeTab === 'jd' && <JDAnalysisTab analyses={selectedAnalyses} onStartScoring={handleScoreJD} />}
-            {activeTab === 'interview' && <InterviewTab />}
-            {activeTab === 'history' && <HistoryTab />}
+            {activeTab === 'interview' && selectedSubResumeId && (
+              <InterviewTab subResumeId={selectedSubResumeId} subResumeTitle={selectedSubResume?.title} />
+            )}
             {activeTab === 'meta' && selectedSubResume && (
               <div className="h-full flex flex-col">
                 <div className="grid grid-cols-2 gap-4 mb-4">

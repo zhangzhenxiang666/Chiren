@@ -9,14 +9,10 @@ import {
 
 interface ResumeInsightsPanelProps {
   sections: ResumeSection[]
-  onEditResume: () => void
-  onExportPdf: () => void
 }
 
 export default function ResumeInsightsPanel({
   sections,
-  onEditResume,
-  onExportPdf,
 }: ResumeInsightsPanelProps) {
   const healthResult = useMemo(() => calculateHealthScore(sections), [sections])
 
@@ -127,20 +123,6 @@ export default function ResumeInsightsPanel({
         </div>
       </div>
 
-      <div className="flex gap-2 pt-3 border-t border-border">
-        <button
-          onClick={onEditResume}
-          className="flex-1 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:text-foreground hover:border-border-hover transition-all"
-        >
-          编辑简历
-        </button>
-        <button
-          onClick={onExportPdf}
-          className="flex-1 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:text-foreground hover:border-border-hover transition-all"
-        >
-          导出 PDF
-        </button>
-      </div>
     </div>
   )
 }

@@ -13,6 +13,7 @@ from apps.conversation_message import router as conversation_message_router
 from apps.cover_letter import router as cover_letter_router
 from apps.export import router as export_router
 from apps.export.browser_manager import ensure_browser
+from apps.interview import router as interview_router
 from apps.jd_analysis import router as jd_analysis_router
 from apps.parser import router as parser_router
 from apps.resume import router as resume_router
@@ -60,6 +61,7 @@ app.include_router(jd_analysis_router)
 app.include_router(cover_letter_router)
 app.include_router(resume_assistant_router)
 app.include_router(conversation_message_router)
+app.include_router(interview_router)
 app.include_router(export_router)
 
 

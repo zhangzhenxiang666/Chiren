@@ -13,6 +13,10 @@ from pydantic import BaseModel
 from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
+from shared.types.interview import (
+    InterviewCollectionSchema,
+    InterviewRoundSchema,
+)
 from shared.types.jd_analysis import (
     JdRequirementItem,
     JobDescriptionAnalysisSchema,
@@ -652,4 +656,210 @@ class JobDescriptionAnalysis(PydanticMixin, Base):
             skill_matches=json.dumps(skill_matches, ensure_ascii=False),
             strengths=json.dumps(strengths, ensure_ascii=False),
             jd_requirements=json.dumps(jd_requirements, ensure_ascii=False),
+        )
+
+
+class InterviewCollection(PydanticMixin, Base):
+    """面试集合体数据库模型"""
+
+    __tablename__ = "interview_collections"
+
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        comment="面试集合唯一标识",
+    )
+    name: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+        comment="面试集合名称",
+    )
+    sub_resume_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("resumes.id"),
+        nullable=False,
+        index=True,
+        comment="关联的子简历ID",
+    )
+    status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="not_started",
+        comment="状态：not_started/in_progress/completed",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        comment="创建时间",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="更新时间",
+    )
+
+    rounds = relationship(
+        "InterviewRound",
+        back_populates="collection",
+        cascade="all, delete-orphan",
+        order_by="InterviewRound.sort_order",
+    )
+
+    def to_pydantic(self) -> InterviewCollectionSchema:
+        """转换为 Pydantic DTO"""
+        return InterviewCollectionSchema(
+            id=self.id,
+            name=self.name,
+            sub_resume_id=self.sub_resume_id,
+            status=self.status,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
+    @classmethod
+    def from_pydantic(cls, schema: InterviewCollectionSchema) -> InterviewCollection:
+        """从 Pydantic DTO 创建数据库模型"""
+        created = schema.created_at or utc_now()
+        updated = schema.updated_at or utc_now()
+        return cls(
+            id=schema.id,
+            name=schema.name,
+            sub_resume_id=schema.sub_resume_id,
+            status=schema.status,
+            created_at=created,
+            updated_at=updated,
+        )
+
+
+class InterviewRound(PydanticMixin, Base):
+    """面试轮次数据库模型"""
+
+    __tablename__ = "interview_rounds"
+
+    id: Mapped[str] = mapped_column(
+        String(36),
+        primary_key=True,
+        default=lambda: str(uuid.uuid4()),
+        comment="面试轮次ID，同时也是会话ID",
+    )
+    interview_collection_id: Mapped[str] = mapped_column(
+        String(36),
+        ForeignKey("interview_collections.id"),
+        nullable=False,
+        index=True,
+        comment="所属面试集合ID",
+    )
+    name: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+        comment="轮次名称，如'技术一面'",
+    )
+    interviewer_name: Mapped[str] = mapped_column(
+        String(100),
+        nullable=False,
+        comment="面试官名称",
+    )
+    interviewer_title: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+        default="",
+        comment="面试官头衔",
+    )
+    interviewer_bio: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+        comment="面试官简介",
+    )
+    question_style: Mapped[str] = mapped_column(
+        String(200),
+        nullable=False,
+        default="",
+        comment="提问风格",
+    )
+    assessment_dimensions: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="考察维度，JSON数组字符串",
+    )
+    personality_traits: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="[]",
+        comment="性格特征，JSON数组字符串",
+    )
+    status: Mapped[str] = mapped_column(
+        String(20),
+        nullable=False,
+        default="not_started",
+        comment="状态：not_started/in_progress/completed",
+    )
+    sort_order: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        comment="排序序号",
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        comment="创建时间",
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utc_now,
+        onupdate=utc_now,
+        comment="更新时间",
+    )
+
+    collection = relationship("InterviewCollection", back_populates="rounds")
+
+    def to_pydantic(self) -> InterviewRoundSchema:
+        """转换为 Pydantic DTO"""
+        return InterviewRoundSchema(
+            id=self.id,
+            interview_collection_id=self.interview_collection_id,
+            name=self.name,
+            interviewer_name=self.interviewer_name,
+            interviewer_title=self.interviewer_title,
+            interviewer_bio=self.interviewer_bio,
+            question_style=self.question_style,
+            assessment_dimensions=json.loads(self.assessment_dimensions),
+            personality_traits=json.loads(self.personality_traits),
+            status=self.status,
+            sort_order=self.sort_order,
+            created_at=self.created_at,
+            updated_at=self.updated_at,
+        )
+
+    @classmethod
+    def from_pydantic(cls, schema: InterviewRoundSchema) -> InterviewRound:
+        """从 Pydantic DTO 创建数据库模型"""
+        created = schema.created_at or utc_now()
+        updated = schema.updated_at or utc_now()
+        return cls(
+            id=schema.id,
+            interview_collection_id=schema.interview_collection_id,
+            name=schema.name,
+            interviewer_name=schema.interviewer_name,
+            interviewer_title=schema.interviewer_title,
+            interviewer_bio=schema.interviewer_bio,
+            question_style=schema.question_style,
+            assessment_dimensions=json.dumps(
+                schema.assessment_dimensions, ensure_ascii=False
+            ),
+            personality_traits=json.dumps(
+                schema.personality_traits, ensure_ascii=False
+            ),
+            status=schema.status,
+            sort_order=schema.sort_order,
+            created_at=created,
+            updated_at=updated,
         )

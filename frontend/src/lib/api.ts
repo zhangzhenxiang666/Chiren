@@ -2,6 +2,17 @@ import axios from 'axios';
 import type { Workspace, KeywordMatch, MissingKeyword, JdRequirement } from '../types/workspace';
 import type { WorkTask } from '../types/work';
 import type { ResumeSection } from '../types/resume';
+import type {
+  InterviewCollection,
+  InterviewCollectionDetail,
+  InterviewRound,
+  CreateInterviewCollectionParams,
+  CreateInterviewCollectionWithRoundsParams,
+  UpdateInterviewRoundParams,
+  UpdateRoundStatusParams,
+  BuiltInInterviewer,
+  BuiltInInterviewerType,
+} from '../types/interview';
 
 const api = axios.create({
   baseURL: 'http://localhost:8000',
@@ -467,4 +478,77 @@ export async function exportTxt(resumeId: string): Promise<Blob> {
 export async function exportJson(resumeId: string): Promise<Blob> {
   const { data } = await api.get(`/export/json/${resumeId}`, { responseType: 'blob' });
   return data;
+}
+
+export async function createInterviewCollection(
+  params: CreateInterviewCollectionParams,
+): Promise<InterviewCollection> {
+  const { data } = await api.post<InterviewCollection>('/interview/collection', params);
+  return data;
+}
+
+export async function listInterviewCollections(
+  subResumeId: string,
+): Promise<InterviewCollectionDetail[]> {
+  const { data } = await api.get<InterviewCollectionDetail[]>(
+    `/interview/collection/list/${subResumeId}`,
+  );
+  return data;
+}
+
+export async function getInterviewCollection(
+  id: string,
+): Promise<InterviewRound[]> {
+  const { data } = await api.get<InterviewRound[]>(
+    `/interview/collection/${id}`,
+  );
+  return data;
+}
+
+export async function deleteInterviewCollection(id: string): Promise<void> {
+  await api.delete('/interview/collection/delete', { params: { id } });
+}
+
+export async function createInterviewCollectionWithRounds(
+  params: CreateInterviewCollectionWithRoundsParams,
+): Promise<InterviewCollectionDetail> {
+  const { data } = await api.post<InterviewCollectionDetail>(
+    '/interview/collection/with-rounds',
+    params,
+  );
+  return data;
+}
+
+export async function updateInterviewRound(
+  data: UpdateInterviewRoundParams,
+): Promise<InterviewRound> {
+  const { data: res } = await api.put<InterviewRound>('/interview/round/update', data);
+  return res;
+}
+
+export async function updateInterviewRoundStatus(
+  params: UpdateRoundStatusParams,
+): Promise<InterviewRound> {
+  const { data } = await api.put<InterviewRound>('/interview/round/status', params);
+  return data;
+}
+
+export async function deleteInterviewRound(id: string): Promise<void> {
+  await api.delete('/interview/round/delete', { params: { id } });
+}
+
+export async function fetchBuiltInInterviewers(): Promise<BuiltInInterviewer[]> {
+  const { data } = await api.get<Array<Record<string, unknown>>>('/interview/built-in-interviewers');
+  return data.map((item) => ({
+    type: item.type as BuiltInInterviewerType,
+    name: item.name as string,
+    title: item.title as string,
+    roundName: (item.round_name ?? item.roundName) as string,
+    avatarText: (item.avatar_text ?? item.avatarText) as string,
+    avatarColor: (item.avatar_color ?? item.avatarColor) as string,
+    bio: item.bio as string,
+    questionStyle: (item.question_style ?? item.questionStyle) as string,
+    assessmentDimensions: (item.assessment_dimensions ?? item.assessmentDimensions) as string[],
+    personalityTraits: (item.personality_traits ?? item.personalityTraits) as string[],
+  }));
 }

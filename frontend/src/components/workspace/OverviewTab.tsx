@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useEffect } from 'react';
 import {
   FileText,
   Users,
@@ -10,14 +10,16 @@ import {
   Key,
   Pencil,
   Lightbulb,
-  Circle,
 } from 'lucide-react';
 import type { JdAnalysis } from '../../types/workspace';
 import { getScoreColorClass, fmtDateTime } from '../../lib/resume-insights';
 import { enrichJdAnalysis } from '../../lib/jd-analysis-adapter';
+import { useInterviewStore } from '@/stores/interview-store';
+import type { InterviewStatus } from '@/types/interview';
 
 interface OverviewTabProps {
   analyses: JdAnalysis[];
+  subResumeId: string;
   onViewInterview: () => void;
 }
 
@@ -33,7 +35,7 @@ const getSuggestionIcon = (type: string): any => {
   }
 };
 
-export default function OverviewTab({ analyses, onViewInterview }: OverviewTabProps) {
+export default function OverviewTab({ analyses, subResumeId, onViewInterview }: OverviewTabProps) {
   const currentAnalysis = useMemo(() => {
     if (!analyses.length) return null;
     const latest = analyses[0];
@@ -79,6 +81,35 @@ export default function OverviewTab({ analyses, onViewInterview }: OverviewTabPr
   }, [analyses]);
 
   const scoreColor = currentAnalysis ? getScoreColorClass(currentAnalysis.overallScore) : null;
+
+  const interviewCollections = useInterviewStore((s) => s.collections);
+  const fetchCollections = useInterviewStore((s) => s.fetchCollections);
+
+  useEffect(() => {
+    if (subResumeId) {
+      fetchCollections(subResumeId);
+    }
+  }, [subResumeId, fetchCollections]);
+
+
+
+  const getStatusColor = (status: InterviewStatus): string => {
+    const colors: Record<InterviewStatus, string> = {
+      completed: 'text-green-400 bg-green-500/10 border border-green-500/20',
+      in_progress: 'text-blue-400 bg-blue-500/10 border border-blue-500/20',
+      not_started: 'text-muted-foreground bg-muted/30 border border-border',
+    };
+    return colors[status] || colors.not_started;
+  };
+
+  const getStatusLabel = (status: InterviewStatus): string => {
+    const labels: Record<InterviewStatus, string> = {
+      completed: '已完成',
+      in_progress: '进行中',
+      not_started: '待开始',
+    };
+    return labels[status] || status;
+  };
 
   return (
     <div className="flex gap-3 fade-in min-w-0">
@@ -253,94 +284,57 @@ export default function OverviewTab({ analyses, onViewInterview }: OverviewTabPr
       </div>
 
       <div className="w-[320px] shrink-0 space-y-3">
+        {interviewCollections.length > 0 ? (
           <div className="rounded-lg border border-border p-4 bg-card">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-muted-foreground" />
-              面试方案
-            </h3>
-            <button
-              onClick={onViewInterview}
-              className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground transition-all"
-            >
-              查看全部
-              <ChevronRight className="w-2.5 h-2.5" />
-            </button>
-          </div>
-
-          <div className="space-y-1.5">
-            <div className="rounded-lg border border-blue-500/30 bg-blue-500/5 p-2.5 cursor-pointer" onClick={onViewInterview}>
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-medium">阿里技术面试</span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/10 text-blue-400">进行中</span>
-              </div>
-              <div className="text-[9px] text-muted-foreground">2/4 · 2 轮面试</div>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-xs font-semibold flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                面试方案
+              </h3>
+              <button
+                onClick={onViewInterview}
+                className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground transition-all"
+              >
+                查看全部
+                <ChevronRight className="w-2.5 h-2.5" />
+              </button>
             </div>
-            <div className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-white/[0.02] transition-all" onClick={onViewInterview}>
-              <div className="flex items-center justify-between mb-0.5">
-                <span className="text-[10px] font-medium">字节后端面试</span>
-                <span className="px-1.5 py-0.5 rounded text-[9px] bg-green-500/10 text-green-400">已完成</span>
-              </div>
-              <div className="text-[9px] text-muted-foreground">4/4 · 4 轮面试</div>
-            </div>
-          </div>
-        </div>
 
-        <div className="rounded-lg border border-border p-4 bg-card">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold">阿里技术面试</h3>
-            <span className="px-1.5 py-0.5 rounded text-[9px] bg-blue-500/10 text-blue-400 border border-blue-500/20">进行中</span>
-          </div>
-
-          <div className="mb-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] text-muted-foreground">进度</span>
-              <span className="text-[10px] font-medium">2/4</span>
-            </div>
-            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-              <div className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full" style={{ width: '50%' }} />
+            <div className="space-y-2">
+              {interviewCollections.map((col) => {
+                const completedCount = col.rounds.filter((r) => r.status === 'completed').length;
+                return (
+                  <div
+                    key={col.id}
+                    className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-white/[0.02] transition-all"
+                    onClick={onViewInterview}
+                  >
+                    <div className="flex items-center justify-between mb-0.5">
+                      <span className="text-[10px] font-medium">{col.name}</span>
+                      <span className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(col.status)}`}>
+                        {getStatusLabel(col.status)}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between text-[9px] text-muted-foreground">
+                      <span>
+                        {completedCount}/{col.rounds.length} · {col.rounds.length} 轮面试
+                      </span>
+                      <span>{fmtDateTime(col.createdAt)}</span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
-
-          <div className="mb-3 p-2.5 rounded-lg bg-blue-500/5 border border-blue-500/10">
-            <div className="text-[9px] text-muted-foreground mb-0.5">下一轮</div>
-            <div className="text-xs font-medium">技术二面</div>
-            <div className="text-[9px] text-muted-foreground">05-27 10:00</div>
+        ) : (
+          <div className="rounded-lg border border-border p-4 bg-card">
+            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground gap-2">
+              <Users className="w-8 h-8 opacity-20" />
+              <p className="text-xs">暂无面试方案</p>
+              <p className="text-[10px] opacity-60">前往面试模块创建方案</p>
+            </div>
           </div>
-
-          <div className="relative space-y-3 pl-5">
-            <div className="absolute left-[11px] top-2 bottom-2 w-px bg-border" />
-            {[
-              { name: 'HR 初面', status: 'completed', interviewer: 'HRBP', time: '05-24 09:30' },
-              { name: '技术一面', status: 'completed', interviewer: '后端工程师', time: '05-25 14:00' },
-              { name: '技术二面', status: 'in_progress', interviewer: '架构师', time: '05-27 10:00' },
-              { name: '主管面', status: 'pending', interviewer: '部门主管', time: '待定' },
-            ].map((round, idx) => (
-              <div key={idx} className="relative">
-                {round.status === 'completed' && (
-                  <CheckCircle2 className="absolute left-[-18px] top-0.5 w-2.5 h-2.5 text-green-500" strokeWidth={2} />
-                )}
-                {round.status === 'in_progress' && (
-                  <div className="absolute left-[-20px] top-0 w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
-                )}
-                {round.status === 'pending' && (
-                  <Circle className="absolute left-[-18px] top-0.5 w-2.5 h-2.5 text-border" strokeWidth={2} />
-                )}
-                <div className="flex items-center justify-between mb-0.5">
-                  <span className="text-xs font-medium">{round.name}</span>
-                  <span className={`px-1.5 py-0.5 rounded text-[9px] ${
-                    round.status === 'completed' ? 'bg-green-500/10 text-green-400' :
-                    round.status === 'in_progress' ? 'bg-blue-500/10 text-blue-400' :
-                    'bg-muted/30 text-muted-foreground'
-                  }`}>
-                    {round.status === 'completed' ? '已完成' : round.status === 'in_progress' ? '面试中' : '待面试'}
-                  </span>
-                </div>
-                <div className="text-[9px] text-muted-foreground">{round.interviewer} · {round.time}</div>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
