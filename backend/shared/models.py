@@ -805,6 +805,12 @@ class InterviewRound(PydanticMixin, Base):
         default=0,
         comment="排序序号",
     )
+    meta_info: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=None,
+        comment="轮次元数据，包含面试摘要等",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -835,6 +841,7 @@ class InterviewRound(PydanticMixin, Base):
             personality_traits=json.loads(self.personality_traits),
             status=self.status,
             sort_order=self.sort_order,
+            meta_info=self.meta_info,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )
@@ -860,6 +867,7 @@ class InterviewRound(PydanticMixin, Base):
             ),
             status=schema.status,
             sort_order=schema.sort_order,
+            meta_info=schema.meta_info,
             created_at=created,
             updated_at=updated,
         )

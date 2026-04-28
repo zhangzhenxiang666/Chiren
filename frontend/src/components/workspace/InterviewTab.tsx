@@ -1,14 +1,18 @@
-import { useEffect, useState } from 'react'
-import { CheckCircle2, Circle, Plus, Play } from 'lucide-react'
+import { useEffect, useState, useCallback } from 'react'
+import { CheckCircle2, Circle, Plus, Play, ChevronDown, ChevronRight, Pencil } from 'lucide-react'
 import { toast } from 'sonner'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useInterviewStore } from '@/stores/interview-store'
 import type { InterviewCollectionDetail, InterviewRound, InterviewRoundDraft } from '@/types/interview'
 import CreateInterviewModal from './interview/CreateInterviewModal'
+import AddRoundModal from './interview/AddRoundModal'
 import { Timeline, TimelineItem } from '@/components/ui/Timeline'
 
 interface InterviewTabProps {
   subResumeId: string
   subResumeTitle?: string
+  selectedCollectionId?: string
+  onSelectCollection?: (collectionId: string) => void
 }
 
 function getStatusColor(status: string): string {
@@ -41,9 +45,28 @@ function RoundStatusIcon({ status }: { status: string }) {
 
 function CollectionCard({
   collection,
+  workspaceId,
+  subResumeId,
+  isSelected,
+  isExpanded,
+  onSelect,
+  onToggleExpand,
 }: {
   collection: InterviewCollectionDetail
+  workspaceId: string
+  subResumeId: string
+  isSelected: boolean
+  isExpanded: boolean
+  onSelect: (collectionId: string) => void
+  onToggleExpand: (collectionId: string) => void
 }) {
+  const navigate = useNavigate()
+  const createRound = useInterviewStore((s) => s.createRound)
+  const updateRound = useInterviewStore((s) => s.updateRound)
+
+  const [showAddRound, setShowAddRound] = useState(false)
+  const [editingRound, setEditingRound] = useState<InterviewRound | null>(null)
+
   const sortedRounds = [...collection.rounds].sort((a, b) => a.sortOrder - b.sortOrder)
   const completedCount = sortedRounds.filter((r) => r.status === 'completed').length
   const progressPercent = sortedRounds.length > 0
@@ -59,11 +82,54 @@ function CollectionCard({
     return !hasInProgress
   }
 
+  const handleStartRound = (e: React.MouseEvent, round: InterviewRound) => {
+    e.stopPropagation()
+    navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`)
+  }
+
+  const handleEnterInterview = (e: React.MouseEvent, round: InterviewRound) => {
+    e.stopPropagation()
+    navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`)
+  }
+
+  const handleToggleExpand = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleExpand(collection.id)
+  }
+
+  const handleHeaderClick = () => {
+    onSelect(collection.id)
+  }
+
+  const nextSortOrder = sortedRounds.length > 0
+    ? Math.max(...sortedRounds.map((r) => r.sortOrder)) + 1
+    : 0
+
+  const canAddRound = collection.status !== 'completed'
+
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
-      <div className="p-4 border-b border-border">
+    <div
+      className={`rounded-xl border border-border bg-card overflow-hidden transition-all ${
+        isSelected ? 'border-pink-500/40 bg-pink-500/[0.03]' : 'hover:border-border-hover'
+      }`}
+    >
+      <div
+        onClick={handleHeaderClick}
+        className={`p-4 cursor-pointer ${isExpanded ? 'border-b border-border' : ''}`}
+      >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleToggleExpand}
+              className="p-0.5 rounded hover:bg-white/10 transition-colors text-muted-foreground"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronRight className="w-3.5 h-3.5" />
+              )}
+            </button>
             <h3 className="text-sm font-semibold">{collection.name}</h3>
             <span className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(collection.status)}`}>
               {getStatusLabel(collection.status)}
@@ -83,78 +149,148 @@ function CollectionCard({
         </div>
       </div>
 
-      <div className="p-4">
-        {sortedRounds.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-4">暂无面试轮次，点击上方按钮添加</p>
-        ) : (
-          <Timeline>
-            {sortedRounds.map((round, index) => (
-              <TimelineItem key={round.id} icon={<RoundStatusIcon status={round.status} />}>
-                <div className="flex items-center justify-between mb-1">
-                  <div>
-                    <span className="text-xs font-medium">{round.name}</span>
-                    {round.interviewerTitle && (
-                      <span className="text-[10px] text-muted-foreground ml-2">
-                        {round.interviewerName} · {round.interviewerTitle}
+      {isExpanded && (
+        <div className="p-4">
+          {sortedRounds.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-4">暂无面试轮次</p>
+          ) : (
+            <Timeline>
+              {sortedRounds.map((round, index) => (
+                <TimelineItem key={round.id} icon={<RoundStatusIcon status={round.status} />}>
+                  <div className="flex items-center justify-between mb-1">
+                    <div>
+                      <span className="text-xs font-medium">{round.name}</span>
+                      {round.interviewerTitle && (
+                        <span className="text-[10px] text-muted-foreground ml-2">
+                          {round.interviewerName} · {round.interviewerTitle}
+                        </span>
+                      )}
+                      {!round.interviewerTitle && round.interviewerName && (
+                        <span className="text-[10px] text-muted-foreground ml-2">
+                          {round.interviewerName}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {round.status === 'not_started' && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingRound(round)
+                          }}
+                          className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                          title="编辑轮次"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                      )}
+                      <span className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(round.status)}`}>
+                        {getStatusLabel(round.status)}
                       </span>
+                    </div>
+                  </div>
+
+                  {round.interviewerBio && (
+                    <div className="text-[10px] text-muted-foreground mb-1 line-clamp-1">
+                      {round.interviewerBio}
+                    </div>
+                  )}
+
+                  <div className="flex items-center gap-2 mt-2">
+                    {canStartRound(round, index) && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleStartRound(e, round)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+                      >
+                        <Play className="w-2.5 h-2.5" />
+                        开始面试
+                      </button>
                     )}
-                    {!round.interviewerTitle && round.interviewerName && (
-                      <span className="text-[10px] text-muted-foreground ml-2">
-                        {round.interviewerName}
-                      </span>
+                    {round.status === 'completed' && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`);
+                        }}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.02] transition-colors"
+                      >
+                        查看详情
+                      </button>
+                    )}
+                    {round.status === 'in_progress' && (
+                      <button
+                        type="button"
+                        onClick={(e) => handleEnterInterview(e, round)}
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                      >
+                        <Play className="w-2.5 h-2.5" />
+                        进入面试
+                      </button>
                     )}
                   </div>
-                  <span className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(round.status)}`}>
-                    {getStatusLabel(round.status)}
-                  </span>
-                </div>
+                </TimelineItem>
+              ))}
+            </Timeline>
+          )}
 
-                {round.interviewerBio && (
-                  <div className="text-[10px] text-muted-foreground mb-1 line-clamp-1">
-                    {round.interviewerBio}
-                  </div>
-                )}
+          {canAddRound && (
+            <button
+              type="button"
+              onClick={() => setShowAddRound(true)}
+              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-[11px] text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors w-full justify-center"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              添加轮次
+            </button>
+          )}
+        </div>
+      )}
 
-                <div className="flex items-center gap-2 mt-2">
-                  {canStartRound(round, index) && (
-                    <button
-                      type="button"
-                      onClick={() => toast.info('开始面试功能开发中，敬请期待')}
-                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
-                    >
-                      <Play className="w-2.5 h-2.5" />
-                      开始面试
-                    </button>
-                  )}
-                  {round.status === 'completed' && (
-                    <button
-                      type="button"
-                      onClick={() => toast.info('面试详情功能开发中，敬请期待')}
-                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.02] transition-colors"
-                    >
-                      查看详情
-                    </button>
-                  )}
-                  {round.status === 'in_progress' && (
-                    <button
-                      type="button"
-                      onClick={() => toast.info('面试功能开发中，敬请期待')}
-                      className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
-                    >
-                      进入面试
-                    </button>
-                  )}
-                </div>
-              </TimelineItem>
-            ))}
-          </Timeline>
-        )}
-      </div>
+      <AddRoundModal
+        open={showAddRound}
+        onClose={() => setShowAddRound(false)}
+        interviewCollectionId={collection.id}
+        nextSortOrder={nextSortOrder}
+        existingRounds={collection.rounds}
+        onSubmit={async (params) => {
+          await createRound(params)
+          toast.success('轮次添加成功')
+        }}
+      />
+
+      <AddRoundModal
+        open={!!editingRound}
+        onClose={() => setEditingRound(null)}
+        interviewCollectionId={collection.id}
+        nextSortOrder={nextSortOrder}
+        initialData={editingRound}
+        existingRounds={collection.rounds}
+        onSubmit={async (params) => {
+          if (params.id) {
+            await updateRound({
+              id: params.id,
+              name: params.name,
+              interviewerName: params.interviewerName,
+              interviewerTitle: params.interviewerTitle,
+              interviewerBio: params.interviewerBio,
+              questionStyle: params.questionStyle,
+              assessmentDimensions: params.assessmentDimensions,
+              personalityTraits: params.personalityTraits,
+              sortOrder: params.sortOrder,
+            })
+            toast.success('轮次修改成功')
+          }
+        }}
+      />
     </div>
   )
 }
 
-export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTitle }: InterviewTabProps) {
+export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTitle, selectedCollectionId, onSelectCollection }: InterviewTabProps) {
+  const { id: workspaceId } = useParams<{ id: string }>()
   const collections = useInterviewStore((s) => s.collections)
   const loading = useInterviewStore((s) => s.loading)
   const error = useInterviewStore((s) => s.error)
@@ -163,6 +299,19 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
   const clearError = useInterviewStore((s) => s.clearError)
 
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+
+  const handleToggleExpand = useCallback((collectionId: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(collectionId)) {
+        next.delete(collectionId)
+      } else {
+        next.add(collectionId)
+      }
+      return next
+    })
+  }, [])
 
   useEffect(() => {
     fetchCollections(subResumeId)
@@ -175,6 +324,16 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
     }
   }, [error, clearError])
 
+  useEffect(() => {
+    if (selectedCollectionId) {
+      setExpandedIds((prev) => {
+        const next = new Set(prev)
+        next.add(selectedCollectionId)
+        return next
+      })
+    }
+  }, [selectedCollectionId])
+
   if (loading && collections.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
@@ -184,8 +343,8 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-4">
+    <div className="flex flex-col h-full">
+      <div className="flex items-center justify-between mb-4 shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-xs font-semibold">面试方案</span>
           <span className="text-[10px] text-muted-foreground">
@@ -214,11 +373,17 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
           </button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
           {collections.map((collection) => (
             <CollectionCard
               key={collection.id}
               collection={collection}
+              workspaceId={workspaceId || ''}
+              subResumeId={subResumeId}
+              isSelected={collection.id === selectedCollectionId}
+              isExpanded={expandedIds.has(collection.id)}
+              onSelect={(id) => onSelectCollection?.(id)}
+              onToggleExpand={handleToggleExpand}
             />
           ))}
         </div>

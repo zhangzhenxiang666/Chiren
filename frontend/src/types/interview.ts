@@ -21,6 +21,7 @@ export interface InterviewRound {
   personalityTraits: string[];
   status: InterviewStatus;
   sortOrder: number;
+  metaInfo: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -93,4 +94,16 @@ export interface UpdateInterviewRoundParams {
 export interface UpdateRoundStatusParams {
   roundId: string;
   status: InterviewStatus;
+}
+
+export type InterviewChatAction = 'start' | 'answer' | 'skip' | 'hint';
+
+export interface InterviewChatParams {
+  roundId: string;
+  action: InterviewChatAction;
+  content?: string;
+  model: string;
+  type: string;
+  apiKey: string;
+  baseUrl: string;
 }

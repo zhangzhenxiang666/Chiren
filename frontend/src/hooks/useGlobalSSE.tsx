@@ -66,12 +66,22 @@ export function useGlobalSSE() {
   useEffect(() => {
     const connectTask = (task: WorkTask) => {
       // 去重：已连接的任务跳过
-      if (sourcesRef.current.has(task.id)) return
+      if (sourcesRef.current.has(task.id)) {
+        console.log(`[SSE] Skip (duplicate): ${task.taskType} (${task.id})`)
+        return
+      }
       // 状态过滤：只连接 running 状态的任务
-      if (task.status !== 'running') return
+      if (task.status !== 'running') {
+        console.log(`[SSE] Skip (status=${task.status}): ${task.taskType} (${task.id})`)
+        return
+      }
       // Handler 过滤：只连接有注册 handler 的 taskType
-      if (!getRegisteredHandler(task.taskType)) return
+      if (!getRegisteredHandler(task.taskType)) {
+        console.log(`[SSE] Skip (no handler): ${task.taskType} (${task.id})`)
+        return
+      }
 
+      console.log(`[SSE] Creating connection: ${task.taskType} (${task.id})`)
       const eventSource = new EventSource(`http://localhost:8000/work/stream/${task.id}`)
 
       eventSource.addEventListener('status', (e: MessageEvent) => {
@@ -101,6 +111,10 @@ export function useGlobalSSE() {
         markUnread()
       })
 
+      eventSource.addEventListener('open', () => {
+        console.log(`[SSE] Connected: ${task.taskType} (${task.id})`)
+      })
+
       eventSource.addEventListener('result', (e: MessageEvent) => {
         const payload = JSON.parse(e.data)
         updateNotificationTask(task.id, { status: 'success' })
@@ -121,6 +135,7 @@ export function useGlobalSSE() {
       })
 
       eventSource.addEventListener('error', () => {
+        console.error(`[SSE] Connection error: ${task.taskType} (${task.id}), readyState=${eventSource.readyState}`)
         eventSource.close()
         sourcesRef.current.delete(task.id)
       })

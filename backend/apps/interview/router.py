@@ -1,31 +1,51 @@
 """面试模块路由"""
 
 import json
+import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Body, Depends, HTTPException, Query
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Body,
+    Depends,
+    HTTPException,
+    Path,
+    Query,
+)
 from pydantic import BaseModel, ConfigDict, alias_generators
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from sse_starlette import EventSourceResponse
 
+from apps.interview.chat import interview_chat
 from apps.interview.schemas import (
     BUILT_IN_INTERVIEWERS,
     BuiltInInterviewerResponse,
     BuiltInInterviewerType,
+    InterviewChatRequest,
     InterviewCollectionCreate,
     InterviewCollectionCreateWithRounds,
+    InterviewRoundCreate,
     InterviewRoundUpdate,
 )
 from apps.interview.service import (
     resolve_interviewer_profile,
     update_collection_status_by_rounds,
+    validate_round_config_update,
+    validate_round_creation,
     validate_round_status_change,
     validate_sub_resume,
 )
+from apps.interview.task_service import run_round_summary_task
+from shared.api import get_client
 from shared.database import get_session
-from shared.models import InterviewCollection, InterviewRound
+from shared.models import BaseWork, InterviewCollection, InterviewRound, Resume
+from shared.task_state import create_task
 from shared.types.interview import InterviewCollectionSchema, InterviewRoundSchema
+from shared.types.task import TaskStatus, TaskType
+from shared.types.work import TaskIdResponse
 
 router = APIRouter(prefix="/interview", tags=["interview"])
 
@@ -159,7 +179,7 @@ async def list_collections(
 
 @router.get("/collection/{collection_id}", summary="获取面试集合详情")
 async def get_collection(
-    collection_id: str,
+    collection_id: Annotated[str, Path(description="面试集合ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> list[InterviewRoundSchema]:
     stmt = (
@@ -176,9 +196,60 @@ async def get_collection(
     ]
 
 
+@router.post("/round", summary="创建面试轮次")
+async def create_round(
+    request: Annotated[InterviewRoundCreate, Body(description="创建面试轮次请求参数")],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> InterviewRoundSchema:
+    """为现有面试集合添加一个新轮次。
+
+    已完成的集合不允许添加轮次。
+    新轮次默认放到最后（sort_order 自动递增）。
+    """
+    collection = await validate_round_creation(request.interview_collection_id, db)
+
+    if request.sort_order is None:
+        stmt = (
+            select(InterviewRound.sort_order)
+            .where(
+                InterviewRound.interview_collection_id
+                == request.interview_collection_id
+            )
+            .order_by(InterviewRound.sort_order.desc())
+        )
+        result = await db.execute(stmt)
+        max_order = result.scalar_one_or_none()
+        request.sort_order = (max_order or -1) + 1
+
+    round_obj = InterviewRound(
+        interview_collection_id=request.interview_collection_id,
+        name=request.name,
+        interviewer_name=request.interviewer_name,
+        interviewer_title=request.interviewer_title or "",
+        interviewer_bio=request.interviewer_bio or "",
+        question_style=request.question_style or "",
+        assessment_dimensions=json.dumps(
+            request.assessment_dimensions or [], ensure_ascii=False
+        ),
+        personality_traits=json.dumps(
+            request.personality_traits or [], ensure_ascii=False
+        ),
+        sort_order=request.sort_order,
+    )
+    db.add(round_obj)
+    await db.flush()
+
+    if collection.status == "completed":
+        collection.status = "not_started"
+
+    await db.commit()
+    await db.refresh(round_obj)
+    return round_obj.to_pydantic()
+
+
 @router.delete("/collection/delete", summary="删除面试集合")
 async def delete_collection(
-    id: Annotated[str, Query()],
+    id: Annotated[str, Query(description="面试集合ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ):
     stmt = select(InterviewCollection).where(InterviewCollection.id == id)
@@ -193,14 +264,15 @@ async def delete_collection(
 
 @router.put("/round/update", summary="更新面试轮次配置")
 async def update_round(
-    request: Annotated[InterviewRoundUpdate, Body()],
+    request: Annotated[InterviewRoundUpdate, Body(description="面试轮次更新请求参数")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> InterviewRoundSchema:
-    stmt = select(InterviewRound).where(InterviewRound.id == request.id)
-    result = await db.execute(stmt)
-    round_obj = result.scalar_one_or_none()
-    if round_obj is None:
-        raise HTTPException(status_code=404, detail="面试轮次不存在")
+    """更新面试轮次的配置信息。
+
+    仅允许修改 status 为 not_started 的轮次，
+    防止面试进行中或已完成后改变规则导致数据不一致。
+    """
+    round_obj = await validate_round_config_update(request.id, db)
 
     if request.name is not None:
         round_obj.name = request.name
@@ -230,7 +302,9 @@ async def update_round(
 
 @router.put("/round/status", summary="更新面试轮次状态")
 async def update_round_status(
-    request: Annotated[UpdateRoundStatusRequest, Body()],
+    request: Annotated[
+        UpdateRoundStatusRequest, Body(description="面试轮次状态更新请求参数")
+    ],
     db: Annotated[AsyncSession, Depends(get_session)],
 ) -> InterviewRoundSchema:
     # First find the round to get its collection_id
@@ -260,9 +334,67 @@ async def update_round_status(
     return round_obj.to_pydantic()
 
 
+@router.post("/round/{round_id}/chat", summary="面试对话接口")
+async def round_chat(
+    round_id: Annotated[str, Path(description="面试轮次ID")],
+    request: Annotated[InterviewChatRequest, Body(description="面试对话请求参数")],
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> EventSourceResponse:
+    stmt = select(InterviewRound).where(InterviewRound.id == round_id)
+    result = await db.execute(stmt)
+    round = result.scalar_one_or_none()
+    if round is None:
+        raise HTTPException(status_code=404, detail="面试轮次不存在")
+
+    if request.action == "start":
+        collection_stmt = select(InterviewCollection).where(
+            InterviewCollection.id == round.interview_collection_id
+        )
+        collection_result = await db.execute(collection_stmt)
+        collection = collection_result.scalar_one_or_none()
+        if collection is None:
+            raise HTTPException(status_code=404, detail="面试集合不存在")
+
+        resume_stmt = select(Resume).where(Resume.id == collection.sub_resume_id)
+        resume_result = await db.execute(resume_stmt)
+        resume = resume_result.scalar_one_or_none()
+        if (
+            resume is None
+            or not resume.meta_info
+            or not resume.meta_info.get("job_description")
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="子简历缺少岗位描述(JD)，无法开始面试",
+            )
+
+        await validate_round_status_change(
+            collection_id=round.interview_collection_id,
+            round_id=round_id,
+            target_status="in_progress",
+            db=db,
+        )
+        round.status = "in_progress"
+        await db.flush()
+        await update_collection_status_by_rounds(round.interview_collection_id, db)
+        await db.commit()
+    elif round.status != "in_progress":
+        raise HTTPException(
+            status_code=400,
+            detail="面试尚未开始或已结束",
+        )
+
+    async def generate():
+        api_client = get_client(request.type, request.api_key, request.base_url)
+        async for sse in interview_chat(round, request, api_client, db):
+            yield sse
+
+    return EventSourceResponse(generate())
+
+
 @router.delete("/round/delete", summary="删除面试轮次")
 async def delete_round(
-    id: Annotated[str, Query()],
+    id: Annotated[str, Query(description="面试轮次ID")],
     db: Annotated[AsyncSession, Depends(get_session)],
 ):
     stmt = select(InterviewRound).where(InterviewRound.id == id)
@@ -273,3 +405,76 @@ async def delete_round(
     await db.delete(round_obj)
     await db.commit()
     return None
+
+
+class RegenerateSummaryRequest(BaseModel):
+    """手动重新生成面试摘要请求"""
+
+    model_config = ConfigDict(
+        alias_generator=alias_generators.to_camel,
+        populate_by_name=True,
+    )
+
+    type: str
+    api_key: str
+    base_url: str | None = None
+    model: str
+
+
+@router.post(
+    "/round/{round_id}/regenerate-summary",
+    summary="手动重新生成面试轮次摘要",
+)
+async def regenerate_summary(
+    round_id: Annotated[str, Path(description="面试轮次ID")],
+    request: Annotated[RegenerateSummaryRequest, Body(description="摘要生成请求参数")],
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> TaskIdResponse:
+    """为已完成的面试轮次手动触发摘要生成，用于重试失败的摘要任务。
+
+    要求轮次状态为 completed。
+    """
+    stmt = select(InterviewRound).where(InterviewRound.id == round_id)
+    result = await db.execute(stmt)
+    round_obj = result.scalar_one_or_none()
+    if round_obj is None:
+        raise HTTPException(status_code=404, detail="面试轮次不存在")
+    if round_obj.status != "completed":
+        raise HTTPException(status_code=400, detail="只有已完成的面试轮次才能生成摘要")
+
+    existing = await db.execute(
+        select(BaseWork).where(
+            BaseWork.task_type == TaskType.INTERVIEW_SUMMARY.value,
+            BaseWork.status == TaskStatus.RUNNING.value,
+            BaseWork.meta_info["round_id"].as_string() == round_id,
+        )
+    )
+    existing_task = existing.scalar_one_or_none()
+    if existing_task is not None:
+        return TaskIdResponse(task_id=existing_task.id)
+
+    task_id = str(uuid.uuid4())
+
+    work = BaseWork(
+        id=task_id,
+        task_type=TaskType.INTERVIEW_SUMMARY.value,
+        status=TaskStatus.PENDING.value,
+        meta_info={"round_id": round_id},
+    )
+    db.add(work)
+    await db.commit()
+    create_task(task_id, TaskType.INTERVIEW_SUMMARY)
+
+    client = get_client(request.type, request.api_key, request.base_url)
+
+    background_tasks.add_task(
+        run_round_summary_task,
+        db,
+        task_id,
+        round_id,
+        client,
+        request.model,
+    )
+
+    return TaskIdResponse(task_id=task_id)

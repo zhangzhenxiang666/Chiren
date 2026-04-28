@@ -26,17 +26,23 @@ import { enrichJdAnalysisList } from '../../lib/jd-analysis-adapter';
 
 interface JDAnalysisTabProps {
   analyses: JdAnalysis[];
+  selectedId?: number;
+  onSelectAnalysis?: (analysisId: number) => void;
   onStartScoring?: () => void;
 }
 
 type KeywordTab = 'matched' | 'partial' | 'missing';
 
-export default function JDAnalysisTab({ analyses, onStartScoring }: JDAnalysisTabProps) {
+export default function JDAnalysisTab({ analyses, selectedId: propSelectedId, onSelectAnalysis, onStartScoring }: JDAnalysisTabProps) {
   const enrichedList = useMemo(() => enrichJdAnalysisList(analyses), [analyses]);
-  const [selectedId, setSelectedId] = useState<number>(enrichedList[0]?.id ?? 0);
+  const effectiveSelectedId = propSelectedId ?? enrichedList[0]?.id ?? 0;
   const [activeKwTab, setActiveKwTab] = useState<KeywordTab>('matched');
 
-  const record = useMemo(() => enrichedList.find((a) => a.id === selectedId) || enrichedList[0] || null, [enrichedList, selectedId]);
+  const record = useMemo(() => enrichedList.find((a) => a.id === effectiveSelectedId) || enrichedList[0] || null, [enrichedList, effectiveSelectedId]);
+
+  const handleSelectId = (id: number) => {
+    onSelectAnalysis?.(id);
+  };
 
   if (!record) {
     return (
@@ -213,12 +219,12 @@ export default function JDAnalysisTab({ analyses, onStartScoring }: JDAnalysisTa
         <div className="space-y-2">
           {enrichedList.map((a) => {
             const sc = getScoreColorClass(a.overallScore);
-            const isActive = a.id === selectedId;
+            const isActive = a.id === effectiveSelectedId;
             const counts = getRecordCounts(a);
             return (
               <div
                 key={a.id}
-                onClick={() => setSelectedId(a.id)}
+                onClick={() => handleSelectId(a.id)}
                 className={`p-3 rounded-lg border cursor-pointer transition-all ${
                   isActive
                     ? 'border-pink-500/30 bg-pink-500/5'

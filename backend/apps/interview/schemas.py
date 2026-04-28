@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import Field
 
@@ -214,6 +215,26 @@ class InterviewRoundDraft(StrictBaseModel):
     personality_traits: list[str] = Field(default_factory=list, description="性格特征")
 
 
+class InterviewRoundCreate(StrictBaseModel):
+    """创建单个面试轮次请求。
+
+    为现有面试集合动态添加轮次，新轮次默认放到最后。
+    若集合状态为 completed，添加后自动回退为 not_started。
+    """
+
+    interview_collection_id: str = Field(description="所属面试集合ID")
+    name: str = Field(description="轮次名称，如'技术一面'")
+    interviewer_name: str = Field(default="", description="面试官名称")
+    interviewer_title: str = Field(default="", description="面试官头衔")
+    interviewer_bio: str = Field(default="", description="面试官简介")
+    question_style: str = Field(default="", description="提问风格")
+    assessment_dimensions: list[str] = Field(
+        default_factory=list, description="考察维度"
+    )
+    personality_traits: list[str] = Field(default_factory=list, description="性格特征")
+    sort_order: int | None = Field(default=None, description="排序序号，不传则放到最后")
+
+
 class InterviewCollectionCreateWithRounds(StrictBaseModel):
     """创建面试集合（含多个轮次）请求"""
 
@@ -223,3 +244,17 @@ class InterviewCollectionCreateWithRounds(StrictBaseModel):
         default_factory=list,
         description="面试轮次列表，按 sort_order 顺序排列",
     )
+
+
+class InterviewChatRequest(StrictBaseModel):
+    action: Literal["start", "answer", "skip", "hint"] = Field(
+        description="对话操作类型：start=开始面试, answer=回答问题, skip=跳过, hint=请求提示"
+    )
+    content: str = Field(
+        default="",
+        description="候选人回答内容，仅 action=answer 时需要",
+    )
+    model: str = Field(description="AI 模型名称")
+    type: str = Field(default="anthropic", description="LLM 供应商类型")
+    api_key: str = Field(description="API 密钥")
+    base_url: str | None = Field(default=None, description="API 地址")

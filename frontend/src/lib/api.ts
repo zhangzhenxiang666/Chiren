@@ -12,6 +12,7 @@ import type {
   UpdateRoundStatusParams,
   BuiltInInterviewer,
   BuiltInInterviewerType,
+  InterviewChatParams,
 } from '../types/interview';
 
 const api = axios.create({
@@ -454,6 +455,17 @@ export async function checkRunningMatchTask(resumeId: string): Promise<TaskIdRes
   return data.length > 0 ? { taskId: data[0].id } : null;
 }
 
+export async function checkRunningInterviewSummaryTask(roundId: string): Promise<TaskIdResponse | null> {
+  const { data } = await api.get<WorkTask[]>('/work/list', {
+    params: {
+      task_type: 'interview_summary',
+      status: 'running',
+      meta_contains: JSON.stringify({ round_id: roundId }),
+    },
+  });
+  return data.length > 0 ? { taskId: data[0].id } : null;
+}
+
 export async function createMatchTask(params: CreateMatchTaskParams): Promise<TaskIdResponse> {
   const { data } = await api.post<TaskIdResponse>('/jd-analysis/match', {
     resume_id: params.resume_id,
@@ -519,6 +531,13 @@ export async function createInterviewCollectionWithRounds(
   return data;
 }
 
+export async function createInterviewRound(
+  params: CreateInterviewRoundParams,
+): Promise<InterviewRound> {
+  const { data } = await api.post<InterviewRound>('/interview/round', params);
+  return data;
+}
+
 export async function updateInterviewRound(
   data: UpdateInterviewRoundParams,
 ): Promise<InterviewRound> {
@@ -537,6 +556,29 @@ export async function deleteInterviewRound(id: string): Promise<void> {
   await api.delete('/interview/round/delete', { params: { id } });
 }
 
+export interface RegenerateSummaryResponse {
+  taskId: string;
+}
+
+export interface RegenerateSummaryParams {
+  roundId: string;
+  type: string;
+  apiKey: string;
+  baseUrl?: string;
+  model: string;
+}
+
+export async function regenerateRoundSummary(
+  params: RegenerateSummaryParams,
+): Promise<RegenerateSummaryResponse> {
+  const { roundId, type, apiKey, baseUrl, model } = params;
+  const { data } = await api.post<RegenerateSummaryResponse>(
+    `/interview/round/${roundId}/regenerate-summary`,
+    { type, apiKey, baseUrl, model },
+  );
+  return data;
+}
+
 export async function fetchBuiltInInterviewers(): Promise<BuiltInInterviewer[]> {
   const { data } = await api.get<Array<Record<string, unknown>>>('/interview/built-in-interviewers');
   return data.map((item) => ({
@@ -551,4 +593,82 @@ export async function fetchBuiltInInterviewers(): Promise<BuiltInInterviewer[]> 
     assessmentDimensions: (item.assessment_dimensions ?? item.assessmentDimensions) as string[],
     personalityTraits: (item.personality_traits ?? item.personalityTraits) as string[],
   }));
+}
+
+export function streamInterviewChat(
+  params: InterviewChatParams,
+  onEvent: (event: SSEEvent) => void,
+): { cleanup: () => void } {
+  let aborted = false;
+
+  const cleanup = () => {
+    aborted = true;
+  };
+
+  const baseURL = api.defaults.baseURL || 'http://localhost:8000';
+
+  fetch(`${baseURL}/interview/round/${params.roundId}/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: params.action,
+      content: params.content || '',
+      model: params.model,
+      type: params.type,
+      apiKey: params.apiKey,
+      baseUrl: params.baseUrl,
+    }),
+  }).then(async (response) => {
+    if (!response.ok) {
+      let errorMsg = `HTTP ${response.status}`;
+      try {
+        const errBody = await response.json();
+        errorMsg = errBody.detail || errorMsg;
+      } catch { void 0 }
+      onEvent({ type: 'error', data: { message: errorMsg } });
+      return;
+    }
+    if (!response.body) {
+      onEvent({ type: 'error', data: { message: 'Response body is null' } });
+      return;
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let currentEventType = '';
+
+    while (true) {
+      if (aborted) break;
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (line.startsWith('event:')) {
+          currentEventType = line.slice(6).trim();
+        } else if (line.startsWith('data:')) {
+          const data = line.slice(5).trim();
+          if (currentEventType && data) {
+            try {
+              const eventData = JSON.parse(data);
+              onEvent({ type: currentEventType as SSEEventType, data: eventData });
+            } catch {
+              console.error('Failed to parse SSE data:', data);
+            }
+          }
+          currentEventType = '';
+        }
+      }
+    }
+  }).catch((err) => {
+    if (!aborted) {
+      onEvent({ type: 'error', data: { message: err.message } });
+    }
+  });
+
+  return { cleanup };
 }

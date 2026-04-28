@@ -18,6 +18,8 @@ interface CustomInterviewerModalProps {
   onSubmit: (profile: InterviewerProfile) => void
 }
 
+const REQUIRED_MSG = '此项为必填'
+
 export default function CustomInterviewerModal({
   open,
   onClose,
@@ -31,6 +33,7 @@ export default function CustomInterviewerModal({
   const [questionStyle, setQuestionStyle] = useState('')
   const [assessmentDimensions, setAssessmentDimensions] = useState('')
   const [personalityTraits, setPersonalityTraits] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   useEffect(() => {
     if (open && initialValues) {
@@ -48,14 +51,32 @@ export default function CustomInterviewerModal({
       setAssessmentDimensions('')
       setPersonalityTraits('')
     }
+    setErrors({})
   }, [open, initialValues])
-
-  const isValid = name.trim() && title.trim() && bio.trim() && questionStyle.trim() && assessmentDimensions.trim()
 
   if (!open) return null
 
+  const validate = (): boolean => {
+    const newErrors: Record<string, string> = {}
+    if (!name.trim()) newErrors.name = REQUIRED_MSG
+    if (!title.trim()) newErrors.title = REQUIRED_MSG
+    if (!bio.trim()) newErrors.bio = REQUIRED_MSG
+    if (!questionStyle.trim()) newErrors.questionStyle = REQUIRED_MSG
+    if (!assessmentDimensions.trim()) newErrors.assessmentDimensions = REQUIRED_MSG
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const clearError = (field: string) => {
+    setErrors((prev) => {
+      const next = { ...prev }
+      delete next[field]
+      return next
+    })
+  }
+
   const handleSubmit = () => {
-    if (!isValid) return
+    if (!validate()) return
     onSubmit({
       name: name.trim(),
       title: title.trim(),
@@ -78,11 +99,16 @@ export default function CustomInterviewerModal({
     setPersonalityTraits('')
   }
 
+  const inputCls = (fieldKey: string) =>
+    `w-full px-3 py-2 bg-background border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 ${
+      errors[fieldKey] ? 'border-red-500/60' : 'border-foreground/10'
+    }`
+
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-md mx-4 shadow-2xl max-h-[85vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-5">
+      <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[85vh]">
+        <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
           <h2 className="text-sm font-semibold">{isEdit ? '编辑面试官' : '自定义面试官'}</h2>
           <button
             type="button"
@@ -93,19 +119,20 @@ export default function CustomInterviewerModal({
           </button>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">
-              面试官名称 <span className="text-red-400">*</span>
+              面试官名称 <span className="text-pink-400">*</span>
             </label>
             <input
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => { setName(e.target.value); clearError('name') }}
               placeholder="如：产品总监"
-              className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50"
+              className={inputCls('name')}
               autoFocus
             />
+            {errors.name && <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -115,10 +142,11 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              onChange={(e) => { setTitle(e.target.value); clearError('title') }}
               placeholder="如：产品副总裁"
-              className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50"
+              className={inputCls('title')}
             />
+            {errors.title && <p className="text-[10px] text-red-400 mt-1">{errors.title}</p>}
           </div>
 
           <div>
@@ -127,11 +155,12 @@ export default function CustomInterviewerModal({
             </label>
             <textarea
               value={bio}
-              onChange={(e) => setBio(e.target.value)}
+              onChange={(e) => { setBio(e.target.value); clearError('bio') }}
               placeholder="描述面试官的背景..."
               rows={2}
-              className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 resize-none"
+              className={`${inputCls('bio')} resize-none`}
             />
+            {errors.bio && <p className="text-[10px] text-red-400 mt-1">{errors.bio}</p>}
           </div>
 
           <div>
@@ -141,10 +170,11 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={questionStyle}
-              onChange={(e) => setQuestionStyle(e.target.value)}
+              onChange={(e) => { setQuestionStyle(e.target.value); clearError('questionStyle') }}
               placeholder="描述提问方式..."
-              className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50"
+              className={inputCls('questionStyle')}
             />
+            {errors.questionStyle && <p className="text-[10px] text-red-400 mt-1">{errors.questionStyle}</p>}
           </div>
 
           <div>
@@ -154,15 +184,16 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={assessmentDimensions}
-              onChange={(e) => setAssessmentDimensions(e.target.value)}
+              onChange={(e) => { setAssessmentDimensions(e.target.value); clearError('assessmentDimensions') }}
               placeholder="如：产品思维, 数据分析, 用户洞察"
-              className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50"
+              className={inputCls('assessmentDimensions')}
             />
+            {errors.assessmentDimensions && <p className="text-[10px] text-red-400 mt-1">{errors.assessmentDimensions}</p>}
           </div>
 
           <div>
             <label className="text-xs text-muted-foreground mb-1.5 block">
-              性格特征
+              性格特征（逗号分隔）
             </label>
             <input
               type="text"
@@ -174,14 +205,15 @@ export default function CustomInterviewerModal({
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={!isValid}
-          className="w-full mt-6 px-4 py-2 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-           {isEdit ? '保存' : '添加'}
-        </button>
+        <div className="p-5 border-t border-border shrink-0">
+          <button
+            type="button"
+            onClick={handleSubmit}
+            className="w-full px-4 py-2 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 transition-colors"
+          >
+            {isEdit ? '保存' : '添加'}
+          </button>
+        </div>
       </div>
     </div>
   )

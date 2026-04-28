@@ -5,11 +5,13 @@ import type {
   InterviewStatus,
   CreateInterviewCollectionParams,
   CreateInterviewCollectionWithRoundsParams,
+  CreateInterviewRoundParams,
   UpdateInterviewRoundParams,
 } from '@/types/interview';
 import {
   createInterviewCollection,
   createInterviewCollectionWithRounds,
+  createInterviewRound,
   listInterviewCollections,
   getInterviewCollection,
   deleteInterviewCollection,
@@ -94,6 +96,7 @@ interface InterviewState {
   createCollection: (params: CreateInterviewCollectionParams) => Promise<InterviewCollectionDetail>;
   createCollectionWithRounds: (params: CreateInterviewCollectionWithRoundsParams) => Promise<InterviewCollectionDetail>;
   deleteCollection: (id: string) => Promise<void>;
+  createRound: (params: CreateInterviewRoundParams) => Promise<InterviewRound>;
   updateRound: (params: UpdateInterviewRoundParams) => Promise<InterviewRound>;
   deleteRound: (id: string) => Promise<void>;
   updateRoundStatus: (collectionId: string, roundId: string, newStatus: InterviewStatus) => Promise<InterviewRound>;
@@ -213,6 +216,30 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return collectionWithRounds;
     } catch (err) {
       set({ error: err instanceof Error ? err.message : 'Failed to create interview collection with rounds' });
+      throw err;
+    }
+  },
+
+  createRound: async (params: CreateInterviewRoundParams) => {
+    set({ error: null });
+    try {
+      const created = await createInterviewRound(params);
+      set((state) => ({
+        collections: state.collections.map((c) => {
+          if (c.id !== params.interviewCollectionId) return c;
+          const updatedRounds = [...c.rounds, created].sort(
+            (a, b) => a.sortOrder - b.sortOrder
+          );
+          return {
+            ...c,
+            rounds: updatedRounds,
+            status: computeCollectionStatus({ ...c, rounds: updatedRounds }),
+          };
+        }),
+      }));
+      return created;
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : 'Failed to create interview round' });
       throw err;
     }
   },

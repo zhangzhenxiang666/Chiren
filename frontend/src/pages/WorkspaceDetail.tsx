@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import {
   Plus, ArrowLeft, Inbox,
   LayoutGrid, FileSearch, Users,
@@ -39,6 +39,8 @@ const DEFAULT_TAB: MainTab = 'overview'
 export default function WorkspaceDetail() {
   const navigate = useNavigate()
   const { id, resumeId: urlResumeId, tab: urlTab } = useParams<{ id: string; resumeId?: string; tab?: string }>()
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activateParam = searchParams.get('activate')
   const [workspace, setWorkspace] = useState<Workspace | null>(null)
   const [wsLoading, setWsLoading] = useState(true)
   const [sections, setSections] = useState<ResumeSection[]>([])
@@ -60,6 +62,17 @@ export default function WorkspaceDetail() {
   const [isSubmittingMeta, setIsSubmittingMeta] = useState(false)
 
   const activeTab: MainTab = VALID_TABS.has(urlTab || '') ? (urlTab as MainTab) : DEFAULT_TAB
+
+  const selectedAnalysisId = activeTab === 'jd' && activateParam ? Number(activateParam) : undefined
+  const selectedCollectionId = activeTab === 'interview' ? activateParam || undefined : undefined
+
+  const handleSelectAnalysis = useCallback((analysisId: number) => {
+    setSearchParams({ activate: String(analysisId) }, { replace: true })
+  }, [setSearchParams])
+
+  const handleSelectCollection = useCallback((collectionId: string) => {
+    setSearchParams({ activate: collectionId }, { replace: true })
+  }, [setSearchParams])
 
   const selectedSubResumeId = urlResumeId
     ? (subResumes.find((s) => s.id === urlResumeId) ? urlResumeId : null)
@@ -583,9 +596,21 @@ export default function WorkspaceDetail() {
                 }}
               />
             )}
-            {activeTab === 'jd' && <JDAnalysisTab analyses={selectedAnalyses} onStartScoring={handleScoreJD} />}
+            {activeTab === 'jd' && (
+              <JDAnalysisTab
+                analyses={selectedAnalyses}
+                selectedId={selectedAnalysisId}
+                onSelectAnalysis={handleSelectAnalysis}
+                onStartScoring={handleScoreJD}
+              />
+            )}
             {activeTab === 'interview' && selectedSubResumeId && (
-              <InterviewTab subResumeId={selectedSubResumeId} subResumeTitle={selectedSubResume?.title} />
+              <InterviewTab
+                subResumeId={selectedSubResumeId}
+                subResumeTitle={selectedSubResume?.title}
+                selectedCollectionId={selectedCollectionId}
+                onSelectCollection={handleSelectCollection}
+              />
             )}
             {activeTab === 'meta' && selectedSubResume && (
               <div className="h-full flex flex-col">

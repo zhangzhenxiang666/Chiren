@@ -52,10 +52,8 @@
 
 import { useState } from 'react'
 import { Outlet } from 'react-router-dom'
-import { Toaster } from 'sonner'
 import { toast } from 'sonner'
 import Sidebar from './Sidebar'
-import { useGlobalSSE } from '../../hooks/useGlobalSSE'
 import { registerSSEHandler } from '../../lib/notification'
 
 /**
@@ -96,12 +94,20 @@ registerSSEHandler('jd_score', {
   onError: () => 'JD 匹配评分失败',
 })
 
+registerSSEHandler('interview_summary', {
+  onSuccess: (task) => {
+    toast.success(
+      <div className="flex flex-col gap-1">
+        <span className="font-medium text-sm">面试总结已生成</span>
+        <span className="text-xs text-muted-foreground">「{task.metaInfo?.title || ''}」</span>
+      </div>,
+    )
+  },
+  onError: () => '面试总结生成失败',
+})
+
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false)
-
-  // 挂载全局 SSE 管理器 — 监听所有 running 状态的 SSE 任务
-  // 页面/组件通过 registerSSEHandler() 注册自定义 handler
-  useGlobalSSE()
 
   return (
     <div className="h-screen w-full flex bg-background">
@@ -109,16 +115,6 @@ export default function MainLayout() {
       <main className="flex-1 min-h-0 min-w-0 p-6">
         <Outlet />
       </main>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          style: {
-            background: 'hsl(var(--card))',
-            border: '1px solid hsl(var(--border))',
-            color: 'hsl(var(--card-foreground))',
-          },
-        }}
-      />
     </div>
   )
 }

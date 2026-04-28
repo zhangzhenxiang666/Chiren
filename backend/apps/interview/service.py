@@ -63,6 +63,105 @@ async def validate_sub_resume(sub_resume_id: str, db: AsyncSession) -> None:
         )
 
 
+async def validate_round_creation(
+    collection_id: str,
+    db: AsyncSession,
+) -> InterviewCollection:
+    """校验添加轮次的合法性。
+
+    已完成的面试集合不允许再添加轮次，防止修改已结束的历史记录。
+
+    Args:
+        collection_id: 所属面试集合 ID
+        db: 数据库会话
+
+    Returns:
+        校验通过则返回集合对象
+
+    Raises:
+        HTTPException(404): 集合不存在
+        HTTPException(400): 集合已完成，不允许添加轮次
+    """
+    stmt = select(InterviewCollection).where(InterviewCollection.id == collection_id)
+    result = await db.execute(stmt)
+    collection = result.scalar_one_or_none()
+    if collection is None:
+        raise HTTPException(status_code=404, detail=f"面试集合不存在: {collection_id}")
+    if collection.status == "completed":
+        raise HTTPException(
+            status_code=400,
+            detail="该面试方案已完成，不允许再添加轮次",
+        )
+    return collection
+
+
+async def validate_round_config_update(
+    round_id: str,
+    db: AsyncSession,
+) -> InterviewRound:
+    """校验轮次配置更新的合法性。
+
+    只有 not_started 状态的轮次允许修改配置，
+    防止面试进行中或已完成后改变规则导致数据不一致。
+
+    Args:
+        round_id: 轮次 ID
+        db: 数据库会话
+
+    Returns:
+        校验通过则返回该轮次对象
+
+    Raises:
+        HTTPException(404): 轮次不存在
+        HTTPException(400): 轮次状态不允许修改配置
+    """
+    stmt = select(InterviewRound).where(InterviewRound.id == round_id)
+    result = await db.execute(stmt)
+    round_obj = result.scalar_one_or_none()
+    if round_obj is None:
+        raise HTTPException(status_code=404, detail=f"面试轮次不存在: {round_id}")
+
+    if round_obj.status != "not_started":
+        status_label = {
+            "in_progress": "进行中",
+            "completed": "已完成",
+        }.get(round_obj.status, round_obj.status)
+        raise HTTPException(
+            status_code=400,
+            detail=f"轮次状态为「{status_label}」，不允许修改配置",
+        )
+    return round_obj
+
+
+async def validate_round_reorder(
+    collection_id: str,
+    db: AsyncSession,
+) -> None:
+    """校验调整轮次顺序的合法性。
+
+    当集合中存在任意 in_progress 的轮次时，禁止调整顺序，
+    防止破坏顺序依赖导致状态流转异常。
+
+    Args:
+        collection_id: 面试集合 ID
+        db: 数据库会话
+
+    Raises:
+        HTTPException(400): 存在进行中的轮次
+    """
+    stmt = select(InterviewRound).where(
+        InterviewRound.interview_collection_id == collection_id,
+        InterviewRound.status == "in_progress",
+    )
+    result = await db.execute(stmt)
+    in_progress_round = result.scalar_one_or_none()
+    if in_progress_round is not None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"轮次「{in_progress_round.name}」正在进行中，无法调整顺序",
+        )
+
+
 async def validate_round_status_change(
     collection_id: str,
     round_id: str,

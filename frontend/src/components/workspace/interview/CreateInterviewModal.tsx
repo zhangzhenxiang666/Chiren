@@ -196,8 +196,7 @@ export default function CreateInterviewModal({
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="absolute inset-0 bg-black/60" onClick={handleClose} />
         <div className="relative bg-card border border-border rounded-xl w-full max-w-3xl mx-4 shadow-2xl flex flex-col h-[560px] max-h-[85vh]">
-          {/* Header */}
-          <div className="flex items-center justify-between p-5 border-b border-border">
+          <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
             <h2 className="text-sm font-semibold">新建面试方案</h2>
             <button
               type="button"
@@ -208,7 +207,6 @@ export default function CreateInterviewModal({
             </button>
           </div>
 
-          {/* Body */}
           <div className="flex-1 overflow-y-auto p-5 space-y-5">
             {/* Title input */}
             <div>
@@ -257,46 +255,49 @@ export default function CreateInterviewModal({
                             : 'border-border bg-card hover:border-foreground/20 hover:bg-white/[0.02]'
                         }`}
                       >
-                        <div className="absolute -top-1.5 -left-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                          <span
-                            role="button"
-                            tabIndex={0}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleEditInterviewer(interviewer)
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
-                                e.stopPropagation()
-                                handleEditInterviewer(interviewer)
-                              }
-                            }}
-                            className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-sm hover:bg-blue-600 transition-colors cursor-pointer"
-                            title="编辑"
-                          >
-                            <Pencil className="w-2.5 h-2.5" />
-                          </span>
-                          {!interviewer.isBuiltIn && (
+                        {/* Hover action buttons */}
+                        {!isSelected && (
+                          <div className="absolute -top-1.5 -left-1.5 flex gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10">
                             <span
                               role="button"
                               tabIndex={0}
                               onClick={(e) => {
                                 e.stopPropagation()
-                                handleDeleteInterviewer(interviewer.id)
+                                handleEditInterviewer(interviewer)
                               }}
                               onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                   e.stopPropagation()
-                                  handleDeleteInterviewer(interviewer.id)
+                                  handleEditInterviewer(interviewer)
                                 }
                               }}
-                              className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors cursor-pointer"
-                              title="删除"
+                              className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-sm hover:bg-blue-600 transition-colors cursor-pointer"
+                              title="编辑"
                             >
-                              <X className="w-2.5 h-2.5" />
+                              <Pencil className="w-2.5 h-2.5" />
                             </span>
-                          )}
-                        </div>
+                            {!interviewer.isBuiltIn && (
+                              <span
+                                role="button"
+                                tabIndex={0}
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleDeleteInterviewer(interviewer.id)
+                                }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') {
+                                    e.stopPropagation()
+                                    handleDeleteInterviewer(interviewer.id)
+                                  }
+                                }}
+                                className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors cursor-pointer"
+                                title="删除"
+                              >
+                                <X className="w-2.5 h-2.5" />
+                              </span>
+                            )}
+                          </div>
+                        )}
                         {/* Order badge */}
                         {isSelected && (
                           <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-pink-500 text-white text-[9px] font-bold flex items-center justify-center shadow-sm z-10">
@@ -305,17 +306,23 @@ export default function CreateInterviewModal({
                         )}
                         {/* Avatar */}
                         <div
-                          className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0"
+                          className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 ${
+                            isSelected ? 'opacity-80' : ''
+                          }`}
                           style={{ backgroundColor: interviewer.avatarColor }}
                         >
                           {interviewer.avatarText}
                         </div>
                         {/* Name */}
-                        <span className="text-[11px] font-medium text-foreground leading-tight text-center line-clamp-1 w-full">
+                        <span className={`text-[11px] font-medium leading-tight text-center line-clamp-1 w-full ${
+                          isSelected ? 'text-pink-400' : 'text-foreground'
+                        }`}>
                           {interviewer.name}
                         </span>
                         {/* Title */}
-                        <span className="text-[9px] text-muted-foreground leading-tight text-center line-clamp-1 w-full">
+                        <span className={`text-[9px] leading-tight text-center line-clamp-1 w-full ${
+                          isSelected ? 'text-pink-400/70' : 'text-muted-foreground'
+                        }`}>
                           {interviewer.title}
                         </span>
                       </button>
@@ -359,8 +366,7 @@ export default function CreateInterviewModal({
             )}
           </div>
 
-          {/* Footer */}
-          <div className="p-5 border-t border-border">
+          <div className="p-5 border-t border-border shrink-0">
             <button
               type="button"
               onClick={handleSubmit}

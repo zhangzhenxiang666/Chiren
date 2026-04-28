@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
 from pydantic import Field
 
@@ -40,5 +41,9 @@ class InterviewRoundSchema(StrictBaseModel):
         description="状态：not_started/in_progress/completed",
     )
     sort_order: int = Field(default=0, description="排序序号")
+    meta_info: dict[str, Any] | None = Field(
+        default=None,
+        description="轮次元数据，包含面试摘要等",
+    )
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="更新时间")
