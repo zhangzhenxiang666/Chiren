@@ -1,28 +1,34 @@
-import { useEffect, useState } from 'react'
-import { X, Plus, Pencil } from 'lucide-react'
-import { fetchBuiltInInterviewers } from '@/lib/api'
-import type { BuiltInInterviewer, BuiltInInterviewerType, InterviewRoundDraft } from '@/types/interview'
-import CustomInterviewerModal, { type InterviewerProfile } from './CustomInterviewerModal'
+import { useEffect, useState } from "react";
+import { X, Plus, Pencil } from "lucide-react";
+import { fetchBuiltInInterviewers } from "@/lib/api";
+import type {
+  BuiltInInterviewer,
+  BuiltInInterviewerType,
+  InterviewRoundDraft,
+} from "@/types/interview";
+import CustomInterviewerModal, {
+  type InterviewerProfile,
+} from "./CustomInterviewerModal";
 
 interface SelectedInterviewer {
-  id: string
-  name: string
-  title: string
-  roundName: string
-  avatarText: string
-  avatarColor: string
-  bio: string
-  questionStyle: string
-  assessmentDimensions: string[]
-  personalityTraits: string[]
-  interviewerType?: BuiltInInterviewerType
-  isBuiltIn: boolean
+  id: string;
+  name: string;
+  title: string;
+  roundName: string;
+  avatarText: string;
+  avatarColor: string;
+  bio: string;
+  questionStyle: string;
+  assessmentDimensions: string[];
+  personalityTraits: string[];
+  interviewerType?: BuiltInInterviewerType;
+  isBuiltIn: boolean;
 }
 
 interface CreateInterviewModalProps {
-  open: boolean
-  onClose: () => void
-  onSubmit: (name: string, rounds: InterviewRoundDraft[]) => Promise<void>
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (name: string, rounds: InterviewRoundDraft[]) => Promise<void>;
 }
 
 export default function CreateInterviewModal({
@@ -30,70 +36,77 @@ export default function CreateInterviewModal({
   onClose,
   onSubmit,
 }: CreateInterviewModalProps) {
-  const [name, setName] = useState('')
-  const [builtInInterviewers, setBuiltInInterviewers] = useState<BuiltInInterviewer[]>([])
-  const [customInterviewers, setCustomInterviewers] = useState<SelectedInterviewer[]>([])
-  const [selectedIds, setSelectedIds] = useState<string[]>([])
-  const [showCustomModal, setShowCustomModal] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [submitting, setSubmitting] = useState(false)
-  const [overrides, setOverrides] = useState<Record<string, Partial<SelectedInterviewer>>>({})
-  const [editingInterviewer, setEditingInterviewer] = useState<SelectedInterviewer | null>(null)
+  const [name, setName] = useState("");
+  const [builtInInterviewers, setBuiltInInterviewers] = useState<
+    BuiltInInterviewer[]
+  >([]);
+  const [customInterviewers, setCustomInterviewers] = useState<
+    SelectedInterviewer[]
+  >([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [overrides, setOverrides] = useState<
+    Record<string, Partial<SelectedInterviewer>>
+  >({});
+  const [editingInterviewer, setEditingInterviewer] =
+    useState<SelectedInterviewer | null>(null);
 
   useEffect(() => {
-    if (!open) return
-    setLoading(true)
+    if (!open) return;
+    setLoading(true);
     fetchBuiltInInterviewers()
       .then((data) => setBuiltInInterviewers(data))
       .catch(() => setBuiltInInterviewers([]))
-      .finally(() => setLoading(false))
-  }, [open])
+      .finally(() => setLoading(false));
+  }, [open]);
 
   // Reset state when modal closes
   const handleClose = () => {
-    setName('')
-    setSelectedIds([])
-    setCustomInterviewers([])
-    setOverrides({})
-    setEditingInterviewer(null)
-    onClose()
-  }
+    setName("");
+    setSelectedIds([]);
+    setCustomInterviewers([]);
+    setOverrides({});
+    setEditingInterviewer(null);
+    onClose();
+  };
 
   const handleSelectInterviewer = (id: string) => {
     setSelectedIds((prev) => {
       if (prev.includes(id)) {
-        return prev.filter((i) => i !== id)
+        return prev.filter((i) => i !== id);
       }
-      return [...prev, id]
-    })
-  }
+      return [...prev, id];
+    });
+  };
 
   const handleAddCustomInterviewer = (profile: InterviewerProfile) => {
-    const customId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+    const customId = `custom-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     const newInterviewer: SelectedInterviewer = {
       id: customId,
       name: profile.name,
       title: profile.title,
       roundName: `${profile.name}面试`,
       avatarText: profile.name.charAt(0),
-      avatarColor: '#6366f1',
+      avatarColor: "#6366f1",
       bio: profile.bio,
       questionStyle: profile.questionStyle,
       assessmentDimensions: profile.assessmentDimensions,
       personalityTraits: profile.personalityTraits,
       isBuiltIn: false,
-    }
-    setCustomInterviewers((prev) => [...prev, newInterviewer])
-    setSelectedIds((prev) => [...prev, customId])
-    setShowCustomModal(false)
-  }
+    };
+    setCustomInterviewers((prev) => [...prev, newInterviewer]);
+    setSelectedIds((prev) => [...prev, customId]);
+    setShowCustomModal(false);
+  };
 
   const handleEditInterviewer = (interviewer: SelectedInterviewer) => {
-    setEditingInterviewer(interviewer)
-  }
+    setEditingInterviewer(interviewer);
+  };
 
   const handleSaveEdit = (profile: InterviewerProfile) => {
-    if (!editingInterviewer) return
+    if (!editingInterviewer) return;
     if (editingInterviewer.isBuiltIn) {
       setOverrides((prev) => ({
         ...prev,
@@ -107,7 +120,7 @@ export default function CreateInterviewModal({
           roundName: `${profile.name}面试`,
           avatarText: profile.name.charAt(0),
         },
-      }))
+      }));
     } else {
       setCustomInterviewers((prev) =>
         prev.map((ci) =>
@@ -123,21 +136,21 @@ export default function CreateInterviewModal({
                 roundName: `${profile.name}面试`,
                 avatarText: profile.name.charAt(0),
               }
-            : ci
-        )
-      )
+            : ci,
+        ),
+      );
     }
-    setEditingInterviewer(null)
-  }
+    setEditingInterviewer(null);
+  };
 
   const handleDeleteInterviewer = (id: string) => {
-    setCustomInterviewers((prev) => prev.filter((ci) => ci.id !== id))
-    setSelectedIds((prev) => prev.filter((sid) => sid !== id))
-  }
+    setCustomInterviewers((prev) => prev.filter((ci) => ci.id !== id));
+    setSelectedIds((prev) => prev.filter((sid) => sid !== id));
+  };
 
   const allInterviewers: SelectedInterviewer[] = [
     ...builtInInterviewers.map((bi) => {
-      const override = overrides[bi.type]
+      const override = overrides[bi.type];
       return {
         id: bi.type,
         name: override?.name ?? bi.name,
@@ -147,49 +160,52 @@ export default function CreateInterviewModal({
         avatarColor: bi.avatarColor,
         bio: override?.bio ?? bi.bio,
         questionStyle: override?.questionStyle ?? bi.questionStyle,
-        assessmentDimensions: override?.assessmentDimensions ?? bi.assessmentDimensions,
+        assessmentDimensions:
+          override?.assessmentDimensions ?? bi.assessmentDimensions,
         personalityTraits: override?.personalityTraits ?? bi.personalityTraits,
         interviewerType: bi.type,
         isBuiltIn: true,
-      }
+      };
     }),
     ...customInterviewers,
-  ]
+  ];
 
-  const isValid = name.trim().length > 0 && selectedIds.length > 0
+  const isValid = name.trim().length > 0 && selectedIds.length > 0;
 
   const handleSubmit = async () => {
-    if (!isValid || submitting) return
-    setSubmitting(true)
+    if (!isValid || submitting) return;
+    setSubmitting(true);
     try {
       const rounds: InterviewRoundDraft[] = selectedIds.map((id) => {
-        const interviewer = allInterviewers.find((i) => i.id === id)!
+        const interviewer = allInterviewers.find((i) => i.id === id)!;
         const roundName = interviewer.isBuiltIn
           ? interviewer.roundName
-          : `${interviewer.name}面试`
+          : `${interviewer.name}面试`;
         return {
           name: roundName,
           interviewerName: interviewer.name,
           interviewerTitle: interviewer.title || undefined,
           interviewerBio: interviewer.bio || undefined,
           questionStyle: interviewer.questionStyle || undefined,
-          assessmentDimensions: interviewer.assessmentDimensions.length > 0
-            ? interviewer.assessmentDimensions
-            : undefined,
-          personalityTraits: interviewer.personalityTraits.length > 0
-            ? interviewer.personalityTraits
-            : undefined,
+          assessmentDimensions:
+            interviewer.assessmentDimensions.length > 0
+              ? interviewer.assessmentDimensions
+              : undefined,
+          personalityTraits:
+            interviewer.personalityTraits.length > 0
+              ? interviewer.personalityTraits
+              : undefined,
           interviewerType: interviewer.interviewerType,
-        }
-      })
-      await onSubmit(name.trim(), rounds)
-      handleClose()
+        };
+      });
+      await onSubmit(name.trim(), rounds);
+      handleClose();
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <>
@@ -239,10 +255,10 @@ export default function CreateInterviewModal({
               ) : (
                 <div className="flex gap-2.5 overflow-x-auto py-2 -mx-1 px-1 scrollbar-thin">
                   {allInterviewers.map((interviewer) => {
-                    const isSelected = selectedIds.includes(interviewer.id)
+                    const isSelected = selectedIds.includes(interviewer.id);
                     const orderIndex = isSelected
                       ? selectedIds.indexOf(interviewer.id) + 1
-                      : 0
+                      : 0;
 
                     return (
                       <button
@@ -251,8 +267,8 @@ export default function CreateInterviewModal({
                         onClick={() => handleSelectInterviewer(interviewer.id)}
                         className={`group relative shrink-0 w-[90px] rounded-xl border p-2.5 flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                           isSelected
-                            ? 'border-pink-500 ring-2 ring-pink-500 bg-pink-500/5'
-                            : 'border-border bg-card hover:border-foreground/20 hover:bg-white/[0.02]'
+                            ? "border-pink-500 ring-2 ring-pink-500 bg-pink-500/5"
+                            : "border-border bg-card hover:border-foreground/20 hover:bg-white/[0.02]"
                         }`}
                       >
                         {/* Hover action buttons */}
@@ -262,13 +278,13 @@ export default function CreateInterviewModal({
                               role="button"
                               tabIndex={0}
                               onClick={(e) => {
-                                e.stopPropagation()
-                                handleEditInterviewer(interviewer)
+                                e.stopPropagation();
+                                handleEditInterviewer(interviewer);
                               }}
                               onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.stopPropagation()
-                                  handleEditInterviewer(interviewer)
+                                if (e.key === "Enter") {
+                                  e.stopPropagation();
+                                  handleEditInterviewer(interviewer);
                                 }
                               }}
                               className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-sm hover:bg-blue-600 transition-colors cursor-pointer"
@@ -281,13 +297,13 @@ export default function CreateInterviewModal({
                                 role="button"
                                 tabIndex={0}
                                 onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteInterviewer(interviewer.id)
+                                  e.stopPropagation();
+                                  handleDeleteInterviewer(interviewer.id);
                                 }}
                                 onKeyDown={(e) => {
-                                  if (e.key === 'Enter') {
-                                    e.stopPropagation()
-                                    handleDeleteInterviewer(interviewer.id)
+                                  if (e.key === "Enter") {
+                                    e.stopPropagation();
+                                    handleDeleteInterviewer(interviewer.id);
                                   }
                                 }}
                                 className="w-5 h-5 rounded-full bg-red-500 text-white flex items-center justify-center shadow-sm hover:bg-red-600 transition-colors cursor-pointer"
@@ -307,26 +323,32 @@ export default function CreateInterviewModal({
                         {/* Avatar */}
                         <div
                           className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0 ${
-                            isSelected ? 'opacity-80' : ''
+                            isSelected ? "opacity-80" : ""
                           }`}
                           style={{ backgroundColor: interviewer.avatarColor }}
                         >
                           {interviewer.avatarText}
                         </div>
                         {/* Name */}
-                        <span className={`text-[11px] font-medium leading-tight text-center line-clamp-1 w-full ${
-                          isSelected ? 'text-pink-400' : 'text-foreground'
-                        }`}>
+                        <span
+                          className={`text-[11px] font-medium leading-tight text-center line-clamp-1 w-full ${
+                            isSelected ? "text-pink-400" : "text-foreground"
+                          }`}
+                        >
                           {interviewer.name}
                         </span>
                         {/* Title */}
-                        <span className={`text-[9px] leading-tight text-center line-clamp-1 w-full ${
-                          isSelected ? 'text-pink-400/70' : 'text-muted-foreground'
-                        }`}>
+                        <span
+                          className={`text-[9px] leading-tight text-center line-clamp-1 w-full ${
+                            isSelected
+                              ? "text-pink-400/70"
+                              : "text-muted-foreground"
+                          }`}
+                        >
                           {interviewer.title}
                         </span>
                       </button>
-                    )
+                    );
                   })}
 
                   {/* Add custom interviewer card */}
@@ -357,9 +379,11 @@ export default function CreateInterviewModal({
                   <span className="text-muted-foreground ml-1.5 inline">
                     · 面试顺序：
                     {selectedIds
-                      .map((id) => allInterviewers.find((i) => i.id === id)?.name)
+                      .map(
+                        (id) => allInterviewers.find((i) => i.id === id)?.name,
+                      )
                       .filter(Boolean)
-                      .join(' → ')}
+                      .join(" → ")}
                   </span>
                 </span>
               </div>
@@ -373,7 +397,7 @@ export default function CreateInterviewModal({
               disabled={!isValid || submitting}
               className="w-full px-4 py-2.5 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {submitting ? '创建中...' : '开始面试'}
+              {submitting ? "创建中..." : "开始面试"}
             </button>
           </div>
         </div>
@@ -404,5 +428,5 @@ export default function CreateInterviewModal({
         onSubmit={handleSaveEdit}
       />
     </>
-  )
+  );
 }

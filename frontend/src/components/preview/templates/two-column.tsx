@@ -10,41 +10,54 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from '../../../types/resume';
-import { AvatarImage } from '../avatar-image';
-import { degreeField, isSectionEmpty, md } from '../utils';
-import { QrCodesPreview } from '../qr-codes-preview';
+} from "../../../types/resume";
+import { AvatarImage } from "../avatar-image";
+import { degreeField, isSectionEmpty, md } from "../utils";
+import { QrCodesPreview } from "../qr-codes-preview";
 
 // Left sidebar section types
-const LEFT_TYPES = new Set(['skills', 'languages', 'certifications', 'custom']);
+const LEFT_TYPES = new Set(["skills", "languages", "certifications", "custom"]);
 
 export function TwoColumnTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
+  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const visibleSections = resume.sections.filter(
-    (s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s)
+    (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
   );
 
   const leftSections = visibleSections.filter((s) => LEFT_TYPES.has(s.type));
   const rightSections = visibleSections.filter((s) => !LEFT_TYPES.has(s.type));
 
   return (
-    <div className="mx-auto flex max-w-[210mm] overflow-hidden bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif', minHeight: '297mm' }}>
+    <div
+      className="mx-auto flex max-w-[210mm] overflow-hidden bg-white shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif", minHeight: "297mm" }}
+    >
       {/* Left Column */}
-      <div className="w-[35%] shrink-0 p-6 text-white" style={{ background: 'linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)' }}>
+      <div
+        className="w-[35%] shrink-0 p-6 text-white"
+        style={{
+          background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)",
+        }}
+      >
         {/* Avatar & Name */}
         <div className="mb-6 text-center">
           {pi.avatar && (
             <AvatarImage
               src={pi.avatar}
               size={80}
-
               wrapperClassName="mx-auto mb-3 w-fit overflow-hidden"
             />
           )}
-          <h1 className="text-xl font-bold tracking-tight text-white">{pi.fullName || 'Your Name'}</h1>
-          {pi.jobTitle && <p className="mt-1 text-sm font-light text-zinc-300">{pi.jobTitle}</p>}
+          <h1 className="text-xl font-bold tracking-tight text-white">
+            {pi.fullName || "Your Name"}
+          </h1>
+          {pi.jobTitle && (
+            <p className="mt-1 text-sm font-light text-zinc-300">
+              {pi.jobTitle}
+            </p>
+          )}
         </div>
 
         {/* Contact Info */}
@@ -144,7 +157,10 @@ export function TwoColumnTemplate({ resume }: { resume: Resume }) {
         {/* Left Sections */}
         {leftSections.map((section) => (
           <div key={section.id} className="mb-6 pt-1" data-section>
-            <h2 className="mb-2 pb-1.5 border-b-2 text-xs font-bold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.35)' }}>
+            <h2
+              className="mb-2 pb-1.5 border-b-2 text-xs font-bold uppercase tracking-wider"
+              style={{ color: "rgba(255,255,255,0.35)" }}
+            >
               {section.title}
             </h2>
             <div className="mt-2">
@@ -158,7 +174,10 @@ export function TwoColumnTemplate({ resume }: { resume: Resume }) {
       <div className="flex-1 p-6">
         {rightSections.map((section) => (
           <div key={section.id} className="mb-6 pt-1" data-section>
-            <h2 className="mb-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-wider" style={{ color: '#1a1a2e', borderColor: '#1a1a2e' }}>
+            <h2
+              className="mb-2 pb-2 border-b-2 text-sm font-bold uppercase tracking-wider"
+              style={{ color: "#1a1a2e", borderColor: "#1a1a2e" }}
+            >
               {section.title}
             </h2>
             <div className="mt-2">
@@ -175,7 +194,7 @@ function LeftSectionContent({ section }: { section: any }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'skills') {
+  if (section.type === "skills") {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2">
@@ -184,7 +203,10 @@ function LeftSectionContent({ section }: { section: any }) {
             <p className="text-xs font-semibold text-zinc-200">{cat.name}</p>
             <div className="mt-1 flex flex-wrap gap-1">
               {(cat.skills || []).map((skill: string, i: number) => (
-                <span key={i} className="rounded-sm bg-white/10 px-1.5 py-0.5 text-[10px] text-zinc-300">
+                <span
+                  key={i}
+                  className="rounded-sm bg-white/10 px-1.5 py-0.5 text-[10px] text-zinc-300"
+                >
                   {skill}
                 </span>
               ))}
@@ -195,12 +217,15 @@ function LeftSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-center justify-between text-xs">
+          <div
+            key={item.id}
+            className="flex items-center justify-between text-xs"
+          >
             <span className="text-zinc-200">{item.language}</span>
             <span className="text-zinc-400">{item.proficiency}</span>
           </div>
@@ -209,36 +234,48 @@ function LeftSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
           <div key={item.id}>
             <p className="text-xs font-semibold text-zinc-200">{item.name}</p>
-            {(item.issuer || item.date) && <p className="text-[10px] text-zinc-400">{item.issuer}{item.date ? ` (${item.date})` : ''}</p>}
+            {(item.issuer || item.date) && (
+              <p className="text-[10px] text-zinc-400">
+                {item.issuer}
+                {item.date ? ` (${item.date})` : ""}
+              </p>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
           <div key={item.id}>
             <p className="text-xs font-semibold text-zinc-200">{item.title}</p>
-            {item.subtitle && <p className="text-[10px] text-zinc-400">{item.subtitle}</p>}
-            {item.description && <p className="text-[10px] text-zinc-400" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.subtitle && (
+              <p className="text-[10px] text-zinc-400">{item.subtitle}</p>
+            )}
+            {item.description && (
+              <p
+                className="text-[10px] text-zinc-400"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -248,8 +285,15 @@ function LeftSectionContent({ section }: { section: any }) {
       <div className="space-y-1.5">
         {content.items.map((item: any) => (
           <div key={item.id}>
-            <span className="text-xs font-medium text-zinc-200">{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-[10px] text-zinc-400" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            <span className="text-xs font-medium text-zinc-200">
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-[10px] text-zinc-400"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -259,15 +303,28 @@ function LeftSectionContent({ section }: { section: any }) {
   return null;
 }
 
-function RightSectionContent({ section, resume }: { section: any; resume: Resume }) {
+function RightSectionContent({
+  section,
+  resume,
+}: {
+  section: any;
+  resume: Resume;
+}) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'summary') {
-    return <p className="text-sm leading-relaxed text-zinc-600" dangerouslySetInnerHTML={{ __html: md((content as SummaryContent).text) }} />;
+  if (section.type === "summary") {
+    return (
+      <p
+        className="text-sm leading-relaxed text-zinc-600"
+        dangerouslySetInnerHTML={{
+          __html: md((content as SummaryContent).text),
+        }}
+      />
+    );
   }
 
-  if (section.type === 'work_experience') {
+  if (section.type === "work_experience") {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3">
@@ -275,16 +332,39 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-semibold text-zinc-800">{item.position}</span>
-                {item.company && <span className="text-sm text-zinc-500"> | {item.company}</span>}
+                <span className="text-sm font-semibold text-zinc-800">
+                  {item.position}
+                </span>
+                {item.company && (
+                  <span className="text-sm text-zinc-500">
+                    {" "}
+                    | {item.company}
+                  </span>
+                )}
               </div>
-              <span className="shrink-0 text-xs text-zinc-400">{item.startDate} – {item.endDate || (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}</span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (item.current
+                    ? resume.language === "zh"
+                      ? "至今"
+                      : "Present"
+                    : "")}
+              </span>
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-sm bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-500">
+                  <span
+                    key={i}
+                    className="rounded-sm bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-500"
+                  >
                     {t}
                   </span>
                 ))}
@@ -293,7 +373,11 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -303,22 +387,36 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'education') {
+  if (section.type === "education") {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">{item.institution}</span>
-              <span className="shrink-0 text-xs text-zinc-400">{item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}</span>
+              <span className="text-sm font-semibold text-zinc-800">
+                {item.institution}
+              </span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (resume.language === "zh" ? "至今" : "Present")}
+              </span>
             </div>
-            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
-            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
+            <p className="text-sm text-zinc-600">
+              {degreeField(item.degree, item.field)}
+            </p>
+            {item.gpa && (
+              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
+            )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -328,25 +426,37 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'projects') {
+  if (section.type === "projects") {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">{item.name}</span>
+              <span className="text-sm font-semibold text-zinc-800">
+                {item.name}
+              </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
+                  {item.startDate} –{" "}
+                  {item.endDate ||
+                    (resume.language === "zh" ? "至今" : "Present")}
                 </span>
               )}
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-sm bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-500">
+                  <span
+                    key={i}
+                    className="rounded-sm bg-zinc-100 px-1.5 py-0.5 text-[10px] text-zinc-500"
+                  >
                     {t}
                   </span>
                 ))}
@@ -355,7 +465,11 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -365,18 +479,29 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'github') {
+  if (section.type === "github") {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">{item.name}</span>
-              <span className="shrink-0 text-xs text-zinc-400">{item.stars?.toLocaleString()}</span>
+              <span className="text-sm font-semibold text-zinc-800">
+                {item.name}
+              </span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.stars?.toLocaleString()}
+              </span>
             </div>
-            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.language && (
+              <span className="text-xs text-zinc-500">{item.language}</span>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
@@ -384,24 +509,31 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
   }
 
   // Fallback for any section type that ends up on the right
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between text-sm">
+          <div
+            key={item.id}
+            className="flex items-baseline justify-between text-sm"
+          >
             <div>
               <span className="font-semibold text-zinc-800">{item.name}</span>
-              {item.issuer && <span className="text-zinc-600"> — {item.issuer}</span>}
+              {item.issuer && (
+                <span className="text-zinc-600"> — {item.issuer}</span>
+              )}
             </div>
-            {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+            {item.date && (
+              <span className="text-xs text-zinc-400">{item.date}</span>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -415,25 +547,36 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">{item.title}</span>
-              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+              <span className="text-sm font-semibold text-zinc-800">
+                {item.title}
+              </span>
+              {item.date && (
+                <span className="text-xs text-zinc-400">{item.date}</span>
+              )}
             </div>
-            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.subtitle && (
+              <p className="text-sm text-zinc-500">{item.subtitle}</p>
+            )}
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -443,8 +586,15 @@ function RightSectionContent({ section, resume }: { section: any; resume: Resume
       <div className="space-y-2">
         {content.items.map((item: any) => (
           <div key={item.id}>
-            <span className="text-sm font-medium text-zinc-700">{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            <span className="text-sm font-medium text-zinc-700">
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>

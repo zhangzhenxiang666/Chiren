@@ -1,70 +1,72 @@
-import { useState } from 'react'
-import { Plus } from 'lucide-react'
-import RoundCard from './RoundCard'
-import RoundConfigPanel from './RoundConfigPanel'
-import type { InterviewerProfile } from './CustomInterviewerModal'
+import { useState } from "react";
+import { Plus } from "lucide-react";
+import RoundCard from "./RoundCard";
+import RoundConfigPanel from "./RoundConfigPanel";
+import type { InterviewerProfile } from "./CustomInterviewerModal";
 
 interface DraftRound {
-  tempId: string
-  name: string
-  interviewer: InterviewerProfile
+  tempId: string;
+  name: string;
+  interviewer: InterviewerProfile;
 }
 
 interface StepConfigureRoundsProps {
-  rounds: DraftRound[]
-  onChange: (rounds: DraftRound[]) => void
-}
-
-function generateTempId(): string {
-  return `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  rounds: DraftRound[];
+  onChange: (rounds: DraftRound[]) => void;
 }
 
 export default function StepConfigureRounds({
   rounds,
   onChange,
 }: StepConfigureRoundsProps) {
-  const [configOpen, setConfigOpen] = useState(false)
-  const [editingRound, setEditingRound] = useState<DraftRound | undefined>()
+  const [configOpen, setConfigOpen] = useState(false);
+  const [editingRound, setEditingRound] = useState<DraftRound | undefined>();
 
   const handleAddRound = (round: DraftRound) => {
-    onChange([...rounds, round])
-    setConfigOpen(false)
-    setEditingRound(undefined)
-  }
+    onChange([...rounds, round]);
+    setConfigOpen(false);
+    setEditingRound(undefined);
+  };
 
   const handleEditRound = (round: DraftRound) => {
-    onChange(rounds.map((r) => (r.tempId === round.tempId ? round : r)))
-    setConfigOpen(false)
-    setEditingRound(undefined)
-  }
+    onChange(rounds.map((r) => (r.tempId === round.tempId ? round : r)));
+    setConfigOpen(false);
+    setEditingRound(undefined);
+  };
 
   const handleDeleteRound = (tempId: string) => {
-    onChange(rounds.filter((r) => r.tempId !== tempId))
-  }
+    onChange(rounds.filter((r) => r.tempId !== tempId));
+  };
 
   const handleMoveUp = (index: number) => {
-    if (index === 0) return
-    const newRounds = [...rounds]
-    ;[newRounds[index - 1], newRounds[index]] = [newRounds[index], newRounds[index - 1]]
-    onChange(newRounds)
-  }
+    if (index === 0) return;
+    const newRounds = [...rounds];
+    [newRounds[index - 1], newRounds[index]] = [
+      newRounds[index],
+      newRounds[index - 1],
+    ];
+    onChange(newRounds);
+  };
 
   const handleMoveDown = (index: number) => {
-    if (index === rounds.length - 1) return
-    const newRounds = [...rounds]
-    ;[newRounds[index], newRounds[index + 1]] = [newRounds[index + 1], newRounds[index]]
-    onChange(newRounds)
-  }
+    if (index === rounds.length - 1) return;
+    const newRounds = [...rounds];
+    [newRounds[index], newRounds[index + 1]] = [
+      newRounds[index + 1],
+      newRounds[index],
+    ];
+    onChange(newRounds);
+  };
 
   const openAddPanel = () => {
-    setEditingRound(undefined)
-    setConfigOpen(true)
-  }
+    setEditingRound(undefined);
+    setConfigOpen(true);
+  };
 
   const openEditPanel = (round: DraftRound) => {
-    setEditingRound(round)
-    setConfigOpen(true)
-  }
+    setEditingRound(round);
+    setConfigOpen(true);
+  };
 
   return (
     <div>
@@ -108,12 +110,12 @@ export default function StepConfigureRounds({
       <RoundConfigPanel
         open={configOpen}
         onClose={() => {
-          setConfigOpen(false)
-          setEditingRound(undefined)
+          setConfigOpen(false);
+          setEditingRound(undefined);
         }}
         initialData={editingRound}
         onSubmit={editingRound ? handleEditRound : handleAddRound}
       />
     </div>
-  )
+  );
 }

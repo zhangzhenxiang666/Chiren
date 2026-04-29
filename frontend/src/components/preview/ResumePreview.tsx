@@ -1,37 +1,57 @@
-import { useId } from 'react';
-import type { Resume, ThemeConfig } from '../../types/resume';
-import { templateMap } from '../../lib/template-labels';
+import { useId } from "react";
+import type { Resume, ThemeConfig } from "../../types/resume";
+import { templateMap } from "../../lib/template-labels";
 
 interface ResumePreviewProps {
   resume: Resume;
   onClick?: () => void;
 }
 
-const FONT_SIZE_SCALE: Record<string, { body: string; h1: string; h2: string; h3: string }> = {
-  small: { body: '12px', h1: '22px', h2: '15px', h3: '13px' },
-  medium: { body: '14px', h1: '26px', h2: '17px', h3: '15px' },
-  large: { body: '16px', h1: '30px', h2: '19px', h3: '17px' },
+const FONT_SIZE_SCALE: Record<
+  string,
+  { body: string; h1: string; h2: string; h3: string }
+> = {
+  small: { body: "12px", h1: "22px", h2: "15px", h3: "13px" },
+  medium: { body: "14px", h1: "26px", h2: "17px", h3: "15px" },
+  large: { body: "16px", h1: "30px", h2: "19px", h3: "17px" },
 };
 
 const DEFAULT_THEME: ThemeConfig = {
-  primaryColor: '#1a1a1a',
-  accentColor: '#3b82f6',
-  fontFamily: 'Inter',
-  fontSize: 'medium',
+  primaryColor: "#1a1a1a",
+  accentColor: "#3b82f6",
+  fontFamily: "Inter",
+  fontSize: "medium",
   lineSpacing: 1.5,
   margin: { top: 20, right: 20, bottom: 20, left: 20 },
   sectionSpacing: 16,
 };
 
 const BACKGROUND_TEMPLATES: ReadonlySet<string> = new Set([
-  'modern', 'creative', 'two-column', 'executive', 'developer',
-  'designer', 'startup', 'infographic', 'compact', 'bold',
-  'corporate', 'finance', 'gradient', 'material', 'coder',
-  'artistic', 'neon', 'berlin', 'engineer', 'sidebar', 'ribbon',
+  "modern",
+  "creative",
+  "two-column",
+  "executive",
+  "developer",
+  "designer",
+  "startup",
+  "infographic",
+  "compact",
+  "bold",
+  "corporate",
+  "finance",
+  "gradient",
+  "material",
+  "coder",
+  "artistic",
+  "neon",
+  "berlin",
+  "engineer",
+  "sidebar",
+  "ribbon",
 ]);
 
 function isDark(hex: string): boolean {
-  const c = hex.replace('#', '');
+  const c = hex.replace("#", "");
   const r = parseInt(c.substring(0, 2), 16) / 255;
   const g = parseInt(c.substring(2, 4), 16) / 255;
   const b = parseInt(c.substring(4, 6), 16) / 255;
@@ -39,7 +59,11 @@ function isDark(hex: string): boolean {
   return luminance < 0.4;
 }
 
-function buildThemeCSS(scopeId: string, theme: ThemeConfig, template: string): string {
+function buildThemeCSS(
+  scopeId: string,
+  theme: ThemeConfig,
+  template: string,
+): string {
   const s = `[data-theme-scope="${scopeId}"]`;
   const fs = FONT_SIZE_SCALE[theme.fontSize] || FONT_SIZE_SCALE.medium;
   const m = theme.margin;
@@ -50,7 +74,7 @@ function buildThemeCSS(scopeId: string, theme: ThemeConfig, template: string): s
     ${s} > div {
       font-family: ${theme.fontFamily}, 'Noto Sans SC', sans-serif !important;
       line-height: ${theme.lineSpacing} !important;
-      ${needsPadding ? `padding-top: ${m.top}px !important; padding-right: ${m.right}px !important; padding-bottom: ${m.bottom}px !important; padding-left: ${m.left}px !important;` : ''}
+      ${needsPadding ? `padding-top: ${m.top}px !important; padding-right: ${m.right}px !important; padding-bottom: ${m.bottom}px !important; padding-left: ${m.left}px !important;` : ""}
       --base-body-size: ${fs.body};
       --base-h1-size: ${fs.h1};
       --base-h2-size: ${fs.h2};
@@ -107,7 +131,9 @@ function buildThemeCSS(scopeId: string, theme: ThemeConfig, template: string): s
     ${s} [data-section] {
       ${needsPadding ? `margin-bottom: ${theme.sectionSpacing}px !important;` : `padding-bottom: ${theme.sectionSpacing}px !important;`}
     }
-    ${primaryIsDark ? `
+    ${
+      primaryIsDark
+        ? `
     ${s} [style*="background"][style*="#"] h1:not([style*="color"]),
     ${s} [style*="background"][style*="#"] h2:not([style*="color"]),
     ${s} [style*="background"][style*="#"] h3:not([style*="color"]),
@@ -121,14 +147,19 @@ function buildThemeCSS(scopeId: string, theme: ThemeConfig, template: string): s
     ${s} .bg-black h2:not([style*="color"]),
     ${s} .bg-black h3:not([style*="color"]) {
       color: #ffffff !important;
-    }` : ''}
+    }`
+        : ""
+    }
   `;
 }
 
 export default function ResumePreview({ resume, onClick }: ResumePreviewProps) {
   const TemplateComponent = templateMap[resume.template];
   const scopeId = useId();
-  const theme: ThemeConfig = { ...DEFAULT_THEME, ...(resume.themeConfig || {}) };
+  const theme: ThemeConfig = {
+    ...DEFAULT_THEME,
+    ...(resume.themeConfig || {}),
+  };
 
   if (!TemplateComponent) {
     return (
@@ -144,12 +175,19 @@ export default function ResumePreview({ resume, onClick }: ResumePreviewProps) {
     <div
       data-theme-scope={scopeId}
       onClick={onClick}
-      onKeyDown={(e) => { if (onClick && (e.key === 'Enter' || e.key === ' ')) e.preventDefault(); onClick(); }}
-      role={onClick ? 'button' : undefined}
+      onKeyDown={(e) => {
+        if (onClick && (e.key === "Enter" || e.key === " ")) e.preventDefault();
+        onClick?.();
+      }}
+      role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
-      className={onClick ? 'cursor-pointer' : undefined}
+      className={onClick ? "cursor-pointer" : undefined}
     >
-      <style dangerouslySetInnerHTML={{ __html: buildThemeCSS(scopeId, theme, safeResume.template) }} />
+      <style
+        dangerouslySetInnerHTML={{
+          __html: buildThemeCSS(scopeId, theme, safeResume.template),
+        }}
+      />
       <TemplateComponent resume={safeResume} />
     </div>
   );

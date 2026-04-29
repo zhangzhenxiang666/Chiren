@@ -38,7 +38,10 @@ from apps.interview.service import (
     validate_round_status_change,
     validate_sub_resume,
 )
-from apps.interview.task_service import run_round_summary_task
+from apps.interview.task_service import (
+    run_collection_summary_task,
+    run_round_summary_task,
+)
 from shared.api import get_client
 from shared.database import get_session
 from shared.models import BaseWork, InterviewCollection, InterviewRound, Resume
@@ -446,7 +449,7 @@ async def regenerate_summary(
     existing = await db.execute(
         select(BaseWork).where(
             BaseWork.task_type == TaskType.INTERVIEW_SUMMARY.value,
-            BaseWork.status == TaskStatus.RUNNING.value,
+            BaseWork.status.in_([TaskStatus.RUNNING.value, TaskStatus.PENDING.value]),
             BaseWork.meta_info["round_id"].as_string() == round_id,
         )
     )
@@ -473,6 +476,72 @@ async def regenerate_summary(
         db,
         task_id,
         round_id,
+        client,
+        request.model,
+    )
+
+    return TaskIdResponse(task_id=task_id)
+
+
+@router.post(
+    "/collection/{collection_id}/regenerate-summary",
+    summary="手动生成/重新生成面试集合总体总结",
+)
+async def regenerate_collection_summary(
+    collection_id: Annotated[str, Path(description="面试集合ID")],
+    request: Annotated[RegenerateSummaryRequest, Body(description="总结生成请求参数")],
+    background_tasks: BackgroundTasks,
+    db: Annotated[AsyncSession, Depends(get_session)],
+) -> TaskIdResponse:
+    """为面试集合手动触发总体总结生成。
+
+    要求集合状态为 completed。若某些已完成轮次尚未生成摘要，
+    后台任务会自动并发补全，补全失败则整体任务失败。
+    """
+    stmt = (
+        select(InterviewCollection)
+        .where(InterviewCollection.id == collection_id)
+        .options(selectinload(InterviewCollection.rounds))
+    )
+    result = await db.execute(stmt)
+    collection = result.scalar_one_or_none()
+    if collection is None:
+        raise HTTPException(status_code=404, detail="面试集合不存在")
+    if collection.status != "completed":
+        raise HTTPException(
+            status_code=400, detail="只有已完成的面试集合才能生成总体总结"
+        )
+
+    existing = await db.execute(
+        select(BaseWork).where(
+            BaseWork.task_type == TaskType.COLLECTION_SUMMARY.value,
+            BaseWork.status.in_([TaskStatus.RUNNING.value, TaskStatus.PENDING.value]),
+            BaseWork.meta_info["collection_id"].as_string() == collection_id,
+        )
+    )
+    existing_task = existing.scalar_one_or_none()
+    if existing_task is not None:
+        return TaskIdResponse(task_id=existing_task.id)
+
+    task_id = str(uuid.uuid4())
+
+    work = BaseWork(
+        id=task_id,
+        task_type=TaskType.COLLECTION_SUMMARY.value,
+        status=TaskStatus.PENDING.value,
+        meta_info={"collection_id": collection_id},
+    )
+    db.add(work)
+    await db.commit()
+    create_task(task_id, TaskType.COLLECTION_SUMMARY)
+
+    client = get_client(request.type, request.api_key, request.base_url)
+
+    background_tasks.add_task(
+        run_collection_summary_task,
+        db,
+        task_id,
+        collection_id,
         client,
         request.model,
     )

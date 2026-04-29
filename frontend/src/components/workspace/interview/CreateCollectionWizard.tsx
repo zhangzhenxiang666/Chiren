@@ -1,29 +1,29 @@
-import { useState } from 'react'
-import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react'
-import StepBasicInfo from './StepBasicInfo'
-import StepConfigureRounds from './StepConfigureRounds'
-import StepReview from './StepReview'
-import type { InterviewerProfile } from './CustomInterviewerModal'
+import { useState } from "react";
+import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import StepBasicInfo from "./StepBasicInfo";
+import StepConfigureRounds from "./StepConfigureRounds";
+import StepReview from "./StepReview";
+import type { InterviewerProfile } from "./CustomInterviewerModal";
 
 interface DraftRound {
-  tempId: string
-  name: string
-  interviewer: InterviewerProfile
+  tempId: string;
+  name: string;
+  interviewer: InterviewerProfile;
 }
 
 interface CreateCollectionWizardProps {
-  open: boolean
-  onClose: () => void
-  subResumeId: string
-  subResumeTitle?: string
-  onSubmit: (name: string, rounds: DraftRound[]) => Promise<void>
+  open: boolean;
+  onClose: () => void;
+  subResumeId: string;
+  subResumeTitle?: string;
+  onSubmit: (name: string, rounds: DraftRound[]) => Promise<void>;
 }
 
 const STEPS = [
-  { label: '基本信息' },
-  { label: '配置轮次' },
-  { label: '确认提交' },
-]
+  { label: "基本信息" },
+  { label: "配置轮次" },
+  { label: "确认提交" },
+];
 
 export default function CreateCollectionWizard({
   open,
@@ -32,52 +32,52 @@ export default function CreateCollectionWizard({
   subResumeTitle,
   onSubmit,
 }: CreateCollectionWizardProps) {
-  const [step, setStep] = useState(0)
-  const [name, setName] = useState('')
-  const [rounds, setRounds] = useState<DraftRound[]>([])
-  const [loading, setLoading] = useState(false)
+  const [step, setStep] = useState(0);
+  const [name, setName] = useState("");
+  const [rounds, setRounds] = useState<DraftRound[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  if (!open) return null
+  if (!open) return null;
 
   const canProceed = (): boolean => {
-    if (step === 0) return name.trim().length > 0
-    if (step === 1) return rounds.length > 0
-    return true
-  }
+    if (step === 0) return name.trim().length > 0;
+    if (step === 1) return rounds.length > 0;
+    return true;
+  };
 
   const handleNext = () => {
-    if (!canProceed()) return
+    if (!canProceed()) return;
     if (step < STEPS.length - 1) {
-      setStep(step + 1)
+      setStep(step + 1);
     }
-  }
+  };
 
   const handlePrev = () => {
     if (step > 0) {
-      setStep(step - 1)
+      setStep(step - 1);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    if (!name.trim() || rounds.length === 0) return
-    setLoading(true)
+    if (!name.trim() || rounds.length === 0) return;
+    setLoading(true);
     try {
-      await onSubmit(name.trim(), rounds)
-      setName('')
-      setRounds([])
-      setStep(0)
-      onClose()
+      await onSubmit(name.trim(), rounds);
+      setName("");
+      setRounds([]);
+      setStep(0);
+      onClose();
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleClose = () => {
-    setName('')
-    setRounds([])
-    setStep(0)
-    onClose()
-  }
+    setName("");
+    setRounds([]);
+    setStep(0);
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -100,17 +100,17 @@ export default function CreateCollectionWizard({
               <div
                 className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-medium shrink-0 ${
                   i < step
-                    ? 'bg-pink-500 text-white'
+                    ? "bg-pink-500 text-white"
                     : i === step
-                      ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500/50'
-                      : 'bg-muted/30 text-muted-foreground'
+                      ? "bg-pink-500/20 text-pink-400 ring-1 ring-pink-500/50"
+                      : "bg-muted/30 text-muted-foreground"
                 }`}
               >
                 {i < step ? <Check className="w-3 h-3" /> : i + 1}
               </div>
               <span
                 className={`text-[10px] whitespace-nowrap ${
-                  i <= step ? 'text-foreground' : 'text-muted-foreground'
+                  i <= step ? "text-foreground" : "text-muted-foreground"
                 }`}
               >
                 {s.label}
@@ -164,11 +164,11 @@ export default function CreateCollectionWizard({
               disabled={loading || rounds.length === 0}
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-pink-500 text-white text-xs font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? '创建中...' : '确认创建'}
+              {loading ? "创建中..." : "确认创建"}
             </button>
           )}
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -18,6 +18,10 @@ class InterviewCollectionSchema(StrictBaseModel):
         default="not_started",
         description="状态：not_started/in_progress/completed",
     )
+    meta_info: dict[str, Any] | None = Field(
+        default=None,
+        description="集合元数据，包含总体面试总结等",
+    )
     created_at: datetime | None = Field(default=None, description="创建时间")
     updated_at: datetime | None = Field(default=None, description="更新时间")
 

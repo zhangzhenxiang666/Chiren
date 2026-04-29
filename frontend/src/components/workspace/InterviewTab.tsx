@@ -1,46 +1,94 @@
-import { useEffect, useState, useCallback } from 'react'
-import { CheckCircle2, Circle, Plus, Play, ChevronDown, ChevronRight, Pencil } from 'lucide-react'
-import { toast } from 'sonner'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useInterviewStore } from '@/stores/interview-store'
-import type { InterviewCollectionDetail, InterviewRound, InterviewRoundDraft } from '@/types/interview'
-import CreateInterviewModal from './interview/CreateInterviewModal'
-import AddRoundModal from './interview/AddRoundModal'
-import { Timeline, TimelineItem } from '@/components/ui/Timeline'
+import { useEffect, useState, useCallback } from "react";
+import {
+  CheckCircle2,
+  Circle,
+  Plus,
+  Play,
+  ChevronDown,
+  ChevronRight,
+  Pencil,
+  Brain,
+  Loader2,
+  FileText,
+  X,
+} from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate, useParams } from "react-router-dom";
+import { useInterviewStore } from "@/stores/interview-store";
+import type {
+  InterviewCollectionDetail,
+  InterviewRound,
+  InterviewRoundDraft,
+} from "@/types/interview";
+import {
+  getProviderConfig,
+  regenerateCollectionSummary,
+  checkRunningCollectionSummaryTask,
+} from "@/lib/api";
+import { addNotificationTask, markUnread } from "@/lib/notification";
+import type { ProviderConfig } from "@/lib/api";
+import CreateInterviewModal from "./interview/CreateInterviewModal";
+import AddRoundModal from "./interview/AddRoundModal";
+import { Timeline, TimelineItem } from "@/components/ui/Timeline";
 
 interface InterviewTabProps {
-  subResumeId: string
-  subResumeTitle?: string
-  selectedCollectionId?: string
-  onSelectCollection?: (collectionId: string) => void
+  subResumeId: string;
+  subResumeTitle?: string;
+  selectedCollectionId?: string;
+  onSelectCollection?: (collectionId: string) => void;
 }
 
 function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    completed: 'text-green-400 bg-green-500/10 border border-green-500/20',
-    in_progress: 'text-blue-400 bg-blue-500/10 border border-blue-500/20',
-    not_started: 'text-muted-foreground bg-muted/30 border border-border',
-  }
-  return colors[status] || colors.not_started
+    completed: "text-green-400 bg-green-500/10 border border-green-500/20",
+    in_progress: "text-blue-400 bg-blue-500/10 border border-blue-500/20",
+    not_started: "text-muted-foreground bg-muted/30 border border-border",
+  };
+  return colors[status] || colors.not_started;
 }
 
 function getStatusLabel(status: string): string {
   const labels: Record<string, string> = {
-    completed: '已完成',
-    in_progress: '进行中',
-    not_started: '待开始',
-  }
-  return labels[status] || status
+    completed: "已完成",
+    in_progress: "进行中",
+    not_started: "待开始",
+  };
+  return labels[status] || status;
 }
 
 function RoundStatusIcon({ status }: { status: string }) {
-  if (status === 'completed') {
-    return <CheckCircle2 className="w-3 h-3 text-green-500" strokeWidth={3} />
+  if (status === "completed") {
+    return <CheckCircle2 className="w-3 h-3 text-green-500" strokeWidth={3} />;
   }
-  if (status === 'in_progress') {
-    return <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
+  if (status === "in_progress") {
+    return (
+      <div className="w-3 h-3 rounded-full bg-blue-500 border-2 border-card" />
+    );
   }
-  return <Circle className="w-3 h-3 text-border" strokeWidth={3} />
+  return <Circle className="w-3 h-3 text-border" strokeWidth={3} />;
+}
+
+interface CollectionSummaryData {
+  overall_score: number;
+  overall_assessment: string;
+  round_summaries: Array<{
+    round_id: string;
+    round_name: string;
+    interviewer_name: string;
+    interviewer_title: string;
+    score: number;
+    key_points: string[];
+  }>;
+  key_strengths: string[];
+  key_weaknesses: string[];
+  dimension_breakdown: Array<{
+    dimension: string;
+    score: number;
+    comment: string;
+  }>;
+  recommendation: string;
+  risk_flags: string[];
+  generated_at: string;
 }
 
 function CollectionCard({
@@ -52,70 +100,143 @@ function CollectionCard({
   onSelect,
   onToggleExpand,
 }: {
-  collection: InterviewCollectionDetail
-  workspaceId: string
-  subResumeId: string
-  isSelected: boolean
-  isExpanded: boolean
-  onSelect: (collectionId: string) => void
-  onToggleExpand: (collectionId: string) => void
+  collection: InterviewCollectionDetail;
+  workspaceId: string;
+  subResumeId: string;
+  isSelected: boolean;
+  isExpanded: boolean;
+  onSelect: (collectionId: string) => void;
+  onToggleExpand: (collectionId: string) => void;
 }) {
-  const navigate = useNavigate()
-  const createRound = useInterviewStore((s) => s.createRound)
-  const updateRound = useInterviewStore((s) => s.updateRound)
+  const navigate = useNavigate();
+  const createRound = useInterviewStore((s) => s.createRound);
 
-  const [showAddRound, setShowAddRound] = useState(false)
-  const [editingRound, setEditingRound] = useState<InterviewRound | null>(null)
+  const [showAddRound, setShowAddRound] = useState(false);
+  const [isGeneratingCollectionSummary, setIsGeneratingCollectionSummary] =
+    useState(false);
+  const [collectionSummaryTaskId, setCollectionSummaryTaskId] = useState<
+    string | null
+  >(null);
+  const [showCollectionSummaryModal, setShowCollectionSummaryModal] =
+    useState(false);
+  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(
+    null,
+  );
 
-  const sortedRounds = [...collection.rounds].sort((a, b) => a.sortOrder - b.sortOrder)
-  const completedCount = sortedRounds.filter((r) => r.status === 'completed').length
-  const progressPercent = sortedRounds.length > 0
-    ? (completedCount / sortedRounds.length) * 100
-    : 0
+  useEffect(() => {
+    getProviderConfig()
+      .then(setProviderConfig)
+      .catch(() => {});
+  }, []);
+
+  const collectionSummary = (
+    collection.metaInfo as Record<string, unknown> | undefined
+  )?.collection_summary as CollectionSummaryData | undefined;
+
+  const handleGenerateCollectionSummary = async () => {
+    if (!providerConfig) return;
+
+    const existing = await checkRunningCollectionSummaryTask(collection.id);
+    if (existing) {
+      setCollectionSummaryTaskId(existing.taskId);
+      toast.error("该集合已有正在进行的总结生成任务");
+      return;
+    }
+
+    setIsGeneratingCollectionSummary(true);
+    try {
+      const active = providerConfig.active;
+      const cfg = providerConfig.providers[active];
+      const { taskId } = await regenerateCollectionSummary({
+        collectionId: collection.id,
+        type: active,
+        apiKey: cfg.apiKey,
+        baseUrl: cfg.baseUrl,
+        model: cfg.model,
+      });
+
+      markUnread();
+      addNotificationTask({
+        id: taskId,
+        taskType: "collection_summary",
+        status: "running",
+        metaInfo: {
+          title: collection.name || "",
+          fileName: collection.id,
+        },
+        errorMessage: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      });
+
+      setCollectionSummaryTaskId(taskId);
+      toast.success("集合总结生成已开始");
+    } catch (err: unknown) {
+      toast.error(err instanceof Error ? err.message : "生成集合总结失败");
+    } finally {
+      setIsGeneratingCollectionSummary(false);
+    }
+  };
+
+  const sortedRounds = [...collection.rounds].sort(
+    (a, b) => a.sortOrder - b.sortOrder,
+  );
+  const completedCount = sortedRounds.filter(
+    (r) => r.status === "completed",
+  ).length;
+  const progressPercent =
+    sortedRounds.length > 0 ? (completedCount / sortedRounds.length) * 100 : 0;
 
   const canStartRound = (round: InterviewRound, index: number): boolean => {
-    if (round.status !== 'not_started') return false
+    if (round.status !== "not_started") return false;
     for (let i = 0; i < index; i++) {
-      if (sortedRounds[i].status !== 'completed') return false
+      if (sortedRounds[i].status !== "completed") return false;
     }
-    const hasInProgress = sortedRounds.some((r) => r.status === 'in_progress')
-    return !hasInProgress
-  }
+    const hasInProgress = sortedRounds.some((r) => r.status === "in_progress");
+    return !hasInProgress;
+  };
 
   const handleStartRound = (e: React.MouseEvent, round: InterviewRound) => {
-    e.stopPropagation()
-    navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`)
-  }
+    e.stopPropagation();
+    navigate(
+      `/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`,
+    );
+  };
 
   const handleEnterInterview = (e: React.MouseEvent, round: InterviewRound) => {
-    e.stopPropagation()
-    navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`)
-  }
+    e.stopPropagation();
+    navigate(
+      `/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`,
+    );
+  };
 
   const handleToggleExpand = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onToggleExpand(collection.id)
-  }
+    e.stopPropagation();
+    onToggleExpand(collection.id);
+  };
 
   const handleHeaderClick = () => {
-    onSelect(collection.id)
-  }
+    onSelect(collection.id);
+  };
 
-  const nextSortOrder = sortedRounds.length > 0
-    ? Math.max(...sortedRounds.map((r) => r.sortOrder)) + 1
-    : 0
+  const nextSortOrder =
+    sortedRounds.length > 0
+      ? Math.max(...sortedRounds.map((r) => r.sortOrder)) + 1
+      : 0;
 
-  const canAddRound = collection.status !== 'completed'
+  const canAddRound = collection.status !== "completed";
 
   return (
     <div
       className={`rounded-xl border border-border bg-card overflow-hidden transition-all ${
-        isSelected ? 'border-pink-500/40 bg-pink-500/[0.03]' : 'hover:border-border-hover'
+        isSelected
+          ? "border-pink-500/40 bg-pink-500/[0.03]"
+          : "hover:border-border-hover"
       }`}
     >
       <div
         onClick={handleHeaderClick}
-        className={`p-4 cursor-pointer ${isExpanded ? 'border-b border-border' : ''}`}
+        className={`p-4 cursor-pointer ${isExpanded ? "border-b border-border" : ""}`}
       >
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-2">
@@ -131,7 +252,9 @@ function CollectionCard({
               )}
             </button>
             <h3 className="text-sm font-semibold">{collection.name}</h3>
-            <span className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(collection.status)}`}>
+            <span
+              className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(collection.status)}`}
+            >
               {getStatusLabel(collection.status)}
             </span>
           </div>
@@ -152,11 +275,16 @@ function CollectionCard({
       {isExpanded && (
         <div className="p-4">
           {sortedRounds.length === 0 ? (
-            <p className="text-xs text-muted-foreground text-center py-4">暂无面试轮次</p>
+            <p className="text-xs text-muted-foreground text-center py-4">
+              暂无面试轮次
+            </p>
           ) : (
             <Timeline>
               {sortedRounds.map((round, index) => (
-                <TimelineItem key={round.id} icon={<RoundStatusIcon status={round.status} />}>
+                <TimelineItem
+                  key={round.id}
+                  icon={<RoundStatusIcon status={round.status} />}
+                >
                   <div className="flex items-center justify-between mb-1">
                     <div>
                       <span className="text-xs font-medium">{round.name}</span>
@@ -172,12 +300,11 @@ function CollectionCard({
                       )}
                     </div>
                     <div className="flex items-center gap-1.5">
-                      {round.status === 'not_started' && (
+                      {round.status === "not_started" && (
                         <button
                           type="button"
                           onClick={(e) => {
-                            e.stopPropagation()
-                            setEditingRound(round)
+                            e.stopPropagation();
                           }}
                           className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
                           title="编辑轮次"
@@ -185,7 +312,9 @@ function CollectionCard({
                           <Pencil className="w-3 h-3" />
                         </button>
                       )}
-                      <span className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(round.status)}`}>
+                      <span
+                        className={`text-[9px] px-1.5 py-0.5 rounded ${getStatusColor(round.status)}`}
+                      >
                         {getStatusLabel(round.status)}
                       </span>
                     </div>
@@ -208,19 +337,21 @@ function CollectionCard({
                         开始面试
                       </button>
                     )}
-                    {round.status === 'completed' && (
+                    {round.status === "completed" && (
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          navigate(`/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`);
+                          navigate(
+                            `/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`,
+                          );
                         }}
                         className="flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.02] transition-colors"
                       >
                         查看详情
                       </button>
                     )}
-                    {round.status === 'in_progress' && (
+                    {round.status === "in_progress" && (
                       <button
                         type="button"
                         onClick={(e) => handleEnterInterview(e, round)}
@@ -246,6 +377,42 @@ function CollectionCard({
               添加轮次
             </button>
           )}
+
+          {collection.status === "completed" && (
+            <div className="mt-3 pt-3 border-t border-border">
+              {collectionSummary ? (
+                <button
+                  type="button"
+                  onClick={() => setShowCollectionSummaryModal(true)}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  查看集合总结
+                </button>
+              ) : collectionSummaryTaskId ? (
+                <div className="flex flex-col items-center justify-center gap-2 py-4">
+                  <Loader2 className="w-4 h-4 text-pink-400 animate-spin" />
+                  <span className="text-[10px] text-muted-foreground">
+                    集合总结生成中...
+                  </span>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleGenerateCollectionSummary}
+                  disabled={isGeneratingCollectionSummary}
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors disabled:opacity-50"
+                >
+                  {isGeneratingCollectionSummary ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Brain className="w-3.5 h-3.5" />
+                  )}
+                  {isGeneratingCollectionSummary ? "创建中..." : "生成集合总结"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -256,90 +423,256 @@ function CollectionCard({
         nextSortOrder={nextSortOrder}
         existingRounds={collection.rounds}
         onSubmit={async (params) => {
-          await createRound(params)
-          toast.success('轮次添加成功')
+          await createRound(params);
+          toast.success("轮次添加成功");
         }}
       />
 
-      <AddRoundModal
-        open={!!editingRound}
-        onClose={() => setEditingRound(null)}
-        interviewCollectionId={collection.id}
-        nextSortOrder={nextSortOrder}
-        initialData={editingRound}
-        existingRounds={collection.rounds}
-        onSubmit={async (params) => {
-          if (params.id) {
-            await updateRound({
-              id: params.id,
-              name: params.name,
-              interviewerName: params.interviewerName,
-              interviewerTitle: params.interviewerTitle,
-              interviewerBio: params.interviewerBio,
-              questionStyle: params.questionStyle,
-              assessmentDimensions: params.assessmentDimensions,
-              personalityTraits: params.personalityTraits,
-              sortOrder: params.sortOrder,
-            })
-            toast.success('轮次修改成功')
-          }
-        }}
-      />
+      {showCollectionSummaryModal && collectionSummary && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setShowCollectionSummaryModal(false)}
+          />
+          <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#1a1a1a] border border-pink-500/20 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#131313]">
+              <div>
+                <h2 className="text-base font-semibold">{collection.name}</h2>
+                <p className="text-[10px] text-muted-foreground mt-0.5">
+                  面试集合总结
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCollectionSummaryModal(false)}
+                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-muted-foreground hover:text-foreground"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="overflow-y-auto max-h-[calc(90vh-57px)] p-6 space-y-5">
+              <div className="flex items-start gap-6">
+                <div className="shrink-0 text-center">
+                  <div className="text-4xl font-bold text-pink-400">
+                    {collectionSummary.overall_score}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    综合评分 / 100
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-xs text-muted-foreground">
+                      录用建议
+                    </span>
+                    <span
+                      className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                        collectionSummary.recommendation === "strong_hire" ||
+                        collectionSummary.recommendation === "hire"
+                          ? "bg-green-500/10 text-green-400"
+                          : collectionSummary.recommendation === "neutral"
+                            ? "bg-yellow-500/10 text-yellow-400"
+                            : "bg-red-500/10 text-red-400"
+                      }`}
+                    >
+                      {collectionSummary.recommendation === "strong_hire"
+                        ? "强烈推荐"
+                        : collectionSummary.recommendation === "hire"
+                          ? "推荐录用"
+                          : collectionSummary.recommendation === "neutral"
+                            ? "中立"
+                            : collectionSummary.recommendation === "no_hire"
+                              ? "不推荐"
+                              : collectionSummary.recommendation ===
+                                  "strong_no_hire"
+                                ? "强烈不推荐"
+                                : collectionSummary.recommendation}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {collectionSummary.overall_assessment}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                {collectionSummary.key_strengths.length > 0 && (
+                  <div className="p-4 rounded-xl bg-green-500/[0.04] border border-green-500/10">
+                    <span className="text-xs font-semibold text-green-400">
+                      核心优势
+                    </span>
+                    <ul className="mt-2 space-y-1">
+                      {collectionSummary.key_strengths.map((s, i) => (
+                        <li key={i} className="text-xs text-muted-foreground">
+                          · {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {collectionSummary.key_weaknesses.length > 0 && (
+                  <div className="p-4 rounded-xl bg-yellow-500/[0.04] border border-yellow-500/10">
+                    <span className="text-xs font-semibold text-yellow-400">
+                      核心短板
+                    </span>
+                    <ul className="mt-2 space-y-1">
+                      {collectionSummary.key_weaknesses.map((w, i) => (
+                        <li key={i} className="text-xs text-muted-foreground">
+                          · {w}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {collectionSummary.dimension_breakdown.length > 0 && (
+                <div>
+                  <span className="text-xs font-semibold text-blue-400">
+                    能力维度评分
+                  </span>
+                  <div className="mt-2 space-y-2">
+                    {collectionSummary.dimension_breakdown.map((d, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-xs text-muted-foreground w-28 shrink-0 truncate">
+                          {d.dimension}
+                        </span>
+                        <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
+                            style={{ width: `${d.score}%` }}
+                          />
+                        </div>
+                        <span className="text-xs text-muted-foreground w-8 text-right">
+                          {d.score}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {collectionSummary.risk_flags.length > 0 && (
+                <div className="p-4 rounded-xl bg-red-500/[0.04] border border-red-500/10">
+                  <span className="text-xs font-semibold text-red-400">
+                    风险提示
+                  </span>
+                  <ul className="mt-2 space-y-1">
+                    {collectionSummary.risk_flags.map((r, i) => (
+                      <li key={i} className="text-xs text-muted-foreground">
+                        ⚠ {r}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {collectionSummary.round_summaries.length > 0 && (
+                <div>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    各轮次参引
+                  </span>
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    {collectionSummary.round_summaries.map((rs, i) => (
+                      <div
+                        key={i}
+                        className="p-3 rounded-lg bg-white/[0.03] border border-white/5"
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs font-medium">
+                            {rs.round_name}
+                          </span>
+                          <span className="text-xs font-semibold text-pink-400">
+                            {rs.score}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-muted-foreground">
+                          {rs.interviewer_name} · {rs.interviewer_title}
+                        </div>
+                        {rs.key_points.length > 0 && (
+                          <ul className="mt-1.5 space-y-0.5">
+                            {rs.key_points.map((p, j) => (
+                              <li
+                                key={j}
+                                className="text-[10px] text-muted-foreground"
+                              >
+                                · {p}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTitle, selectedCollectionId, onSelectCollection }: InterviewTabProps) {
-  const { id: workspaceId } = useParams<{ id: string }>()
-  const collections = useInterviewStore((s) => s.collections)
-  const loading = useInterviewStore((s) => s.loading)
-  const error = useInterviewStore((s) => s.error)
-  const fetchCollections = useInterviewStore((s) => s.fetchCollections)
-  const createCollectionWithRounds = useInterviewStore((s) => s.createCollectionWithRounds)
-  const clearError = useInterviewStore((s) => s.clearError)
+export default function InterviewTab({
+  subResumeId,
+  subResumeTitle: _subResumeTitle,
+  selectedCollectionId,
+  onSelectCollection,
+}: InterviewTabProps) {
+  const { id: workspaceId } = useParams<{ id: string }>();
+  const collections = useInterviewStore((s) => s.collections);
+  const loading = useInterviewStore((s) => s.loading);
+  const error = useInterviewStore((s) => s.error);
+  const fetchCollections = useInterviewStore((s) => s.fetchCollections);
+  const createCollectionWithRounds = useInterviewStore(
+    (s) => s.createCollectionWithRounds,
+  );
+  const clearError = useInterviewStore((s) => s.clearError);
 
-  const [showCreateModal, setShowCreateModal] = useState(false)
-  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const handleToggleExpand = useCallback((collectionId: string) => {
     setExpandedIds((prev) => {
-      const next = new Set(prev)
+      const next = new Set(prev);
       if (next.has(collectionId)) {
-        next.delete(collectionId)
+        next.delete(collectionId);
       } else {
-        next.add(collectionId)
+        next.add(collectionId);
       }
-      return next
-    })
-  }, [])
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
-    fetchCollections(subResumeId)
-  }, [subResumeId, fetchCollections])
+    fetchCollections(subResumeId);
+  }, [subResumeId, fetchCollections]);
 
   useEffect(() => {
     if (error) {
-      toast.error(error)
-      clearError()
+      toast.error(error);
+      clearError();
     }
-  }, [error, clearError])
+  }, [error, clearError]);
 
   useEffect(() => {
     if (selectedCollectionId) {
       setExpandedIds((prev) => {
-        const next = new Set(prev)
-        next.add(selectedCollectionId)
-        return next
-      })
+        const next = new Set(prev);
+        next.add(selectedCollectionId);
+        return next;
+      });
     }
-  }, [selectedCollectionId])
+  }, [selectedCollectionId]);
 
   if (loading && collections.length === 0) {
     return (
       <div className="flex items-center justify-center py-16 text-sm text-muted-foreground">
         加载中...
       </div>
-    )
+    );
   }
 
   return (
@@ -378,7 +711,7 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
             <CollectionCard
               key={collection.id}
               collection={collection}
-              workspaceId={workspaceId || ''}
+              workspaceId={workspaceId || ""}
               subResumeId={subResumeId}
               isSelected={collection.id === selectedCollectionId}
               isExpanded={expandedIds.has(collection.id)}
@@ -397,10 +730,10 @@ export default function InterviewTab({ subResumeId, subResumeTitle: _subResumeTi
             name,
             subResumeId,
             rounds,
-          })
-          toast.success('面试方案创建成功')
+          });
+          toast.success("面试方案创建成功");
         }}
       />
     </div>
-  )
+  );
 }

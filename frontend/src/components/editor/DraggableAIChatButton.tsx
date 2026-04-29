@@ -1,16 +1,44 @@
-import { useState, useRef, useEffect, useCallback, createContext, useContext } from 'react';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { Sparkles, Brain, Wrench, ChevronRight, ChevronDown, CheckCircle, AlertCircle, Loader2, ArrowDown } from 'lucide-react';
-import { getProviderConfig, getConversationMessages, createMessage, streamResumeAssistant, type ConversationMessage, type TextBlock, type ToolUseBlock, type ToolResultBlock, type SSEEvent, type ProviderConfig } from '../../lib/api';
-import { useResumeStore } from '../../stores/resume-store';
-import type { ResumeSection } from '../../types/resume';
+import {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  createContext,
+  useContext,
+} from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import {
+  Sparkles,
+  Brain,
+  Wrench,
+  ChevronRight,
+  ChevronDown,
+  CheckCircle,
+  AlertCircle,
+  Loader2,
+  ArrowDown,
+} from "lucide-react";
+import {
+  getProviderConfig,
+  getConversationMessages,
+  createMessage,
+  streamResumeAssistant,
+  type ConversationMessage,
+  type TextBlock,
+  type ToolUseBlock,
+  type ToolResultBlock,
+  type SSEEvent,
+  type ProviderConfig,
+} from "../../lib/api";
+import { useResumeStore } from "../../stores/resume-store";
+import type { ResumeSection } from "../../types/resume";
 
 interface ToolCall {
   id: string;
   name: string;
   input: Record<string, unknown>;
-  status: 'executing' | 'done';
+  status: "executing" | "done";
   result: {
     isError: boolean;
     content: string;
@@ -20,7 +48,7 @@ interface ToolCall {
 
 interface StreamingMessage {
   bubbleId: string;
-  status: 'streaming' | 'done' | 'error';
+  status: "streaming" | "done" | "error";
   thinking: { visible: boolean; content: string } | null;
   isThinkingActive: boolean;
   text: string;
@@ -29,21 +57,29 @@ interface StreamingMessage {
 
 const BUTTON_SIZE = 48;
 
-const clamp = (value: number, min: number, max: number) => Math.max(min, Math.min(value, max));
+const clamp = (value: number, min: number, max: number) =>
+  Math.max(min, Math.min(value, max));
 
 const generateUniqueId = () =>
   `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
 function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
-  if (typeof obj !== 'object' || obj === null) return obj;
+  if (typeof obj !== "object" || obj === null) return obj;
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     const camelKey = key.replace(/_([a-z])/g, (_, c) => c.toUpperCase());
-    if (typeof value === 'object' && value !== null && !Array.isArray(value) && !(value instanceof Date)) {
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      !Array.isArray(value) &&
+      !(value instanceof Date)
+    ) {
       result[camelKey] = snakeToCamel(value as Record<string, unknown>);
     } else if (Array.isArray(value)) {
       result[camelKey] = value.map((item) =>
-        typeof item === 'object' && item !== null ? snakeToCamel(item as Record<string, unknown>) : item
+        typeof item === "object" && item !== null
+          ? snakeToCamel(item as Record<string, unknown>)
+          : item,
       );
     } else {
       result[camelKey] = value;
@@ -67,7 +103,7 @@ const AIChatContext = createContext<AIChatContextValue | null>(null);
 export function useAIChat() {
   const ctx = useContext(AIChatContext);
   if (!ctx) {
-    throw new Error('useAIChat must be used within AIChatProvider');
+    throw new Error("useAIChat must be used within AIChatProvider");
   }
   return ctx;
 }
@@ -88,23 +124,35 @@ export function AIChatProvider({ children }: AIChatProviderProps) {
 export function DraggableAIChatButton() {
   const [position, setPosition] = useState<Position>(() => {
     // 每次进入页面重置为默认位置
-    return { x: window.innerWidth - BUTTON_SIZE - 24, y: window.innerHeight - BUTTON_SIZE - 24 };
+    return {
+      x: window.innerWidth - BUTTON_SIZE - 24,
+      y: window.innerHeight - BUTTON_SIZE - 24,
+    };
   });
   const { isOpen, setIsOpen } = useAIChat();
-  const dragState = useRef({ isDragging: false, startX: 0, startY: 0, startPosX: 0, startPosY: 0 });
+  const dragState = useRef({
+    isDragging: false,
+    startX: 0,
+    startY: 0,
+    startPosX: 0,
+    startPosY: 0,
+  });
 
   const actualPosition = position;
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button !== 0) return;
-    dragState.current = {
-      isDragging: true,
-      startX: e.clientX,
-      startY: e.clientY,
-      startPosX: actualPosition.x,
-      startPosY: actualPosition.y,
-    };
-  }, [actualPosition]);
+  const handleMouseDown = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.button !== 0) return;
+      dragState.current = {
+        isDragging: true,
+        startX: e.clientX,
+        startY: e.clientY,
+        startPosX: actualPosition.x,
+        startPosY: actualPosition.y,
+      };
+    },
+    [actualPosition],
+  );
 
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!dragState.current.isDragging) return;
@@ -125,30 +173,33 @@ export function DraggableAIChatButton() {
   }, []);
 
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
     };
   }, [handleMouseMove, handleMouseUp]);
 
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    e.nativeEvent.stopImmediatePropagation();
-    const movedX = e.clientX - dragState.current.startX;
-    const movedY = e.clientY - dragState.current.startY;
-    const distance = Math.sqrt(movedX * movedX + movedY * movedY);
-    if (distance < 5) {
-      setIsOpen(!isOpen);
-    }
-  }, [setIsOpen, isOpen]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation();
+      const movedX = e.clientX - dragState.current.startX;
+      const movedY = e.clientY - dragState.current.startY;
+      const distance = Math.sqrt(movedX * movedX + movedY * movedY);
+      if (distance < 5) {
+        setIsOpen(!isOpen);
+      }
+    },
+    [setIsOpen, isOpen],
+  );
 
   return (
     <>
       <div
         style={{
-          position: 'fixed',
+          position: "fixed",
           left: actualPosition.x,
           top: actualPosition.y,
           zIndex: 50,
@@ -193,16 +244,25 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [dialogHeight, setDialogHeight] = useState(590);
-  const [currentModel, setCurrentModel] = useState('');
-  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(null);
-  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(new Set());
-  const [expandedToolCalls, setExpandedToolCalls] = useState<Set<string>>(new Set());
-  const [expandedToolResults, setExpandedToolResults] = useState<Set<string>>(new Set());
+  const [currentModel, setCurrentModel] = useState("");
+  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(
+    null,
+  );
+  const [expandedMessages, setExpandedMessages] = useState<Set<string>>(
+    new Set(),
+  );
+  const [expandedToolCalls, setExpandedToolCalls] = useState<Set<string>>(
+    new Set(),
+  );
+  const [expandedToolResults, setExpandedToolResults] = useState<Set<string>>(
+    new Set(),
+  );
   const [messages, setMessages] = useState<ConversationMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [streamingMessage, setStreamingMessage] = useState<StreamingMessage | null>(null);
+  const [streamingMessage, setStreamingMessage] =
+    useState<StreamingMessage | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
 
   // ✅ FIX: ref 与 state 保持同步，避免在 updater 内嵌套 setMessages
@@ -305,9 +365,14 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
       .then((data) => {
         const welcomeMessage: ConversationMessage = {
           id: -1,
-          conversationId: conversationId || '',
-          role: 'assistant',
-          content: [{ type: 'text', text: '你好！我是你的简历优化助手。告诉我你想改进简历的哪个部分？' }],
+          conversationId: conversationId || "",
+          role: "assistant",
+          content: [
+            {
+              type: "text",
+              text: "你好！我是你的简历优化助手。告诉我你想改进简历的哪个部分？",
+            },
+          ],
           reasoning: null,
           createdAt: null,
         };
@@ -336,7 +401,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
     if (!provider.apiKey || !provider.baseUrl || !provider.model) return;
 
     const userText = input.trim();
-    setInput('');
+    setInput("");
     setIsStreaming(true);
 
     isDoneRef.current = false;
@@ -344,17 +409,21 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
     const userMessage: ConversationMessage = {
       id: generateUniqueId() as any,
       conversationId,
-      role: 'user',
-      content: [{ type: 'text', text: userText }],
+      role: "user",
+      content: [{ type: "text", text: userText }],
       reasoning: null,
       createdAt: null,
     };
     setMessages((prev) => {
       const filtered = prev.filter((msg) => {
-        if (msg.role !== 'assistant') return true;
-        const textBlock = msg.content.find((b) => b.type === 'text');
-        if (textBlock && 'text' in textBlock && typeof textBlock.text === 'string') {
-          return !textBlock.text.startsWith('❌ Error:');
+        if (msg.role !== "assistant") return true;
+        const textBlock = msg.content.find((b) => b.type === "text");
+        if (
+          textBlock &&
+          "text" in textBlock &&
+          typeof textBlock.text === "string"
+        ) {
+          return !textBlock.text.startsWith("❌ Error:");
         }
         return true;
       });
@@ -367,10 +436,10 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
     // ✅ FIX: 用 updateStreaming 初始化
     updateStreaming(() => ({
       bubbleId: String(Date.now()),
-      status: 'streaming',
+      status: "streaming",
       thinking: null,
       isThinkingActive: false,
-      text: '',
+      text: "",
       toolCalls: [],
     }));
 
@@ -384,29 +453,45 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
         input: userText,
       },
       (event: SSEEvent) => {
-        const validTypes = ['next', 'thinking_start', 'thinking_delta', 'text_start', 'text_delta', 'tool_use', 'tool_result', 'done', 'error'];
+        const validTypes = [
+          "next",
+          "thinking_start",
+          "thinking_delta",
+          "text_start",
+          "text_delta",
+          "tool_use",
+          "tool_result",
+          "done",
+          "error",
+        ];
         if (!validTypes.includes(event.type)) return;
 
         switch (event.type) {
-          case 'next': {
+          case "next": {
             const prev = streamingMessageRef.current;
             if (!prev) break;
 
-            const hasContent = prev.text || prev.thinking?.content || prev.toolCalls.length > 0;
+            const hasContent =
+              prev.text || prev.thinking?.content || prev.toolCalls.length > 0;
             if (!hasContent) break;
 
             const hasToolCalls = prev.toolCalls.length > 0;
-            const pendingToolCalls = prev.toolCalls.some((tc) => tc.result === null);
+            const pendingToolCalls = prev.toolCalls.some(
+              (tc) => tc.result === null,
+            );
 
             if (pendingToolCalls) {
               break;
             }
 
             const hasToolResults =
-              hasToolCalls && prev.toolCalls.some((tc) => tc.result?.content || tc.result?.section_content);
+              hasToolCalls &&
+              prev.toolCalls.some(
+                (tc) => tc.result?.content || tc.result?.section_content,
+              );
 
             const toolUseContent: ToolUseBlock[] = prev.toolCalls.map((tc) => ({
-              type: 'tool_use' as const,
+              type: "tool_use" as const,
               id: tc.id,
               name: tc.name,
               input: tc.input,
@@ -415,9 +500,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             const assistantMessage: ConversationMessage = {
               id: generateUniqueId() as any,
               conversationId,
-              role: 'assistant',
+              role: "assistant",
               content: [
-                ...(prev.text ? [{ type: 'text' as const, text: prev.text }] : []),
+                ...(prev.text
+                  ? [{ type: "text" as const, text: prev.text }]
+                  : []),
                 ...(hasToolCalls ? toolUseContent : []),
               ],
               reasoning: prev.thinking?.content || null,
@@ -426,32 +513,38 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
 
             if (hasToolResults) {
               const toolResultContent: ToolResultBlock[] = prev.toolCalls
-                .filter((tc) => tc.result?.content || tc.result?.section_content)
+                .filter(
+                  (tc) => tc.result?.content || tc.result?.section_content,
+                )
                 .map((tc) => ({
-                  type: 'tool_result' as const,
+                  type: "tool_result" as const,
                   toolUseId: tc.id,
                   isError: tc.result!.isError,
-                  content: tc.result!.content || '',
+                  content: tc.result!.content || "",
                 }));
               const toolUserMessage: ConversationMessage = {
                 id: generateUniqueId() as any,
                 conversationId,
-                role: 'user',
+                role: "user",
                 content: toolResultContent,
                 reasoning: null,
                 createdAt: null,
               };
-              setMessages((msgs) => [...msgs, assistantMessage, toolUserMessage]);
+              setMessages((msgs) => [
+                ...msgs,
+                assistantMessage,
+                toolUserMessage,
+              ]);
             } else {
               setMessages((msgs) => [...msgs, assistantMessage]);
             }
 
             updateStreaming(() => ({
               bubbleId: generateUniqueId(),
-              status: 'streaming',
+              status: "streaming",
               thinking: null,
               isThinkingActive: false,
-              text: '',
+              text: "",
               toolCalls: [],
             }));
             isDoneRef.current = false;
@@ -459,30 +552,42 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             break;
           }
 
-          case 'thinking_start':
+          case "thinking_start":
             updateStreaming((prev) =>
-              prev ? { ...prev, isThinkingActive: true, thinking: { visible: false, content: '' } } : null,
+              prev
+                ? {
+                    ...prev,
+                    isThinkingActive: true,
+                    thinking: { visible: false, content: "" },
+                  }
+                : null,
             );
             break;
 
-          case 'thinking_delta':
+          case "thinking_delta":
             updateStreaming((prev) => {
               if (!prev) return null;
               return {
                 ...prev,
                 thinking: prev.thinking
-                  ? { ...prev.thinking, content: prev.thinking.content + (event.data.text as string) }
+                  ? {
+                      ...prev.thinking,
+                      content:
+                        prev.thinking.content + (event.data.text as string),
+                    }
                   : null,
               };
             });
             scrollToBottom();
             break;
 
-          case 'text_start':
-            updateStreaming((prev) => (prev ? { ...prev, isThinkingActive: false, text: '' } : null));
+          case "text_start":
+            updateStreaming((prev) =>
+              prev ? { ...prev, isThinkingActive: false, text: "" } : null,
+            );
             break;
 
-          case 'text_delta':
+          case "text_delta":
             updateStreaming((prev) => {
               if (!prev) return null;
               return { ...prev, text: prev.text + (event.data.text as string) };
@@ -490,19 +595,22 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             scrollToBottom();
             break;
 
-          case 'tool_use': {
+          case "tool_use": {
             const newToolCall: ToolCall = {
               id: event.data.id as string,
               name: event.data.name as string,
               input: event.data.input as Record<string, unknown>,
-              status: 'executing',
+              status: "executing",
               result: null,
             };
             if (streamingMessageRef.current) {
               streamingMessageRef.current = {
                 ...streamingMessageRef.current,
                 isThinkingActive: false,
-                toolCalls: [...streamingMessageRef.current.toolCalls, newToolCall],
+                toolCalls: [
+                  ...streamingMessageRef.current.toolCalls,
+                  newToolCall,
+                ],
               };
             }
             setExpandedToolCalls((s) => new Set(s).add(newToolCall.id));
@@ -511,16 +619,19 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             break;
           }
 
-          case 'tool_result': {
+          case "tool_result": {
             const toolUseId = event.data.tool_use_id as string;
-            const sectionContent = event.data.section_content as Record<string, unknown> | undefined;
+            const sectionContent = event.data.section_content as
+              | Record<string, unknown>
+              | undefined;
             const isError = event.data.is_error as boolean;
             const content = event.data.content as string;
 
-
-            const toolCall = streamingMessageRef.current?.toolCalls.find((tc) => tc.id === toolUseId);
-            const isUpdateSection = toolCall?.name === 'update_section';
-            const isAddSection = toolCall?.name === 'add_section';
+            const toolCall = streamingMessageRef.current?.toolCalls.find(
+              (tc) => tc.id === toolUseId,
+            );
+            const isUpdateSection = toolCall?.name === "update_section";
+            const isAddSection = toolCall?.name === "add_section";
 
             // 同步更新 ref，确保 next 事件能立即看到更新后的状态
             if (streamingMessageRef.current) {
@@ -528,8 +639,16 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 ...streamingMessageRef.current,
                 toolCalls: streamingMessageRef.current.toolCalls.map((tc) =>
                   tc.id === toolUseId
-                    ? { ...tc, status: 'done' as const, result: { isError, content, section_content: sectionContent } }
-                    : tc
+                    ? {
+                        ...tc,
+                        status: "done" as const,
+                        result: {
+                          isError,
+                          content,
+                          section_content: sectionContent,
+                        },
+                      }
+                    : tc,
                 ),
               };
             }
@@ -540,38 +659,58 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             // ✅ update_section 工具结果：立即更新前端 UI，不触发数据库保存
             if (isUpdateSection && !isError && sectionContent) {
               const sectionId = sectionContent.id as string;
-              const rawSectionData = (sectionContent as any).data as Record<string, unknown>;
+              const rawSectionData = (sectionContent as any).data as Record<
+                string,
+                unknown
+              >;
               if (sectionId && rawSectionData) {
                 const sectionData = snakeToCamel(rawSectionData);
                 useResumeStore.setState((state) => {
                   const sections = state.sections.map((s) =>
-                    s.id === sectionId ? { ...s, content: { ...s.content, ...sectionData } } : s
+                    s.id === sectionId
+                      ? { ...s, content: { ...s.content, ...sectionData } }
+                      : s,
                   );
                   return {
                     sections,
-                    currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+                    currentResume: state.currentResume
+                      ? { ...state.currentResume, sections }
+                      : null,
                     isDirty: false,
                   };
                 });
               }
             } else if (isAddSection && !isError && sectionContent) {
-              const newSection = snakeToCamel(sectionContent as unknown as Record<string, unknown>) as unknown as ResumeSection;
+              const newSection = snakeToCamel(
+                sectionContent as unknown as Record<string, unknown>,
+              ) as unknown as ResumeSection;
               const sectionId = newSection.id;
               const sectionType = newSection.type;
               const sectionTitle = newSection.title;
               useResumeStore.setState((state) => {
-                const existingIndex = state.sections.findIndex((s) => s.id === sectionId || (s.type === sectionType && s.title === sectionTitle));
+                const existingIndex = state.sections.findIndex(
+                  (s) =>
+                    s.id === sectionId ||
+                    (s.type === sectionType && s.title === sectionTitle),
+                );
                 let sections: ResumeSection[];
                 if (existingIndex >= 0) {
                   sections = state.sections.map((s, i) =>
-                    i === existingIndex ? { ...s, ...newSection, visible: true } : s
+                    i === existingIndex
+                      ? { ...s, ...newSection, visible: true }
+                      : s,
                   );
                 } else {
-                  sections = [...state.sections, { ...newSection, visible: true }];
+                  sections = [
+                    ...state.sections,
+                    { ...newSection, visible: true },
+                  ];
                 }
                 return {
                   sections,
-                  currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+                  currentResume: state.currentResume
+                    ? { ...state.currentResume, sections }
+                    : null,
                   isDirty: false,
                 };
               });
@@ -582,7 +721,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
           }
 
           // ✅ FIX: done 分支直接读 ref，setMessages 独立调用，彻底避免 updater 嵌套
-          case 'done': {
+          case "done": {
             if (isDoneRef.current) break;
             isDoneRef.current = true;
 
@@ -598,10 +737,13 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
 
             const hasToolCalls = prev.toolCalls.length > 0;
             const hasToolResults =
-              hasToolCalls && prev.toolCalls.some((tc) => tc.result?.content || tc.result?.section_content);
+              hasToolCalls &&
+              prev.toolCalls.some(
+                (tc) => tc.result?.content || tc.result?.section_content,
+              );
 
             const toolUseContent: ToolUseBlock[] = prev.toolCalls.map((tc) => ({
-              type: 'tool_use' as const,
+              type: "tool_use" as const,
               id: tc.id,
               name: tc.name,
               input: tc.input,
@@ -610,9 +752,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
             const assistantMessage: ConversationMessage = {
               id: generateUniqueId() as any,
               conversationId,
-              role: 'assistant',
+              role: "assistant",
               content: [
-                ...(prev.text ? [{ type: 'text' as const, text: prev.text }] : []),
+                ...(prev.text
+                  ? [{ type: "text" as const, text: prev.text }]
+                  : []),
                 ...(hasToolCalls ? toolUseContent : []),
               ],
               reasoning: prev.thinking?.content || null,
@@ -621,36 +765,44 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
 
             if (hasToolResults) {
               const toolResultContent: ToolResultBlock[] = prev.toolCalls
-                .filter((tc) => tc.result?.content || tc.result?.section_content)
+                .filter(
+                  (tc) => tc.result?.content || tc.result?.section_content,
+                )
                 .map((tc) => ({
-                  type: 'tool_result' as const,
+                  type: "tool_result" as const,
                   toolUseId: tc.id,
                   isError: tc.result!.isError,
-                  content: tc.result!.content || '',
+                  content: tc.result!.content || "",
                 }));
               const toolUserMessage: ConversationMessage = {
                 id: generateUniqueId() as any,
                 conversationId,
-                role: 'user',
+                role: "user",
                 content: toolResultContent,
                 reasoning: null,
                 createdAt: null,
               };
-              setMessages((msgs) => [...msgs, assistantMessage, toolUserMessage]);
+              setMessages((msgs) => [
+                ...msgs,
+                assistantMessage,
+                toolUserMessage,
+              ]);
             } else {
               setMessages((msgs) => [...msgs, assistantMessage]);
             }
             break;
           }
 
-          case 'error': {
+          case "error": {
             isDoneRef.current = true;
             const errorMessage = event.data.message as string;
             const errorMsg: ConversationMessage = {
               id: generateUniqueId() as any,
               conversationId,
-              role: 'assistant',
-              content: [{ type: 'text' as const, text: `❌ Error: ${errorMessage}` }],
+              role: "assistant",
+              content: [
+                { type: "text" as const, text: `❌ Error: ${errorMessage}` },
+              ],
               reasoning: null,
               createdAt: null,
             };
@@ -669,14 +821,14 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
   }, [input, conversationId, providerConfig, updateStreaming, scrollToBottom]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
   };
 
   const dialogStyle = {
-    position: 'fixed' as const,
+    position: "fixed" as const,
     left: position.x + 56 - 500 - 46 + 47,
     top: position.y - dialogHeight - 5,
     zIndex: 51,
@@ -701,10 +853,22 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
         </div>
         <button
           type="button"
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <title>关闭</title>
             <line x1="3" y1="8" x2="13" y2="8" />
           </svg>
@@ -712,20 +876,31 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
       </div>
 
       <div className="flex flex-col">
-        <div ref={scrollRef} className="relative h-[460px] overflow-y-auto p-4 space-y-3 bg-card" onScroll={handleScroll}>
+        <div
+          ref={scrollRef}
+          className="relative h-[460px] overflow-y-auto p-4 space-y-3 bg-card"
+          onScroll={handleScroll}
+        >
           {loading ? (
-            <div className="text-center text-muted-foreground text-xs py-8">加载中...</div>
+            <div className="text-center text-muted-foreground text-xs py-8">
+              加载中...
+            </div>
           ) : messages.length === 0 ? (
-            <div className="text-center text-muted-foreground text-xs py-8">暂无消息</div>
+            <div className="text-center text-muted-foreground text-xs py-8">
+              暂无消息
+            </div>
           ) : (
             messages.map((msg, index) => {
               const isToolResultOnlyUser =
-                msg.role === 'user' && msg.content.some((c) => c.type === 'tool_result');
+                msg.role === "user" &&
+                msg.content.some((c) => c.type === "tool_result");
               if (isToolResultOnlyUser) return null;
 
-              if (msg.role === 'user') {
-                const textBlockForUser = msg.content.find((c) => c.type === 'text') as TextBlock | undefined;
-                const userText = textBlockForUser?.text || '消息发送成功';
+              if (msg.role === "user") {
+                const textBlockForUser = msg.content.find(
+                  (c) => c.type === "text",
+                ) as TextBlock | undefined;
+                const userText = textBlockForUser?.text || "消息发送成功";
                 return (
                   <div key={msg.id} className="flex justify-end">
                     <div className="max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-xs leading-relaxed bg-primary text-primary-foreground">
@@ -736,13 +911,19 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               }
 
               const reasoning = msg.reasoning;
-              const textBlocks = msg.content.filter((c): c is TextBlock => c.type === 'text');
-              const toolUseBlocks = msg.content.filter((c): c is ToolUseBlock => c.type === 'tool_use');
+              const textBlocks = msg.content.filter(
+                (c): c is TextBlock => c.type === "text",
+              );
+              const toolUseBlocks = msg.content.filter(
+                (c): c is ToolUseBlock => c.type === "tool_use",
+              );
 
               const nextMsg = messages[index + 1];
               const toolResults =
-                nextMsg?.role === 'user'
-                  ? nextMsg.content.filter((c): c is ToolResultBlock => c.type === 'tool_result')
+                nextMsg?.role === "user"
+                  ? nextMsg.content.filter(
+                      (c): c is ToolResultBlock => c.type === "tool_result",
+                    )
                   : [];
 
               const msgKey = `msg-${msg.id}`;
@@ -784,25 +965,71 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
                           components={{
-                            h1: ({ children }) => <h1 className="text-base font-bold text-foreground mb-1">{children}</h1>,
-                            h2: ({ children }) => <h2 className="text-sm font-semibold text-foreground mb-1">{children}</h2>,
-                            h3: ({ children }) => <h3 className="text-xs font-semibold text-foreground mb-1">{children}</h3>,
-                            h4: ({ children }) => <h4 className="text-xs font-medium text-foreground mb-1">{children}</h4>,
-                            p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
-                            ul: ({ children }) => <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">{children}</ul>,
-                            ol: ({ children }) => <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">{children}</ol>,
-                            li: ({ children }) => <li className="text-foreground">{children}</li>,
-                            strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                            em: ({ children }) => <em className="italic text-foreground">{children}</em>,
-                            blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">{children}</blockquote>,
+                            h1: ({ children }) => (
+                              <h1 className="text-base font-bold text-foreground mb-1">
+                                {children}
+                              </h1>
+                            ),
+                            h2: ({ children }) => (
+                              <h2 className="text-sm font-semibold text-foreground mb-1">
+                                {children}
+                              </h2>
+                            ),
+                            h3: ({ children }) => (
+                              <h3 className="text-xs font-semibold text-foreground mb-1">
+                                {children}
+                              </h3>
+                            ),
+                            h4: ({ children }) => (
+                              <h4 className="text-xs font-medium text-foreground mb-1">
+                                {children}
+                              </h4>
+                            ),
+                            p: ({ children }) => (
+                              <p className="text-foreground mb-1">{children}</p>
+                            ),
+                            ul: ({ children }) => (
+                              <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">
+                                {children}
+                              </ul>
+                            ),
+                            ol: ({ children }) => (
+                              <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">
+                                {children}
+                              </ol>
+                            ),
+                            li: ({ children }) => (
+                              <li className="text-foreground">{children}</li>
+                            ),
+                            strong: ({ children }) => (
+                              <strong className="font-semibold text-foreground">
+                                {children}
+                              </strong>
+                            ),
+                            em: ({ children }) => (
+                              <em className="italic text-foreground">
+                                {children}
+                              </em>
+                            ),
+                            blockquote: ({ children }) => (
+                              <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">
+                                {children}
+                              </blockquote>
+                            ),
                             a: ({ children }) => (
-                              <span className="text-pink-400 cursor-pointer">{children}</span>
+                              <span className="text-pink-400 cursor-pointer">
+                                {children}
+                              </span>
                             ),
                             table: ({ children }) => (
-                              <table className="w-full text-xs border-collapse my-2">{children}</table>
+                              <table className="w-full text-xs border-collapse my-2">
+                                {children}
+                              </table>
                             ),
                             thead: ({ children }) => (
-                              <thead className="bg-secondary text-secondary-foreground">{children}</thead>
+                              <thead className="bg-secondary text-secondary-foreground">
+                                {children}
+                              </thead>
                             ),
                             th: ({ children }) => (
                               <th className="border-border px-3 py-1 text-left font-medium text-foreground">
@@ -810,10 +1037,14 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               </th>
                             ),
                             td: ({ children }) => (
-                              <td className="border-border px-3 py-1 text-foreground">{children}</td>
+                              <td className="border-border px-3 py-1 text-foreground">
+                                {children}
+                              </td>
                             ),
                             tr: ({ children }) => (
-                              <tr className="border-b border-[#3a3a3e]">{children}</tr>
+                              <tr className="border-b border-[#3a3a3e]">
+                                {children}
+                              </tr>
                             ),
                           }}
                         >
@@ -849,15 +1080,19 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                           </div>
                           {result && (
                             <div
-                              className={`rounded-lg border p-2 space-y-2 ${result.isError
-                                ? 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10'
-                                : 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10'
-                                }`}
+                              className={`rounded-lg border p-2 space-y-2 ${
+                                result.isError
+                                  ? "border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10"
+                                  : "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10"
+                              }`}
                             >
                               <button
                                 type="button"
-                                className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${result.isError ? 'text-red-700 dark:text-red-300' : 'text-emerald-700 dark:text-emerald-300'
-                                  }`}
+                                className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${
+                                  result.isError
+                                    ? "text-red-700 dark:text-red-300"
+                                    : "text-emerald-700 dark:text-emerald-300"
+                                }`}
                                 onClick={() => toggleThinking(resultKey)}
                               >
                                 {expandedMessages.has(resultKey) ? (
@@ -874,10 +1109,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               </button>
                               {expandedMessages.has(resultKey) && (
                                 <div
-                                  className={`rounded p-2 text-[10px] ${result.isError
-                                    ? 'bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300'
-                                    : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-                                    }`}
+                                  className={`rounded p-2 text-[10px] ${
+                                    result.isError
+                                      ? "bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300"
+                                      : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
+                                  }`}
                                 >
                                   {result.content}
                                 </div>
@@ -908,11 +1144,14 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                       updateStreaming((prev) =>
                         prev
                           ? {
-                            ...prev,
-                            thinking: prev.thinking
-                              ? { ...prev.thinking, visible: !prev.thinking.visible }
-                              : null,
-                          }
+                              ...prev,
+                              thinking: prev.thinking
+                                ? {
+                                    ...prev.thinking,
+                                    visible: !prev.thinking.visible,
+                                  }
+                                : null,
+                            }
                           : null,
                       )
                     }
@@ -927,9 +1166,18 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     </span>
                     {streamingMessage.isThinkingActive && (
                       <span className="flex gap-0.5 ml-1">
-                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '120ms' }} />
-                        <span className="w-1 h-1 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '240ms' }} />
+                        <span
+                          className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
+                          style={{ animationDelay: "0ms" }}
+                        />
+                        <span
+                          className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
+                          style={{ animationDelay: "120ms" }}
+                        />
+                        <span
+                          className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
+                          style={{ animationDelay: "240ms" }}
+                        />
                       </span>
                     )}
                   </button>
@@ -944,20 +1192,64 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        h1: ({ children }) => <h1 className="text-base font-bold text-foreground mb-1">{children}</h1>,
-                        h2: ({ children }) => <h2 className="text-sm font-semibold text-foreground mb-1">{children}</h2>,
-                        h3: ({ children }) => <h3 className="text-xs font-semibold text-foreground mb-1">{children}</h3>,
-                        h4: ({ children }) => <h4 className="text-xs font-medium text-foreground mb-1">{children}</h4>,
-                        p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">{children}</ul>,
-                        ol: ({ children }) => <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">{children}</ol>,
-                        li: ({ children }) => <li className="text-foreground">{children}</li>,
-                        strong: ({ children }) => <strong className="font-semibold text-foreground">{children}</strong>,
-                        em: ({ children }) => <em className="italic text-foreground">{children}</em>,
-                        blockquote: ({ children }) => <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">{children}</blockquote>,
-                        a: ({ children }) => <span className="text-pink-400 cursor-pointer">{children}</span>,
+                        h1: ({ children }) => (
+                          <h1 className="text-base font-bold text-foreground mb-1">
+                            {children}
+                          </h1>
+                        ),
+                        h2: ({ children }) => (
+                          <h2 className="text-sm font-semibold text-foreground mb-1">
+                            {children}
+                          </h2>
+                        ),
+                        h3: ({ children }) => (
+                          <h3 className="text-xs font-semibold text-foreground mb-1">
+                            {children}
+                          </h3>
+                        ),
+                        h4: ({ children }) => (
+                          <h4 className="text-xs font-medium text-foreground mb-1">
+                            {children}
+                          </h4>
+                        ),
+                        p: ({ children }) => (
+                          <p className="text-foreground mb-1">{children}</p>
+                        ),
+                        ul: ({ children }) => (
+                          <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">
+                            {children}
+                          </ul>
+                        ),
+                        ol: ({ children }) => (
+                          <ol className="list-decimal list-inside text-foreground mb-1 space-y-0.5">
+                            {children}
+                          </ol>
+                        ),
+                        li: ({ children }) => (
+                          <li className="text-foreground">{children}</li>
+                        ),
+                        strong: ({ children }) => (
+                          <strong className="font-semibold text-foreground">
+                            {children}
+                          </strong>
+                        ),
+                        em: ({ children }) => (
+                          <em className="italic text-foreground">{children}</em>
+                        ),
+                        blockquote: ({ children }) => (
+                          <blockquote className="border-l-2 border-border pl-2 text-muted-foreground italic mb-1">
+                            {children}
+                          </blockquote>
+                        ),
+                        a: ({ children }) => (
+                          <span className="text-pink-400 cursor-pointer">
+                            {children}
+                          </span>
+                        ),
                       }}
-                    >{streamingMessage.text}</ReactMarkdown>
+                    >
+                      {streamingMessage.text}
+                    </ReactMarkdown>
                   </div>
                 )}
                 {streamingMessage.toolCalls.map((toolCall) => (
@@ -975,9 +1267,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         )}
                         <Wrench className="h-3 w-3" />
                         <span>工具请求: {toolCall.name}</span>
-                        {toolCall.status === 'executing' && (
+                        {toolCall.status === "executing" && (
                           <>
-                            <span className="text-muted-foreground">执行中...</span>
+                            <span className="text-muted-foreground">
+                              执行中...
+                            </span>
                             <Loader2 className="h-3 w-3 animate-spin text-indigo-500 dark:text-indigo-400" />
                           </>
                         )}
@@ -988,23 +1282,25 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         </pre>
                       )}
                     </div>
-                    {(toolCall.result || toolCall.status === 'executing') && (
+                    {(toolCall.result || toolCall.status === "executing") && (
                       <div
-                        className={`rounded-lg border p-2 space-y-2 ${toolCall.status === 'executing'
-                          ? 'border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10'
-                          : toolCall.result!.isError
-                            ? 'border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10'
-                            : 'border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10'
-                          }`}
+                        className={`rounded-lg border p-2 space-y-2 ${
+                          toolCall.status === "executing"
+                            ? "border-purple-200 dark:border-purple-500/30 bg-purple-50 dark:bg-purple-500/10"
+                            : toolCall.result!.isError
+                              ? "border-red-200 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10"
+                              : "border-emerald-200 dark:border-emerald-500/30 bg-emerald-50 dark:bg-emerald-500/10"
+                        }`}
                       >
                         <button
                           type="button"
-                          className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${toolCall.status === 'executing'
-                            ? 'text-purple-700 dark:text-purple-300'
-                            : toolCall.result!.isError
-                              ? 'text-red-700 dark:text-red-300'
-                              : 'text-emerald-700 dark:text-emerald-300'
-                            }`}
+                          className={`text-[10px] cursor-pointer hover:opacity-80 flex items-center gap-1 w-full ${
+                            toolCall.status === "executing"
+                              ? "text-purple-700 dark:text-purple-300"
+                              : toolCall.result!.isError
+                                ? "text-red-700 dark:text-red-300"
+                                : "text-emerald-700 dark:text-emerald-300"
+                          }`}
                           onClick={() => toggleToolResult(toolCall.id)}
                         >
                           {expandedToolResults.has(toolCall.id) ? (
@@ -1012,7 +1308,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                           ) : (
                             <ChevronRight className="h-3 w-3" />
                           )}
-                          {toolCall.status === 'executing' ? (
+                          {toolCall.status === "executing" ? (
                             <>
                               <Loader2 className="h-3 w-3 animate-spin text-purple-500 dark:text-purple-400" />
                               <span>执行中...</span>
@@ -1031,27 +1327,41 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         </button>
                         {expandedToolResults.has(toolCall.id) && (
                           <div
-                            className={`rounded p-2 text-[10px] ${toolCall.status === 'executing'
-                              ? 'bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300'
-                              : toolCall.result!.isError
-                                ? 'bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300'
-                                : 'bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-                              }`}
+                            className={`rounded p-2 text-[10px] ${
+                              toolCall.status === "executing"
+                                ? "bg-purple-100 dark:bg-purple-500/10 text-purple-800 dark:text-purple-300"
+                                : toolCall.result!.isError
+                                  ? "bg-red-100 dark:bg-red-500/10 text-red-800 dark:text-red-300"
+                                  : "bg-emerald-100 dark:bg-emerald-500/10 text-emerald-800 dark:text-emerald-300"
+                            }`}
                           >
-                            {toolCall.status === 'executing' ? '等待结果...' : toolCall.result!.content}
+                            {toolCall.status === "executing"
+                              ? "等待结果..."
+                              : toolCall.result!.content}
                           </div>
                         )}
                       </div>
                     )}
                   </div>
                 ))}
-                {!streamingMessage.text && !streamingMessage.thinking && streamingMessage.toolCalls.length === 0 && (
-                  <div className="flex items-center gap-1 py-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </div>
-                )}
+                {!streamingMessage.text &&
+                  !streamingMessage.thinking &&
+                  streamingMessage.toolCalls.length === 0 && (
+                    <div className="flex items-center gap-1 py-1">
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce"
+                        style={{ animationDelay: "0ms" }}
+                      />
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce"
+                        style={{ animationDelay: "150ms" }}
+                      />
+                      <span
+                        className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce"
+                        style={{ animationDelay: "300ms" }}
+                      />
+                    </div>
+                  )}
               </div>
             </div>
           )}
@@ -1084,7 +1394,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               <div className="flex items-center gap-2 text-xs text-foreground">
                 <span className="flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
-                  {currentModel || '未配置模型'}
+                  {currentModel || "未配置模型"}
                 </span>
               </div>
               <button

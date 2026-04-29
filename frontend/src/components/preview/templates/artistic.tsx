@@ -1,4 +1,3 @@
-
 import type {
   Resume,
   PersonalInfoContent,
@@ -11,38 +10,81 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from '../../../types/resume';
-import { AvatarImage } from '../avatar-image';
-import { degreeField, isSectionEmpty, md } from '../utils';
-import { QrCodesPreview } from '../qr-codes-preview';
+} from "../../../types/resume";
+import { AvatarImage } from "../avatar-image";
+import { degreeField, isSectionEmpty, md } from "../utils";
+import { QrCodesPreview } from "../qr-codes-preview";
 
-const PRIMARY = '#1e1b4b';
-const ACCENT = '#f43f5e';
-const HIGHLIGHT = '#fbbf24';
+const PRIMARY = "#1e1b4b";
+const ACCENT = "#f43f5e";
+const HIGHLIGHT = "#fbbf24";
 
 export function ArtisticTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
+  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
-  const contacts = [pi.age, pi.politicalStatus, pi.gender, pi.ethnicity, pi.hometown, pi.maritalStatus, pi.yearsOfExperience, pi.educationLevel, pi.email, pi.phone, pi.wechat, pi.location, pi.website].filter(Boolean);
+  const contacts = [
+    pi.age,
+    pi.politicalStatus,
+    pi.gender,
+    pi.ethnicity,
+    pi.hometown,
+    pi.maritalStatus,
+    pi.yearsOfExperience,
+    pi.educationLevel,
+    pi.email,
+    pi.phone,
+    pi.wechat,
+    pi.location,
+    pi.website,
+  ].filter(Boolean);
 
   return (
-    <div className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       {/* Header with colored block */}
-      <div className="relative px-10 py-8 text-white" style={{ background: PRIMARY }}>
+      <div
+        className="relative px-10 py-8 text-white"
+        style={{ background: PRIMARY }}
+      >
         {/* Decorative shapes */}
-        <div className="absolute right-6 top-4 h-24 w-24 rounded-full opacity-20" style={{ backgroundColor: ACCENT }} />
-        <div className="absolute right-16 bottom-2 h-12 w-12 rounded-full opacity-30" style={{ backgroundColor: HIGHLIGHT }} />
-        <div className="absolute left-0 bottom-0 h-2 w-full" style={{ background: `linear-gradient(90deg, ${ACCENT}, ${HIGHLIGHT})` }} />
+        <div
+          className="absolute right-6 top-4 h-24 w-24 rounded-full opacity-20"
+          style={{ backgroundColor: ACCENT }}
+        />
+        <div
+          className="absolute right-16 bottom-2 h-12 w-12 rounded-full opacity-30"
+          style={{ backgroundColor: HIGHLIGHT }}
+        />
+        <div
+          className="absolute left-0 bottom-0 h-2 w-full"
+          style={{
+            background: `linear-gradient(90deg, ${ACCENT}, ${HIGHLIGHT})`,
+          }}
+        />
 
         <div className="relative flex items-center gap-5">
           {pi.avatar && (
-            <AvatarImage src={pi.avatar} size={80} wrapperClassName="shrink-0 p-1" wrapperStyle={{ border: `3px dashed ${HIGHLIGHT}` }} />
+            <AvatarImage
+              src={pi.avatar}
+              size={80}
+              wrapperClassName="shrink-0 p-1"
+              wrapperStyle={{ border: `3px dashed ${HIGHLIGHT}` }}
+            />
           )}
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">
+              {pi.fullName || "Your Name"}
+            </h1>
             {pi.jobTitle && (
-              <p className="mt-1 text-sm font-medium" style={{ color: HIGHLIGHT }}>{pi.jobTitle}</p>
+              <p
+                className="mt-1 text-sm font-medium"
+                style={{ color: HIGHLIGHT }}
+              >
+                {pi.jobTitle}
+              </p>
             )}
             {contacts.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-white/70">
@@ -57,57 +99,115 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
 
       {/* Body */}
       <div className="p-8 pt-6">
-      {resume.sections
-        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
-        .map((section) => (
-          <div key={section.id} className="mb-6" data-section>
-            <div className="mb-2.5 flex items-center gap-2">
-              <h2 className="text-sm font-extrabold uppercase tracking-widest" style={{ color: PRIMARY }}>
-                {section.title}
-              </h2>
-              <div className="h-0.5 flex-1" style={{ borderTop: `2px dashed ${ACCENT}40` }} />
+        {resume.sections
+          .filter(
+            (s) =>
+              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
+          )
+          .map((section) => (
+            <div key={section.id} className="mb-6" data-section>
+              <div className="mb-2.5 flex items-center gap-2">
+                <h2
+                  className="text-sm font-extrabold uppercase tracking-widest"
+                  style={{ color: PRIMARY }}
+                >
+                  {section.title}
+                </h2>
+                <div
+                  className="h-0.5 flex-1"
+                  style={{ borderTop: `2px dashed ${ACCENT}40` }}
+                />
+              </div>
+              <div className="mt-2">
+                <ArtisticSectionContent section={section} resume={resume} />
+              </div>
             </div>
-            <div className="mt-2">
-              <ArtisticSectionContent section={section} resume={resume} />
-            </div>
-          </div>
-                  ))}
+          ))}
       </div>
     </div>
   );
 }
 
-function ArtisticSectionContent({ section, resume }: { section: any; resume: Resume }) {
+function ArtisticSectionContent({
+  section,
+  resume,
+}: {
+  section: any;
+  resume: Resume;
+}) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'summary') {
+  if (section.type === "summary") {
     return (
-      <div className="rounded-lg p-4" style={{ border: `2px dashed ${ACCENT}30`, backgroundColor: `${PRIMARY}05` }}>
-        <p className="text-sm leading-relaxed text-zinc-600 italic" dangerouslySetInnerHTML={{ __html: md((content as SummaryContent).text) }} />
+      <div
+        className="rounded-lg p-4"
+        style={{
+          border: `2px dashed ${ACCENT}30`,
+          backgroundColor: `${PRIMARY}05`,
+        }}
+      >
+        <p
+          className="text-sm leading-relaxed text-zinc-600 italic"
+          dangerouslySetInnerHTML={{
+            __html: md((content as SummaryContent).text),
+          }}
+        />
       </div>
     );
   }
 
-  if (section.type === 'work_experience') {
+  if (section.type === "work_experience") {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id} className="relative rounded-lg p-4" style={{ border: `1px dashed ${ACCENT}30` }}>
-            <div className="absolute -left-1.5 top-4 h-3 w-3 rounded-full" style={{ backgroundColor: ACCENT }} />
+          <div
+            key={item.id}
+            className="relative rounded-lg p-4"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
+            <div
+              className="absolute -left-1.5 top-4 h-3 w-3 rounded-full"
+              style={{ backgroundColor: ACCENT }}
+            />
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.position}</h3>
-              <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white" style={{ backgroundColor: ACCENT }}>
-                {item.startDate} - {item.endDate || (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.position}
+              </h3>
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {item.startDate} -{" "}
+                {item.endDate ||
+                  (item.current
+                    ? resume.language === "zh"
+                      ? "至今"
+                      : "Present"
+                    : "")}
               </span>
             </div>
-            {item.company && <p className="text-sm font-medium" style={{ color: ACCENT }}>{item.company}{item.location ? `, ${item.location}` : ''}</p>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.company && (
+              <p className="text-sm font-medium" style={{ color: ACCENT }}>
+                {item.company}
+                {item.location ? `, ${item.location}` : ""}
+              </p>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: i % 2 === 0 ? ACCENT : PRIMARY }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                    style={{ backgroundColor: i % 2 === 0 ? ACCENT : PRIMARY }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -116,8 +216,14 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HIGHLIGHT }} />
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-600"
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: HIGHLIGHT }}
+                    />
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
                 ))}
@@ -129,23 +235,44 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'education') {
+  if (section.type === "education") {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg p-4" style={{ border: `1px dashed ${ACCENT}30` }}>
+          <div
+            key={item.id}
+            className="rounded-lg p-4"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.institution}</h3>
-              <span className="text-xs text-zinc-400">{item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}</span>
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.institution}
+              </h3>
+              <span className="text-xs text-zinc-400">
+                {item.startDate} -{" "}
+                {item.endDate ||
+                  (resume.language === "zh" ? "至今" : "Present")}
+              </span>
             </div>
-            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}{item.location ? ` — ${item.location}` : ''}</p>
-            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
+            <p className="text-sm text-zinc-600">
+              {degreeField(item.degree, item.field)}
+              {item.location ? ` — ${item.location}` : ""}
+            </p>
+            {item.gpa && (
+              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
+            )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HIGHLIGHT }} />
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-600"
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: HIGHLIGHT }}
+                    />
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
                 ))}
@@ -157,13 +284,18 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'skills') {
+  if (section.type === "skills") {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
           <div key={cat.id}>
-            <p className="mb-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: ACCENT }}>{cat.name}</p>
+            <p
+              className="mb-1.5 text-xs font-bold uppercase tracking-wider"
+              style={{ color: ACCENT }}
+            >
+              {cat.name}
+            </p>
             <div className="flex flex-wrap gap-2">
               {(cat.skills || []).map((skill: string, i: number) => (
                 <span
@@ -171,7 +303,12 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
                   className="flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium"
                   style={{ backgroundColor: `${PRIMARY}10`, color: PRIMARY }}
                 >
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: i % 2 === 0 ? ACCENT : HIGHLIGHT }} />
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{
+                      backgroundColor: i % 2 === 0 ? ACCENT : HIGHLIGHT,
+                    }}
+                  />
                   {skill}
                 </span>
               ))}
@@ -182,25 +319,42 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'projects') {
+  if (section.type === "projects") {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg p-4" style={{ border: `1px dashed ${ACCENT}30` }}>
+          <div
+            key={item.id}
+            className="rounded-lg p-4"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</h3>
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.name}
+              </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
+                  {item.startDate} -{" "}
+                  {item.endDate ||
+                    (resume.language === "zh" ? "至今" : "Present")}
                 </span>
               )}
             </div>
-            {item.description && <p className="mt-0.5 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-0.5 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white" style={{ backgroundColor: i % 2 === 0 ? ACCENT : PRIMARY }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
+                    style={{ backgroundColor: i % 2 === 0 ? ACCENT : PRIMARY }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -209,8 +363,14 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
-                    <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: HIGHLIGHT }} />
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-sm text-zinc-600"
+                  >
+                    <span
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: HIGHLIGHT }}
+                    />
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
                 ))}
@@ -222,28 +382,52 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg px-4 py-2" style={{ border: `1px dashed ${ACCENT}30`, backgroundColor: `${HIGHLIGHT}10` }}>
-            <p className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</p>
-            {(item.issuer || item.date) && <p className="text-xs text-zinc-500">{item.issuer}{item.issuer && item.date ? ' | ' : ''}{item.date}</p>}
+          <div
+            key={item.id}
+            className="rounded-lg px-4 py-2"
+            style={{
+              border: `1px dashed ${ACCENT}30`,
+              backgroundColor: `${HIGHLIGHT}10`,
+            }}
+          >
+            <p className="text-sm font-bold" style={{ color: PRIMARY }}>
+              {item.name}
+            </p>
+            {(item.issuer || item.date) && (
+              <p className="text-xs text-zinc-500">
+                {item.issuer}
+                {item.issuer && item.date ? " | " : ""}
+                {item.date}
+              </p>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-center gap-2 rounded-full px-4 py-1.5" style={{ border: `2px dashed ${ACCENT}30` }}>
-            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ACCENT }} />
-            <span className="text-sm font-medium" style={{ color: PRIMARY }}>{item.language}</span>
+          <div
+            key={item.id}
+            className="flex items-center gap-2 rounded-full px-4 py-1.5"
+            style={{ border: `2px dashed ${ACCENT}30` }}
+          >
+            <span
+              className="h-2.5 w-2.5 rounded-full"
+              style={{ backgroundColor: ACCENT }}
+            />
+            <span className="text-sm font-medium" style={{ color: PRIMARY }}>
+              {item.language}
+            </span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -251,43 +435,77 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'github') {
+  if (section.type === "github") {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg p-4" style={{ border: `1px dashed ${ACCENT}30` }}>
+          <div
+            key={item.id}
+            className="rounded-lg p-4"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</span>
-              <span className="text-xs text-zinc-400">{'\u2B50'} {item.stars?.toLocaleString()}</span>
+              <span className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.name}
+              </span>
+              <span className="text-xs text-zinc-400">
+                {"\u2B50"} {item.stars?.toLocaleString()}
+              </span>
             </div>
-            {item.language && <span className="text-xs" style={{ color: ACCENT }}>{item.language}</span>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.language && (
+              <span className="text-xs" style={{ color: ACCENT }}>
+                {item.language}
+              </span>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg p-4" style={{ border: `1px dashed ${ACCENT}30` }}>
+          <div
+            key={item.id}
+            className="rounded-lg p-4"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.title}</h3>
-              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.title}
+              </h3>
+              {item.date && (
+                <span className="text-xs text-zinc-400">{item.date}</span>
+              )}
             </div>
-            {item.subtitle && <p className="text-sm" style={{ color: ACCENT }}>{item.subtitle}</p>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.subtitle && (
+              <p className="text-sm" style={{ color: ACCENT }}>
+                {item.subtitle}
+              </p>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -296,9 +514,20 @@ function ArtisticSectionContent({ section, resume }: { section: any; resume: Res
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="rounded-lg p-3" style={{ border: `1px dashed ${ACCENT}30` }}>
-            <span className="text-sm font-medium" style={{ color: PRIMARY }}>{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+          <div
+            key={item.id}
+            className="rounded-lg p-3"
+            style={{ border: `1px dashed ${ACCENT}30` }}
+          >
+            <span className="text-sm font-medium" style={{ color: PRIMARY }}>
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>

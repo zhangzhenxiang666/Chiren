@@ -1,57 +1,62 @@
-import { useState, useEffect } from 'react'
-import { X, Loader2, Pencil } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { X, Loader2, Pencil } from "lucide-react";
 
 export interface EditSubResumeModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
   onSubmit: (payload: {
-    title: string
-    jobTitle: string
-    jobDescription: string
-  }) => void
+    title: string;
+    jobTitle: string;
+    jobDescription: string;
+  }) => void;
   initialData?: {
-    title: string
-    jobTitle?: string
-    jobDescription?: string
-  }
+    title: string;
+    jobTitle?: string;
+    jobDescription?: string;
+  };
 }
 
-export default function EditSubResumeModal({ open, onClose, onSubmit, initialData }: EditSubResumeModalProps) {
-  const [title, setTitle] = useState('')
-  const [jobTitle, setJobTitle] = useState('')
-  const [jobDescription, setJobDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+export default function EditSubResumeModal({
+  open,
+  onClose,
+  onSubmit,
+  initialData,
+}: EditSubResumeModalProps) {
+  const [title, setTitle] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jobDescription, setJobDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (open && initialData) {
-      setTitle(initialData.title || '')
-      setJobTitle(initialData.jobTitle || '')
-      setJobDescription(initialData.jobDescription || '')
+      setTitle(initialData.title || "");
+      setJobTitle(initialData.jobTitle || "");
+      setJobDescription(initialData.jobDescription || "");
     }
-  }, [open, initialData])
+  }, [open, initialData]);
 
   const handleSubmit = async () => {
-    if (!jobDescription.trim()) return
-    setIsSubmitting(true)
+    if (!jobDescription.trim()) return;
+    setIsSubmitting(true);
     try {
       await onSubmit({
-        title: title.trim() || initialData?.title || '未命名简历',
+        title: title.trim() || initialData?.title || "未命名简历",
         jobTitle: jobTitle.trim(),
         jobDescription: jobDescription.trim(),
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const resetAndClose = () => {
-    onClose()
-    setTitle('')
-    setJobTitle('')
-    setJobDescription('')
-  }
+    onClose();
+    setTitle("");
+    setJobTitle("");
+    setJobDescription("");
+  };
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -59,15 +64,21 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
         role="button"
         tabIndex={0}
         onClick={resetAndClose}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') resetAndClose() }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") resetAndClose();
+        }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
       />
 
       <div className="relative w-[640px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">编辑子简历</h2>
-            <p className="text-muted-foreground text-sm mt-1">修改简历名称、岗位信息和 JD 描述</p>
+            <h2 className="text-xl font-semibold text-foreground">
+              编辑子简历
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              修改简历名称、岗位信息和 JD 描述
+            </p>
           </div>
           <button
             type="button"
@@ -81,7 +92,10 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
         <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="edit-name" className="text-xs text-muted-foreground mb-1.5 block">
+              <label
+                htmlFor="edit-name"
+                className="text-xs text-muted-foreground mb-1.5 block"
+              >
                 简历名称
               </label>
               <input
@@ -94,8 +108,12 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
               />
             </div>
             <div>
-              <label htmlFor="edit-job-title" className="text-xs text-muted-foreground mb-1.5 block">
-                岗位名称 <span className="text-muted-foreground/60">(选填)</span>
+              <label
+                htmlFor="edit-job-title"
+                className="text-xs text-muted-foreground mb-1.5 block"
+              >
+                岗位名称{" "}
+                <span className="text-muted-foreground/60">(选填)</span>
               </label>
               <input
                 id="edit-job-title"
@@ -109,7 +127,10 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
           </div>
 
           <div className="mt-4">
-            <label htmlFor="edit-jd" className="text-xs text-muted-foreground mb-1.5 block">
+            <label
+              htmlFor="edit-jd"
+              className="text-xs text-muted-foreground mb-1.5 block"
+            >
               JD 描述 <span className="text-red-400">*</span>
             </label>
             <textarea
@@ -121,9 +142,15 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
               className="w-full resize-none px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
             />
             <div className="flex justify-between mt-1">
-              <span className="text-muted-foreground/60 text-[11px]">请尽量填写完整的岗位要求和职责描述</span>
-              <span className={`text-[11px] ${jobDescription.trim() ? 'text-pink-400' : 'text-muted-foreground/60'}`}>
-                {jobDescription.length > 0 ? `${jobDescription.length} 字` : '必填'}
+              <span className="text-muted-foreground/60 text-[11px]">
+                请尽量填写完整的岗位要求和职责描述
+              </span>
+              <span
+                className={`text-[11px] ${jobDescription.trim() ? "text-pink-400" : "text-muted-foreground/60"}`}
+              >
+                {jobDescription.length > 0
+                  ? `${jobDescription.length} 字`
+                  : "必填"}
               </span>
             </div>
           </div>
@@ -158,5 +185,5 @@ export default function EditSubResumeModal({ open, onClose, onSubmit, initialDat
         </div>
       </div>
     </div>
-  )
+  );
 }

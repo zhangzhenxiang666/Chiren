@@ -1,7 +1,7 @@
-import * as React from "react"
-import * as SliderPrimitive from "@radix-ui/react-slider"
+import * as React from "react";
+import * as SliderPrimitive from "@radix-ui/react-slider";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 function Slider({
   className,
@@ -20,7 +20,7 @@ function Slider({
       max={max}
       className={cn(
         "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
-        className
+        className,
       )}
       {...props}
     >
@@ -29,14 +29,14 @@ function Slider({
         className={cn(
           "relative grow overflow-hidden rounded-full bg-muted",
           "data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full",
-          "data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5"
+          "data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5",
         )}
       >
         <SliderPrimitive.Range
           data-slot="slider-range"
           className="absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full"
         />
-      </SliderPrimitive.Track    >
+      </SliderPrimitive.Track>
       {value?.map((v: number) => (
         <SliderPrimitive.Thumb
           key={v}
@@ -44,7 +44,7 @@ function Slider({
         />
       ))}
     </SliderPrimitive.Root>
-  )
+  );
 }
 
-export { Slider }
+export { Slider };

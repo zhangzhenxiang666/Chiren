@@ -1,4 +1,3 @@
-
 import type {
   Resume,
   PersonalInfoContent,
@@ -11,52 +10,97 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from '../../../types/resume';
-import { AvatarImage } from '../avatar-image';
-import { degreeField, isSectionEmpty, md } from '../utils';
-import { QrCodesPreview } from '../qr-codes-preview';
+} from "../../../types/resume";
+import { AvatarImage } from "../avatar-image";
+import { degreeField, isSectionEmpty, md } from "../utils";
+import { QrCodesPreview } from "../qr-codes-preview";
 
-const PRIMARY = '#1e293b';
-const AMBER = '#f59e0b';
+const PRIMARY = "#1e293b";
+const AMBER = "#f59e0b";
 
 export function MetroTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
+  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
-  const contacts = [pi.age, pi.politicalStatus, pi.gender, pi.ethnicity, pi.hometown, pi.maritalStatus, pi.yearsOfExperience, pi.educationLevel, pi.email, pi.phone, pi.wechat, pi.location, pi.website].filter(Boolean);
+  const contacts = [
+    pi.age,
+    pi.politicalStatus,
+    pi.gender,
+    pi.ethnicity,
+    pi.hometown,
+    pi.maritalStatus,
+    pi.yearsOfExperience,
+    pi.educationLevel,
+    pi.email,
+    pi.phone,
+    pi.wechat,
+    pi.location,
+    pi.website,
+  ].filter(Boolean);
 
   return (
-    <div className="mx-auto max-w-[210mm] bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="mx-auto max-w-[210mm] bg-white shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       {/* Header */}
       <div className="mb-6 flex items-center gap-5">
         {pi.avatar && (
           <AvatarImage
             src={pi.avatar}
-
             size={64}
             className="shrink-0"
             style={{ border: `3px solid ${AMBER}` }}
           />
         )}
         <div className="min-w-0 flex-1">
-          <h1 className="text-2xl font-extrabold uppercase tracking-tight" style={{ color: PRIMARY }}>{pi.fullName || 'Your Name'}</h1>
+          <h1
+            className="text-2xl font-extrabold uppercase tracking-tight"
+            style={{ color: PRIMARY }}
+          >
+            {pi.fullName || "Your Name"}
+          </h1>
           {pi.jobTitle && (
-            <p className="mt-0.5 text-sm font-semibold" style={{ color: AMBER }}>{pi.jobTitle}</p>
+            <p
+              className="mt-0.5 text-sm font-semibold"
+              style={{ color: AMBER }}
+            >
+              {pi.jobTitle}
+            </p>
           )}
           {contacts.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2 text-xs text-zinc-500">
               {contacts.map((c, i) => (
-                <span key={i} className="px-2 py-0.5" style={{ backgroundColor: '#f8fafc', borderLeft: `2px solid ${AMBER}` }}>
+                <span
+                  key={i}
+                  className="px-2 py-0.5"
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    borderLeft: `2px solid ${AMBER}`,
+                  }}
+                >
                   {c}
                 </span>
               ))}
               {pi.linkedin && (
-                <span className="px-2 py-0.5" style={{ backgroundColor: '#f8fafc', borderLeft: `2px solid ${AMBER}` }}>
+                <span
+                  className="px-2 py-0.5"
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    borderLeft: `2px solid ${AMBER}`,
+                  }}
+                >
                   {pi.linkedin}
                 </span>
               )}
               {pi.github && (
-                <span className="px-2 py-0.5" style={{ backgroundColor: '#f8fafc', borderLeft: `2px solid ${AMBER}` }}>
+                <span
+                  className="px-2 py-0.5"
+                  style={{
+                    backgroundColor: "#f8fafc",
+                    borderLeft: `2px solid ${AMBER}`,
+                  }}
+                >
                   {pi.github}
                 </span>
               )}
@@ -70,14 +114,22 @@ export function MetroTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
+        .filter(
+          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
+        )
         .map((section) => (
           <div key={section.id} className="mb-7 pt-1" data-section>
             <div className="mb-4 flex items-center gap-2">
-              <div className="px-3 py-1 text-xs font-bold uppercase tracking-wider text-white" style={{ backgroundColor: PRIMARY }}>
+              <div
+                className="px-3 py-1 text-xs font-bold uppercase tracking-wider text-white"
+                style={{ backgroundColor: PRIMARY }}
+              >
                 {section.title}
               </div>
-              <div className="h-0.5 flex-1" style={{ backgroundColor: AMBER }} />
+              <div
+                className="h-0.5 flex-1"
+                style={{ backgroundColor: AMBER }}
+              />
             </div>
             <div className="mt-2">
               <MetroSectionContent section={section} resume={resume} />
@@ -88,34 +140,74 @@ export function MetroTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function MetroSectionContent({ section, resume }: { section: any; resume: Resume }) {
+function MetroSectionContent({
+  section,
+  resume,
+}: {
+  section: any;
+  resume: Resume;
+}) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'summary') {
+  if (section.type === "summary") {
     return (
-      <p className="border-l-3 pl-4 text-sm leading-relaxed text-zinc-600" style={{ borderColor: AMBER }} dangerouslySetInnerHTML={{ __html: md((content as SummaryContent).text) }} />
+      <p
+        className="border-l-3 pl-4 text-sm leading-relaxed text-zinc-600"
+        style={{ borderColor: AMBER }}
+        dangerouslySetInnerHTML={{
+          __html: md((content as SummaryContent).text),
+        }}
+      />
     );
   }
 
-  if (section.type === 'work_experience') {
+  if (section.type === "work_experience") {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.position}</h3>
-              <span className="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase text-white" style={{ backgroundColor: PRIMARY }}>
-                {item.startDate} - {item.endDate || (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.position}
+              </h3>
+              <span
+                className="shrink-0 px-2 py-0.5 text-[10px] font-bold uppercase text-white"
+                style={{ backgroundColor: PRIMARY }}
+              >
+                {item.startDate} -{" "}
+                {item.endDate ||
+                  (item.current
+                    ? resume.language === "zh"
+                      ? "至今"
+                      : "Present"
+                    : "")}
               </span>
             </div>
-            {item.company && <p className="text-sm font-semibold" style={{ color: AMBER }}>{item.company}</p>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.company && (
+              <p className="text-sm font-semibold" style={{ color: AMBER }}>
+                {item.company}
+              </p>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: PRIMARY }}>
+                  <span
+                    key={i}
+                    className="px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    style={{ backgroundColor: PRIMARY }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -124,7 +216,11 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -134,22 +230,40 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'education') {
+  if (section.type === "education") {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.institution}</h3>
-              <span className="text-xs text-zinc-400">{item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}</span>
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.institution}
+              </h3>
+              <span className="text-xs text-zinc-400">
+                {item.startDate} -{" "}
+                {item.endDate ||
+                  (resume.language === "zh" ? "至今" : "Present")}
+              </span>
             </div>
-            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
-            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
+            <p className="text-sm text-zinc-600">
+              {degreeField(item.degree, item.field)}
+            </p>
+            {item.gpa && (
+              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
+            )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -159,13 +273,18 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'skills') {
+  if (section.type === "skills") {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
           <div key={cat.id}>
-            <p className="mb-1.5 text-xs font-bold uppercase tracking-wider" style={{ color: PRIMARY }}>{cat.name}</p>
+            <p
+              className="mb-1.5 text-xs font-bold uppercase tracking-wider"
+              style={{ color: PRIMARY }}
+            >
+              {cat.name}
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {(cat.skills || []).map((skill: string, i: number) => (
                 <span
@@ -183,25 +302,42 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'projects') {
+  if (section.type === "projects") {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</h3>
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.name}
+              </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
+                  {item.startDate} -{" "}
+                  {item.endDate ||
+                    (resume.language === "zh" ? "至今" : "Present")}
                 </span>
               )}
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="px-1.5 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: PRIMARY }}>
+                  <span
+                    key={i}
+                    className="px-1.5 py-0.5 text-[10px] font-bold text-white"
+                    style={{ backgroundColor: PRIMARY }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -210,7 +346,11 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -220,27 +360,48 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between border-l-3 pl-4" style={{ borderColor: AMBER }}>
-            <span className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</span>
-            {(item.issuer || item.date) && <span className="text-xs text-zinc-500">{item.issuer}{item.issuer && item.date ? ' | ' : ''}{item.date}</span>}
+          <div
+            key={item.id}
+            className="flex items-baseline justify-between border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
+            <span className="text-sm font-bold" style={{ color: PRIMARY }}>
+              {item.name}
+            </span>
+            {(item.issuer || item.date) && (
+              <span className="text-xs text-zinc-500">
+                {item.issuer}
+                {item.issuer && item.date ? " | " : ""}
+                {item.date}
+              </span>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-center gap-2 px-3 py-1" style={{ backgroundColor: '#f8fafc', borderLeft: `3px solid ${AMBER}` }}>
-            <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.language}</span>
+          <div
+            key={item.id}
+            className="flex items-center gap-2 px-3 py-1"
+            style={{
+              backgroundColor: "#f8fafc",
+              borderLeft: `3px solid ${AMBER}`,
+            }}
+          >
+            <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
+              {item.language}
+            </span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -248,43 +409,75 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     );
   }
 
-  if (section.type === 'github') {
+  if (section.type === "github") {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</span>
-              <span className="text-xs text-zinc-400">{'\u2B50'} {item.stars?.toLocaleString()}</span>
+              <span className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.name}
+              </span>
+              <span className="text-xs text-zinc-400">
+                {"\u2B50"} {item.stars?.toLocaleString()}
+              </span>
             </div>
-            {item.language && <span className="text-xs" style={{ color: AMBER }}>{item.language}</span>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.language && (
+              <span className="text-xs" style={{ color: AMBER }}>
+                {item.language}
+              </span>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>{item.title}</h3>
-              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+              <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.title}
+              </h3>
+              {item.date && (
+                <span className="text-xs text-zinc-400">{item.date}</span>
+              )}
             </div>
-            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.subtitle && (
+              <p className="text-sm text-zinc-500">{item.subtitle}</p>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -293,9 +486,20 @@ function MetroSectionContent({ section, resume }: { section: any; resume: Resume
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="border-l-3 pl-4" style={{ borderColor: AMBER }}>
-            <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+          <div
+            key={item.id}
+            className="border-l-3 pl-4"
+            style={{ borderColor: AMBER }}
+          >
+            <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -122,6 +122,13 @@ export interface CustomContent {
   title: string;
   date: string;
   description: string;
+  items?: Array<{
+    id: string;
+    title: string;
+    subtitle?: string;
+    date?: string;
+    description?: string;
+  }>;
 }
 
 export interface GitHubRepoItem {

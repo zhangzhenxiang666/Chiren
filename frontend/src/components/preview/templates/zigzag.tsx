@@ -1,4 +1,3 @@
-
 import type {
   Resume,
   PersonalInfoContent,
@@ -11,34 +10,62 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from '../../../types/resume';
-import { AvatarImage } from '../avatar-image';
-import { degreeField, isSectionEmpty, md } from '../utils';
-import { QrCodesPreview } from '../qr-codes-preview';
+} from "../../../types/resume";
+import { AvatarImage } from "../avatar-image";
+import { degreeField, isSectionEmpty, md } from "../utils";
+import { QrCodesPreview } from "../qr-codes-preview";
 
-const PRIMARY = '#1e293b';
-const ACCENT = '#8b5cf6';
-const ALT_BG = '#f5f3ff';
+const PRIMARY = "#1e293b";
+const ACCENT = "#8b5cf6";
+const ALT_BG = "#f5f3ff";
 
 export function ZigzagTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
+  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
-  const contacts = [pi.age, pi.politicalStatus, pi.gender, pi.ethnicity, pi.hometown, pi.maritalStatus, pi.yearsOfExperience, pi.educationLevel, pi.email, pi.phone, pi.wechat, pi.location, pi.website].filter(Boolean);
+  const contacts = [
+    pi.age,
+    pi.politicalStatus,
+    pi.gender,
+    pi.ethnicity,
+    pi.hometown,
+    pi.maritalStatus,
+    pi.yearsOfExperience,
+    pi.educationLevel,
+    pi.email,
+    pi.phone,
+    pi.wechat,
+    pi.location,
+    pi.website,
+  ].filter(Boolean);
 
   const filteredSections = resume.sections.filter(
-    (s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s)
+    (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
   );
 
   return (
-    <div className="mx-auto max-w-[210mm] bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="mx-auto max-w-[210mm] bg-white shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       {/* Header */}
       <div className="mb-6 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} size={80} className="mx-auto mb-3" style={{ border: `3px solid ${ACCENT}` }} />
+          <AvatarImage
+            src={pi.avatar}
+            size={80}
+            className="mx-auto mb-3"
+            style={{ border: `3px solid ${ACCENT}` }}
+          />
         )}
-        <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>{pi.fullName || 'Your Name'}</h1>
-        {pi.jobTitle && <p className="mt-1 text-sm font-medium" style={{ color: ACCENT }}>{pi.jobTitle}</p>}
+        <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>
+          {pi.fullName || "Your Name"}
+        </h1>
+        {pi.jobTitle && (
+          <p className="mt-1 text-sm font-medium" style={{ color: ACCENT }}>
+            {pi.jobTitle}
+          </p>
+        )}
         {(contacts.length > 0 || pi.linkedin || pi.github) && (
           <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-zinc-500">
             {contacts.map((c, i) => (
@@ -53,7 +80,11 @@ export function ZigzagTemplate({ resume }: { resume: Resume }) {
       {/* Zigzag divider */}
       <div className="mb-6 flex items-center justify-center gap-1">
         {[...Array(20)].map((_, i) => (
-          <div key={i} className="h-1 w-3 rounded-full" style={{ backgroundColor: i % 2 === 0 ? ACCENT : `${ACCENT}40` }} />
+          <div
+            key={i}
+            className="h-1 w-3 rounded-full"
+            style={{ backgroundColor: i % 2 === 0 ? ACCENT : `${ACCENT}40` }}
+          />
         ))}
       </div>
 
@@ -62,10 +93,19 @@ export function ZigzagTemplate({ resume }: { resume: Resume }) {
         const isEven = idx % 2 === 0;
         return (
           <div key={section.id} className="mb-6 pt-1" data-section>
-            <div className="rounded-lg p-4" style={{ backgroundColor: isEven ? 'transparent' : ALT_BG }}>
+            <div
+              className="rounded-lg p-4"
+              style={{ backgroundColor: isEven ? "transparent" : ALT_BG }}
+            >
               <div className="mb-3 flex items-center gap-2">
-                <div className="h-5 w-1 rounded-full" style={{ backgroundColor: ACCENT }} />
-                <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color: PRIMARY }}>
+                <div
+                  className="h-5 w-1 rounded-full"
+                  style={{ backgroundColor: ACCENT }}
+                />
+                <h2
+                  className="text-sm font-bold uppercase tracking-wider"
+                  style={{ color: PRIMARY }}
+                >
                   {section.title}
                 </h2>
               </div>
@@ -77,7 +117,14 @@ export function ZigzagTemplate({ resume }: { resume: Resume }) {
             {idx < filteredSections.length - 1 && (
               <div className="my-2 flex items-center justify-center">
                 <svg width="40" height="12" viewBox="0 0 40 12" fill="none">
-                  <path d="M0 6 L10 1 L20 6 L30 1 L40 6" stroke={ACCENT} strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.4" />
+                  <path
+                    d="M0 6 L10 1 L20 6 L30 1 L40 6"
+                    stroke={ACCENT}
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    fill="none"
+                    opacity="0.4"
+                  />
                 </svg>
               </div>
             )}
@@ -88,15 +135,28 @@ export function ZigzagTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function ZigzagSectionContent({ section, resume }: { section: any; resume: Resume }) {
+function ZigzagSectionContent({
+  section,
+  resume,
+}: {
+  section: any;
+  resume: Resume;
+}) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'summary') {
-    return <p className="text-sm leading-relaxed text-zinc-600" dangerouslySetInnerHTML={{ __html: md((content as SummaryContent).text) }} />;
+  if (section.type === "summary") {
+    return (
+      <p
+        className="text-sm leading-relaxed text-zinc-600"
+        dangerouslySetInnerHTML={{
+          __html: md((content as SummaryContent).text),
+        }}
+      />
+    );
   }
 
-  if (section.type === 'work_experience') {
+  if (section.type === "work_experience") {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3 text-left">
@@ -104,16 +164,43 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.position}</span>
-                {item.company && <span className="text-sm" style={{ color: ACCENT }}> | {item.company}</span>}
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: PRIMARY }}
+                >
+                  {item.position}
+                </span>
+                {item.company && (
+                  <span className="text-sm" style={{ color: ACCENT }}>
+                    {" "}
+                    | {item.company}
+                  </span>
+                )}
               </div>
-              <span className="shrink-0 text-xs text-zinc-400">{item.startDate} – {item.endDate || (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}</span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (item.current
+                    ? resume.language === "zh"
+                      ? "至今"
+                      : "Present"
+                    : "")}
+              </span>
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] text-white" style={{ backgroundColor: ACCENT }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] text-white"
+                    style={{ backgroundColor: ACCENT }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -122,7 +209,11 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -132,22 +223,39 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
     );
   }
 
-  if (section.type === 'education') {
+  if (section.type === "education") {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3 text-left">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.institution}</span>
-              <span className="shrink-0 text-xs text-zinc-400">{item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}</span>
+              <span
+                className="text-sm font-semibold"
+                style={{ color: PRIMARY }}
+              >
+                {item.institution}
+              </span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (resume.language === "zh" ? "至今" : "Present")}
+              </span>
             </div>
-            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
-            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
+            <p className="text-sm text-zinc-600">
+              {degreeField(item.degree, item.field)}
+            </p>
+            {item.gpa && (
+              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
+            )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -157,16 +265,26 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
     );
   }
 
-  if (section.type === 'skills') {
+  if (section.type === "skills") {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2 text-left">
         {categories.map((cat: any) => (
           <div key={cat.id}>
-            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">{cat.name}</p>
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              {cat.name}
+            </p>
             <div className="flex flex-wrap gap-1.5">
               {(cat.skills || []).map((skill: string, i: number) => (
-                <span key={i} className="rounded-full border px-2 py-0.5 text-xs font-medium" style={{ borderColor: `${ACCENT}50`, color: ACCENT, backgroundColor: `${ACCENT}08` }}>
+                <span
+                  key={i}
+                  className="rounded-full border px-2 py-0.5 text-xs font-medium"
+                  style={{
+                    borderColor: `${ACCENT}50`,
+                    color: ACCENT,
+                    backgroundColor: `${ACCENT}08`,
+                  }}
+                >
                   {skill}
                 </span>
               ))}
@@ -177,25 +295,38 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
     );
   }
 
-  if (section.type === 'projects') {
+  if (section.type === "projects") {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3 text-left">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold" style={{ color: ACCENT }}>{item.name}</span>
+              <span className="text-sm font-semibold" style={{ color: ACCENT }}>
+                {item.name}
+              </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
+                  {item.startDate} –{" "}
+                  {item.endDate ||
+                    (resume.language === "zh" ? "至今" : "Present")}
                 </span>
               )}
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] text-white" style={{ backgroundColor: ACCENT }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] text-white"
+                    style={{ backgroundColor: ACCENT }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -204,7 +335,11 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
-                  <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
                 ))}
               </ul>
             )}
@@ -214,30 +349,48 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
     );
   }
 
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5 text-left">
         {items.map((item: any) => (
           <div key={item.id} className="flex items-baseline justify-between">
             <div>
-              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.name}</span>
-              {item.issuer && <span className="text-sm text-zinc-600"> — {item.issuer}</span>}
+              <span
+                className="text-sm font-semibold"
+                style={{ color: PRIMARY }}
+              >
+                {item.name}
+              </span>
+              {item.issuer && (
+                <span className="text-sm text-zinc-600"> — {item.issuer}</span>
+              )}
             </div>
-            {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+            {item.date && (
+              <span className="text-xs text-zinc-400">{item.date}</span>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-center gap-2 rounded-full px-3 py-1" style={{ backgroundColor: `${ACCENT}10`, border: `1px solid ${ACCENT}30` }}>
-            <span className="text-sm font-medium" style={{ color: PRIMARY }}>{item.language}</span>
+          <div
+            key={item.id}
+            className="flex items-center gap-2 rounded-full px-3 py-1"
+            style={{
+              backgroundColor: `${ACCENT}10`,
+              border: `1px solid ${ACCENT}30`,
+            }}
+          >
+            <span className="text-sm font-medium" style={{ color: PRIMARY }}>
+              {item.language}
+            </span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -245,43 +398,68 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2 text-left">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>{item.title}</span>
-              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
+              <span
+                className="text-sm font-semibold"
+                style={{ color: PRIMARY }}
+              >
+                {item.title}
+              </span>
+              {item.date && (
+                <span className="text-xs text-zinc-400">{item.date}</span>
+              )}
             </div>
-            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.subtitle && (
+              <p className="text-sm text-zinc-500">{item.subtitle}</p>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'github') {
+  if (section.type === "github") {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3 text-left">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: PRIMARY }}>{item.name}</span>
-              <span className="shrink-0 text-xs" style={{ color: ACCENT }}>{item.stars?.toLocaleString()}</span>
+              <span className="text-sm font-bold" style={{ color: PRIMARY }}>
+                {item.name}
+              </span>
+              <span className="shrink-0 text-xs" style={{ color: ACCENT }}>
+                {item.stars?.toLocaleString()}
+              </span>
             </div>
-            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.language && (
+              <span className="text-xs text-zinc-500">{item.language}</span>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -291,8 +469,15 @@ function ZigzagSectionContent({ section, resume }: { section: any; resume: Resum
       <div className="space-y-2 text-left">
         {content.items.map((item: any) => (
           <div key={item.id}>
-            <span className="text-sm font-medium" style={{ color: PRIMARY }}>{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            <span className="text-sm font-medium" style={{ color: PRIMARY }}>
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>

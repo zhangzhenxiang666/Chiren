@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -9,21 +9,24 @@ import {
   type DragEndEvent,
   DragOverlay,
   type DragStartEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { SortableSection } from './dnd/sortable-section';
-import { SectionWrapper } from './SectionWrapper';
-import { useEditorStore } from '@/stores/editor-store';
-import type { ResumeSection, SectionContent } from '@/types/resume';
+} from "@dnd-kit/sortable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { SortableSection } from "./dnd/sortable-section";
+import { SectionWrapper } from "./SectionWrapper";
+import { useEditorStore } from "@/stores/editor-store";
+import type { ResumeSection, SectionContent } from "@/types/resume";
 
 interface EditorCanvasProps {
   sections: ResumeSection[];
-  onUpdateSection: (sectionId: string, content: Partial<SectionContent>) => void;
+  onUpdateSection: (
+    sectionId: string,
+    content: Partial<SectionContent>,
+  ) => void;
   onRemoveSection: (sectionId: string) => void;
   onReorderSections: (sections: ResumeSection[]) => void;
   className?: string;
@@ -34,14 +37,16 @@ export function EditorCanvas({
   onUpdateSection,
   onRemoveSection,
   onReorderSections,
-  className = 'flex-[4]',
+  className = "flex-[4]",
 }: EditorCanvasProps) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const { setDragging } = useEditorStore();
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleDragStart = useCallback(
@@ -49,7 +54,7 @@ export function EditorCanvas({
       setActiveId(event.active.id as string);
       setDragging(true);
     },
-    [setDragging]
+    [setDragging],
   );
 
   const handleDragEnd = useCallback(
@@ -71,10 +76,12 @@ export function EditorCanvas({
         }
       }
     },
-    [sections, onReorderSections, setDragging]
+    [sections, onReorderSections, setDragging],
   );
 
-  const activeSection = activeId ? sections.find((s) => s.id === activeId) : null;
+  const activeSection = activeId
+    ? sections.find((s) => s.id === activeId)
+    : null;
 
   return (
     <div className={`min-w-0 overflow-hidden bg-background ${className}`}>
@@ -95,7 +102,9 @@ export function EditorCanvas({
                   <SortableSection key={section.id} id={section.id}>
                     <SectionWrapper
                       section={section}
-                      onUpdate={(content) => onUpdateSection(section.id, content)}
+                      onUpdate={(content) =>
+                        onUpdateSection(section.id, content)
+                      }
                       onRemove={() => onRemoveSection(section.id)}
                     />
                   </SortableSection>
@@ -106,7 +115,9 @@ export function EditorCanvas({
             <DragOverlay>
               {activeSection && (
                 <div className="rounded-lg border-2 border-pink-400 bg-card p-4 opacity-80 shadow-xl">
-                  <p className="font-medium text-foreground">{activeSection.title}</p>
+                  <p className="font-medium text-foreground">
+                    {activeSection.title}
+                  </p>
                 </div>
               )}
             </DragOverlay>

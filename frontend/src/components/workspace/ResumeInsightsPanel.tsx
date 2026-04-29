@@ -1,37 +1,46 @@
-import { useMemo } from 'react'
-import { BarChart3, Check, EyeOff } from 'lucide-react'
-import type { ResumeSection } from '../../types/resume'
+import { useMemo } from "react";
+import { BarChart3, Check, EyeOff } from "lucide-react";
+import type { ResumeSection } from "../../types/resume";
 import {
   calculateHealthScore,
   getScoreColorClass,
   getTextContent,
-} from '../../lib/resume-insights'
+} from "../../lib/resume-insights";
 
 interface ResumeInsightsPanelProps {
-  sections: ResumeSection[]
+  sections: ResumeSection[];
 }
 
 export default function ResumeInsightsPanel({
   sections,
 }: ResumeInsightsPanelProps) {
-  const healthResult = useMemo(() => calculateHealthScore(sections), [sections])
+  const healthResult = useMemo(
+    () => calculateHealthScore(sections),
+    [sections],
+  );
 
-  const visibleSections = useMemo(() => sections.filter((s) => s.visible), [sections])
-  const hiddenSections = useMemo(() => sections.filter((s) => !s.visible), [sections])
+  const visibleSections = useMemo(
+    () => sections.filter((s) => s.visible),
+    [sections],
+  );
+  const hiddenSections = useMemo(
+    () => sections.filter((s) => !s.visible),
+    [sections],
+  );
 
   const sectionWordData = useMemo(() => {
     return visibleSections.map((s) => ({
       section: s,
       wordCount: getTextContent(s).trim().length,
-    }))
-  }, [visibleSections])
+    }));
+  }, [visibleSections]);
 
   const maxWordCount = useMemo(
     () => Math.max(...sectionWordData.map((d) => d.wordCount), 1),
     [sectionWordData],
-  )
+  );
 
-  const scoreColor = getScoreColorClass(healthResult.score)
+  const scoreColor = getScoreColorClass(healthResult.score);
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
@@ -64,12 +73,17 @@ export default function ResumeInsightsPanel({
               className="transition-all duration-700"
             />
           </svg>
-          <span className="absolute text-sm font-bold">{healthResult.score}</span>
+          <span className="absolute text-sm font-bold">
+            {healthResult.score}
+          </span>
         </div>
         <div className="flex-1">
           <div className="text-xs font-medium mb-1">综合健康度</div>
           <div className="text-[10px] text-muted-foreground">
-            {healthResult.filledCount} 个可见 · {healthResult.totalWords} 字 · {healthResult.filledCount < healthResult.visibleCount ? `${healthResult.visibleCount - healthResult.filledCount} 个待完善` : '全部完善'}
+            {healthResult.filledCount} 个可见 · {healthResult.totalWords} 字 ·{" "}
+            {healthResult.filledCount < healthResult.visibleCount
+              ? `${healthResult.visibleCount - healthResult.filledCount} 个待完善`
+              : "全部完善"}
           </div>
           <div className="mt-1.5 h-1.5 bg-background rounded-full overflow-hidden">
             <div
@@ -86,7 +100,8 @@ export default function ResumeInsightsPanel({
         </div>
         <div className="space-y-1">
           {sectionWordData.map(({ section: s, wordCount }) => {
-            const barWidth = maxWordCount > 0 ? (wordCount / maxWordCount) * 100 : 0
+            const barWidth =
+              maxWordCount > 0 ? (wordCount / maxWordCount) * 100 : 0;
             return (
               <div key={s.id} className="px-1.5 py-1">
                 <div className="flex items-center justify-between text-[10px] mb-1">
@@ -94,9 +109,7 @@ export default function ResumeInsightsPanel({
                     <Check className="w-3 h-3 text-green-400" strokeWidth={2} />
                     <span>{s.title}</span>
                   </div>
-                  <span className="text-muted-foreground">
-                    {wordCount}字
-                  </span>
+                  <span className="text-muted-foreground">{wordCount}字</span>
                 </div>
                 <div className="h-1 bg-background rounded-full overflow-hidden">
                   <div
@@ -105,14 +118,20 @@ export default function ResumeInsightsPanel({
                   />
                 </div>
               </div>
-            )
+            );
           })}
           {hiddenSections.length > 0 && (
             <div className="pt-1 border-t border-border/50 px-1.5">
               {hiddenSections.map((s) => (
-                <div key={s.id} className="flex items-center justify-between text-[10px] opacity-40">
+                <div
+                  key={s.id}
+                  className="flex items-center justify-between text-[10px] opacity-40"
+                >
                   <div className="flex items-center gap-1.5">
-                    <EyeOff className="w-3 h-3 text-muted-foreground" strokeWidth={2} />
+                    <EyeOff
+                      className="w-3 h-3 text-muted-foreground"
+                      strokeWidth={2}
+                    />
                     <span>{s.title}</span>
                   </div>
                   <span>已隐藏</span>
@@ -122,7 +141,6 @@ export default function ResumeInsightsPanel({
           )}
         </div>
       </div>
-
     </div>
-  )
+  );
 }

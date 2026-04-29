@@ -1,14 +1,14 @@
-import type { InterviewerProfile } from './CustomInterviewerModal'
+import type { InterviewerProfile } from "./CustomInterviewerModal";
 
 interface DraftRound {
-  tempId: string
-  name: string
-  interviewer: InterviewerProfile
+  tempId: string;
+  name: string;
+  interviewer: InterviewerProfile;
 }
 
 interface StepReviewProps {
-  name: string
-  rounds: DraftRound[]
+  name: string;
+  rounds: DraftRound[];
 }
 
 export default function StepReview({ name, rounds }: StepReviewProps) {
@@ -63,5 +63,5 @@ export default function StepReview({ name, rounds }: StepReviewProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

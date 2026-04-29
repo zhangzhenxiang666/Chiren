@@ -1,16 +1,39 @@
-import { useEffect, useRef, useState, type ComponentProps } from 'react';
-import { ChevronLeft, ChevronRight, CalendarDays, X, Plus } from 'lucide-react';
-import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from '@/components/ui/select';
-import { cn } from '@/lib/utils';
+import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { ChevronLeft, ChevronRight, X, Plus } from "lucide-react";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectTrigger,
+  SelectContent,
+  SelectItem,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const CURRENT_YEAR = new Date().getFullYear();
-const MONTH_LABELS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+const MONTH_LABELS = [
+  "1月",
+  "2月",
+  "3月",
+  "4月",
+  "5月",
+  "6月",
+  "7月",
+  "8月",
+  "9月",
+  "10月",
+  "11月",
+  "12月",
+];
 
 export const YearMonthPicker = ({
   label,
-  value = '',
+  value = "",
   onChange,
 }: {
   label: string;
@@ -19,21 +42,21 @@ export const YearMonthPicker = ({
 }) => {
   const parse = (): [number, number] => {
     if (!value) return [CURRENT_YEAR, 0];
-    const parts = value.split('.');
+    const parts = value.split(".");
     const y = parseInt(parts[0], 10);
-    const m = parseInt(parts[1] || '1', 10) - 1;
+    const m = parseInt(parts[1] || "1", 10) - 1;
     return [isNaN(y) ? CURRENT_YEAR : y, isNaN(m) ? 0 : m];
   };
   const [selYear, selMonth] = parse();
   const [pickerYear, setPickerYear] = useState(selYear);
   const [open, setOpen] = useState(false);
-  const display = value || '选择日期';
+  const display = value || "选择日期";
 
   const prevYear = () => setPickerYear((y) => y - 1);
   const nextYear = () => setPickerYear((y) => y + 1);
 
   const handleSelect = (m: number) => {
-    onChange(`${pickerYear}.${String(m + 1).padStart(2, '0')}`);
+    onChange(`${pickerYear}.${String(m + 1).padStart(2, "0")}`);
     setOpen(false);
   };
 
@@ -46,17 +69,33 @@ export const YearMonthPicker = ({
             type="button"
             className="mt-1 flex w-full items-center justify-between rounded border border-input bg-muted px-2.5 py-1.5 text-sm text-foreground transition-colors hover:border-foreground/30 focus:border-pink-300 focus:outline-none"
           >
-            <span className={!value ? 'text-muted-foreground' : ''}>{display}</span>
+            <span className={!value ? "text-muted-foreground" : ""}>
+              {display}
+            </span>
           </button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto border border-input bg-card p-3" align="start" sideOffset={8}>
+        <PopoverContent
+          className="w-auto border border-input bg-card p-3"
+          align="start"
+          sideOffset={8}
+        >
           {/* Year nav */}
           <div className="flex items-center justify-between mb-3">
-            <button type="button" onClick={prevYear} className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
+            <button
+              type="button"
+              onClick={prevYear}
+              className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm font-medium text-foreground">{pickerYear}年</span>
-            <button type="button" onClick={nextYear} className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors">
+            <span className="text-sm font-medium text-foreground">
+              {pickerYear}年
+            </span>
+            <button
+              type="button"
+              onClick={nextYear}
+              className="rounded p-1 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 transition-colors"
+            >
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>
@@ -70,10 +109,10 @@ export const YearMonthPicker = ({
                   type="button"
                   onClick={() => handleSelect(i)}
                   className={cn(
-                    'h-8 rounded-lg text-xs font-medium transition-colors',
+                    "h-8 rounded-lg text-xs font-medium transition-colors",
                     isSelected
-                      ? 'bg-pink-500 text-white hover:bg-pink-600'
-                      : 'bg-muted text-muted-foreground hover:bg-accent',
+                      ? "bg-pink-500 text-white hover:bg-pink-600"
+                      : "bg-muted text-muted-foreground hover:bg-accent",
                   )}
                 >
                   {label}
@@ -87,21 +126,27 @@ export const YearMonthPicker = ({
   );
 };
 
-export const F = ({ label, ...props }: { label: string } & Omit<ComponentProps<'input'>, 'ref'>) => (
+export const F = ({
+  label,
+  ...props
+}: { label: string } & Omit<ComponentProps<"input">, "ref">) => (
   <label className="block">
     <span className="text-xs font-medium text-muted-foreground">{label}</span>
-    <input className="mt-1 w-full rounded border border-input bg-background h-8 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none px-2.5" {...props} />
+    <input
+      className="mt-1 w-full rounded border border-input bg-background h-8 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-pink-300 focus:outline-none px-2.5"
+      {...props}
+    />
   </label>
 );
 
-function AutoResizeTextarea(props: Omit<ComponentProps<'textarea'>, 'ref'>) {
+function AutoResizeTextarea(props: Omit<ComponentProps<"textarea">, "ref">) {
   const ref = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = el.scrollHeight + 'px';
+    el.style.height = "auto";
+    el.style.height = el.scrollHeight + "px";
   });
 
   return (
@@ -114,7 +159,10 @@ function AutoResizeTextarea(props: Omit<ComponentProps<'textarea'>, 'ref'>) {
   );
 }
 
-export const TA = ({ label, ...props }: { label: string } & Omit<ComponentProps<'textarea'>, 'ref'>) => (
+export const TA = ({
+  label,
+  ...props
+}: { label: string } & Omit<ComponentProps<"textarea">, "ref">) => (
   <label className="block">
     <span className="text-xs font-medium text-muted-foreground">{label}</span>
     <AutoResizeTextarea {...props} />
@@ -128,7 +176,10 @@ export type SectionComponentProps = {
   onUpdate: (content: Record<string, unknown>) => void;
 };
 
-export function addItemState<T extends { id: string }>(items: T[], newItem: T): T[] {
+export function addItemState<T extends { id: string }>(
+  items: T[],
+  newItem: T,
+): T[] {
   return [...items, newItem];
 }
 
@@ -136,7 +187,13 @@ export function makeId(): string {
   return crypto.randomUUID?.() || Math.random().toString(36).slice(2);
 }
 
-export function FieldWrapper({ children, columns = 2 }: { children: React.ReactNode; columns?: number }) {
+export function FieldWrapper({
+  children,
+  columns = 2,
+}: {
+  children: React.ReactNode;
+  columns?: number;
+}) {
   return (
     <div
       className="grid gap-3"
@@ -147,7 +204,13 @@ export function FieldWrapper({ children, columns = 2 }: { children: React.ReactN
   );
 }
 
-export const S = ({ label, value, options, onChange, placeholder }: {
+export const S = ({
+  label,
+  value,
+  options,
+  onChange,
+  placeholder,
+}: {
   label: string;
   value: string;
   options: string[];
@@ -157,14 +220,26 @@ export const S = ({ label, value, options, onChange, placeholder }: {
   const id = `select-${label}`;
   return (
     <div>
-      <span id={id} className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</span>
-      <Select value={value || ''} onValueChange={onChange} aria-labelledby={id}>
-        <SelectTrigger className="mt-1 border border-input bg-background text-foreground h-8" aria-labelledby={id}>
-          <SelectValue placeholder={placeholder || '请选择'} />
+      <span
+        id={id}
+        className="text-xs font-medium text-zinc-500 dark:text-zinc-400"
+      >
+        {label}
+      </span>
+      <Select value={value || ""} onValueChange={onChange} aria-labelledby={id}>
+        <SelectTrigger
+          className="mt-1 border border-input bg-background text-foreground h-8"
+          aria-labelledby={id}
+        >
+          <SelectValue placeholder={placeholder || "请选择"} />
         </SelectTrigger>
         <SelectContent className="border-input bg-card text-foreground">
           {options.map((opt) => (
-            <SelectItem key={opt} value={opt} className="text-foreground focus:bg-muted focus:text-foreground">
+            <SelectItem
+              key={opt}
+              value={opt}
+              className="text-foreground focus:bg-muted focus:text-foreground"
+            >
               {opt}
             </SelectItem>
           ))}
@@ -174,7 +249,12 @@ export const S = ({ label, value, options, onChange, placeholder }: {
   );
 };
 
-export function EditableList({ label, items, onChange, placeholder }: {
+export function EditableList({
+  label,
+  items,
+  onChange,
+  placeholder,
+}: {
   label: string;
   items: string[];
   onChange: (items: string[]) => void;
@@ -215,23 +295,29 @@ export function EditableList({ label, items, onChange, placeholder }: {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onChange([...items, ''])}
+          onClick={() => onChange([...items, ""])}
           className="h-7 cursor-pointer gap-1 text-xs"
         >
-          <Plus className="h-3 w-3" />添加
+          <Plus className="h-3 w-3" />
+          添加
         </Button>
       </div>
     </div>
   );
 }
 
-export function TagInput({ label, tags, onChange, placeholder }: {
+export function TagInput({
+  label,
+  tags,
+  onChange,
+  placeholder,
+}: {
   label: string;
   tags: string[];
   onChange: (tags: string[]) => void;
   placeholder?: string;
 }) {
-  const addItem = () => onChange([...(tags || []), '']);
+  const addItem = () => onChange([...(tags || []), ""]);
 
   const updateItem = (index: number, value: string) => {
     const updated = [...(tags || [])];
@@ -272,7 +358,8 @@ export function TagInput({ label, tags, onChange, placeholder }: {
           onClick={addItem}
           className="h-7 cursor-pointer gap-1 text-xs"
         >
-          <Plus className="h-3 w-3" />添加
+          <Plus className="h-3 w-3" />
+          添加
         </Button>
       </div>
     </div>

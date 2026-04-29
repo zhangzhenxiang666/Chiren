@@ -1,9 +1,18 @@
-import { create } from 'zustand';
-import type { Resume, ResumeSection, SectionContent, ThemeConfig } from '@/types/resume';
-import { AUTOSAVE_DELAY } from '@/lib/constants';
-import { generateId } from '@/lib/utils';
-import { useSettingsStore } from '@/stores/settings-store';
-import { updateResumeSection, deleteResumeSection, updateResume } from '@/lib/api';
+import { create } from "zustand";
+import type {
+  Resume,
+  ResumeSection,
+  SectionContent,
+  ThemeConfig,
+} from "@/types/resume";
+import { AUTOSAVE_DELAY } from "@/lib/constants";
+import { generateId } from "@/lib/utils";
+import { useSettingsStore } from "@/stores/settings-store";
+import {
+  updateResumeSection,
+  deleteResumeSection,
+  updateResume,
+} from "@/lib/api";
 
 interface ResumeStore {
   currentResume: Resume | null;
@@ -48,16 +57,16 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       const content = s.content as unknown as Record<string, unknown>;
       if (Array.isArray(content?.items)) {
         content.items = (content.items as any[]).map((item) =>
-          typeof item === 'object' && item !== null && !item.id
+          typeof item === "object" && item !== null && !item.id
             ? { ...item, id: generateId() }
-            : item
+            : item,
         );
       }
       if (Array.isArray(content?.categories)) {
         content.categories = (content.categories as any[]).map((cat) =>
-          typeof cat === 'object' && cat !== null && !cat.id
+          typeof cat === "object" && cat !== null && !cat.id
             ? { ...cat, id: generateId() }
-            : cat
+            : cat,
         );
       }
       return { ...s, content: content as unknown as typeof s.content };
@@ -77,13 +86,17 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   updateSection: (sectionId, content) => {
     set((state) => {
       const sections = state.sections.map((s) =>
-        s.id === sectionId ? { ...s, content: { ...s.content, ...content } as SectionContent } : s
+        s.id === sectionId
+          ? { ...s, content: { ...s.content, ...content } as SectionContent }
+          : s,
       );
       const _dirtySections = new Set(state._dirtySections);
       _dirtySections.add(sectionId);
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _dirtySections,
       };
@@ -94,13 +107,15 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   updateSectionTitle: (sectionId, title) => {
     set((state) => {
       const sections = state.sections.map((s) =>
-        s.id === sectionId ? { ...s, title } : s
+        s.id === sectionId ? { ...s, title } : s,
       );
       const _dirtySections = new Set(state._dirtySections);
       _dirtySections.add(sectionId);
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _dirtySections,
       };
@@ -115,7 +130,9 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       _dirtySections.add(section.id);
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _dirtySections,
       };
@@ -130,7 +147,9 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       _pendingDeletions.add(sectionId);
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _pendingDeletions,
       };
@@ -144,7 +163,9 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       sections.forEach((s) => _dirtySections.add(s.id));
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _dirtySections,
       };
@@ -155,13 +176,15 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   toggleSectionVisibility: (sectionId) => {
     set((state) => {
       const sections = state.sections.map((s) =>
-        s.id === sectionId ? { ...s, visible: !s.visible } : s
+        s.id === sectionId ? { ...s, visible: !s.visible } : s,
       );
       const _dirtySections = new Set(state._dirtySections);
       _dirtySections.add(sectionId);
       return {
         sections,
-        currentResume: state.currentResume ? { ...state.currentResume, sections } : null,
+        currentResume: state.currentResume
+          ? { ...state.currentResume, sections }
+          : null,
         isDirty: true,
         _dirtySections,
       };
@@ -185,11 +208,17 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     const { currentResume } = get();
     set((state) => ({
       currentResume: state.currentResume
-        ? { ...state.currentResume, themeConfig: { ...state.currentResume.themeConfig, ...themeConfig } }
+        ? {
+            ...state.currentResume,
+            themeConfig: { ...state.currentResume.themeConfig, ...themeConfig },
+          }
         : null,
     }));
     if (currentResume?.id) {
-      updateResume({ id: currentResume.id, themeConfig: { ...currentResume.themeConfig, ...themeConfig } });
+      updateResume({
+        id: currentResume.id,
+        themeConfig: { ...currentResume.themeConfig, ...themeConfig },
+      });
     }
   },
 
@@ -204,14 +233,20 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
   },
 
   save: async () => {
-    const { currentResume, sections, isDirty, _dirtySections, _pendingDeletions } = get();
+    const {
+      currentResume,
+      sections,
+      isDirty,
+      _dirtySections,
+      _pendingDeletions,
+    } = get();
     if (!currentResume || !isDirty) return;
 
     set({ isSaving: true });
     try {
       const deletePromises = [..._pendingDeletions].map((id) =>
         deleteResumeSection(id).catch((err) => {
-          console.error('删除区块失败:', id, err);
+          console.error("删除区块失败:", id, err);
         }),
       );
 
@@ -233,9 +268,11 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
         };
 
         savePromises.push(
-          updateResumeSection(payload).then(() => { }).catch((err) => {
-            console.error('保存区块失败:', s.type, s.id, err);
-          }),
+          updateResumeSection(payload)
+            .then(() => {})
+            .catch((err) => {
+              console.error("保存区块失败:", s.type, s.id, err);
+            }),
         );
       }
 
@@ -248,7 +285,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
         _originalSectionIds: currentSectionIds,
       });
     } catch (error) {
-      console.error('Failed to save resume:', error);
+      console.error("Failed to save resume:", error);
     } finally {
       set({ isSaving: false });
     }
@@ -258,7 +295,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
     const { _saveTimeout } = get();
     if (_saveTimeout) clearTimeout(_saveTimeout);
 
-    const { autoSave, autoSaveInterval, _hydrated } = useSettingsStore.getState();
+    const { autoSave, autoSaveInterval, _hydrated } =
+      useSettingsStore.getState();
 
     if (_hydrated && !autoSave) {
       set({ _saveTimeout: null });

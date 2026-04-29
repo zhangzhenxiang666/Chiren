@@ -8,27 +8,35 @@ import {
   Languages,
   FileText,
   SpellCheck,
-} from 'lucide-react'
-import { useResumeStore } from '@/stores/resume-store';
+} from "lucide-react";
+import { useResumeStore } from "@/stores/resume-store";
 
 interface EditorToolbarProps {
-  title?: string
-  onBack?: () => void
-  onCoverLetterOpen?: () => void
-  onThemeToggle?: () => void
-  onSettings?: () => void
-  onExport?: () => void
-  themeActive?: boolean
+  title?: string;
+  onBack?: () => void;
+  onCoverLetterOpen?: () => void;
+  onThemeToggle?: () => void;
+  onSettings?: () => void;
+  onExport?: () => void;
+  themeActive?: boolean;
 }
 
 /**
  * Editor toolbar with action buttons.
  * Migrated from JadeAI editor. Button handlers are TODO placeholders.
  */
-export default function EditorToolbar({ title = '未命名简历', onBack, onCoverLetterOpen, onThemeToggle, onSettings, onExport, themeActive }: EditorToolbarProps) {
+export default function EditorToolbar({
+  title = "未命名简历",
+  onBack,
+  onCoverLetterOpen,
+  onThemeToggle,
+  onSettings,
+  onExport,
+  themeActive,
+}: EditorToolbarProps) {
   const { isSaving, isDirty } = useResumeStore();
 
-  const saveLabel = isSaving ? '保存中...' : isDirty ? '未保存' : '已保存';
+  const saveLabel = isSaving ? "保存中..." : isDirty ? "未保存" : "已保存";
 
   return (
     <div className="flex h-12 items-center justify-between border-b border-border bg-muted px-3">
@@ -121,7 +129,7 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
           type="button"
           title="主题"
           onClick={onThemeToggle}
-          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? 'bg-pink-500/30 text-pink-400' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
+          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? "bg-pink-500/30 text-pink-400" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
         >
           <Palette className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">主题</span>
@@ -139,5 +147,5 @@ export default function EditorToolbar({ title = '未命名简历', onBack, onCov
         </button>
       </div>
     </div>
-  )
+  );
 }

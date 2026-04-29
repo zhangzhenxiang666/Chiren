@@ -45,119 +45,133 @@
  * ============================================
  */
 
-import { useEffect, useRef } from 'react'
-import { toast } from 'sonner'
-import type { WorkTask } from '../types/work'
+import { useEffect, useRef } from "react";
+import { toast } from "sonner";
+import type { WorkTask } from "../types/work";
 import {
   getNotificationTasks,
   updateNotificationTask,
   markUnread,
   onNotificationTasksChange,
   getRegisteredHandler,
-} from '../lib/notification'
+} from "../lib/notification";
 
 /** 全局任务完成/失败事件（供 Dashboard 等页面监听） */
-const GLOBAL_SSE_COMPLETE = 'global-sse-complete'
-const GLOBAL_SSE_ERROR = 'global-sse-error'
+const GLOBAL_SSE_COMPLETE = "global-sse-complete";
+const GLOBAL_SSE_ERROR = "global-sse-error";
 
 export function useGlobalSSE() {
-  const sourcesRef = useRef<Map<string, EventSource>>(new Map())
+  const sourcesRef = useRef<Map<string, EventSource>>(new Map());
 
   useEffect(() => {
     const connectTask = (task: WorkTask) => {
       // 去重：已连接的任务跳过
       if (sourcesRef.current.has(task.id)) {
-        console.log(`[SSE] Skip (duplicate): ${task.taskType} (${task.id})`)
-        return
+        console.log(`[SSE] Skip (duplicate): ${task.taskType} (${task.id})`);
+        return;
       }
       // 状态过滤：只连接 running 状态的任务
-      if (task.status !== 'running') {
-        console.log(`[SSE] Skip (status=${task.status}): ${task.taskType} (${task.id})`)
-        return
+      if (task.status !== "running") {
+        console.log(
+          `[SSE] Skip (status=${task.status}): ${task.taskType} (${task.id})`,
+        );
+        return;
       }
       // Handler 过滤：只连接有注册 handler 的 taskType
       if (!getRegisteredHandler(task.taskType)) {
-        console.log(`[SSE] Skip (no handler): ${task.taskType} (${task.id})`)
-        return
+        console.log(`[SSE] Skip (no handler): ${task.taskType} (${task.id})`);
+        return;
       }
 
-      console.log(`[SSE] Creating connection: ${task.taskType} (${task.id})`)
-      const eventSource = new EventSource(`http://localhost:8000/work/stream/${task.id}`)
+      console.log(`[SSE] Creating connection: ${task.taskType} (${task.id})`);
+      const eventSource = new EventSource(
+        `http://localhost:8000/work/stream/${task.id}`,
+      );
 
-      eventSource.addEventListener('status', (e: MessageEvent) => {
-        const payload = JSON.parse(e.data)
-        if (payload.content === 'error') {
-          updateNotificationTask(task.id, { status: 'error' })
-          markUnread()
-          eventSource.close()
-          sourcesRef.current.delete(task.id)
+      eventSource.addEventListener("status", (e: MessageEvent) => {
+        const payload = JSON.parse(e.data);
+        if (payload.content === "error") {
+          updateNotificationTask(task.id, { status: "error" });
+          markUnread();
+          eventSource.close();
+          sourcesRef.current.delete(task.id);
 
-          window.dispatchEvent(new CustomEvent(GLOBAL_SSE_ERROR, {
-            detail: { taskId: task.id, taskType: task.taskType },
-          }))
+          window.dispatchEvent(
+            new CustomEvent(GLOBAL_SSE_ERROR, {
+              detail: { taskId: task.id, taskType: task.taskType },
+            }),
+          );
 
           // 调用注册的 error handler
-          const handler = getRegisteredHandler(task.taskType)
+          const handler = getRegisteredHandler(task.taskType);
           if (handler?.onError) {
-            const errorMsg = handler.onError(task)
-            if (errorMsg) toast.error(errorMsg)
+            const errorMsg = handler.onError(task);
+            if (errorMsg) toast.error(errorMsg);
           }
 
           // onStatus 回调
           if (handler?.onStatus) {
-            handler.onStatus(task)
+            handler.onStatus(task);
           }
         }
-        markUnread()
-      })
+        markUnread();
+      });
 
-      eventSource.addEventListener('open', () => {
-        console.log(`[SSE] Connected: ${task.taskType} (${task.id})`)
-      })
+      eventSource.addEventListener("open", () => {
+        console.log(`[SSE] Connected: ${task.taskType} (${task.id})`);
+      });
 
-      eventSource.addEventListener('result', (e: MessageEvent) => {
-        const payload = JSON.parse(e.data)
-        updateNotificationTask(task.id, { status: 'success' })
-        eventSource.close()
-        sourcesRef.current.delete(task.id)
+      eventSource.addEventListener("result", (e: MessageEvent) => {
+        const payload = JSON.parse(e.data);
+        updateNotificationTask(task.id, { status: "success" });
+        eventSource.close();
+        sourcesRef.current.delete(task.id);
 
         // dispatch 全局事件（包含 taskType，方便页面按需监听）
-        window.dispatchEvent(new CustomEvent(GLOBAL_SSE_COMPLETE, {
-          detail: { taskId: task.id, workspaceId: task.workspaceId, taskType: payload.type || task.taskType },
-        }))
+        window.dispatchEvent(
+          new CustomEvent(GLOBAL_SSE_COMPLETE, {
+            detail: {
+              taskId: task.id,
+              workspaceId: task.workspaceId,
+              taskType: payload.type || task.taskType,
+            },
+          }),
+        );
 
         // 调用注册的 success handler
-        const handler = getRegisteredHandler(task.taskType)
+        const handler = getRegisteredHandler(task.taskType);
         if (handler?.onSuccess) {
-          const content = handler.onSuccess(task)
-          if (content) toast.success(content as any)
+          const content = handler.onSuccess(task);
+          if (content) toast.success(content as any);
         }
-      })
+      });
 
-      eventSource.addEventListener('error', () => {
-        console.error(`[SSE] Connection error: ${task.taskType} (${task.id}), readyState=${eventSource.readyState}`)
-        eventSource.close()
-        sourcesRef.current.delete(task.id)
-      })
+      eventSource.addEventListener("error", () => {
+        console.error(
+          `[SSE] Connection error: ${task.taskType} (${task.id}), readyState=${eventSource.readyState}`,
+        );
+        eventSource.close();
+        sourcesRef.current.delete(task.id);
+      });
 
-      sourcesRef.current.set(task.id, eventSource)
-    }
+      sourcesRef.current.set(task.id, eventSource);
+    };
 
     const syncTasks = () => {
-      const tasks = getNotificationTasks()
+      const tasks = getNotificationTasks();
       for (const task of tasks) {
-        connectTask(task)
+        connectTask(task);
       }
-    }
+    };
 
-    syncTasks()
-    const cleanup = onNotificationTasksChange(syncTasks)
+    syncTasks();
+    const cleanup = onNotificationTasksChange(syncTasks);
     return () => {
-      cleanup()
+      cleanup();
       for (const [, source] of sourcesRef.current) {
-        source.close()
+        source.close();
       }
-      sourcesRef.current.clear()
-    }
-  }, [])
+      sourcesRef.current.clear();
+    };
+  }, []);
 }

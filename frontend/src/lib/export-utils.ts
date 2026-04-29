@@ -1,22 +1,26 @@
 function sanitizeHtmlForPdf(html: string): string {
   return html
-    .replace(/\s+shadow-(sm|md|lg|xl|2xl|xs|inner)\b/g, '')
-    .replace(/\s+shadow-pink-500\/10\b/g, '')
+    .replace(/\s+shadow-(sm|md|lg|xl|2xl|xs|inner)\b/g, "")
+    .replace(/\s+shadow-pink-500\/10\b/g, "")
     .replace(/style="([^"]*)box-shadow:[^;"]*;?([^"]*)"/gi, 'style="$1$2"')
     .replace(/style="([^"]*)filter:[^;"]*;?([^"]*)"/gi, 'style="$1$2"');
 }
 
 function markPdfItems(el: HTMLElement): void {
-  el.querySelectorAll('[data-section]').forEach((section) => {
-    const containers = Array.from(section.querySelectorAll('div')).filter((div) => {
-      const childDivs = Array.from(div.children).filter((c) => c.tagName === 'DIV');
-      return childDivs.length >= 2;
-    });
+  el.querySelectorAll("[data-section]").forEach((section) => {
+    const containers = Array.from(section.querySelectorAll("div")).filter(
+      (div) => {
+        const childDivs = Array.from(div.children).filter(
+          (c) => c.tagName === "DIV",
+        );
+        return childDivs.length >= 2;
+      },
+    );
 
     containers.forEach((container) => {
       Array.from(container.children).forEach((child) => {
-        if (child instanceof HTMLElement && child.tagName === 'DIV') {
-          child.setAttribute('data-pdf-item', '');
+        if (child instanceof HTMLElement && child.tagName === "DIV") {
+          child.setAttribute("data-pdf-item", "");
         }
       });
     });
@@ -24,18 +28,18 @@ function markPdfItems(el: HTMLElement): void {
 }
 
 export function extractPreviewHtml(): string {
-  const scopeEl = document.querySelector('[data-theme-scope]');
+  const scopeEl = document.querySelector("[data-theme-scope]");
   if (!scopeEl) {
-    return '';
+    return "";
   }
 
   const clone = scopeEl.cloneNode(true) as HTMLElement;
   markPdfItems(clone);
 
-  const styleTags = document.querySelectorAll('style');
-  let collectedStyles = '';
+  const styleTags = document.querySelectorAll("style");
+  let collectedStyles = "";
   styleTags.forEach((tag) => {
-    collectedStyles += tag.innerHTML + '\n';
+    collectedStyles += tag.innerHTML + "\n";
   });
 
   const scopeHtml = sanitizeHtmlForPdf(clone.outerHTML);
@@ -94,7 +98,7 @@ export function extractPreviewHtml(): string {
 
 export function downloadBlob(blob: Blob, filename: string): void {
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
   a.download = filename;
   document.body.appendChild(a);
@@ -104,16 +108,18 @@ export function downloadBlob(blob: Blob, filename: string): void {
 }
 
 export function downloadJson(data: object, filename: string): void {
-  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(data, null, 2)], {
+    type: "application/json",
+  });
   downloadBlob(blob, filename);
 }
 
 export function downloadText(text: string, filename: string): void {
-  const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+  const blob = new Blob([text], { type: "text/plain;charset=utf-8" });
   downloadBlob(blob, filename);
 }
 
 export function downloadHtml(html: string, filename: string): void {
-  const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+  const blob = new Blob([html], { type: "text/html;charset=utf-8" });
   downloadBlob(blob, filename);
 }

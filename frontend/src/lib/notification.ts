@@ -1,74 +1,77 @@
-import type { WorkTask } from '../types/work'
+import type { WorkTask } from "../types/work";
 
-const NOTIFICATION_KEY = 'notification_unread_flag'
-const NOTIFICATION_TASKS_KEY = 'notification_tasks'
+const NOTIFICATION_KEY = "notification_unread_flag";
+const NOTIFICATION_TASKS_KEY = "notification_tasks";
 
 export function hasUnreadNotification(): boolean {
-  return localStorage.getItem(NOTIFICATION_KEY) === 'true'
+  return localStorage.getItem(NOTIFICATION_KEY) === "true";
 }
 
 export function markUnread(): void {
-  localStorage.setItem(NOTIFICATION_KEY, 'true')
-  window.dispatchEvent(new Event('notification-unread-change'))
-  window.dispatchEvent(new Event('notification-tasks-change'))
+  localStorage.setItem(NOTIFICATION_KEY, "true");
+  window.dispatchEvent(new Event("notification-unread-change"));
+  window.dispatchEvent(new Event("notification-tasks-change"));
 }
 
 export function markAllRead(): void {
-  localStorage.setItem(NOTIFICATION_KEY, 'false')
-  window.dispatchEvent(new Event('notification-unread-change'))
+  localStorage.setItem(NOTIFICATION_KEY, "false");
+  window.dispatchEvent(new Event("notification-unread-change"));
 }
 
 export function onNotificationChange(cb: () => void): () => void {
-  window.addEventListener('notification-unread-change', cb)
-  return () => window.removeEventListener('notification-unread-change', cb)
+  window.addEventListener("notification-unread-change", cb);
+  return () => window.removeEventListener("notification-unread-change", cb);
 }
 
 function parseStoredTasks(): WorkTask[] {
   try {
-    const stored = localStorage.getItem(NOTIFICATION_TASKS_KEY)
-    return stored ? JSON.parse(stored) : []
+    const stored = localStorage.getItem(NOTIFICATION_TASKS_KEY);
+    return stored ? JSON.parse(stored) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 function storeTasks(tasks: WorkTask[]): void {
-  localStorage.setItem(NOTIFICATION_TASKS_KEY, JSON.stringify(tasks))
+  localStorage.setItem(NOTIFICATION_TASKS_KEY, JSON.stringify(tasks));
 }
 
 export function getNotificationTasks(): WorkTask[] {
-  return parseStoredTasks()
+  return parseStoredTasks();
 }
 
 export function getNotificationTasksAndClear(): WorkTask[] {
-  const tasks = parseStoredTasks()
-  storeTasks([])
-  return tasks
+  const tasks = parseStoredTasks();
+  storeTasks([]);
+  return tasks;
 }
 
 export function addNotificationTask(task: WorkTask): void {
-  const tasks = parseStoredTasks()
-  const exists = tasks.some(t => t.id === task.id)
+  const tasks = parseStoredTasks();
+  const exists = tasks.some((t) => t.id === task.id);
   if (!exists) {
-    tasks.push(task)
+    tasks.push(task);
   }
-  storeTasks(tasks)
-  window.dispatchEvent(new Event('notification-tasks-change'))
+  storeTasks(tasks);
+  window.dispatchEvent(new Event("notification-tasks-change"));
 }
 
-export function updateNotificationTask(id: string, updates: Partial<WorkTask>): void {
-  const tasks = parseStoredTasks()
-  const idx = tasks.findIndex(t => t.id === id)
+export function updateNotificationTask(
+  id: string,
+  updates: Partial<WorkTask>,
+): void {
+  const tasks = parseStoredTasks();
+  const idx = tasks.findIndex((t) => t.id === id);
   if (idx !== -1) {
-    tasks[idx] = { ...tasks[idx], ...updates }
-    storeTasks(tasks)
+    tasks[idx] = { ...tasks[idx], ...updates };
+    storeTasks(tasks);
   }
-  window.dispatchEvent(new Event('notification-tasks-change'))
+  window.dispatchEvent(new Event("notification-tasks-change"));
 }
 
 export function onNotificationTasksChange(cb: () => void): () => void {
-  window.addEventListener('notification-tasks-change', cb)
-  return () => window.removeEventListener('notification-tasks-change', cb)
+  window.addEventListener("notification-tasks-change", cb);
+  return () => window.removeEventListener("notification-tasks-change", cb);
 }
 
 // ============================================
@@ -110,21 +113,21 @@ export interface SSEHandlerConfig {
    * 任务成功时回调。
    * @returns string | React.ReactNode — 作为 toast.success 的内容
    */
-  onSuccess?: (task: WorkTask) => React.ReactNode | string | void
+  onSuccess?: (task: WorkTask) => React.ReactNode | string | void;
   /**
    * 任务失败时回调。
    * @returns string — 作为 toast.error 的内容
    */
-  onError?: (task: WorkTask) => string | void
+  onError?: (task: WorkTask) => string | void;
   /**
    * 任务状态变化时回调（可选）。
    * 在 'status' 事件（包含 error 状态）触发时调用。
    */
-  onStatus?: (task: WorkTask) => void
+  onStatus?: (task: WorkTask) => void;
 }
 
 /** 全局 SSE Handler 注册表 — key = taskType */
-const sseHandlers = new Map<string, SSEHandlerConfig>()
+const sseHandlers = new Map<string, SSEHandlerConfig>();
 
 /**
  * 注册 SSE Handler。
@@ -139,11 +142,14 @@ const sseHandlers = new Map<string, SSEHandlerConfig>()
  *   })
  *   // 组件卸载时: cleanup()
  */
-export function registerSSEHandler(taskType: string, config: SSEHandlerConfig): () => void {
-  sseHandlers.set(taskType, config)
+export function registerSSEHandler(
+  taskType: string,
+  config: SSEHandlerConfig,
+): () => void {
+  sseHandlers.set(taskType, config);
   return () => {
-    sseHandlers.delete(taskType)
-  }
+    sseHandlers.delete(taskType);
+  };
 }
 
 /**
@@ -151,13 +157,18 @@ export function registerSSEHandler(taskType: string, config: SSEHandlerConfig): 
  * @param taskType - 任务类型标识符
  * @returns Handler 配置，如果未注册则返回 undefined
  */
-export function getRegisteredHandler(taskType: string): SSEHandlerConfig | undefined {
-  return sseHandlers.get(taskType)
+export function getRegisteredHandler(
+  taskType: string,
+): SSEHandlerConfig | undefined {
+  return sseHandlers.get(taskType);
 }
 
 /**
  * 获取所有已注册的 Handler。供全局 SSE 管理器内部使用。
  */
-export function getAllRegisteredHandlers(): ReadonlyMap<string, SSEHandlerConfig> {
-  return sseHandlers
+export function getAllRegisteredHandlers(): ReadonlyMap<
+  string,
+  SSEHandlerConfig
+> {
+  return sseHandlers;
 }

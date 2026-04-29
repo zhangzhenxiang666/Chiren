@@ -1,25 +1,47 @@
+import type {
+  Resume,
+  PersonalInfoContent,
+  SummaryContent,
+  ProjectsContent,
+  CertificationsContent,
+  LanguagesContent,
+  CustomContent,
+  GitHubContent,
+} from "../../../types/resume";
+import { AvatarImage } from "../avatar-image";
+import { degreeField, isSectionEmpty, md } from "../utils";
+import { QrCodesPreview } from "../qr-codes-preview";
 
-import type { Resume, PersonalInfoContent, SummaryContent, WorkExperienceContent, EducationContent, SkillsContent, ProjectsContent, CertificationsContent, LanguagesContent, CustomContent, GitHubContent } from '../../../types/resume';
-import { AvatarImage } from '../avatar-image';
-import { degreeField, isSectionEmpty, md } from '../utils';
-import { QrCodesPreview } from '../qr-codes-preview';
-
-const BLUE_GRAY = '#475569';
-const ACCENT = '#3b82f6';
+const BLUE_GRAY = "#475569";
+const ACCENT = "#3b82f6";
 
 export function TimelineTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
+  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
-    <div className="mx-auto max-w-[210mm] bg-white shadow-lg" style={{ fontFamily: 'Inter, sans-serif' }}>
+    <div
+      className="mx-auto max-w-[210mm] bg-white shadow-lg"
+      style={{ fontFamily: "Inter, sans-serif" }}
+    >
       {/* Header */}
       <div className="mb-6 text-center">
         {pi.avatar && (
-          <AvatarImage src={pi.avatar} size={72} className="mx-auto mb-3" style={{ border: `2px solid ${ACCENT}` }} />
+          <AvatarImage
+            src={pi.avatar}
+            size={72}
+            className="mx-auto mb-3"
+            style={{ border: `2px solid ${ACCENT}` }}
+          />
         )}
-        <h1 className="text-2xl font-bold" style={{ color: BLUE_GRAY }}>{pi.fullName || 'Your Name'}</h1>
-        {pi.jobTitle && <p className="mt-0.5 text-base" style={{ color: ACCENT }}>{pi.jobTitle}</p>}
+        <h1 className="text-2xl font-bold" style={{ color: BLUE_GRAY }}>
+          {pi.fullName || "Your Name"}
+        </h1>
+        {pi.jobTitle && (
+          <p className="mt-0.5 text-base" style={{ color: ACCENT }}>
+            {pi.jobTitle}
+          </p>
+        )}
         <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-sm text-zinc-500">
           {pi.age && <span>{pi.age}</span>}
           {pi.politicalStatus && <span>{pi.politicalStatus}</span>}
@@ -41,10 +63,15 @@ export function TimelineTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
+        .filter(
+          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
+        )
         .map((section) => (
           <div key={section.id} className="mb-6 pt-1" data-section>
-            <h2 className="mb-3 pb-2 border-b-2 border-zinc-200 text-sm font-bold uppercase tracking-wider" style={{ color: BLUE_GRAY }}>
+            <h2
+              className="mb-3 pb-2 border-b-2 border-zinc-200 text-sm font-bold uppercase tracking-wider"
+              style={{ color: BLUE_GRAY }}
+            >
               {section.title}
             </h2>
             <div className="mt-2">
@@ -56,35 +83,85 @@ export function TimelineTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function TimelineSectionContent({ section, resume }: { section: any; resume: Resume }) {
+function TimelineSectionContent({
+  section,
+  resume,
+}: {
+  section: any;
+  resume: Resume;
+}) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === 'summary') {
-    return <p className="text-sm leading-relaxed text-zinc-600" dangerouslySetInnerHTML={{ __html: md((content as SummaryContent).text) }} />;
+  if (section.type === "summary") {
+    return (
+      <p
+        className="text-sm leading-relaxed text-zinc-600"
+        dangerouslySetInnerHTML={{
+          __html: md((content as SummaryContent).text),
+        }}
+      />
+    );
   }
 
-  if (section.type === 'work_experience') {
+  if (section.type === "work_experience") {
     return (
-      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
+      <div
+        className="relative border-l-2 pl-6 ml-2"
+        style={{ borderColor: "#e2e8f0" }}
+      >
         {(content.items || []).map((item: any, idx: number) => (
-          <div key={item.id} className={`relative ${idx < (content.items || []).length - 1 ? 'pb-5' : ''}`}>
+          <div
+            key={item.id}
+            className={`relative ${idx < (content.items || []).length - 1 ? "pb-5" : ""}`}
+          >
             {/* Timeline dot */}
-            <div className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white" style={{ borderColor: ACCENT }} />
+            <div
+              className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white"
+              style={{ borderColor: ACCENT }}
+            />
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>{item.position}</span>
-                {item.company && <span className="text-sm text-zinc-500"> | {item.company}</span>}
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: BLUE_GRAY }}
+                >
+                  {item.position}
+                </span>
+                {item.company && (
+                  <span className="text-sm text-zinc-500">
+                    {" "}
+                    | {item.company}
+                  </span>
+                )}
               </div>
-              <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: '#eff6ff', color: ACCENT }}>
-                {item.startDate} – {item.endDate || (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
+              <span
+                className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                style={{ background: "#eff6ff", color: ACCENT }}
+              >
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (item.current
+                    ? resume.language === "zh"
+                      ? "至今"
+                      : "Present"
+                    : "")}
               </span>
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: '#eff6ff', color: ACCENT }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    style={{ background: "#eff6ff", color: ACCENT }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -92,7 +169,13 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
             )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
-                {item.highlights.map((h: string, i: number) => <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />)}
+                {item.highlights.map((h: string, i: number) => (
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
+                ))}
               </ul>
             )}
           </div>
@@ -101,23 +184,54 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'education') {
+  if (section.type === "education") {
     return (
-      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
+      <div
+        className="relative border-l-2 pl-6 ml-2"
+        style={{ borderColor: "#e2e8f0" }}
+      >
         {(content.items || []).map((item: any, idx: number) => (
-          <div key={item.id} className={`relative ${idx < (content.items || []).length - 1 ? 'pb-4' : ''}`}>
-            <div className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white" style={{ borderColor: ACCENT }} />
+          <div
+            key={item.id}
+            className={`relative ${idx < (content.items || []).length - 1 ? "pb-4" : ""}`}
+          >
+            <div
+              className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white"
+              style={{ borderColor: ACCENT }}
+            />
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>{degreeField(item.degree, item.field)}</span>
-                {item.institution && <span className="text-sm text-zinc-500"> — {item.institution}</span>}
+                <span
+                  className="text-sm font-bold"
+                  style={{ color: BLUE_GRAY }}
+                >
+                  {degreeField(item.degree, item.field)}
+                </span>
+                {item.institution && (
+                  <span className="text-sm text-zinc-500">
+                    {" "}
+                    — {item.institution}
+                  </span>
+                )}
               </div>
-              <span className="shrink-0 text-xs text-zinc-400">{item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}</span>
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.startDate} –{" "}
+                {item.endDate ||
+                  (resume.language === "zh" ? "至今" : "Present")}
+              </span>
             </div>
-            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
+            {item.gpa && (
+              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
+            )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
-                {item.highlights.map((h: string, i: number) => <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />)}
+                {item.highlights.map((h: string, i: number) => (
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
+                ))}
               </ul>
             )}
           </div>
@@ -126,39 +240,71 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'skills') {
+  if (section.type === "skills") {
     return (
       <div className="space-y-1">
         {(content.categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span className="w-28 shrink-0 font-medium" style={{ color: ACCENT }}>{cat.name}:</span>
-            <span className="text-zinc-600">{(cat.skills || []).join(', ')}</span>
+            <span
+              className="w-28 shrink-0 font-medium"
+              style={{ color: ACCENT }}
+            >
+              {cat.name}:
+            </span>
+            <span className="text-zinc-600">
+              {(cat.skills || []).join(", ")}
+            </span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'projects') {
+  if (section.type === "projects") {
     const items = (content as ProjectsContent).items || [];
     return (
-      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
+      <div
+        className="relative border-l-2 pl-6 ml-2"
+        style={{ borderColor: "#e2e8f0" }}
+      >
         {items.map((item: any, idx: number) => (
-          <div key={item.id} className={`relative ${idx < items.length - 1 ? 'pb-5' : ''}`}>
-            <div className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white" style={{ borderColor: ACCENT }} />
+          <div
+            key={item.id}
+            className={`relative ${idx < items.length - 1 ? "pb-5" : ""}`}
+          >
+            <div
+              className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white"
+              style={{ borderColor: ACCENT }}
+            />
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>{item.name}</span>
+              <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>
+                {item.name}
+              </span>
               {item.startDate && (
-                <span className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: '#eff6ff', color: ACCENT }}>
-                  {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
+                <span
+                  className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
+                  style={{ background: "#eff6ff", color: ACCENT }}
+                >
+                  {item.startDate} –{" "}
+                  {item.endDate ||
+                    (resume.language === "zh" ? "至今" : "Present")}
                 </span>
               )}
             </div>
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
             {item.technologies?.length > 0 && (
               <div className="mt-1 flex flex-wrap gap-1">
                 {item.technologies.map((t: string, i: number) => (
-                  <span key={i} className="rounded-full px-2 py-0.5 text-[10px] font-medium" style={{ background: '#eff6ff', color: ACCENT }}>
+                  <span
+                    key={i}
+                    className="rounded-full px-2 py-0.5 text-[10px] font-medium"
+                    style={{ background: "#eff6ff", color: ACCENT }}
+                  >
                     {t}
                   </span>
                 ))}
@@ -166,7 +312,13 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
             )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
-                {item.highlights.map((h: string, i: number) => <li key={i} className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(h) }} />)}
+                {item.highlights.map((h: string, i: number) => (
+                  <li
+                    key={i}
+                    className="text-sm text-zinc-600"
+                    dangerouslySetInnerHTML={{ __html: md(h) }}
+                  />
+                ))}
               </ul>
             )}
           </div>
@@ -175,30 +327,43 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'certifications') {
+  if (section.type === "certifications") {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between text-sm">
+          <div
+            key={item.id}
+            className="flex items-baseline justify-between text-sm"
+          >
             <div>
-              <span className="font-semibold" style={{ color: BLUE_GRAY }}>{item.name}</span>
-              {item.issuer && <span className="text-zinc-500"> — {item.issuer}</span>}
+              <span className="font-semibold" style={{ color: BLUE_GRAY }}>
+                {item.name}
+              </span>
+              {item.issuer && (
+                <span className="text-zinc-500"> — {item.issuer}</span>
+              )}
             </div>
-            {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
+            {item.date && (
+              <span className="shrink-0 text-xs text-zinc-400">
+                {item.date}
+              </span>
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'languages') {
+  if (section.type === "languages") {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-x-6 gap-y-1">
         {items.map((item: any) => (
           <span key={item.id} className="text-sm">
-            <span className="font-medium" style={{ color: ACCENT }}>{item.language}</span>
+            <span className="font-medium" style={{ color: ACCENT }}>
+              {item.language}
+            </span>
             <span className="text-zinc-500"> — {item.proficiency}</span>
           </span>
         ))}
@@ -206,25 +371,36 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
     );
   }
 
-  if (section.type === 'github') {
+  if (section.type === "github") {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>{item.name}</span>
-              <span className="text-xs text-zinc-400">{'\u2B50'} {item.stars?.toLocaleString()}</span>
+              <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>
+                {item.name}
+              </span>
+              <span className="text-xs text-zinc-400">
+                {"\u2B50"} {item.stars?.toLocaleString()}
+              </span>
             </div>
-            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
-            {item.description && <p className="mt-1 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.language && (
+              <span className="text-xs text-zinc-500">{item.language}</span>
+            )}
+            {item.description && (
+              <p
+                className="mt-1 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'custom') {
+  if (section.type === "custom") {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
@@ -232,19 +408,38 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-semibold" style={{ color: BLUE_GRAY }}>{item.title}</span>
-                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
+                <span
+                  className="text-sm font-semibold"
+                  style={{ color: BLUE_GRAY }}
+                >
+                  {item.title}
+                </span>
+                {item.subtitle && (
+                  <span className="text-sm text-zinc-500">
+                    {" "}
+                    — {item.subtitle}
+                  </span>
+                )}
               </div>
-              {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
+              {item.date && (
+                <span className="shrink-0 text-xs text-zinc-400">
+                  {item.date}
+                </span>
+              )}
             </div>
-            {item.description && <p className="mt-0.5 text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            {item.description && (
+              <p
+                className="mt-0.5 text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === 'qr_codes') {
+  if (section.type === "qr_codes") {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -253,8 +448,15 @@ function TimelineSectionContent({ section, resume }: { section: any; resume: Res
       <div className="space-y-2">
         {content.items.map((item: any) => (
           <div key={item.id}>
-            <span className="text-sm font-medium" style={{ color: BLUE_GRAY }}>{item.name || item.title || item.language}</span>
-            {item.description && <p className="text-sm text-zinc-600" dangerouslySetInnerHTML={{ __html: md(item.description) }} />}
+            <span className="text-sm font-medium" style={{ color: BLUE_GRAY }}>
+              {item.name || item.title || item.language}
+            </span>
+            {item.description && (
+              <p
+                className="text-sm text-zinc-600"
+                dangerouslySetInnerHTML={{ __html: md(item.description) }}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -688,6 +688,12 @@ class InterviewCollection(PydanticMixin, Base):
         default="not_started",
         comment="状态：not_started/in_progress/completed",
     )
+    meta_info: Mapped[dict[str, Any] | None] = mapped_column(
+        JSON,
+        nullable=True,
+        default=None,
+        comment="集合元数据，包含总体面试总结等",
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
@@ -716,6 +722,7 @@ class InterviewCollection(PydanticMixin, Base):
             name=self.name,
             sub_resume_id=self.sub_resume_id,
             status=self.status,
+            meta_info=self.meta_info,
             created_at=self.created_at,
             updated_at=self.updated_at,
         )
@@ -730,6 +737,7 @@ class InterviewCollection(PydanticMixin, Base):
             name=schema.name,
             sub_resume_id=schema.sub_resume_id,
             status=schema.status,
+            meta_info=schema.meta_info,
             created_at=created,
             updated_at=updated,
         )

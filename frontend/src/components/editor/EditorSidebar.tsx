@@ -1,5 +1,20 @@
-import { useCallback, useRef, useState, useEffect } from 'react';
-import { Plus, GripVertical, LayoutList, Pencil, User, FileText, Briefcase, GraduationCap, Wrench, FolderKanban, Award, Languages, Code, QrCode } from 'lucide-react';
+import { useCallback, useRef, useState, useEffect } from "react";
+import {
+  Plus,
+  GripVertical,
+  LayoutList,
+  Pencil,
+  User,
+  FileText,
+  Briefcase,
+  GraduationCap,
+  Wrench,
+  FolderKanban,
+  Award,
+  Languages,
+  Code,
+  QrCode,
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -8,21 +23,25 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from '@dnd-kit/core';
+} from "@dnd-kit/core";
 import {
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
   useSortable,
-} from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { useEditorStore } from '@/stores/editor-store';
-import { useResumeStore } from '@/stores/resume-store';
-import type { ResumeSection } from '@/types/resume';
-import { SECTION_TYPES, DEFAULT_SECTION_TITLES, type SectionType } from '@/lib/constants';
-import { generateId } from '@/lib/utils';
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useEditorStore } from "@/stores/editor-store";
+import { useResumeStore } from "@/stores/resume-store";
+import type { ResumeSection } from "@/types/resume";
+import {
+  SECTION_TYPES,
+  DEFAULT_SECTION_TITLES,
+  type SectionType,
+} from "@/lib/constants";
+import { generateId } from "@/lib/utils";
 
 const sectionIcons: Record<string, React.ElementType> = {
   personal_info: User,
@@ -51,7 +70,14 @@ function SortableSidebarItem({
   onRename?: (title: string) => void;
   icon: React.ElementType;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: section.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: section.id });
 
   const [isRenaming, setIsRenaming] = useState(false);
   const [renameValue, setRenameValue] = useState(section.title);
@@ -80,7 +106,7 @@ function SortableSidebarItem({
     opacity: isDragging ? 0.5 : undefined,
   };
 
-  const isRenamable = section.type !== 'personal_info';
+  const isRenamable = section.type !== "personal_info";
 
   return (
     <div
@@ -88,8 +114,8 @@ function SortableSidebarItem({
       style={style}
       className={`group/item flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors duration-150 ${
         isSelected
-          ? 'bg-pink-50 dark:bg-pink-950/70 text-pink-700 dark:text-pink-300'
-          : 'text-muted-foreground hover:bg-muted dark:hover:bg-muted'
+          ? "bg-pink-50 dark:bg-pink-950/70 text-pink-700 dark:text-pink-300"
+          : "text-muted-foreground hover:bg-muted dark:hover:bg-muted"
       }`}
     >
       <GripVertical
@@ -110,8 +136,11 @@ function SortableSidebarItem({
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={commitRename}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') commitRename();
-              if (e.key === 'Escape') { setRenameValue(section.title); setIsRenaming(false); }
+              if (e.key === "Enter") commitRename();
+              if (e.key === "Escape") {
+                setRenameValue(section.title);
+                setIsRenaming(false);
+              }
             }}
             onClick={(e) => e.stopPropagation()}
             className="h-5 w-full min-w-0 rounded border border-border bg-transparent px-1 text-sm outline-none"
@@ -124,7 +153,11 @@ function SortableSidebarItem({
         <button
           type="button"
           className="hidden shrink-0 cursor-pointer rounded p-0.5 text-muted-foreground hover:text-foreground"
-          onClick={(e) => { e.stopPropagation(); setRenameValue(section.title); setIsRenaming(true); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            setRenameValue(section.title);
+            setIsRenaming(true);
+          }}
         >
           <Pencil className="h-3 w-3" />
         </button>
@@ -139,21 +172,30 @@ interface EditorSidebarProps {
   onReorderSections: (sections: ResumeSection[]) => void;
 }
 
-export function EditorSidebar({ sections, onAddSection, onReorderSections }: EditorSidebarProps) {
+export function EditorSidebar({
+  sections,
+  onAddSection,
+  onReorderSections,
+}: EditorSidebarProps) {
   const { selectedSectionId, selectSection } = useEditorStore();
   const { updateSectionTitle } = useResumeStore();
 
-  const handleSelect = useCallback((id: string) => {
-    selectSection(id);
-    requestAnimationFrame(() => {
-      const el = document.querySelector(`[data-section-id="${id}"]`);
-      el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  }, [selectSection]);
+  const handleSelect = useCallback(
+    (id: string) => {
+      selectSection(id);
+      requestAnimationFrame(() => {
+        const el = document.querySelector(`[data-section-id="${id}"]`);
+        el?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+    },
+    [selectSection],
+  );
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const handleDragEnd = useCallback(
@@ -171,32 +213,33 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
         }
       }
     },
-    [sections, onReorderSections]
+    [sections, onReorderSections],
   );
 
   const existingTypes = new Set(sections.map((s) => s.type));
   const availableTypes = SECTION_TYPES.filter((type) => {
-    if (type === 'custom') return true;
+    if (type === "custom") return true;
     return !existingTypes.has(type);
   });
 
   const handleAddSection = (type: SectionType) => {
     const newSection: ResumeSection = {
       id: generateId(),
-      resumeId: '',
+      resumeId: "",
       type,
       title: DEFAULT_SECTION_TITLES[type] || type,
       sortOrder: sections.length,
       visible: true,
-      content: type === 'personal_info'
-        ? { fullName: '', jobTitle: '', email: '', phone: '', location: '' }
-        : type === 'summary'
-          ? { text: '' }
-          : type === 'skills'
-            ? { categories: [] }
-            : type === 'custom'
-              ? { id: '', title: '', date: '', description: '' }
-              : { items: [] },
+      content:
+        type === "personal_info"
+          ? { fullName: "", jobTitle: "", email: "", phone: "", location: "" }
+          : type === "summary"
+            ? { text: "" }
+            : type === "skills"
+              ? { categories: [] }
+              : type === "custom"
+                ? { id: "", title: "", date: "", description: "" }
+                : { items: [] },
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -229,7 +272,11 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
                     section={section}
                     isSelected={selectedSectionId === section.id}
                     onSelect={() => handleSelect(section.id)}
-                    onRename={section.type !== 'personal_info' ? (title) => updateSectionTitle(section.id, title) : undefined}
+                    onRename={
+                      section.type !== "personal_info"
+                        ? (title) => updateSectionTitle(section.id, title)
+                        : undefined
+                    }
                     icon={Icon}
                   />
                 );
@@ -242,7 +289,9 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
           <>
             <Separator className="my-3" />
             <div className="px-2 pb-4">
-              <p className="mb-2 px-2 text-xs text-muted-foreground">添加段落</p>
+              <p className="mb-2 px-2 text-xs text-muted-foreground">
+                添加段落
+              </p>
               <div className="space-y-0.5">
                 {availableTypes.map((type) => {
                   const Icon = sectionIcons[type] || LayoutList;
@@ -255,7 +304,9 @@ export function EditorSidebar({ sections, onAddSection, onReorderSections }: Edi
                     >
                       <Plus className="h-3 w-3 shrink-0" />
                       <Icon className="h-4 w-4 shrink-0" />
-                      <span className="truncate">{DEFAULT_SECTION_TITLES[type]}</span>
+                      <span className="truncate">
+                        {DEFAULT_SECTION_TITLES[type]}
+                      </span>
                     </button>
                   );
                 })}

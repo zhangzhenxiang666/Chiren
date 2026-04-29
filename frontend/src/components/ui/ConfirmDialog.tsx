@@ -1,39 +1,42 @@
-import { useCallback, useEffect } from 'react'
-import { AlertTriangle, X } from 'lucide-react'
+import { useCallback, useEffect } from "react";
+import { AlertTriangle, X } from "lucide-react";
 
 interface ConfirmDialogProps {
-  open: boolean
-  title: string
-  description?: string
-  confirmText?: string
-  cancelText?: string
-  confirmVariant?: 'danger' | 'primary'
-  onConfirm: () => void
-  onCancel: () => void
+  open: boolean;
+  title: string;
+  description?: string;
+  confirmText?: string;
+  cancelText?: string;
+  confirmVariant?: "danger" | "primary";
+  onConfirm: () => void;
+  onCancel: () => void;
 }
 
 export default function ConfirmDialog({
   open,
   title,
   description,
-  confirmText = '确认',
-  cancelText = '取消',
-  confirmVariant = 'primary',
+  confirmText = "确认",
+  cancelText = "取消",
+  confirmVariant = "primary",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
-  const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (e.key === 'Escape') onCancel()
-  }, [onCancel])
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCancel();
+    },
+    [onCancel],
+  );
 
   useEffect(() => {
     if (open) {
-      document.addEventListener('keydown', handleKeyDown)
-      return () => document.removeEventListener('keydown', handleKeyDown)
+      document.addEventListener("keydown", handleKeyDown);
+      return () => document.removeEventListener("keydown", handleKeyDown);
     }
-  }, [open, handleKeyDown])
+  }, [open, handleKeyDown]);
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -74,9 +77,9 @@ export default function ConfirmDialog({
             type="button"
             onClick={onConfirm}
             className={`rounded-lg px-4 py-2 text-sm font-medium text-white transition-colors ${
-              confirmVariant === 'danger'
-                ? 'bg-red-500 hover:bg-red-600'
-                : 'bg-pink-500 hover:bg-pink-600'
+              confirmVariant === "danger"
+                ? "bg-red-500 hover:bg-red-600"
+                : "bg-pink-500 hover:bg-pink-600"
             }`}
           >
             {confirmText}
@@ -84,5 +87,5 @@ export default function ConfirmDialog({
         </div>
       </div>
     </div>
-  )
+  );
 }

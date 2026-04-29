@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react'
-import { X } from 'lucide-react'
+import { useState, useEffect } from "react";
+import { X } from "lucide-react";
 
 export interface InterviewerProfile {
-  name: string
-  title: string
-  bio: string
-  questionStyle: string
-  assessmentDimensions: string[]
-  personalityTraits: string[]
+  name: string;
+  title: string;
+  bio: string;
+  questionStyle: string;
+  assessmentDimensions: string[];
+  personalityTraits: string[];
 }
 
 interface CustomInterviewerModalProps {
-  open: boolean
-  onClose: () => void
-  initialValues?: InterviewerProfile
-  isEdit?: boolean
-  onSubmit: (profile: InterviewerProfile) => void
+  open: boolean;
+  onClose: () => void;
+  initialValues?: InterviewerProfile;
+  isEdit?: boolean;
+  onSubmit: (profile: InterviewerProfile) => void;
 }
 
-const REQUIRED_MSG = '此项为必填'
+const REQUIRED_MSG = "此项为必填";
 
 export default function CustomInterviewerModal({
   open,
@@ -27,56 +27,57 @@ export default function CustomInterviewerModal({
   isEdit,
   onSubmit,
 }: CustomInterviewerModalProps) {
-  const [name, setName] = useState('')
-  const [title, setTitle] = useState('')
-  const [bio, setBio] = useState('')
-  const [questionStyle, setQuestionStyle] = useState('')
-  const [assessmentDimensions, setAssessmentDimensions] = useState('')
-  const [personalityTraits, setPersonalityTraits] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [name, setName] = useState("");
+  const [title, setTitle] = useState("");
+  const [bio, setBio] = useState("");
+  const [questionStyle, setQuestionStyle] = useState("");
+  const [assessmentDimensions, setAssessmentDimensions] = useState("");
+  const [personalityTraits, setPersonalityTraits] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (open && initialValues) {
-      setName(initialValues.name)
-      setTitle(initialValues.title)
-      setBio(initialValues.bio)
-      setQuestionStyle(initialValues.questionStyle)
-      setAssessmentDimensions(initialValues.assessmentDimensions.join('，'))
-      setPersonalityTraits(initialValues.personalityTraits.join('，'))
+      setName(initialValues.name);
+      setTitle(initialValues.title);
+      setBio(initialValues.bio);
+      setQuestionStyle(initialValues.questionStyle);
+      setAssessmentDimensions(initialValues.assessmentDimensions.join("，"));
+      setPersonalityTraits(initialValues.personalityTraits.join("，"));
     } else if (!open) {
-      setName('')
-      setTitle('')
-      setBio('')
-      setQuestionStyle('')
-      setAssessmentDimensions('')
-      setPersonalityTraits('')
+      setName("");
+      setTitle("");
+      setBio("");
+      setQuestionStyle("");
+      setAssessmentDimensions("");
+      setPersonalityTraits("");
     }
-    setErrors({})
-  }, [open, initialValues])
+    setErrors({});
+  }, [open, initialValues]);
 
-  if (!open) return null
+  if (!open) return null;
 
   const validate = (): boolean => {
-    const newErrors: Record<string, string> = {}
-    if (!name.trim()) newErrors.name = REQUIRED_MSG
-    if (!title.trim()) newErrors.title = REQUIRED_MSG
-    if (!bio.trim()) newErrors.bio = REQUIRED_MSG
-    if (!questionStyle.trim()) newErrors.questionStyle = REQUIRED_MSG
-    if (!assessmentDimensions.trim()) newErrors.assessmentDimensions = REQUIRED_MSG
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
+    const newErrors: Record<string, string> = {};
+    if (!name.trim()) newErrors.name = REQUIRED_MSG;
+    if (!title.trim()) newErrors.title = REQUIRED_MSG;
+    if (!bio.trim()) newErrors.bio = REQUIRED_MSG;
+    if (!questionStyle.trim()) newErrors.questionStyle = REQUIRED_MSG;
+    if (!assessmentDimensions.trim())
+      newErrors.assessmentDimensions = REQUIRED_MSG;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const clearError = (field: string) => {
     setErrors((prev) => {
-      const next = { ...prev }
-      delete next[field]
-      return next
-    })
-  }
+      const next = { ...prev };
+      delete next[field];
+      return next;
+    });
+  };
 
   const handleSubmit = () => {
-    if (!validate()) return
+    if (!validate()) return;
     onSubmit({
       name: name.trim(),
       title: title.trim(),
@@ -90,26 +91,28 @@ export default function CustomInterviewerModal({
         .split(/[,，]/)
         .map((s) => s.trim())
         .filter(Boolean),
-    })
-    setName('')
-    setTitle('')
-    setBio('')
-    setQuestionStyle('')
-    setAssessmentDimensions('')
-    setPersonalityTraits('')
-  }
+    });
+    setName("");
+    setTitle("");
+    setBio("");
+    setQuestionStyle("");
+    setAssessmentDimensions("");
+    setPersonalityTraits("");
+  };
 
   const inputCls = (fieldKey: string) =>
     `w-full px-3 py-2 bg-background border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 ${
-      errors[fieldKey] ? 'border-red-500/60' : 'border-foreground/10'
-    }`
+      errors[fieldKey] ? "border-red-500/60" : "border-foreground/10"
+    }`;
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-md mx-4 flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
-          <h2 className="text-sm font-semibold">{isEdit ? '编辑面试官' : '自定义面试官'}</h2>
+          <h2 className="text-sm font-semibold">
+            {isEdit ? "编辑面试官" : "自定义面试官"}
+          </h2>
           <button
             type="button"
             onClick={onClose}
@@ -127,12 +130,17 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={name}
-              onChange={(e) => { setName(e.target.value); clearError('name') }}
+              onChange={(e) => {
+                setName(e.target.value);
+                clearError("name");
+              }}
               placeholder="如：产品总监"
-              className={inputCls('name')}
+              className={inputCls("name")}
               autoFocus
             />
-            {errors.name && <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>}
+            {errors.name && (
+              <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>
+            )}
           </div>
 
           <div>
@@ -142,11 +150,16 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={title}
-              onChange={(e) => { setTitle(e.target.value); clearError('title') }}
+              onChange={(e) => {
+                setTitle(e.target.value);
+                clearError("title");
+              }}
               placeholder="如：产品副总裁"
-              className={inputCls('title')}
+              className={inputCls("title")}
             />
-            {errors.title && <p className="text-[10px] text-red-400 mt-1">{errors.title}</p>}
+            {errors.title && (
+              <p className="text-[10px] text-red-400 mt-1">{errors.title}</p>
+            )}
           </div>
 
           <div>
@@ -155,12 +168,17 @@ export default function CustomInterviewerModal({
             </label>
             <textarea
               value={bio}
-              onChange={(e) => { setBio(e.target.value); clearError('bio') }}
+              onChange={(e) => {
+                setBio(e.target.value);
+                clearError("bio");
+              }}
               placeholder="描述面试官的背景..."
               rows={2}
-              className={`${inputCls('bio')} resize-none`}
+              className={`${inputCls("bio")} resize-none`}
             />
-            {errors.bio && <p className="text-[10px] text-red-400 mt-1">{errors.bio}</p>}
+            {errors.bio && (
+              <p className="text-[10px] text-red-400 mt-1">{errors.bio}</p>
+            )}
           </div>
 
           <div>
@@ -170,11 +188,18 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={questionStyle}
-              onChange={(e) => { setQuestionStyle(e.target.value); clearError('questionStyle') }}
+              onChange={(e) => {
+                setQuestionStyle(e.target.value);
+                clearError("questionStyle");
+              }}
               placeholder="描述提问方式..."
-              className={inputCls('questionStyle')}
+              className={inputCls("questionStyle")}
             />
-            {errors.questionStyle && <p className="text-[10px] text-red-400 mt-1">{errors.questionStyle}</p>}
+            {errors.questionStyle && (
+              <p className="text-[10px] text-red-400 mt-1">
+                {errors.questionStyle}
+              </p>
+            )}
           </div>
 
           <div>
@@ -184,11 +209,18 @@ export default function CustomInterviewerModal({
             <input
               type="text"
               value={assessmentDimensions}
-              onChange={(e) => { setAssessmentDimensions(e.target.value); clearError('assessmentDimensions') }}
+              onChange={(e) => {
+                setAssessmentDimensions(e.target.value);
+                clearError("assessmentDimensions");
+              }}
               placeholder="如：产品思维, 数据分析, 用户洞察"
-              className={inputCls('assessmentDimensions')}
+              className={inputCls("assessmentDimensions")}
             />
-            {errors.assessmentDimensions && <p className="text-[10px] text-red-400 mt-1">{errors.assessmentDimensions}</p>}
+            {errors.assessmentDimensions && (
+              <p className="text-[10px] text-red-400 mt-1">
+                {errors.assessmentDimensions}
+              </p>
+            )}
           </div>
 
           <div>
@@ -211,10 +243,10 @@ export default function CustomInterviewerModal({
             onClick={handleSubmit}
             className="w-full px-4 py-2 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 transition-colors"
           >
-            {isEdit ? '保存' : '添加'}
+            {isEdit ? "保存" : "添加"}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

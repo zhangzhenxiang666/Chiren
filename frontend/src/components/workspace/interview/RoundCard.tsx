@@ -1,20 +1,20 @@
-import { ChevronUp, ChevronDown, Trash2, Edit3 } from 'lucide-react'
-import type { InterviewerProfile } from './CustomInterviewerModal'
+import { ChevronUp, ChevronDown, Trash2, Edit3 } from "lucide-react";
+import type { InterviewerProfile } from "./CustomInterviewerModal";
 
 interface DraftRound {
-  tempId: string
-  name: string
-  interviewer: InterviewerProfile
+  tempId: string;
+  name: string;
+  interviewer: InterviewerProfile;
 }
 
 interface RoundCardProps {
-  round: DraftRound
-  index: number
-  totalCount: number
-  onEdit: () => void
-  onDelete: () => void
-  onMoveUp: () => void
-  onMoveDown: () => void
+  round: DraftRound;
+  index: number;
+  totalCount: number;
+  onEdit: () => void;
+  onDelete: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 export default function RoundCard({
@@ -79,5 +79,5 @@ export default function RoundCard({
         </button>
       </div>
     </div>
-  )
+  );
 }

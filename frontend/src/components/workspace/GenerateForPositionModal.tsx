@@ -1,71 +1,76 @@
-import { useState } from 'react'
-import { X, Check, Loader2, Sparkles, FileText } from 'lucide-react'
-import { TemplateThumbnail } from '../template/TemplateThumbnail'
-import { templateLabelsMap, TEMPLATE_ORDER } from '../../lib/template-labels'
+import { useState } from "react";
+import { X, Check, Loader2, Sparkles, FileText } from "lucide-react";
+import { TemplateThumbnail } from "../template/TemplateThumbnail";
+import { templateLabelsMap, TEMPLATE_ORDER } from "../../lib/template-labels";
 
 export interface GenerateForPositionModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
   onSubmit: (payload: {
-    template: string
-    name: string
-    jobTitle: string
-    jdDescription: string
-  }) => void
+    template: string;
+    name: string;
+    jobTitle: string;
+    jdDescription: string;
+  }) => void;
   onCreateDirect: (payload: {
-    template: string
-    name: string
-    jobTitle: string
-    jdDescription: string
-  }) => void
+    template: string;
+    name: string;
+    jobTitle: string;
+    jdDescription: string;
+  }) => void;
 }
 
-export default function GenerateForPositionModal({ open, onClose, onSubmit, onCreateDirect }: GenerateForPositionModalProps) {
-  const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATE_ORDER[0])
-  const [name, setName] = useState('')
-  const [jobTitle, setJobTitle] = useState('')
-  const [jdDescription, setJdDescription] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isCreatingDirect, setIsCreatingDirect] = useState(false)
+export default function GenerateForPositionModal({
+  open,
+  onClose,
+  onSubmit,
+  onCreateDirect,
+}: GenerateForPositionModalProps) {
+  const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATE_ORDER[0]);
+  const [name, setName] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [jdDescription, setJdDescription] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCreatingDirect, setIsCreatingDirect] = useState(false);
 
   const handleCreateDirect = async () => {
-    setIsCreatingDirect(true)
+    setIsCreatingDirect(true);
     try {
       await onCreateDirect({
         template: selectedTemplate,
         name,
         jobTitle,
         jdDescription,
-      })
+      });
     } finally {
-      setIsCreatingDirect(false)
+      setIsCreatingDirect(false);
     }
-  }
+  };
 
   const handleSubmit = async () => {
-    if (!jdDescription.trim()) return
-    setIsSubmitting(true)
+    if (!jdDescription.trim()) return;
+    setIsSubmitting(true);
     try {
       await onSubmit({
         template: selectedTemplate,
         name,
         jobTitle,
         jdDescription,
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const resetAndClose = () => {
-    onClose()
-    setName('')
-    setJobTitle('')
-    setJdDescription('')
-    setSelectedTemplate(TEMPLATE_ORDER[0])
-  }
+    onClose();
+    setName("");
+    setJobTitle("");
+    setJdDescription("");
+    setSelectedTemplate(TEMPLATE_ORDER[0]);
+  };
 
-  if (!open) return null
+  if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -73,15 +78,21 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
         role="button"
         tabIndex={0}
         onClick={resetAndClose}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') resetAndClose() }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") resetAndClose();
+        }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
       />
 
       <div className="relative w-[896px] h-[768px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">针对新职位生成</h2>
-            <p className="text-muted-foreground text-sm mt-1">填写岗位要求，AI 将为您生成定制简历</p>
+            <h2 className="text-xl font-semibold text-foreground">
+              针对新职位生成
+            </h2>
+            <p className="text-muted-foreground text-sm mt-1">
+              填写岗位要求，AI 将为您生成定制简历
+            </p>
           </div>
           <button
             type="button"
@@ -95,8 +106,12 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
         <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label htmlFor="gen-name" className="text-xs text-muted-foreground mb-1.5 block">
-                简历名称 <span className="text-muted-foreground/60">(选填)</span>
+              <label
+                htmlFor="gen-name"
+                className="text-xs text-muted-foreground mb-1.5 block"
+              >
+                简历名称{" "}
+                <span className="text-muted-foreground/60">(选填)</span>
               </label>
               <input
                 id="gen-name"
@@ -108,8 +123,12 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
               />
             </div>
             <div>
-              <label htmlFor="gen-job-title" className="text-xs text-muted-foreground mb-1.5 block">
-                岗位名称 <span className="text-muted-foreground/60">(选填)</span>
+              <label
+                htmlFor="gen-job-title"
+                className="text-xs text-muted-foreground mb-1.5 block"
+              >
+                岗位名称{" "}
+                <span className="text-muted-foreground/60">(选填)</span>
               </label>
               <input
                 id="gen-job-title"
@@ -123,7 +142,10 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
           </div>
 
           <div className="mt-4">
-            <label htmlFor="gen-jd" className="text-xs text-muted-foreground mb-1.5 block">
+            <label
+              htmlFor="gen-jd"
+              className="text-xs text-muted-foreground mb-1.5 block"
+            >
               JD 描述 <span className="text-red-400">*</span>
             </label>
             <textarea
@@ -135,9 +157,15 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
               className="w-full resize-none px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
             />
             <div className="flex justify-between mt-1">
-              <span className="text-muted-foreground/60 text-[11px]">请尽量填写完整的岗位要求和职责描述</span>
-              <span className={`text-[11px] ${jdDescription.trim() ? 'text-pink-400' : 'text-muted-foreground/60'}`}>
-                {jdDescription.length > 0 ? `${jdDescription.length} 字` : '必填'}
+              <span className="text-muted-foreground/60 text-[11px]">
+                请尽量填写完整的岗位要求和职责描述
+              </span>
+              <span
+                className={`text-[11px] ${jdDescription.trim() ? "text-pink-400" : "text-muted-foreground/60"}`}
+              >
+                {jdDescription.length > 0
+                  ? `${jdDescription.length} 字`
+                  : "必填"}
               </span>
             </div>
           </div>
@@ -149,15 +177,15 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
             <div className="flex-1 overflow-y-auto pr-1 min-h-0">
               <div className="grid grid-cols-5 gap-3">
                 {TEMPLATE_ORDER.map((tpl) => {
-                  const isSelected = selectedTemplate === tpl
+                  const isSelected = selectedTemplate === tpl;
                   return (
                     <button
                       key={tpl}
                       type="button"
                       className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                         isSelected
-                          ? 'border-pink-500 shadow-md shadow-pink-500/10'
-                          : 'border-foreground/10 hover:border-foreground/30'
+                          ? "border-pink-500 shadow-md shadow-pink-500/10"
+                          : "border-foreground/10 hover:border-foreground/30"
                       }`}
                       onClick={() => setSelectedTemplate(tpl)}
                     >
@@ -172,15 +200,17 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
                           </div>
                         )}
                       </div>
-                      <div className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
-                        isSelected
-                          ? 'bg-pink-500/10 text-pink-400'
-                          : 'text-muted-foreground hover:text-foreground'
-                      }`}>
+                      <div
+                        className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
+                          isSelected
+                            ? "bg-pink-500/10 text-pink-400"
+                            : "text-muted-foreground hover:text-foreground"
+                        }`}
+                      >
                         {templateLabelsMap[tpl]}
                       </div>
                     </button>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -236,5 +266,5 @@ export default function GenerateForPositionModal({ open, onClose, onSubmit, onCr
         </div>
       </div>
     </div>
-  )
+  );
 }

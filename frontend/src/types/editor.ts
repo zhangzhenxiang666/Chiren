@@ -1,4 +1,4 @@
-import type { ResumeSection } from './resume';
+import type { ResumeSection } from "./resume";
 
 export interface EditorState {
   selectedSectionId: string | null;
@@ -13,7 +13,7 @@ export interface ResumeSnapshot {
   timestamp: number;
 }
 
-export type DragItemType = 'section' | 'item' | 'new-section';
+export type DragItemType = "section" | "item" | "new-section";
 
 export interface DragData {
   type: DragItemType;

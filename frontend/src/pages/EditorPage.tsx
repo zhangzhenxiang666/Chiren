@@ -1,27 +1,36 @@
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import { useEditorStore } from '@/stores/editor-store';
-import { useResumeStore } from '@/stores/resume-store';
-import { useEditor } from '@/hooks/use-editor';
-import EditorToolbar from '@/components/editor/EditorToolbar';
-import { EditorSidebar } from '@/components/editor/EditorSidebar';
-import { EditorCanvas } from '@/components/editor/EditorCanvas';
-import { ThemeEditor } from '@/components/editor/ThemeEditor';
-import { EditorPreviewPanel } from '@/components/editor/EditorPreviewPanel';
-import { CoverLetterDialog } from '@/components/editor/CoverLetterDialog';
-import { ExportDialog } from '@/components/editor/ExportDialog';
-import { DraggableAIChatButton, AIChatProvider } from '@/components/editor/DraggableAIChatButton';
-import SettingsModal from '@/components/settings/SettingsModal';
-import { Inbox, FileX } from 'lucide-react';
-import { mockResume } from '@/data/mockResume';
-import { fetchWorkspaces, fetchResumeDetail } from '@/lib/api';
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useEditorStore } from "@/stores/editor-store";
+import { useResumeStore } from "@/stores/resume-store";
+import { useEditor } from "@/hooks/use-editor";
+import EditorToolbar from "@/components/editor/EditorToolbar";
+import { EditorSidebar } from "@/components/editor/EditorSidebar";
+import { EditorCanvas } from "@/components/editor/EditorCanvas";
+import { ThemeEditor } from "@/components/editor/ThemeEditor";
+import { EditorPreviewPanel } from "@/components/editor/EditorPreviewPanel";
+import { CoverLetterDialog } from "@/components/editor/CoverLetterDialog";
+import { ExportDialog } from "@/components/editor/ExportDialog";
+import {
+  DraggableAIChatButton,
+  AIChatProvider,
+} from "@/components/editor/DraggableAIChatButton";
+import SettingsModal from "@/components/settings/SettingsModal";
+import { Inbox, FileX } from "lucide-react";
+import { mockResume } from "@/data/mockResume";
+import { fetchWorkspaces, fetchResumeDetail } from "@/lib/api";
 
 export default function EditorPage() {
   const { id, resumeId } = useParams<{ id: string; resumeId?: string }>();
   const effectiveResumeId = resumeId || id;
   const navigate = useNavigate();
   const { showThemeEditor, toggleThemeEditor } = useEditorStore();
-  const { updateSection, addSection, removeSection, reorderSections, loadResume } = useEditor(effectiveResumeId || 'mock-1');
+  const {
+    updateSection,
+    addSection,
+    removeSection,
+    reorderSections,
+    loadResume,
+  } = useEditor(effectiveResumeId || "mock-1");
   const { sections, setResume, currentResume } = useResumeStore();
   const [loading, setLoading] = useState(true);
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
@@ -60,7 +69,15 @@ export default function EditorPage() {
         }
         setLoading(false);
       });
-  }, [effectiveResumeId, id, resumeId, loadResume, setResume, workspaceNotFound, resumeNotFound]);
+  }, [
+    effectiveResumeId,
+    id,
+    resumeId,
+    loadResume,
+    setResume,
+    workspaceNotFound,
+    resumeNotFound,
+  ]);
 
   if (workspaceNotFound) {
     return (
@@ -69,11 +86,13 @@ export default function EditorPage() {
           <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
-            <p className="text-sm text-gray-500">访问的工作空间可能已被删除或不存在</p>
+            <p className="text-sm text-gray-500">
+              访问的工作空间可能已被删除或不存在
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => navigate('/workspace')}
+            onClick={() => navigate("/workspace")}
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
             返回工作空间列表
@@ -90,11 +109,19 @@ export default function EditorPage() {
           <FileX className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-gray-300 mb-1">子简历不存在</p>
-            <p className="text-sm text-gray-500">访问的子简历可能已被删除或不存在</p>
+            <p className="text-sm text-gray-500">
+              访问的子简历可能已被删除或不存在
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => id ? (resumeId ? navigate(`/workspace/${id}/resumes/${resumeId}/overview`) : navigate(`/workspace/${id}`)) : navigate('/workspace')}
+            onClick={() =>
+              id
+                ? resumeId
+                  ? navigate(`/workspace/${id}/resumes/${resumeId}/overview`)
+                  : navigate(`/workspace/${id}`)
+                : navigate("/workspace")
+            }
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
             返回工作空间详情
@@ -112,7 +139,11 @@ export default function EditorPage() {
     );
   }
 
-  const backUrl = id ? (resumeId ? `/workspace/${id}/resumes/${resumeId}/overview` : `/workspace/${id}`) : '/';
+  const backUrl = id
+    ? resumeId
+      ? `/workspace/${id}/resumes/${resumeId}/overview`
+      : `/workspace/${id}`
+    : "/";
 
   return (
     <div className="flex h-screen flex-col bg-muted">
@@ -155,7 +186,10 @@ export default function EditorPage() {
         open={coverLetterOpen}
         onOpenChange={setCoverLetterOpen}
       />
-      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
+      <SettingsModal
+        open={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   );
 }

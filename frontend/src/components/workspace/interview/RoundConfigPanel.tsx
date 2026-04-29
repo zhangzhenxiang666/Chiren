@@ -1,22 +1,24 @@
-import { useState, useEffect } from 'react'
-import { X, UserPlus } from 'lucide-react'
-import CustomInterviewerModal, { type InterviewerProfile } from './CustomInterviewerModal'
+import { useState, useEffect } from "react";
+import { X, UserPlus } from "lucide-react";
+import CustomInterviewerModal, {
+  type InterviewerProfile,
+} from "./CustomInterviewerModal";
 
 interface DraftRound {
-  tempId: string
-  name: string
-  interviewer: InterviewerProfile
+  tempId: string;
+  name: string;
+  interviewer: InterviewerProfile;
 }
 
 interface RoundConfigPanelProps {
-  open: boolean
-  onClose: () => void
-  initialData?: DraftRound
-  onSubmit: (round: DraftRound) => void
+  open: boolean;
+  onClose: () => void;
+  initialData?: DraftRound;
+  onSubmit: (round: DraftRound) => void;
 }
 
 function generateTempId(): string {
-  return `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
+  return `draft_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
 export default function RoundConfigPanel({
@@ -25,40 +27,40 @@ export default function RoundConfigPanel({
   initialData,
   onSubmit,
 }: RoundConfigPanelProps) {
-  const [name, setName] = useState('')
+  const [name, setName] = useState("");
   const [interviewer, setInterviewer] = useState<InterviewerProfile>({
-    name: '',
-    title: '',
-    bio: '',
-    questionStyle: '',
+    name: "",
+    title: "",
+    bio: "",
+    questionStyle: "",
     assessmentDimensions: [],
     personalityTraits: [],
-  })
-  const [showInterviewerModal, setShowInterviewerModal] = useState(false)
+  });
+  const [showInterviewerModal, setShowInterviewerModal] = useState(false);
 
   useEffect(() => {
     if (open) {
       if (initialData) {
-        setName(initialData.name)
-        setInterviewer(initialData.interviewer)
+        setName(initialData.name);
+        setInterviewer(initialData.interviewer);
       } else {
-        setName('')
+        setName("");
         setInterviewer({
-          name: '',
-          title: '',
-          bio: '',
-          questionStyle: '',
+          name: "",
+          title: "",
+          bio: "",
+          questionStyle: "",
           assessmentDimensions: [],
           personalityTraits: [],
-        })
+        });
       }
     }
-  }, [open, initialData])
+  }, [open, initialData]);
 
-  if (!open) return null
+  if (!open) return null;
 
   const handleSubmit = () => {
-    if (!name.trim() || !interviewer.name.trim()) return
+    if (!name.trim() || !interviewer.name.trim()) return;
     onSubmit({
       tempId: initialData?.tempId ?? generateTempId(),
       name: name.trim(),
@@ -70,13 +72,13 @@ export default function RoundConfigPanel({
         assessmentDimensions: interviewer.assessmentDimensions,
         personalityTraits: interviewer.personalityTraits,
       },
-    })
-  }
+    });
+  };
 
   const handleInterviewerSubmit = (profile: InterviewerProfile) => {
-    setInterviewer(profile)
-    setShowInterviewerModal(false)
-  }
+    setInterviewer(profile);
+    setShowInterviewerModal(false);
+  };
 
   return (
     <>
@@ -85,7 +87,7 @@ export default function RoundConfigPanel({
         <div className="relative bg-card border border-border rounded-xl p-6 w-full max-w-lg mx-4 shadow-2xl max-h-[85vh] overflow-y-auto">
           <div className="flex items-center justify-between mb-5">
             <h2 className="text-sm font-semibold">
-              {initialData ? '编辑面试轮次' : '添加面试轮次'}
+              {initialData ? "编辑面试轮次" : "添加面试轮次"}
             </h2>
             <button
               type="button"
@@ -129,7 +131,9 @@ export default function RoundConfigPanel({
               {interviewer.name ? (
                 <div className="p-3 rounded-lg border border-border bg-background">
                   <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-medium">{interviewer.name}</span>
+                    <span className="text-xs font-medium">
+                      {interviewer.name}
+                    </span>
                     {interviewer.title && (
                       <span className="text-[10px] text-muted-foreground">
                         {interviewer.title}
@@ -175,7 +179,7 @@ export default function RoundConfigPanel({
             disabled={!name.trim() || !interviewer.name.trim()}
             className="w-full mt-6 px-4 py-2 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {initialData ? '保存修改' : '添加轮次'}
+            {initialData ? "保存修改" : "添加轮次"}
           </button>
         </div>
       </div>
@@ -186,5 +190,5 @@ export default function RoundConfigPanel({
         onSubmit={handleInterviewerSubmit}
       />
     </>
-  )
+  );
 }

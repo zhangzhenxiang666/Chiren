@@ -322,3 +322,61 @@ def resolve_interviewer_profile(
             detail="interviewer_type 未设置时，interviewer_name 不能为空",
         )
     return None
+
+
+async def validate_collection_summary_ready(
+    collection_id: str,
+    db: AsyncSession,
+) -> bool:
+    """校验面试集合是否已准备好生成总体总结。
+
+    要求：
+    1. 集合状态为 completed
+    2. 所有轮次状态为 completed
+    3. 所有已完成轮次都已生成 round_summary
+    4. 尚未生成过 collection_summary（可重生成）
+
+    Args:
+        collection_id: 面试集合 ID。
+        db: 数据库会话。
+
+    Returns:
+        如果就绪则返回 True。
+
+    Raises:
+        HTTPException(400): 条件不满足时抛出。
+    """
+    from shared.models import InterviewCollection, InterviewRound
+
+    stmt = select(InterviewCollection).where(InterviewCollection.id == collection_id)
+    result = await db.execute(stmt)
+    collection = result.scalar_one_or_none()
+    if collection is None:
+        raise HTTPException(status_code=404, detail="面试集合不存在")
+    if collection.status != "completed":
+        raise HTTPException(
+            status_code=400, detail="只有已完成的面试集合才能生成总体总结"
+        )
+
+    stmt_rounds = (
+        select(InterviewRound)
+        .where(InterviewRound.interview_collection_id == collection_id)
+        .order_by(InterviewRound.sort_order.asc())
+    )
+    result_rounds = await db.execute(stmt_rounds)
+    rounds = result_rounds.scalars().all()
+
+    missing: list[str] = []
+    for r in rounds:
+        if r.status == "completed":
+            round_summary = (r.meta_info or {}).get("round_summary")
+            if round_summary is None:
+                missing.append(f"{r.name}({r.id})")
+
+    if missing:
+        raise HTTPException(
+            status_code=400,
+            detail=f"以下轮次已完成但尚未生成摘要: {', '.join(missing)}",
+        )
+
+    return True

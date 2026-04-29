@@ -1,36 +1,79 @@
-import { useState, useRef, useEffect } from 'react'
-import { MoreVertical, Pencil, Trash2 } from 'lucide-react'
-import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover'
-import ConfirmDialog from '../ui/ConfirmDialog'
-import { TemplateThumbnail } from '../template/TemplateThumbnail'
+import { useState, useRef, useEffect } from "react";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Popover, PopoverTrigger, PopoverContent } from "../ui/popover";
+import ConfirmDialog from "../ui/ConfirmDialog";
+import { TemplateThumbnail } from "../template/TemplateThumbnail";
 
 export interface WorkspaceCardProps {
-  id: string
-  title: string
-  domain: string
-  subResumeIds: string[]
-  lastModified: string
-  templateName: string
-  isActive?: boolean
-  onClick?: () => void
-  onDelete?: (id: string) => void
-  onRename?: (id: string, newTitle: string) => void
+  id: string;
+  title: string;
+  domain: string;
+  subResumeIds: string[];
+  lastModified: string;
+  templateName: string;
+  isActive?: boolean;
+  onClick?: () => void;
+  onDelete?: (id: string) => void;
+  onRename?: (id: string, newTitle: string) => void;
 }
 
 interface CoverImageProps {
-  templateName: string
+  templateName: string;
 }
 
 function CoverImage({ templateName }: CoverImageProps) {
   const isKnownTemplate = [
-    'classic', 'professional', 'formal', 'elegant', 'corporate', 'ats', 'executive',
-    'consultant', 'minimal', 'modern', 'clean', 'compact', 'swiss', 'nordic', 'gradient',
-    'bold', 'two-column', 'sidebar', 'card', 'blocks', 'timeline', 'material', 'creative',
-    'artistic', 'neon', 'watercolor', 'mosaic', 'luxe', 'retro', 'magazine', 'ribbon',
-    'rose', 'zigzag', 'developer', 'coder', 'designer', 'architect', 'engineer',
-    'scientist', 'finance', 'medical', 'metro', 'legal', 'teacher', 'academic', 'startup',
-    'japanese', 'euro', 'berlin', 'infographic'
-  ].includes(templateName)
+    "classic",
+    "professional",
+    "formal",
+    "elegant",
+    "corporate",
+    "ats",
+    "executive",
+    "consultant",
+    "minimal",
+    "modern",
+    "clean",
+    "compact",
+    "swiss",
+    "nordic",
+    "gradient",
+    "bold",
+    "two-column",
+    "sidebar",
+    "card",
+    "blocks",
+    "timeline",
+    "material",
+    "creative",
+    "artistic",
+    "neon",
+    "watercolor",
+    "mosaic",
+    "luxe",
+    "retro",
+    "magazine",
+    "ribbon",
+    "rose",
+    "zigzag",
+    "developer",
+    "coder",
+    "designer",
+    "architect",
+    "engineer",
+    "scientist",
+    "finance",
+    "medical",
+    "metro",
+    "legal",
+    "teacher",
+    "academic",
+    "startup",
+    "japanese",
+    "euro",
+    "berlin",
+    "infographic",
+  ].includes(templateName);
 
   if (isKnownTemplate) {
     return (
@@ -40,17 +83,23 @@ function CoverImage({ templateName }: CoverImageProps) {
           className="w-20 h-28 rounded-sm shadow-lg"
         />
       </div>
-    )
+    );
   }
 
   return (
     <div className="w-full h-full bg-muted flex items-center justify-center">
-      <div className="w-full h-full opacity-30" style={{
-        background: 'linear-gradient(135deg, hsl(var(--muted-foreground) / 0.3) 0%, hsl(var(--accent) / 0.1) 100%)'
-      }} />
-      <span className="absolute text-muted-foreground text-xs">{templateName}</span>
+      <div
+        className="w-full h-full opacity-30"
+        style={{
+          background:
+            "linear-gradient(135deg, hsl(var(--muted-foreground) / 0.3) 0%, hsl(var(--accent) / 0.1) 100%)",
+        }}
+      />
+      <span className="absolute text-muted-foreground text-xs">
+        {templateName}
+      </span>
     </div>
-  )
+  );
 }
 
 export default function WorkspaceCard({
@@ -65,60 +114,60 @@ export default function WorkspaceCard({
   onDelete,
   onRename,
 }: WorkspaceCardProps) {
-  const [isRenaming, setIsRenaming] = useState(false)
-  const [renameValue, setRenameValue] = useState(title)
-  const [popoverOpen, setPopoverOpen] = useState(false)
-  const [confirmOpen, setConfirmOpen] = useState(false)
-  const renameInputRef = useRef<HTMLInputElement>(null)
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [renameValue, setRenameValue] = useState(title);
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isRenaming && renameInputRef.current) {
-      renameInputRef.current.focus()
-      renameInputRef.current.select()
+      renameInputRef.current.focus();
+      renameInputRef.current.select();
     }
-  }, [isRenaming])
+  }, [isRenaming]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setPopoverOpen(false)
-    setConfirmOpen(true)
-  }
+    e.stopPropagation();
+    setPopoverOpen(false);
+    setConfirmOpen(true);
+  };
 
   const handleConfirmDelete = () => {
-    setConfirmOpen(false)
-    onDelete?.(id)
-  }
+    setConfirmOpen(false);
+    onDelete?.(id);
+  };
 
   const handleRenameClick = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    setPopoverOpen(false)
-    setIsRenaming(true)
-    setRenameValue(title)
-  }
+    e.stopPropagation();
+    setPopoverOpen(false);
+    setIsRenaming(true);
+    setRenameValue(title);
+  };
 
   const handleRenameConfirm = () => {
-    const newTitle = renameValue.trim()
+    const newTitle = renameValue.trim();
     if (newTitle && newTitle !== title) {
-      onRename?.(id, newTitle)
+      onRename?.(id, newTitle);
     }
-    setIsRenaming(false)
-  }
+    setIsRenaming(false);
+  };
 
   const handleRenameCancel = () => {
-    setIsRenaming(false)
-    setRenameValue(title)
-  }
+    setIsRenaming(false);
+    setRenameValue(title);
+  };
 
   const handleRenameKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleRenameConfirm()
-    if (e.key === 'Escape') handleRenameCancel()
-  }
+    if (e.key === "Enter") handleRenameConfirm();
+    if (e.key === "Escape") handleRenameCancel();
+  };
 
   return (
     <>
       <div
         onClick={onClick}
-        className={`relative rounded-2xl bg-card border border-border overflow-hidden group hover:shadow-md hover:shadow-black/10 hover:border-border/80 transition-all duration-200 cursor-pointer w-full h-[280px] flex flex-col ${isActive ? 'ring-2 ring-pink-500/50' : ''}`}
+        className={`relative rounded-2xl bg-card border border-border overflow-hidden group hover:shadow-md hover:shadow-black/10 hover:border-border/80 transition-all duration-200 cursor-pointer w-full h-[280px] flex flex-col ${isActive ? "ring-2 ring-pink-500/50" : ""}`}
       >
         <div className="pt-4">
           <div className="relative w-full h-[140px] shrink-0">
@@ -141,9 +190,13 @@ export default function WorkspaceCard({
                   className="w-full px-2 py-1 bg-background border border-input rounded-md text-foreground text-sm outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/30"
                 />
               ) : (
-                <h3 className="text-foreground font-semibold text-base truncate leading-tight">{title}</h3>
+                <h3 className="text-foreground font-semibold text-base truncate leading-tight">
+                  {title}
+                </h3>
               )}
-              <p className="text-muted-foreground text-xs truncate mt-0.5">{domain}</p>
+              <p className="text-muted-foreground text-xs truncate mt-0.5">
+                {domain}
+              </p>
             </div>
             <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
               <PopoverTrigger asChild>
@@ -155,7 +208,11 @@ export default function WorkspaceCard({
                   <MoreVertical className="w-3.5 h-3.5" />
                 </button>
               </PopoverTrigger>
-              <PopoverContent className="w-40 p-1.5 border-border" align="end" sideOffset={4}>
+              <PopoverContent
+                className="w-40 p-1.5 border-border"
+                align="end"
+                sideOffset={4}
+              >
                 <div className="flex flex-col gap-0.5">
                   <button
                     type="button"
@@ -206,5 +263,5 @@ export default function WorkspaceCard({
         onCancel={() => setConfirmOpen(false)}
       />
     </>
-  )
+  );
 }

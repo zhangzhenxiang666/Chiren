@@ -1,7 +1,7 @@
 interface StepBasicInfoProps {
-  name: string
-  subResumeTitle?: string
-  onChange: (name: string) => void
+  name: string;
+  subResumeTitle?: string;
+  onChange: (name: string) => void;
 }
 
 export default function StepBasicInfo({
@@ -36,5 +36,5 @@ export default function StepBasicInfo({
         </div>
       )}
     </div>
-  )
+  );
 }

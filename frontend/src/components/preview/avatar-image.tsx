@@ -10,14 +10,14 @@ interface AvatarImageProps {
 export function AvatarImage({
   src,
   size,
-  className = '',
+  className = "",
   style,
   wrapperClassName,
   wrapperStyle,
 }: AvatarImageProps) {
   const width = size;
   const height = Math.round(size * 1.4);
-  const borderRadius = '4px';
+  const borderRadius = "4px";
 
   const imgEl = (
     <img
@@ -28,7 +28,7 @@ export function AvatarImage({
         width,
         height,
         borderRadius,
-        objectFit: 'cover',
+        objectFit: "cover",
         ...style,
       }}
     />

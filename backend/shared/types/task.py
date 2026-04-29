@@ -10,6 +10,7 @@ class TaskType(StrEnum):
     JD_GENERATE = "jd_generate"
     JD_SCORE = "jd_score"
     INTERVIEW_SUMMARY = "interview_summary"
+    COLLECTION_SUMMARY = "collection_summary"
 
 
 class TaskStatus(StrEnum):
