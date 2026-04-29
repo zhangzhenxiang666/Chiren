@@ -68,7 +68,7 @@ export default function JDAnalysisTab({
           <button
             type="button"
             onClick={onStartScoring}
-            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors"
           >
             <Star className="w-3 h-3" />
             开始评分
@@ -164,18 +164,18 @@ export default function JDAnalysisTab({
   > = {
     mandatory: {
       accentColor: "#ec4899",
-      bg: "bg-pink-500/[0.06]",
-      text: "text-pink-300",
+      bg: "bg-pink-100 dark:bg-pink-500/15",
+      text: "text-pink-700 dark:text-pink-300",
     },
     preferred: {
       accentColor: "#fbbf24",
-      bg: "bg-amber-500/[0.06]",
-      text: "text-amber-300",
+      bg: "bg-amber-100 dark:bg-amber-500/15",
+      text: "text-amber-700 dark:text-amber-300",
     },
     bonus: {
       accentColor: "#94a3b8",
-      bg: "bg-slate-500/[0.06]",
-      text: "text-slate-400",
+      bg: "bg-slate-100 dark:bg-slate-500/15",
+      text: "text-slate-600 dark:text-slate-400",
     },
   };
 
@@ -199,10 +199,10 @@ export default function JDAnalysisTab({
       return keywordMatchesArr.map((item: any, idx: number) => {
         const catClass =
           item.category === "required"
-            ? "bg-red-500/10 text-red-400 border-red-500/20"
+            ? "bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/30"
             : item.category === "preferred"
-              ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-              : "bg-blue-500/10 text-blue-400 border-blue-500/20";
+              ? "bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500/30"
+              : "bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-500/30";
         return (
           <div
             key={idx}
@@ -220,7 +220,7 @@ export default function JDAnalysisTab({
                 <span className="text-sm font-medium break-all">
                   {item.keyword}
                 </span>
-                <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-500/10 text-green-400 shrink-0">
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 shrink-0">
                   {typeLabels[item.matchType] || item.matchType}
                 </span>
               </div>
@@ -283,10 +283,10 @@ export default function JDAnalysisTab({
     return missingKeywordsArr.map((item: any, idx: number) => {
       const catClass =
         item.category === "required"
-          ? "bg-red-500/10 text-red-400 border-red-500/20"
+          ? "bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300 border-red-300 dark:border-red-500/30"
           : item.category === "preferred"
-            ? "bg-yellow-500/10 text-yellow-400 border-yellow-500/20"
-            : "bg-blue-500/10 text-blue-400 border-blue-500/20";
+            ? "bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-300 border-yellow-300 dark:border-yellow-500/30"
+            : "bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-500/30";
       return (
         <div
           key={idx}
@@ -348,7 +348,7 @@ export default function JDAnalysisTab({
           <button
             type="button"
             onClick={onStartScoring}
-            className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[11px] bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition-colors"
+            className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[11px] bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
             重新评分
@@ -365,15 +365,15 @@ export default function JDAnalysisTab({
                 onClick={() => handleSelectId(a.id)}
                 className={`p-3 rounded-lg border cursor-pointer transition-all ${
                   isActive
-                    ? "border-pink-500/30 bg-pink-500/5"
-                    : "border-border hover:border-border-hover hover:bg-white/[0.02]"
+                    ? "border-indigo-400 dark:border-pink-400 bg-indigo-50 dark:bg-pink-500/20 shadow-sm"
+                    : "border-border hover:border-foreground/30 hover:bg-muted/50"
                 }`}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <span className="text-xs font-semibold">v{a.version}</span>
                     {a.id === enrichedList[0]?.id && (
-                      <span className="text-[9px] px-1 py-0.5 rounded bg-green-500/10 text-green-400">
+                      <span className="text-[9px] px-1 py-0.5 rounded bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300">
                         最新
                       </span>
                     )}
@@ -468,7 +468,7 @@ export default function JDAnalysisTab({
                   <span
                     className={`text-sm px-3 py-1 rounded-full border ${
                       record.atsScore >= 80
-                        ? "bg-green-500/10 text-green-400 border-green-500/20"
+                        ? "bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 border-green-300 dark:border-green-500/30"
                         : record.atsScore >= 60
                           ? "bg-orange-500/10 text-orange-400 border-orange-500/20"
                           : "bg-red-500/10 text-red-400 border-red-500/20"
@@ -481,7 +481,7 @@ export default function JDAnalysisTab({
                     </span>
                   </span>
                 </div>
-                <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-1000"
                     style={{
@@ -517,7 +517,7 @@ export default function JDAnalysisTab({
                 {strengthsArr.slice(0, 6).map((s: any, idx: number) => (
                   <span
                     key={idx}
-                    className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 whitespace-nowrap max-w-full overflow-hidden text-ellipsis min-w-0"
+                    className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-500/30 whitespace-nowrap max-w-full overflow-hidden text-ellipsis min-w-0"
                   >
                     {strengthIcons[s.type] || <Check className="w-3 h-3" />}{" "}
                     {s.description}
@@ -651,7 +651,7 @@ export default function JDAnalysisTab({
                           {s.matchScore}%
                         </span>
                       </div>
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full bg-gradient-to-r ${sc.barFrom} ${sc.barTo} rounded-full transition-all duration-700`}
                           style={{ width: `${s.matchScore}%` }}
@@ -749,7 +749,7 @@ export default function JDAnalysisTab({
                                 ? "bg-red-500/10 text-red-400"
                                 : s.priority === "medium"
                                   ? "bg-yellow-500/10 text-yellow-400"
-                                  : "bg-green-500/10 text-green-400"
+                                  : "bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300"
                             }`}
                           >
                             {s.priority === "high"

@@ -84,7 +84,7 @@ function PreviewModal({
             </h2>
             <button
               onClick={() => onUse(templateId)}
-              className="px-4 py-1.5 rounded-lg bg-[#e94560] text-primary-foreground hover:bg-[#d63653] transition-colors text-sm font-medium"
+              className="px-4 py-1.5 rounded-lg bg-pink-500 text-primary-foreground hover:bg-pink-600 transition-colors text-sm font-medium"
             >
               使用此模板
             </button>

@@ -626,12 +626,15 @@ export default function InterviewPage() {
 
   if (workspaceNotFound) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#131313]">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <Inbox className="w-16 h-16 text-gray-500/40" strokeWidth={1.5} />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <Inbox
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">工作空间不存在</p>
+            <p className="text-sm text-muted-foreground">
               访问的工作空间可能已被删除或不存在
             </p>
           </div>
@@ -649,12 +652,15 @@ export default function InterviewPage() {
 
   if (resumeNotFound) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#131313]">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <FileX className="w-16 h-16 text-gray-500/40" strokeWidth={1.5} />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <FileX
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">子简历不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">子简历不存在</p>
+            <p className="text-sm text-muted-foreground">
               访问的子简历可能已被删除或不存在
             </p>
           </div>
@@ -676,12 +682,15 @@ export default function InterviewPage() {
 
   if (collectionNotFound) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#131313]">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <Circle className="w-16 h-16 text-gray-500/40" strokeWidth={1.5} />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <Circle
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">面试方案不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">面试方案不存在</p>
+            <p className="text-sm text-muted-foreground">
               该面试方案可能已被删除或不存在
             </p>
           </div>
@@ -703,7 +712,7 @@ export default function InterviewPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#131313]">
+      <div className="flex h-screen items-center justify-center bg-background">
         <Loader2 className="w-8 h-8 text-pink-500 animate-spin" />
       </div>
     );
@@ -711,12 +720,15 @@ export default function InterviewPage() {
 
   if (!currentRound || !collection) {
     return (
-      <div className="flex h-screen items-center justify-center bg-[#131313]">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <Circle className="w-16 h-16 text-gray-500/40" strokeWidth={1.5} />
+      <div className="flex h-screen items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <Circle
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">面试轮次不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">面试轮次不存在</p>
+            <p className="text-sm text-muted-foreground">
               该面试轮次可能已被删除或不存在
             </p>
           </div>
@@ -736,13 +748,13 @@ export default function InterviewPage() {
 
   if (!hasStarted) {
     return (
-      <div className="flex h-screen flex-col bg-[#131313] text-foreground overflow-hidden">
-        <div className="shrink-0 px-6 py-4 border-b border-white/5">
+      <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
+        <div className="shrink-0 px-6 py-4 border-b border-border/10">
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => navigate(backUrl)}
-              className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground"
+              className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
@@ -805,14 +817,14 @@ export default function InterviewPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-[#131313] text-foreground overflow-hidden">
+    <div className="flex h-screen flex-col bg-background text-foreground overflow-hidden">
       {/* Header: back button + round stepper */}
-      <div className="shrink-0 px-6 py-3 border-b border-white/5 min-h-[52px] flex items-center">
+      <div className="shrink-0 px-6 py-3 border-b border-border/10 min-h-[52px] flex items-center">
         <div className="flex items-center gap-3 w-full">
           <button
             type="button"
             onClick={() => navigate(backUrl)}
-            className="p-2 rounded-lg hover:bg-white/5 transition-colors text-muted-foreground hover:text-foreground shrink-0"
+            className="p-2 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground shrink-0"
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
@@ -827,7 +839,7 @@ export default function InterviewPage() {
                     className={`w-6 h-[2px] mx-1 ${
                       sortedRounds[index - 1].status === "completed"
                         ? "bg-green-500/40"
-                        : "bg-white/10"
+                        : "bg-muted"
                     }`}
                   />
                 )}
@@ -845,8 +857,8 @@ export default function InterviewPage() {
                       : round.status === "completed"
                         ? "bg-green-500/10 text-green-400 border-green-500 hover:bg-green-500/15"
                         : round.status === "in_progress"
-                          ? "bg-white/[0.08] text-foreground border-white/15 hover:bg-white/[0.12]"
-                          : "bg-white/[0.05] text-muted-foreground border-white/10 opacity-50"
+                          ? "bg-muted text-foreground border-border/30 hover:bg-muted"
+                          : "bg-muted text-muted-foreground border-border/20 opacity-50"
                   }`}
                 >
                   {round.status === "completed" ? (
@@ -856,7 +868,7 @@ export default function InterviewPage() {
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold align-super ${
                         round.id === roundId
                           ? "bg-pink-500 text-white"
-                          : "bg-white/10 text-muted-foreground"
+                          : "bg-muted text-muted-foreground"
                       }`}
                     >
                       {index + 1}
@@ -885,7 +897,7 @@ export default function InterviewPage() {
                     <span className="text-sm font-semibold">
                       {currentRound.interviewerName}
                     </span>
-                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-white/10 text-muted-foreground">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] bg-muted text-muted-foreground">
                       {currentRound.name}
                     </span>
                   </div>
@@ -910,7 +922,7 @@ export default function InterviewPage() {
       <div className="flex-1 overflow-hidden min-h-0">
         {isCompleted ? (
           <div className="flex h-full">
-            <div className="w-[380px] shrink-0 overflow-y-auto border-r border-white/5 p-4">
+            <div className="w-[380px] shrink-0 overflow-y-auto border-r border-border/10 p-4">
               {roundSummary ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
@@ -1005,7 +1017,7 @@ export default function InterviewPage() {
                         <span className="text-sm font-semibold">
                           {currentRound.interviewerName}
                         </span>
-                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-white/10 text-muted-foreground">
+                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-muted text-muted-foreground">
                           {currentRound.name}
                         </span>
                       </div>
@@ -1038,7 +1050,7 @@ export default function InterviewPage() {
                           className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
                             msg.role === "candidate"
                               ? "bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl"
-                              : "bg-white/[0.04] border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
+                              : "bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
                           }`}
                         >
                           {msg.reasoning && (
@@ -1090,7 +1102,7 @@ export default function InterviewPage() {
                       className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
                         msg.role === "candidate"
                           ? "bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl"
-                          : "bg-white/[0.04] border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
+                          : "bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
                       }`}
                     >
                       {msg.reasoning && (
@@ -1127,7 +1139,7 @@ export default function InterviewPage() {
 
                 {isStreaming && streaming.thinking && (
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] px-4 py-3 bg-white/[0.04] border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl">
+                    <div className="max-w-[80%] px-4 py-3 bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl">
                       <button
                         type="button"
                         onClick={() => {
@@ -1185,7 +1197,7 @@ export default function InterviewPage() {
 
                 {isStreaming && !streaming.thinking && streaming.content && (
                   <div className="flex justify-start">
-                    <div className="max-w-[80%] px-4 py-3 text-sm leading-relaxed bg-white/[0.04] border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl">
+                    <div className="max-w-[80%] px-4 py-3 text-sm leading-relaxed bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl">
                       {streaming.content.split("\n").map((line, i) => (
                         <p key={i} className={i > 0 ? "mt-2" : ""}>
                           {line}
@@ -1197,7 +1209,7 @@ export default function InterviewPage() {
 
                 {isStreaming && !streaming.content && !streaming.thinking && (
                   <div className="flex justify-start">
-                    <div className="px-4 py-3 bg-white/[0.04] border-l-4 border-l-pink-500/60 rounded-r-xl">
+                    <div className="px-4 py-3 bg-muted border-l-4 border-l-pink-500/60 rounded-r-xl">
                       <span className="flex gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce [animation-delay:0ms]" />
                         <span className="w-1.5 h-1.5 rounded-full bg-pink-400 animate-bounce [animation-delay:150ms]" />
@@ -1215,14 +1227,14 @@ export default function InterviewPage() {
       </div>
 
       {!isCompleted && (
-        <div className="shrink-0 px-6 py-3 border-t border-white/5">
+        <div className="shrink-0 px-6 py-3 border-t border-border/10">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={handleSkip}
                 disabled={isStreaming || isCompleted}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <SkipForward className="w-3.5 h-3.5" />
                 跳过
@@ -1231,7 +1243,7 @@ export default function InterviewPage() {
                 type="button"
                 onClick={handleHint}
                 disabled={isStreaming || isCompleted}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-white/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Lightbulb className="w-3.5 h-3.5" />
                 请求提示
@@ -1254,7 +1266,7 @@ export default function InterviewPage() {
       {!isCompleted && (
         <div className="shrink-0 px-6 pb-6 pt-2">
           <div className="max-w-3xl mx-auto">
-            <div className="flex flex-col rounded-2xl bg-white/[0.03] border border-white/10 overflow-hidden min-h-[98px] focus-within:border-pink-500/30 transition-colors">
+            <div className="flex flex-col rounded-2xl bg-muted/50 border border-border/20 overflow-hidden min-h-[98px] focus-within:border-pink-500/30 transition-colors">
               <div className="flex-1 overflow-y-auto px-4 pt-3">
                 <textarea
                   value={inputValue}

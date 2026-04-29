@@ -82,11 +82,14 @@ export default function EditorPage() {
   if (workspaceNotFound) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <Inbox className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <Inbox
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">工作空间不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">工作空间不存在</p>
+            <p className="text-sm text-muted-foreground">
               访问的工作空间可能已被删除或不存在
             </p>
           </div>
@@ -105,11 +108,14 @@ export default function EditorPage() {
   if (resumeNotFound) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
-        <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
-          <FileX className="w-16 h-16 text-gray-400/40" strokeWidth={1.5} />
+        <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
+          <FileX
+            className="w-16 h-16 text-muted-foreground/40"
+            strokeWidth={1.5}
+          />
           <div className="text-center">
-            <p className="text-lg text-gray-300 mb-1">子简历不存在</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-lg text-foreground mb-1">子简历不存在</p>
+            <p className="text-sm text-muted-foreground">
               访问的子简历可能已被删除或不存在
             </p>
           </div>
@@ -134,7 +140,7 @@ export default function EditorPage() {
   if (loading || !currentResume) {
     return (
       <div className="flex h-screen items-center justify-center bg-muted">
-        <div className="space-y-4 text-zinc-500">加载中...</div>
+        <div className="space-y-4 text-muted-foreground">加载中...</div>
       </div>
     );
   }

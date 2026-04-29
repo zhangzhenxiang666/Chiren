@@ -230,18 +230,18 @@ export function CoverLetterDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="flex h-[580px] w-[700px] flex-col rounded-2xl bg-background shadow-2xl dark:bg-gray-900 dark:shadow-2xl dark:shadow-black/50">
+      <div className="flex h-[580px] w-[700px] flex-col rounded-2xl bg-background shadow-2xl dark:bg-card dark:shadow-2xl dark:shadow-black/50">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800/50">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-border dark:border-border/50">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-teal-400 to-teal-600 shadow-lg shadow-teal-500/25 dark:from-teal-400 dark:to-cyan-500 dark:shadow-teal-400/30">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg shadow-pink-500/25">
               <Sparkles className="h-5 w-5 text-white" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              <h2 className="text-lg font-semibold text-foreground dark:text-foreground">
                 AI 求职信生成
               </h2>
-              <p className="text-xs text-gray-400 dark:text-gray-500">
+              <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                 智能匹配岗位，彰显个人优势
               </p>
             </div>
@@ -249,7 +249,7 @@ export function CoverLetterDialog({
           <button
             type="button"
             onClick={handleClose}
-            className="rounded-xl p-2.5 text-gray-400 transition-all hover:bg-gray-100 hover:text-gray-600 active:scale-95 dark:text-gray-500 dark:hover:bg-gray-800/80 dark:hover:text-gray-300"
+            className="rounded-xl p-2.5 text-muted-foreground transition-all hover:bg-muted hover:text-foreground active:scale-95 dark:text-muted-foreground dark:hover:bg-muted dark:hover:text-muted-foreground"
           >
             <X className="h-5 w-5" />
           </button>
@@ -261,22 +261,22 @@ export function CoverLetterDialog({
             <div className="flex h-full flex-col gap-3 p-6">
               {/* 岗位描述输入 */}
               <div className="flex flex-[4] flex-col gap-1.5">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500 dark:bg-teal-400" />
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-pink-500 dark:bg-pink-400" />
                   岗位描述
                 </label>
                 <textarea
                   value={jdDescription}
                   onChange={(e) => setJdDescription(e.target.value)}
                   placeholder="粘贴职位 JD 或描述岗位要求..."
-                  className="flex-1 resize-none rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-700 placeholder:text-gray-400 transition-all focus:border-teal-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-teal-400/20 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-200 dark:placeholder:text-gray-500 dark:focus:border-teal-400 dark:focus:bg-gray-800"
+                  className="flex-1 resize-none rounded-xl border border-border bg-muted px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground transition-all focus:border-pink-500/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-pink-500/20 dark:border-border dark:bg-muted dark:text-foreground dark:placeholder:text-muted-foreground dark:focus:border-pink-500/50 dark:focus:bg-muted"
                 />
               </div>
 
               {/* 风格选择 */}
               <div className="flex flex-1 flex-col gap-1.5">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500 dark:bg-teal-400" />
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-pink-500 dark:bg-pink-400" />
                   写作风格
                 </label>
                 <div className="grid h-full grid-cols-3 gap-2">
@@ -287,16 +287,16 @@ export function CoverLetterDialog({
                       onClick={() => setStyle(option.value)}
                       className={`relative overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                         style === option.value
-                          ? "bg-gradient-to-br from-teal-500 to-teal-600 text-white shadow-lg shadow-teal-500/25 dark:from-teal-400 dark:to-cyan-500 dark:shadow-teal-400/30"
-                          : "border border-gray-200 bg-white text-gray-600 hover:border-teal-300 hover:bg-teal-50/80 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-300 dark:hover:border-teal-400/60 dark:hover:bg-teal-900/20"
+                          ? "bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/25 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
+                          : "border border-border bg-white text-foreground hover:border-pink-300 hover:bg-pink-500/10 dark:border-border dark:bg-muted dark:text-muted-foreground dark:hover:border-pink-400/60 dark:hover:bg-pink-500/5"
                       }`}
                     >
                       <span className="block">{option.label}</span>
                       <span
                         className={`block text-xs mt-0.5 ${
                           style === option.value
-                            ? "text-teal-100 dark:text-teal-200"
-                            : "text-gray-400 dark:text-gray-500"
+                            ? "text-pink-100 dark:text-pink-200"
+                            : "text-muted-foreground dark:text-muted-foreground"
                         }`}
                       >
                         {option.desc}
@@ -308,8 +308,8 @@ export function CoverLetterDialog({
 
               {/* 语言选择 */}
               <div className="flex flex-col gap-1.5">
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-400">
-                  <span className="h-1.5 w-1.5 rounded-full bg-teal-500 dark:bg-teal-400" />
+                <label className="flex items-center gap-2 text-sm font-medium text-foreground dark:text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-pink-500 dark:bg-pink-400" />
                   语言
                 </label>
                 <select
@@ -317,7 +317,7 @@ export function CoverLetterDialog({
                   onChange={(e) =>
                     setLanguage(e.target.value as CoverLetterLanguage)
                   }
-                  className="w-full cursor-pointer rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-700 transition-all focus:border-teal-400 focus:outline-none focus:ring-2 focus:ring-teal-400/20 dark:border-gray-700 dark:bg-gray-800/60 dark:text-gray-200 dark:focus:border-teal-400"
+                  className="w-full cursor-pointer rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-foreground transition-all focus:border-pink-500/50 focus:outline-none focus:ring-2 focus:ring-pink-500/20 dark:border-border dark:bg-muted dark:text-foreground dark:focus:border-pink-500/50"
                   style={{
                     appearance: "none",
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
@@ -339,7 +339,7 @@ export function CoverLetterDialog({
                   type="button"
                   onClick={handleGenerate}
                   disabled={!jdDescription.trim()}
-                  className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-8 py-3 text-sm font-medium text-white shadow-lg shadow-teal-500/25 transition-all hover:from-teal-600 hover:to-teal-700 hover:shadow-xl hover:shadow-teal-500/30 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-lg dark:from-teal-400 dark:to-cyan-500 dark:shadow-teal-400/30"
+                  className="flex items-center gap-2.5 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-8 py-3 text-sm font-medium text-white shadow-lg shadow-pink-500/25 transition-all hover:from-pink-600 hover:to-pink-700 hover:shadow-xl hover:shadow-pink-500/25 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:shadow-lg dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
                 >
                   <Sparkles className="h-4 w-4" />
                   开始生成
@@ -351,21 +351,21 @@ export function CoverLetterDialog({
           {status === "generating" && (
             <div className="flex h-0 min-h-0 flex-1 flex-col p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 dark:bg-teal-900/40">
-                  <Loader2 className="h-4 w-4 animate-spin text-teal-500 dark:text-teal-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-500/10 dark:bg-pink-500/10">
+                  <Loader2 className="h-4 w-4 animate-spin text-pink-500 dark:text-pink-400" />
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  <span className="text-sm font-medium text-foreground dark:text-foreground">
                     AI 正在生成求职信
                   </span>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                     基于您的简历和岗位要求量身定制...
                   </p>
                 </div>
               </div>
               <div
                 ref={contentRef}
-                className="flex-1 overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 text-gray-600 dark:border-gray-700/50 dark:bg-gray-800/60 dark:text-gray-300"
+                className="flex-1 overflow-y-auto rounded-xl border border-border bg-white p-6 text-foreground dark:border-border/50 dark:bg-muted dark:text-muted-foreground"
                 style={{
                   fontFamily:
                     "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
@@ -379,7 +379,7 @@ export function CoverLetterDialog({
                 {content
                   .replace(/^\s+|\s+$/g, "")
                   .replace(/\n{3,}/g, "\n\n") || (
-                  <span className="flex items-center gap-2 text-gray-400 dark:text-gray-500">
+                  <span className="flex items-center gap-2 text-muted-foreground dark:text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     正在思考内容结构...
                   </span>
@@ -391,21 +391,21 @@ export function CoverLetterDialog({
           {status === "done" && (
             <div className="flex h-0 min-h-0 flex-1 flex-col p-6">
               <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-50 dark:bg-teal-900/40">
-                  <Sparkles className="h-4 w-4 text-teal-500 dark:text-teal-400" />
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-500/10 dark:bg-pink-500/10">
+                  <Sparkles className="h-4 w-4 text-pink-500 dark:text-pink-400" />
                 </div>
                 <div>
-                  <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                  <span className="text-sm font-medium text-foreground dark:text-foreground">
                     生成完成
                   </span>
-                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                  <p className="text-xs text-muted-foreground dark:text-muted-foreground">
                     内容已准备就绪，可复制或下载
                   </p>
                 </div>
               </div>
               <div
                 ref={contentRef}
-                className="flex-1 overflow-y-auto rounded-xl border border-gray-200 bg-white p-6 text-gray-600 dark:border-gray-700/50 dark:bg-gray-800/60 dark:text-gray-300"
+                className="flex-1 overflow-y-auto rounded-xl border border-border bg-white p-6 text-foreground dark:border-border/50 dark:bg-muted dark:text-muted-foreground"
                 style={{
                   fontFamily:
                     "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
@@ -423,7 +423,7 @@ export function CoverLetterDialog({
                 <button
                   type="button"
                   onClick={() => setStatus("idle")}
-                  className="flex items-center gap-2 rounded-xl border border-gray-200 px-5 py-2.5 text-sm font-medium text-gray-600 transition-all hover:border-teal-400 hover:text-teal-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-teal-400 dark:hover:text-teal-400"
+                  className="flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:border-pink-400 hover:text-pink-600 dark:border-border dark:text-muted-foreground dark:hover:border-pink-400 dark:hover:text-pink-400"
                 >
                   <Sparkles className="h-4 w-4" />
                   重新生成
@@ -432,7 +432,7 @@ export function CoverLetterDialog({
                   <button
                     type="button"
                     onClick={handleDownload}
-                    className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition-all hover:border-teal-400 hover:text-teal-600 dark:border-gray-700 dark:text-gray-300 dark:hover:border-teal-400 dark:hover:text-teal-400"
+                    className="flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-all hover:border-pink-400 hover:text-pink-600 dark:border-border dark:text-muted-foreground dark:hover:border-pink-400 dark:hover:text-pink-400"
                   >
                     <Download className="h-4 w-4" />
                     下载
@@ -440,14 +440,14 @@ export function CoverLetterDialog({
                   <button
                     type="button"
                     onClick={handleClose}
-                    className="flex items-center gap-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition-all hover:border-gray-300 dark:border-gray-700 dark:text-gray-300 dark:hover:border-gray-600"
+                    className="flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-all hover:border-border dark:border-border dark:text-muted-foreground dark:hover:border-border"
                   >
                     关闭
                   </button>
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-teal-500/20 transition-all hover:from-teal-600 hover:to-teal-700 dark:from-teal-400 dark:to-cyan-500 dark:shadow-teal-400/30"
+                    className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-pink-500/20 transition-all hover:from-pink-600 hover:to-pink-700 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
                   >
                     {copied ? (
                       <span className="text-white">已复制</span>
@@ -465,21 +465,21 @@ export function CoverLetterDialog({
 
           {status === "error" && (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-900/30">
+              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-500/10">
                 <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400" />
               </div>
               <div className="text-center">
                 <p className="text-sm font-medium text-red-600 dark:text-red-400">
                   {errorMessage}
                 </p>
-                <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground">
                   请检查输入后重试
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setStatus("idle")}
-                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-teal-500 to-teal-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-teal-500/25 transition-all hover:from-teal-600 hover:to-teal-700 dark:from-teal-400 dark:to-cyan-500 dark:shadow-teal-400/30"
+                className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-pink-500/25 transition-all hover:from-pink-600 hover:to-pink-700 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
               >
                 <Sparkles className="h-4 w-4" />
                 重新配置

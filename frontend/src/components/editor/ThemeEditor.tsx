@@ -139,7 +139,7 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full cursor-pointer items-center gap-2 py-2 text-left text-xs font-semibold uppercase tracking-wider text-zinc-400 transition-colors hover:text-zinc-600 dark:hover:text-zinc-300"
+        className="flex w-full cursor-pointer items-center gap-2 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground dark:hover:text-muted-foreground"
       >
         {open ? (
           <ChevronDown className="h-3 w-3" />
@@ -200,11 +200,11 @@ export function ThemeEditor() {
                     <div className="bg-background p-1">
                       <TemplateThumbnail
                         template={tpl}
-                        className="mx-auto h-[56px] w-[40px] shadow-sm ring-1 ring-zinc-200/50"
+                        className="mx-auto h-[56px] w-[40px] shadow-sm ring-1 ring-border/50"
                       />
                     </div>
                     <div
-                      className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? "bg-pink-50 text-pink-700" : "text-zinc-500"}`}
+                      className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? "bg-pink-50 text-pink-700" : "text-muted-foreground"}`}
                     >
                       {TEMPLATE_NAMES[tpl] ?? tpl}
                     </div>
@@ -235,7 +235,7 @@ export function ThemeEditor() {
                       />
                     ))}
                   </div>
-                  <span className="text-[10px] text-zinc-500 group-hover:text-zinc-700 dark:group-hover:text-zinc-200">
+                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground dark:group-hover:text-foreground">
                     {preset.id === "classic"
                       ? "经典"
                       : preset.id === "modern"
@@ -269,7 +269,7 @@ export function ThemeEditor() {
           </CollapsibleSection>
           <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="排版" icon={Type as React.ElementType}>
-            <label className="block text-xs text-zinc-500">
+            <label className="block text-xs text-muted-foreground">
               字体
               <select
                 value={themeConfig.fontFamily}
@@ -283,7 +283,7 @@ export function ThemeEditor() {
                 ))}
               </select>
             </label>
-            <label className="block text-xs text-zinc-500">字号</label>
+            <label className="block text-xs text-muted-foreground">字号</label>
             <div className="mt-1.5 grid grid-cols-3 gap-1.5">
               {[
                 { value: "small", label: "小" },
@@ -304,7 +304,7 @@ export function ThemeEditor() {
                 </button>
               ))}
             </div>
-            <label className="block text-xs text-zinc-500">
+            <label className="block text-xs text-muted-foreground">
               行距
               <input
                 type="range"
@@ -317,14 +317,14 @@ export function ThemeEditor() {
                 }
                 className="mt-1 w-full"
               />
-              <span className="text-xs text-zinc-400">
+              <span className="text-xs text-muted-foreground">
                 {themeConfig.lineSpacing.toFixed(1)}
               </span>
             </label>
           </CollapsibleSection>
           <Separator className="my-2 bg-muted-foreground/20" />
           <CollapsibleSection title="间距" icon={Space as React.ElementType}>
-            <label className="block text-xs text-zinc-500">
+            <label className="block text-xs text-muted-foreground">
               区块间距
               <input
                 type="range"
@@ -337,16 +337,16 @@ export function ThemeEditor() {
                 }
                 className="mt-1 w-full"
               />
-              <span className="text-xs text-zinc-400">
+              <span className="text-xs text-muted-foreground">
                 {themeConfig.sectionSpacing}px
               </span>
             </label>
             <div className="mt-1.5 space-y-2">
-              <span className="text-xs text-zinc-500">页边距</span>
+              <span className="text-xs text-muted-foreground">页边距</span>
               <div className="grid grid-cols-4 gap-1">
                 {(["top", "right", "bottom", "left"] as const).map((dir) => (
                   <div key={dir} className="flex flex-col items-center">
-                    <span className="mb-1 text-[9px] text-zinc-400">
+                    <span className="mb-1 text-[9px] text-muted-foreground">
                       {dir === "top"
                         ? "上"
                         : dir === "right"
@@ -392,7 +392,7 @@ function ColorPicker({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <Label className="text-xs text-zinc-600 dark:text-zinc-400">
+      <Label className="text-xs text-muted-foreground dark:text-muted-foreground">
         {label}
       </Label>
       <Popover>
@@ -405,7 +405,7 @@ function ColorPicker({
               className="h-4 w-4 rounded-sm border border-border"
               style={{ backgroundColor: value }}
             />
-            <span className="font-mono text-zinc-500">{value}</span>
+            <span className="font-mono text-muted-foreground">{value}</span>
           </button>
         </PopoverTrigger>
         <PopoverContent

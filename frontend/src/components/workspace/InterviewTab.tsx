@@ -19,6 +19,7 @@ import type {
   InterviewCollectionDetail,
   InterviewRound,
   InterviewRoundDraft,
+  UpdateInterviewRoundParams,
 } from "@/types/interview";
 import {
   getProviderConfig,
@@ -40,7 +41,8 @@ interface InterviewTabProps {
 
 function getStatusColor(status: string): string {
   const colors: Record<string, string> = {
-    completed: "text-green-400 bg-green-500/10 border border-green-500/20",
+    completed:
+      "text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30",
     in_progress: "text-blue-400 bg-blue-500/10 border border-blue-500/20",
     not_started: "text-muted-foreground bg-muted/30 border border-border",
   };
@@ -110,8 +112,10 @@ function CollectionCard({
 }) {
   const navigate = useNavigate();
   const createRound = useInterviewStore((s) => s.createRound);
+  const updateRound = useInterviewStore((s) => s.updateRound);
 
   const [showAddRound, setShowAddRound] = useState(false);
+  const [editingRound, setEditingRound] = useState<InterviewRound | null>(null);
   const [isGeneratingCollectionSummary, setIsGeneratingCollectionSummary] =
     useState(false);
   const [collectionSummaryTaskId, setCollectionSummaryTaskId] = useState<
@@ -230,28 +234,28 @@ function CollectionCard({
     <div
       className={`rounded-xl border border-border bg-card overflow-hidden transition-all ${
         isSelected
-          ? "border-pink-500/40 bg-pink-500/[0.03]"
-          : "hover:border-border-hover"
+          ? "border-indigo-400 dark:border-pink-400 bg-indigo-50 dark:bg-pink-500/20 shadow-sm"
+          : "hover:border-foreground/30 hover:bg-muted/50"
       }`}
     >
       <div
         onClick={handleHeaderClick}
-        className={`p-4 cursor-pointer ${isExpanded ? "border-b border-border" : ""}`}
+        className={`p-3 cursor-pointer ${isExpanded ? "border-b border-border" : ""}`}
       >
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center gap-1.5">
             <button
               type="button"
               onClick={handleToggleExpand}
-              className="p-0.5 rounded hover:bg-white/10 transition-colors text-muted-foreground"
+              className="p-0.5 rounded hover:bg-muted transition-colors text-muted-foreground"
             >
               {isExpanded ? (
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-3 h-3" />
               ) : (
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3 h-3" />
               )}
             </button>
-            <h3 className="text-sm font-semibold">{collection.name}</h3>
+            <h3 className="text-xs font-semibold">{collection.name}</h3>
             <span
               className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(collection.status)}`}
             >
@@ -259,8 +263,8 @@ function CollectionCard({
             </span>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+        <div className="flex items-center gap-2">
+          <div className="flex-1 h-1 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full bg-gradient-to-r from-pink-500 to-pink-400 rounded-full transition-all"
               style={{ width: `${progressPercent}%` }}
@@ -273,7 +277,7 @@ function CollectionCard({
       </div>
 
       {isExpanded && (
-        <div className="p-4">
+        <div className="p-3">
           {sortedRounds.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-4">
               暂无面试轮次
@@ -305,8 +309,9 @@ function CollectionCard({
                           type="button"
                           onClick={(e) => {
                             e.stopPropagation();
+                            setEditingRound(round);
                           }}
-                          className="p-1 rounded hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
                           title="编辑轮次"
                         >
                           <Pencil className="w-3 h-3" />
@@ -331,7 +336,7 @@ function CollectionCard({
                       <button
                         type="button"
                         onClick={(e) => handleStartRound(e, round)}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-green-500/10 text-green-400 hover:bg-green-500/20 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-500/30 hover:bg-green-200 dark:hover:bg-green-500/25 transition-colors"
                       >
                         <Play className="w-2.5 h-2.5" />
                         开始面试
@@ -346,7 +351,7 @@ function CollectionCard({
                             `/workspace/${workspaceId}/resumes/${subResumeId}/interview/${collection.id}/${round.id}`,
                           );
                         }}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] border border-border text-muted-foreground hover:text-foreground hover:bg-white/[0.02] transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-muted/50 border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                       >
                         查看详情
                       </button>
@@ -355,7 +360,7 @@ function CollectionCard({
                       <button
                         type="button"
                         onClick={(e) => handleEnterInterview(e, round)}
-                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition-colors"
+                        className="flex items-center gap-1 px-2 py-1 rounded text-[10px] bg-blue-100 dark:bg-blue-500/15 text-blue-700 dark:text-blue-300 border border-blue-300 dark:border-blue-500/30 hover:bg-blue-200 dark:hover:bg-blue-500/25 transition-colors"
                       >
                         <Play className="w-2.5 h-2.5" />
                         进入面试
@@ -371,9 +376,9 @@ function CollectionCard({
             <button
               type="button"
               onClick={() => setShowAddRound(true)}
-              className="mt-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-dashed border-border text-[11px] text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors w-full justify-center"
+              className="mt-2 flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-dashed border-border text-[10px] text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors w-full justify-center"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3 h-3" />
               添加轮次
             </button>
           )}
@@ -384,7 +389,7 @@ function CollectionCard({
                 <button
                   type="button"
                   onClick={() => setShowCollectionSummaryModal(true)}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   查看集合总结
@@ -401,7 +406,7 @@ function CollectionCard({
                   type="button"
                   onClick={handleGenerateCollectionSummary}
                   disabled={isGeneratingCollectionSummary}
-                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-500/10 border border-pink-500/20 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors disabled:opacity-50"
+                  className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors disabled:opacity-50"
                 >
                   {isGeneratingCollectionSummary ? (
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -428,14 +433,31 @@ function CollectionCard({
         }}
       />
 
+      <AddRoundModal
+        open={!!editingRound}
+        onClose={() => setEditingRound(null)}
+        interviewCollectionId={collection.id}
+        nextSortOrder={nextSortOrder}
+        initialData={editingRound}
+        existingRounds={collection.rounds}
+        onSubmit={async (params) => {
+          if (params.id) {
+            const { interviewCollectionId: _, ...updateData } = params as any;
+            await updateRound(updateData as UpdateInterviewRoundParams);
+            toast.success("轮次更新成功");
+            setEditingRound(null);
+          }
+        }}
+      />
+
       {showCollectionSummaryModal && collectionSummary && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setShowCollectionSummaryModal(false)}
           />
-          <div className="relative w-full max-w-4xl max-h-[90vh] bg-[#1a1a1a] border border-pink-500/20 rounded-2xl overflow-hidden shadow-2xl">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-[#131313]">
+          <div className="relative w-full max-w-4xl max-h-[90vh] bg-card border border-pink-500/20 rounded-2xl overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border/10 bg-card">
               <div>
                 <h2 className="text-base font-semibold">{collection.name}</h2>
                 <p className="text-[10px] text-muted-foreground mt-0.5">
@@ -445,7 +467,7 @@ function CollectionCard({
               <button
                 type="button"
                 onClick={() => setShowCollectionSummaryModal(false)}
-                className="p-1.5 rounded-lg hover:bg-white/10 transition-colors text-muted-foreground hover:text-foreground"
+                className="p-1.5 rounded-lg hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -470,10 +492,10 @@ function CollectionCard({
                       className={`text-xs font-semibold px-2 py-0.5 rounded ${
                         collectionSummary.recommendation === "strong_hire" ||
                         collectionSummary.recommendation === "hire"
-                          ? "bg-green-500/10 text-green-400"
+                          ? "bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300"
                           : collectionSummary.recommendation === "neutral"
-                            ? "bg-yellow-500/10 text-yellow-400"
-                            : "bg-red-500/10 text-red-400"
+                            ? "bg-yellow-100 dark:bg-yellow-500/15 text-yellow-700 dark:text-yellow-300"
+                            : "bg-red-100 dark:bg-red-500/15 text-red-700 dark:text-red-300"
                       }`}
                     >
                       {collectionSummary.recommendation === "strong_hire"
@@ -498,8 +520,8 @@ function CollectionCard({
 
               <div className="grid grid-cols-2 gap-4">
                 {collectionSummary.key_strengths.length > 0 && (
-                  <div className="p-4 rounded-xl bg-green-500/[0.04] border border-green-500/10">
-                    <span className="text-xs font-semibold text-green-400">
+                  <div className="p-4 rounded-xl bg-green-50 dark:bg-green-500/[0.07] border border-green-200 dark:border-green-500/20">
+                    <span className="text-xs font-semibold text-green-700 dark:text-green-300">
                       核心优势
                     </span>
                     <ul className="mt-2 space-y-1">
@@ -512,8 +534,8 @@ function CollectionCard({
                   </div>
                 )}
                 {collectionSummary.key_weaknesses.length > 0 && (
-                  <div className="p-4 rounded-xl bg-yellow-500/[0.04] border border-yellow-500/10">
-                    <span className="text-xs font-semibold text-yellow-400">
+                  <div className="p-4 rounded-xl bg-yellow-50 dark:bg-yellow-500/[0.07] border border-yellow-200 dark:border-yellow-500/20">
+                    <span className="text-xs font-semibold text-yellow-700 dark:text-yellow-300">
                       核心短板
                     </span>
                     <ul className="mt-2 space-y-1">
@@ -538,7 +560,7 @@ function CollectionCard({
                         <span className="text-xs text-muted-foreground w-28 shrink-0 truncate">
                           {d.dimension}
                         </span>
-                        <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                        <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
                           <div
                             className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full transition-all"
                             style={{ width: `${d.score}%` }}
@@ -554,8 +576,8 @@ function CollectionCard({
               )}
 
               {collectionSummary.risk_flags.length > 0 && (
-                <div className="p-4 rounded-xl bg-red-500/[0.04] border border-red-500/10">
-                  <span className="text-xs font-semibold text-red-400">
+                <div className="p-4 rounded-xl bg-red-50 dark:bg-red-500/[0.07] border border-red-200 dark:border-red-500/20">
+                  <span className="text-xs font-semibold text-red-700 dark:text-red-300">
                     风险提示
                   </span>
                   <ul className="mt-2 space-y-1">
@@ -577,7 +599,7 @@ function CollectionCard({
                     {collectionSummary.round_summaries.map((rs, i) => (
                       <div
                         key={i}
-                        className="p-3 rounded-lg bg-white/[0.03] border border-white/5"
+                        className="p-3 rounded-lg bg-muted/50 border border-border/50"
                       >
                         <div className="flex items-center justify-between mb-1">
                           <span className="text-xs font-medium">
@@ -677,8 +699,8 @@ export default function InterviewTab({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex items-center justify-between mb-4 shrink-0">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <div className="flex items-center gap-2">
           <span className="text-xs font-semibold">面试方案</span>
           <span className="text-[10px] text-muted-foreground">
             {collections.length} 个方案
@@ -687,7 +709,7 @@ export default function InterviewTab({
         <button
           type="button"
           onClick={() => setShowCreateModal(true)}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-pink-500/10 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors"
+          className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors text-xs"
         >
           <Plus className="w-3 h-3" />
           创建方案
@@ -695,18 +717,18 @@ export default function InterviewTab({
       </div>
 
       {collections.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 gap-3 text-muted-foreground">
-          <p className="text-sm">暂无面试方案</p>
+        <div className="flex flex-col items-center justify-center py-12 gap-2 text-muted-foreground">
+          <p className="text-xs">暂无面试方案</p>
           <button
             type="button"
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 rounded-lg bg-pink-500/10 text-pink-400 text-xs hover:bg-pink-500/20 transition-colors"
+            className="px-3 py-1.5 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors text-xs"
           >
             创建第一个面试方案
           </button>
         </div>
       ) : (
-        <div className="flex-1 min-h-0 overflow-y-auto space-y-3 pr-1">
+        <div className="flex-1 min-h-0 overflow-y-auto space-y-2 pr-1">
           {collections.map((collection) => (
             <CollectionCard
               key={collection.id}

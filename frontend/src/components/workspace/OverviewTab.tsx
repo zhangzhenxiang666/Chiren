@@ -101,7 +101,8 @@ export default function OverviewTab({
 
   const getStatusColor = (status: InterviewStatus): string => {
     const colors: Record<InterviewStatus, string> = {
-      completed: "text-green-400 bg-green-500/10 border border-green-500/20",
+      completed:
+        "text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30",
       in_progress: "text-blue-400 bg-blue-500/10 border border-blue-500/20",
       not_started: "text-muted-foreground bg-muted/30 border border-border",
     };
@@ -270,7 +271,7 @@ export default function OverviewTab({
                         {s.matchScore}%
                       </span>
                     </div>
-                    <div className="h-1 bg-white/5 rounded-full overflow-hidden">
+                    <div className="h-1 bg-muted rounded-full overflow-hidden">
                       <div
                         className={`h-full bg-gradient-to-r ${c.barFrom} ${c.barTo} rounded-full transition-all duration-700`}
                         style={{ width: `${s.matchScore}%` }}
@@ -327,14 +328,14 @@ export default function OverviewTab({
                 return (
                   <div
                     key={h.id}
-                    className={`flex items-center justify-between py-2 px-2.5 rounded ${h.isLatest ? "bg-white/[0.02]" : ""}`}
+                    className={`flex items-center justify-between py-2 px-2.5 rounded ${h.isLatest ? "bg-muted/30" : ""}`}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-muted-foreground">
                         v{h.version}
                       </span>
                       {h.isLatest && (
-                        <span className="text-[9px] px-1 py-0.5 rounded bg-green-500/10 text-green-400">
+                        <span className="text-[9px] px-1 py-0.5 rounded bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300">
                           最新
                         </span>
                       )}
@@ -363,7 +364,7 @@ export default function OverviewTab({
               </h3>
               <button
                 onClick={onViewInterview}
-                className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground transition-all"
+                className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
               >
                 查看全部
                 <ChevronRight className="w-2.5 h-2.5" />
@@ -378,7 +379,7 @@ export default function OverviewTab({
                 return (
                   <div
                     key={col.id}
-                    className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-white/[0.02] transition-all"
+                    className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-muted/30 transition-all"
                     onClick={onViewInterview}
                   >
                     <div className="flex items-center justify-between mb-0.5">

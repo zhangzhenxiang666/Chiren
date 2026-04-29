@@ -490,7 +490,7 @@ export default function WorkspaceDetail() {
         <button
           type="button"
           onClick={() => navigate("/workspace")}
-          className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
+          className="mt-2 px-4 py-2 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors text-sm"
         >
           返回工作空间列表
         </button>
@@ -597,7 +597,7 @@ export default function WorkspaceDetail() {
           <button
             type="button"
             onClick={() => setShowGenerateModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border text-xs text-muted-foreground hover:text-foreground hover:border-border-hover transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
           >
             <Plus className="w-3 h-3" />
             新建子简历
@@ -658,7 +658,7 @@ export default function WorkspaceDetail() {
                     </h2>
                     {selectedSubResume?.matchScore !== undefined &&
                       selectedSubResume.matchScore >= 85 && (
-                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-500/10 text-green-400 border border-green-500/20">
+                        <span className="px-1.5 py-0.5 rounded text-[10px] bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 border border-green-300 dark:border-green-500/30">
                           推荐
                         </span>
                       )}
@@ -703,7 +703,7 @@ export default function WorkspaceDetail() {
                       `/workspace/${workspace.id}/resumes/${selectedSubResume.id}/edit`,
                     );
                   }}
-                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:text-foreground hover:border-border-hover transition-all"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                 >
                   <Pencil className="w-3 h-3" />
                   编辑
@@ -840,7 +840,7 @@ export default function WorkspaceDetail() {
                         );
                       }
                     }}
-                    className="px-4 py-2 rounded-lg border border-foreground/10 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
+                    className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
                   >
                     取消
                   </button>
@@ -916,7 +916,7 @@ export default function WorkspaceDetail() {
               <button
                 type="button"
                 onClick={() => setShowGenerateModal(true)}
-                className="w-full h-24 rounded-lg border-2 border-dashed border-muted-foreground/15 hover:border-pink-500/30 hover:bg-pink-500/5 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
+                className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-indigo-400 dark:hover:border-pink-400 hover:bg-indigo-50 dark:hover:bg-pink-500/20 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
               >
                 <Plus className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:text-pink-400 transition-all" />
                 <span className="text-xs font-medium group-hover:text-pink-400 transition-colors">
@@ -941,8 +941,8 @@ export default function WorkspaceDetail() {
                     }
                     className={`rounded-lg border p-3 cursor-pointer transition-all group ${
                       isActive
-                        ? "border-pink-500/40 bg-pink-500/[0.03]"
-                        : "border-border hover:border-foreground/10 hover:bg-white/[0.02]"
+                        ? "border-indigo-400 dark:border-pink-400 bg-indigo-50 dark:bg-pink-500/20 shadow-sm"
+                        : "border-border hover:border-foreground/30 hover:bg-muted/50"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -952,7 +952,7 @@ export default function WorkspaceDetail() {
                         </h3>
                         {resume.matchScore !== undefined &&
                           resume.matchScore >= 85 && (
-                            <span className="px-1 py-0.5 rounded text-[9px] bg-green-500/10 text-green-400 shrink-0 font-medium">
+                            <span className="px-1 py-0.5 rounded text-[9px] bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 shrink-0 font-medium">
                               推荐
                             </span>
                           )}
@@ -1014,7 +1014,7 @@ export default function WorkspaceDetail() {
               <button
                 type="button"
                 onClick={() => setShowGenerateModal(true)}
-                className="w-full h-16 rounded-lg border-2 border-dashed border-muted-foreground/15 hover:border-pink-500/30 hover:bg-pink-500/5 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
+                className="w-full h-16 rounded-lg border-2 border-dashed border-muted-foreground/15 hover:border-indigo-400 dark:hover:border-pink-400 hover:bg-indigo-50 dark:hover:bg-pink-500/20 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
               >
                 <Plus className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:text-pink-400 transition-all" />
                 <span className="text-xs font-medium group-hover:text-pink-400 transition-colors">

@@ -443,12 +443,10 @@ export default function ScoreDetailModal({
       if (!s.sectionId) continue;
       if (!map.has(s.sectionId))
         map.set(s.sectionId, { sectionId: s.sectionId, suggestions: [] });
-      map
-        .get(s.sectionId)!
-        .suggestions.push({
-          current: s.current ?? "",
-          suggested: s.suggested ?? "",
-        });
+      map.get(s.sectionId)!.suggestions.push({
+        current: s.current ?? "",
+        suggested: s.suggested ?? "",
+      });
     }
     return Array.from(map.values());
   }, [currentAnalysis]);

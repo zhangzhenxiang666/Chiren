@@ -268,7 +268,7 @@ export default function CreateInterviewModal({
                         className={`group relative shrink-0 w-[90px] rounded-xl border p-2.5 flex flex-col items-center gap-1.5 transition-all cursor-pointer ${
                           isSelected
                             ? "border-pink-500 ring-2 ring-pink-500 bg-pink-500/5"
-                            : "border-border bg-card hover:border-foreground/20 hover:bg-white/[0.02]"
+                            : "border-border bg-card hover:border-foreground/20 hover:bg-muted/30"
                         }`}
                       >
                         {/* Hover action buttons */}

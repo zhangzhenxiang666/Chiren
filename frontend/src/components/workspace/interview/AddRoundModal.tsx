@@ -201,7 +201,7 @@ export default function AddRoundModal({
                           ? "border-border/30 bg-muted/10 opacity-40 cursor-not-allowed"
                           : isActive
                             ? "border-pink-500 ring-1 ring-pink-500 bg-pink-500/5 cursor-default"
-                            : "border-border bg-card hover:border-foreground/20 hover:bg-white/[0.02] cursor-pointer"
+                            : "border-border bg-card hover:border-foreground/20 hover:bg-muted/30 cursor-pointer"
                       }`}
                       title={
                         isUsed

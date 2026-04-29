@@ -1042,7 +1042,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               </td>
                             ),
                             tr: ({ children }) => (
-                              <tr className="border-b border-[#3a3a3e]">
+                              <tr className="border-b border-border">
                                 {children}
                               </tr>
                             ),

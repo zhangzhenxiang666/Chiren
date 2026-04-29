@@ -119,7 +119,7 @@ export default function GenerateForPositionModal({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="例如：前端开发工程师-张三"
-                className="w-full px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
               />
             </div>
             <div>
@@ -136,7 +136,7 @@ export default function GenerateForPositionModal({
                 value={jobTitle}
                 onChange={(e) => setJobTitle(e.target.value)}
                 placeholder="例如：高级前端开发"
-                className="w-full px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+                className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
               />
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function GenerateForPositionModal({
               onChange={(e) => setJdDescription(e.target.value)}
               placeholder="粘贴完整的职位描述（JD），AI 将根据此内容为您定制简历..."
               rows={6}
-              className="w-full resize-none px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+              className="w-full resize-none px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
             />
             <div className="flex justify-between mt-1">
               <span className="text-muted-foreground/60 text-[11px]">
@@ -185,7 +185,7 @@ export default function GenerateForPositionModal({
                       className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                         isSelected
                           ? "border-pink-500 shadow-md shadow-pink-500/10"
-                          : "border-foreground/10 hover:border-foreground/30"
+                          : "border-border hover:border-foreground/30"
                       }`}
                       onClick={() => setSelectedTemplate(tpl)}
                     >
@@ -217,11 +217,11 @@ export default function GenerateForPositionModal({
           </div>
         </div>
 
-        <div className="flex items-center justify-between px-6 py-4 border-t border-foreground/10">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-border">
           <button
             type="button"
             onClick={resetAndClose}
-            className="cursor-pointer px-5 py-2 rounded-lg border border-foreground/10 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
+            className="cursor-pointer px-5 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
           >
             取消
           </button>
@@ -230,7 +230,7 @@ export default function GenerateForPositionModal({
               type="button"
               onClick={handleCreateDirect}
               disabled={!jdDescription.trim() || isCreatingDirect}
-              className="cursor-pointer px-4 py-2 rounded-lg border border-foreground/10 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              className="cursor-pointer px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
             >
               {isCreatingDirect ? (
                 <>

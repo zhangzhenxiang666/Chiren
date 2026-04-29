@@ -219,7 +219,7 @@ export default function CreateWorkspaceModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="输入工作空间名称..."
-            className="w-full px-4 py-2.5 bg-background border border-foreground/10 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
+            className="w-full px-4 py-2.5 bg-background border border-border rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
           />
         </div>
 
@@ -240,7 +240,7 @@ export default function CreateWorkspaceModal({
                         className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                           isSelected
                             ? "border-pink-500 shadow-md shadow-pink-500/10"
-                            : "border-foreground/10 hover:border-foreground/30"
+                            : "border-border hover:border-foreground/30"
                         }`}
                         onClick={() => setSelectedTemplate(tpl)}
                       >
@@ -356,7 +356,7 @@ export default function CreateWorkspaceModal({
                           className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                             isSelected
                               ? "border-pink-500 shadow-md shadow-pink-500/10"
-                              : "border-foreground/10 hover:border-foreground/30"
+                              : "border-border hover:border-foreground/30"
                           }`}
                           onClick={() => setSelectedTemplate(tpl)}
                         >
@@ -391,10 +391,10 @@ export default function CreateWorkspaceModal({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-foreground/10">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-border">
           <button
             onClick={resetAndClose}
-            className="cursor-pointer px-5 py-2 rounded-lg border border-foreground/10 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
+            className="cursor-pointer px-5 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
           >
             取消
           </button>

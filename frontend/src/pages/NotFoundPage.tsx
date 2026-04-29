@@ -6,14 +6,14 @@ export default function NotFoundPage() {
 
   return (
     <div className="flex h-screen items-center justify-center bg-muted">
-      <div className="flex flex-col items-center justify-center text-gray-400 gap-4">
+      <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
         <FileQuestion
-          className="w-16 h-16 text-gray-400/40"
+          className="w-16 h-16 text-muted-foreground/40"
           strokeWidth={1.5}
         />
         <div className="text-center">
-          <p className="text-lg text-gray-300 mb-1">页面不存在</p>
-          <p className="text-sm text-gray-500">
+          <p className="text-lg text-foreground mb-1">页面不存在</p>
+          <p className="text-sm text-muted-foreground">
             您访问的页面可能已被删除或不存在
           </p>
         </div>
