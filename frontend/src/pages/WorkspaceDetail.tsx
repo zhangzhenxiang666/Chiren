@@ -490,7 +490,7 @@ export default function WorkspaceDetail() {
         <button
           type="button"
           onClick={() => navigate("/workspace")}
-          className="mt-2 px-4 py-2 rounded-lg bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors text-sm"
+          className="mt-2 px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           返回工作空间列表
         </button>
@@ -581,9 +581,9 @@ export default function WorkspaceDetail() {
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {selectedSubResume?.matchScore !== undefined && (
-              <span className="flex items-center gap-1">
+              <span className={`flex items-center gap-1 ${getScoreColorClass(selectedSubResume.matchScore).text}`}>
                 <span
-                  className={`w-2 h-2 rounded-full ${selectedSubResume.matchScore >= 90 ? "bg-green-400" : selectedSubResume.matchScore >= 75 ? "bg-yellow-400" : "bg-orange-400"}`}
+                  className={`w-2 h-2 rounded-full ${getScoreColorClass(selectedSubResume.matchScore).text.replace("text-", "bg-")}`}
                 />
                 匹配度 {selectedSubResume.matchScore}%
               </span>
@@ -754,10 +754,10 @@ export default function WorkspaceDetail() {
               <OverviewTab
                 analyses={selectedAnalyses}
                 subResumeId={selectedSubResumeId || ""}
-                onViewInterview={() => {
+                onViewInterview={(collectionId) => {
                   if (selectedSubResumeId) {
                     navigate(
-                      `/workspace/${id}/resumes/${selectedSubResumeId}/interview`,
+                      `/workspace/${id}/resumes/${selectedSubResumeId}/interview${collectionId ? `?activate=${collectionId}` : ""}`,
                       { replace: true },
                     );
                   }
@@ -874,7 +874,7 @@ export default function WorkspaceDetail() {
                       }
                     }}
                     disabled={!editJobDescription.trim() || isSubmittingMeta}
-                    className="px-4 py-2 rounded-lg bg-gradient-to-r from-pink-500 to-pink-600 text-primary-foreground hover:from-pink-600 hover:to-pink-700 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+                    className="px-4 py-2 rounded-lg border border-border bg-muted/70 text-foreground hover:bg-muted transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
                   >
                     {isSubmittingMeta ? (
                       <>
@@ -916,7 +916,7 @@ export default function WorkspaceDetail() {
               <button
                 type="button"
                 onClick={() => setShowGenerateModal(true)}
-                className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-indigo-400 dark:hover:border-pink-400 hover:bg-indigo-50 dark:hover:bg-pink-500/20 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
+                className="w-full h-24 rounded-lg border-2 border-dashed border-border hover:border-pink-400 hover:bg-pink-50/50 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
               >
                 <Plus className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:text-pink-400 transition-all" />
                 <span className="text-xs font-medium group-hover:text-pink-400 transition-colors">
@@ -941,8 +941,8 @@ export default function WorkspaceDetail() {
                     }
                     className={`rounded-lg border p-3 cursor-pointer transition-all group ${
                       isActive
-                        ? "border-indigo-400 dark:border-pink-400 bg-indigo-50 dark:bg-pink-500/20 shadow-sm"
-                        : "border-border hover:border-foreground/30 hover:bg-muted/50"
+                        ? "border-pink-400"
+                        : "border-border hover:border-foreground/30"
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -1014,7 +1014,7 @@ export default function WorkspaceDetail() {
               <button
                 type="button"
                 onClick={() => setShowGenerateModal(true)}
-                className="w-full h-16 rounded-lg border-2 border-dashed border-muted-foreground/15 hover:border-indigo-400 dark:hover:border-pink-400 hover:bg-indigo-50 dark:hover:bg-pink-500/20 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
+                className="w-full h-16 rounded-lg border-2 border-dashed border-muted-foreground/15 hover:border-pink-400 hover:bg-pink-50/50 transition-all flex flex-col items-center justify-center gap-0.5 text-muted-foreground group"
               >
                 <Plus className="w-4 h-4 opacity-40 group-hover:opacity-100 group-hover:text-pink-400 transition-all" />
                 <span className="text-xs font-medium group-hover:text-pink-400 transition-colors">

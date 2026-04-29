@@ -140,7 +140,7 @@ export default function Dashboard() {
           </button>
           <button
             type="button"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-pink-500 text-primary-foreground hover:bg-pink-600 transition-colors text-sm font-medium"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-lg border border-border bg-muted/70 text-foreground hover:bg-muted transition-colors text-sm font-medium"
             onClick={() => setCreateModalOpen(true)}
           >
             <Plus className="w-4 h-4" />

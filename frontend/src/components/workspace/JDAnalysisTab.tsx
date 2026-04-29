@@ -23,6 +23,7 @@ import {
 import type { JdAnalysis, JdRequirement } from "../../types/workspace";
 import { getScoreColorClass, fmtDateTime } from "../../lib/resume-insights";
 import { enrichJdAnalysisList } from "../../lib/jd-analysis-adapter";
+import ConfirmDialog from "../ui/ConfirmDialog";
 
 interface JDAnalysisTabProps {
   analyses: JdAnalysis[];
@@ -46,6 +47,8 @@ export default function JDAnalysisTab({
   const effectiveSelectedId = propSelectedId ?? enrichedList[0]?.id ?? 0;
   const [activeKwTab, setActiveKwTab] = useState<KeywordTab>("matched");
 
+  const [showConfirmScoring, setShowConfirmScoring] = useState(false);
+
   const record = useMemo(
     () =>
       enrichedList.find((a) => a.id === effectiveSelectedId) ||
@@ -67,8 +70,8 @@ export default function JDAnalysisTab({
         {onStartScoring && (
           <button
             type="button"
-            onClick={onStartScoring}
-            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors"
+            onClick={() => setShowConfirmScoring(true)}
+            className="mt-2 inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs bg-muted/70 text-foreground border border-border hover:bg-muted transition-colors"
           >
             <Star className="w-3 h-3" />
             开始评分
@@ -333,6 +336,7 @@ export default function JDAnalysisTab({
   };
 
   return (
+    <>
     <div
       className="flex gap-4 h-full overflow-hidden fade-in min-w-0"
       style={{ minHeight: 0 }}
@@ -347,53 +351,55 @@ export default function JDAnalysisTab({
         {onStartScoring && (
           <button
             type="button"
-            onClick={onStartScoring}
-            className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[11px] bg-pink-100 dark:bg-pink-500/15 text-pink-700 dark:text-pink-300 border border-pink-300 dark:border-pink-500/30 hover:bg-pink-200 dark:hover:bg-pink-500/25 transition-colors"
+            onClick={() => setShowConfirmScoring(true)}
+            className="w-full inline-flex items-center justify-center gap-1 px-3 py-1.5 rounded-md text-[11px] bg-muted/70 text-foreground border border-border hover:bg-muted transition-colors"
           >
             <RefreshCw className="w-3 h-3" />
             重新评分
           </button>
         )}
-        <div className="space-y-2">
-          {enrichedList.map((a) => {
+        <div>
+          {enrichedList.map((a, idx) => {
             const sc = getScoreColorClass(a.overallScore);
             const isActive = a.id === effectiveSelectedId;
             const counts = getRecordCounts(a);
             return (
-              <div
-                key={a.id}
-                onClick={() => handleSelectId(a.id)}
-                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                  isActive
-                    ? "border-indigo-400 dark:border-pink-400 bg-indigo-50 dark:bg-pink-500/20 shadow-sm"
-                    : "border-border hover:border-foreground/30 hover:bg-muted/50"
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold">v{a.version}</span>
-                    {a.id === enrichedList[0]?.id && (
-                      <span className="text-[9px] px-1 py-0.5 rounded bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300">
-                        最新
+              <div key={a.id}>
+                <div
+                  onClick={() => handleSelectId(a.id)}
+                  className={`pl-3 py-2.5 cursor-pointer transition-all border-l-2 ${
+                    isActive
+                      ? "border-l-pink-400"
+                      : "border-l-transparent hover:border-l-foreground/10"
+                  }`}
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-baseline gap-1.5">
+                      <span className={`text-sm font-bold ${sc.text}`}>
+                        {a.overallScore}
                       </span>
-                    )}
+                      <span className="text-[10px] text-muted-foreground font-medium">
+                        v{a.version}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {a.id === enrichedList[0]?.id && (
+                        <span className="text-[9px] text-green-500 font-medium">最新</span>
+                      )}
+                      <span className="text-[9px] text-muted-foreground">
+                        {fmtDateTime(a.createdAt)}
+                      </span>
+                    </div>
                   </div>
-                  <span className={`text-xs font-bold ${sc.text}`}>
-                    {a.overallScore}%
-                  </span>
+                  <div className="flex items-center gap-2.5 text-[10px]">
+                    <span className="text-green-500 font-medium">{counts.kwMatches}✓</span>
+                    <span className="text-yellow-500 font-medium">{counts.partialMatches}◐</span>
+                    <span className="text-red-500 font-medium">{counts.missingKw}✗</span>
+                  </div>
                 </div>
-                <div className="text-[10px] text-muted-foreground mb-2">
-                  {fmtDateTime(a.createdAt)}
-                </div>
-                <div className="flex items-center gap-2 text-[10px]">
-                  <span className="text-green-400">
-                    {counts.kwMatches} 匹配
-                  </span>
-                  <span className="text-yellow-400">
-                    {counts.partialMatches} 部分
-                  </span>
-                  <span className="text-red-400">{counts.missingKw} 缺失</span>
-                </div>
+                {idx < enrichedList.length - 1 && (
+                  <div className="border-b border-border/50" />
+                )}
               </div>
             );
           })}
@@ -808,5 +814,17 @@ export default function JDAnalysisTab({
         </div>
       </div>
     </div>
-  );
+      <ConfirmDialog
+        open={showConfirmScoring}
+        title="确认发起 JD 评分"
+        description="将根据当前子简历的 JD 描述进行 AI 匹配评分，评分过程可能需要一些时间。"
+        confirmText="开始评分"
+        cancelText="取消"
+        onConfirm={() => {
+          setShowConfirmScoring(false);
+          onStartScoring?.();
+        }}
+        onCancel={() => setShowConfirmScoring(false)}
+      />
+    </>);
 }

@@ -5,12 +5,20 @@ import {
   CheckCircle2,
   AlertCircle,
   Star,
-  ChevronRight,
   Clock,
   Key,
   Pencil,
   Lightbulb,
 } from "lucide-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 import type { JdAnalysis } from "../../types/workspace";
 import { getScoreColorClass, fmtDateTime } from "../../lib/resume-insights";
 import { enrichJdAnalysis } from "../../lib/jd-analysis-adapter";
@@ -20,7 +28,7 @@ import type { InterviewStatus } from "@/types/interview";
 interface OverviewTabProps {
   analyses: JdAnalysis[];
   subResumeId: string;
-  onViewInterview: () => void;
+  onViewInterview: (collectionId?: string) => void;
 }
 
 // Helper to render lucide icons for suggestions based on type
@@ -119,8 +127,8 @@ export default function OverviewTab({
   };
 
   return (
-    <div className="flex gap-3 fade-in min-w-0">
-      <div className="flex-1 space-y-3 min-w-0">
+    <div className="flex gap-3 fade-in min-w-0 h-full overflow-hidden">
+      <div className="flex-1 space-y-3 min-w-0 overflow-y-auto pr-1">
         <div className="rounded-lg border border-border p-4 bg-card">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-xs font-semibold flex items-center gap-1.5">
@@ -218,6 +226,9 @@ export default function OverviewTab({
                   </span>
                   <span className="text-xs font-bold text-red-400">
                     {missingKeywordsArr.length}
+                    <span className="text-[10px] text-muted-foreground font-normal">
+                      /{currentAnalysis.totalRequirements || 20}
+                    </span>
                   </span>
                 </div>
               </div>
@@ -320,56 +331,92 @@ export default function OverviewTab({
           <div className="rounded-lg border border-border p-4 bg-card">
             <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
               <Clock className="w-3.5 h-3.5 text-muted-foreground" />
-              JD 分析历史
+              JD 评分趋势
             </h3>
-            <div className="space-y-1">
-              {historyAnalyses.map((h) => {
-                const c = getScoreColorClass(h.overallScore);
-                return (
-                  <div
-                    key={h.id}
-                    className={`flex items-center justify-between py-2 px-2.5 rounded ${h.isLatest ? "bg-muted/30" : ""}`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-muted-foreground">
-                        v{h.version}
-                      </span>
-                      {h.isLatest && (
-                        <span className="text-[9px] px-1 py-0.5 rounded bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300">
-                          最新
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[10px] text-muted-foreground">
-                      {fmtDateTime(h.createdAt)}
-                    </span>
-                    <span className={`text-xs font-bold ${c.text}`}>
-                      {h.overallScore}%
-                    </span>
-                  </div>
-                );
-              })}
+            <div className="h-[160px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart
+                  data={[...historyAnalyses].reverse()}
+                  margin={{ top: 5, right: 10, left: -10, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    stroke="rgba(255,255,255,0.06)"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="version"
+                    tick={{ fontSize: 10, fill: "#888" }}
+                    tickFormatter={(v) => `v${v}`}
+                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    domain={[0, 100]}
+                    tick={{ fontSize: 10, fill: "#888" }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        const d = payload[0].payload;
+                        const c = getScoreColorClass(d.overallScore);
+                        return (
+                          <div className="bg-popover border border-border rounded-lg px-3 py-2 shadow-lg max-w-[220px]">
+                            <div className="text-[10px] text-muted-foreground mb-0.5">
+                              v{d.version} · {fmtDateTime(d.createdAt)}
+                            </div>
+                            <div className={`text-xs font-bold ${c.text} mb-1`}>
+                              {d.overallScore}%
+                            </div>
+                            {d.summary && (
+                              <div className="text-[10px] text-muted-foreground leading-snug line-clamp-3 break-words">
+                                {d.summary}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="overallScore"
+                    stroke="#ec4899"
+                    strokeWidth={2}
+                    dot={(props: any) => {
+                      const { cx, cy, payload } = props;
+                      const isLatest = payload.isLatest;
+                      return (
+                        <circle
+                          cx={cx}
+                          cy={cy}
+                          r={isLatest ? 4 : 3}
+                          fill={isLatest ? "#ec4899" : "#1a1a2e"}
+                          stroke="#ec4899"
+                          strokeWidth={2}
+                        />
+                      );
+                    }
+                    }
+                    activeDot={{ r: 5, fill: "#ec4899", stroke: "#fff", strokeWidth: 2 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </div>
           </div>
         )}
       </div>
 
-      <div className="w-[320px] shrink-0 space-y-3">
+      <div className="w-[320px] shrink-0 space-y-3 overflow-y-auto">
         {interviewCollections.length > 0 ? (
           <div className="rounded-lg border border-border p-4 bg-card">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-xs font-semibold flex items-center gap-1.5">
-                <Users className="w-3.5 h-3.5 text-muted-foreground" />
-                面试方案
-              </h3>
-              <button
-                onClick={onViewInterview}
-                className="flex items-center gap-1 px-2 py-1 rounded border border-border text-[9px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
-              >
-                查看全部
-                <ChevronRight className="w-2.5 h-2.5" />
-              </button>
-            </div>
+            <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
+              <Users className="w-3.5 h-3.5 text-muted-foreground" />
+              面试方案
+            </h3>
 
             <div className="space-y-2">
               {interviewCollections.map((col) => {
@@ -380,7 +427,7 @@ export default function OverviewTab({
                   <div
                     key={col.id}
                     className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-muted/30 transition-all"
-                    onClick={onViewInterview}
+                    onClick={() => onViewInterview(col.id)}
                   >
                     <div className="flex items-center justify-between mb-0.5">
                       <span className="text-[10px] font-medium">

@@ -156,6 +156,12 @@ class Resume(PydanticMixin, Base):
         back_populates="resume",
         cascade="all, delete-orphan",
     )
+    interview_collections = relationship(
+        "InterviewCollection",
+        back_populates="resume",
+        foreign_keys="InterviewCollection.sub_resume_id",
+        cascade="all, delete-orphan",
+    )
 
     def to_pydantic(self) -> ResumeSchema:
         return ResumeSchema(
@@ -708,6 +714,11 @@ class InterviewCollection(PydanticMixin, Base):
         comment="更新时间",
     )
 
+    resume = relationship(
+        "Resume",
+        back_populates="interview_collections",
+        foreign_keys=[sub_resume_id],
+    )
     rounds = relationship(
         "InterviewRound",
         back_populates="collection",

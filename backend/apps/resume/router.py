@@ -14,7 +14,7 @@ from apps.resume.schemas import (
 )
 from apps.resume.service import copy_sections_from_workspace, create_default_sections
 from shared.database import get_session
-from shared.models import ConversationMessageRecord, Resume
+from shared.models import ConversationMessageRecord, InterviewCollection, Resume
 from shared.types.resume import ResumeSchema
 
 router = APIRouter(prefix="/resume", tags=["resume"])
@@ -198,11 +198,21 @@ async def delete_resume(
 
     all_resume_ids = [parent.id] + [v.id for v in parent.versions]
 
-    await db.execute(
-        delete(ConversationMessageRecord).where(
-            ConversationMessageRecord.conversation_id.in_(all_resume_ids)
-        )
+    collections_result = await db.execute(
+        select(InterviewCollection)
+        .where(InterviewCollection.sub_resume_id.in_(all_resume_ids))
+        .options(selectinload(InterviewCollection.rounds))
     )
+    interview_collections = collections_result.scalars().all()
+    interview_round_ids = [r.id for c in interview_collections for r in c.rounds]
+
+    all_conversation_ids = all_resume_ids + interview_round_ids
+    if all_conversation_ids:
+        await db.execute(
+            delete(ConversationMessageRecord).where(
+                ConversationMessageRecord.conversation_id.in_(all_conversation_ids)
+            )
+        )
 
     await db.delete(parent)
 

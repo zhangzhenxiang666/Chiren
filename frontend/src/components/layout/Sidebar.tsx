@@ -91,8 +91,12 @@ export default function Sidebar({
   return (
     <>
       <aside
-        className="bg-card border-r border-muted-foreground/20 flex flex-col h-full shrink-0 transition-all duration-300 ease-in-out overflow-hidden"
-        style={{ width: collapsed ? "64px" : "208px" }}
+        className="bg-card border-r border-muted-foreground/20 flex flex-col h-full shrink-0 transition-[width] duration-150 ease-out overflow-hidden"
+        style={{
+          width: collapsed ? "64px" : "208px",
+          willChange: "width",
+          transform: "translateZ(0)",
+        }}
       >
         <div className="h-14 flex items-center px-4 border-b border-muted-foreground/20 shrink-0 gap-3">
           <button
@@ -102,7 +106,7 @@ export default function Sidebar({
           >
             <img src={logoSvg} alt="Chiren" className="w-7 h-7 shrink-0" />
             <span
-              className="text-pink-500 font-bold text-lg whitespace-nowrap transition-opacity duration-300"
+              className="text-pink-500 font-bold text-lg whitespace-nowrap transition-opacity duration-200"
               style={{ opacity: collapsed ? 0 : 1 }}
             >
               Chiren
@@ -132,7 +136,7 @@ export default function Sidebar({
                       className={`w-4 h-4 shrink-0 ${isActive ? "text-pink-500" : ""}`}
                     />
                     <span
-                      className="text-sm whitespace-nowrap transition-opacity duration-300"
+                      className="text-sm whitespace-nowrap transition-opacity duration-200"
                       style={{ opacity: collapsed ? 0 : 1 }}
                     >
                       {label}
@@ -157,7 +161,7 @@ export default function Sidebar({
                     )}
                   </span>
                   <span
-                    className="text-sm whitespace-nowrap transition-opacity duration-300"
+                    className="text-sm whitespace-nowrap transition-opacity duration-200"
                     style={{ opacity: collapsed ? 0 : 1 }}
                   >
                     通知
@@ -181,7 +185,7 @@ export default function Sidebar({
             >
               <Settings className="w-4 h-4 shrink-0" />
               <span
-                className="text-sm whitespace-nowrap transition-opacity duration-300"
+                className="text-sm whitespace-nowrap transition-opacity duration-200"
                 style={{ opacity: collapsed ? 0 : 1 }}
               >
                 设置
@@ -201,7 +205,7 @@ export default function Sidebar({
             ) : (
               <ChevronLeft className="w-4 h-4" />
             )}
-            {!collapsed && <span className="ml-2 text-sm">折叠侧边栏</span>}
+            {!collapsed && <span className="ml-2 text-sm whitespace-nowrap">折叠侧边栏</span>}
           </button>
         </div>
       </aside>
