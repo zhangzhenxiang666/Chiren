@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from 'react';
 import {
   X,
   Eye,
@@ -10,44 +10,44 @@ import {
   Sun,
   Moon,
   Monitor,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   getProviderConfig,
   updateProviderConfig,
   switchProviderConfig,
   type ProviderType,
-} from "../../lib/api";
-import { useSettingsStore, type ThemeMode } from "../../stores/settings-store";
+} from '../../lib/api';
+import { useSettingsStore, type ThemeMode } from '../../stores/settings-store';
 
 export interface SettingsModalProps {
   open: boolean;
   onClose: () => void;
 }
 
-export type SettingsTab = "ai" | "appearance" | "editor";
+export type SettingsTab = 'ai' | 'appearance' | 'editor';
 
 const PROVIDER_OPTIONS: { value: ProviderType; label: string }[] = [
-  { value: "openai", label: "OpenAI" },
-  { value: "anthropic", label: "Anthropic" },
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'anthropic', label: 'Anthropic' },
 ];
 
 export default function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const [tab, setTab] = useState<SettingsTab>("ai");
+  const [tab, setTab] = useState<SettingsTab>('ai');
   const [loading, setLoading] = useState(false);
 
-  const [activeProvider, setActiveProvider] = useState<ProviderType>("openai");
+  const [activeProvider, setActiveProvider] = useState<ProviderType>('openai');
   const [config, setConfig] = useState<
     Record<ProviderType, { baseUrl: string; apiKey: string; model: string }>
   >({
-    openai: { baseUrl: "", apiKey: "", model: "" },
-    anthropic: { baseUrl: "", apiKey: "", model: "" },
+    openai: { baseUrl: '', apiKey: '', model: '' },
+    anthropic: { baseUrl: '', apiKey: '', model: '' },
   });
   const [showApiKey, setShowApiKey] = useState(false);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const configRef = useRef(config);
 
   useEffect(() => {
-    if (open && tab === "ai") {
+    if (open && tab === 'ai') {
       loadConfig();
     }
   }, [open, tab]);
@@ -68,7 +68,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
         });
       }
     } catch (error) {
-      console.error("Failed to load config:", error);
+      console.error('Failed to load config:', error);
     } finally {
       setLoading(false);
     }
@@ -86,14 +86,11 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
     try {
       await updateProviderConfig(activeProvider, payload);
     } catch (error) {
-      console.error("Failed to save config:", error);
+      console.error('Failed to save config:', error);
     }
   };
 
-  const updateCurrentProviderConfig = (
-    field: "baseUrl" | "apiKey" | "model",
-    value: string,
-  ) => {
+  const updateCurrentProviderConfig = (field: 'baseUrl' | 'apiKey' | 'model', value: string) => {
     setConfig((prev) => {
       const next = {
         ...prev,
@@ -130,17 +127,14 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
   if (!open) return null;
 
   const currentProvider = config[activeProvider] ?? {
-    baseUrl: "",
-    apiKey: "",
-    model: "",
+    baseUrl: '',
+    apiKey: '',
+    model: '',
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={handleClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={handleClose} />
 
       <div className="relative w-[560px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         <div className="flex items-center justify-between px-6 pt-6 pb-4">
@@ -160,11 +154,11 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors flex items-center justify-center gap-1.5 ${
-              tab === "ai"
-                ? "bg-secondary text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              tab === 'ai'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
-            onClick={() => setTab("ai")}
+            onClick={() => setTab('ai')}
           >
             <Cpu className="w-4 h-4" />
             AI 配置
@@ -172,29 +166,29 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === "appearance"
-                ? "bg-secondary text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              tab === 'appearance'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
-            onClick={() => setTab("appearance")}
+            onClick={() => setTab('appearance')}
           >
             外观
           </button>
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === "editor"
-                ? "bg-secondary text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              tab === 'editor'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
-            onClick={() => setTab("editor")}
+            onClick={() => setTab('editor')}
           >
             编辑器
           </button>
         </div>
 
         <div className="px-6 pb-6 flex-1 overflow-y-auto">
-          {tab === "ai" ? (
+          {tab === 'ai' ? (
             loading ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-6 h-6 text-muted-foreground animate-spin" />
@@ -219,7 +213,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                           try {
                             await switchProviderConfig(nextProvider);
                           } catch (error) {
-                            console.error("Failed to switch provider:", error);
+                            console.error('Failed to switch provider:', error);
                             setActiveProvider(prevProvider);
                           }
                         }, 400);
@@ -242,11 +236,9 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                   </label>
                   <div className="relative">
                     <input
-                      type={showApiKey ? "text" : "password"}
+                      type={showApiKey ? 'text' : 'password'}
                       value={currentProvider.apiKey}
-                      onChange={(e) =>
-                        updateCurrentProviderConfig("apiKey", e.target.value)
-                      }
+                      onChange={(e) => updateCurrentProviderConfig('apiKey', e.target.value)}
                       placeholder="输入 API Key..."
                       className="w-full px-4 py-2.5 pr-10 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                     />
@@ -255,11 +247,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                       onClick={() => setShowApiKey(!showApiKey)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                     >
-                      {showApiKey ? (
-                        <EyeOff className="w-4 h-4" />
-                      ) : (
-                        <Eye className="w-4 h-4" />
-                      )}
+                      {showApiKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
                 </div>
@@ -271,9 +259,7 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <input
                     type="text"
                     value={currentProvider.baseUrl}
-                    onChange={(e) =>
-                      updateCurrentProviderConfig("baseUrl", e.target.value)
-                    }
+                    onChange={(e) => updateCurrentProviderConfig('baseUrl', e.target.value)}
                     placeholder="https://api.openai.com/v1"
                     className="w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                   />
@@ -286,16 +272,14 @@ export default function SettingsModal({ open, onClose }: SettingsModalProps) {
                   <input
                     type="text"
                     value={currentProvider.model}
-                    onChange={(e) =>
-                      updateCurrentProviderConfig("model", e.target.value)
-                    }
+                    onChange={(e) => updateCurrentProviderConfig('model', e.target.value)}
                     placeholder="gpt-4"
                     className="w-full px-4 py-2.5 bg-background border border-input rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 text-sm"
                   />
                 </div>
               </div>
             )
-          ) : tab === "appearance" ? (
+          ) : tab === 'appearance' ? (
             <AppearanceSettings />
           ) : (
             <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">
@@ -322,9 +306,9 @@ const THEME_OPTIONS: {
   label: string;
   icon: React.ElementType;
 }[] = [
-  { value: "light", label: "亮色", icon: Sun },
-  { value: "dark", label: "暗色", icon: Moon },
-  { value: "system", label: "跟随系统", icon: Monitor },
+  { value: 'light', label: '亮色', icon: Sun },
+  { value: 'dark', label: '暗色', icon: Moon },
+  { value: 'system', label: '跟随系统', icon: Monitor },
 ];
 
 function AppearanceSettings() {
@@ -334,9 +318,7 @@ function AppearanceSettings() {
   return (
     <div className="space-y-5">
       <div>
-        <label className="block text-sm font-medium text-muted-foreground mb-3">
-          主题模式
-        </label>
+        <label className="block text-sm font-medium text-muted-foreground mb-3">主题模式</label>
         <div className="grid grid-cols-3 gap-3">
           {THEME_OPTIONS.map((option) => {
             const Icon = option.icon;
@@ -348,8 +330,8 @@ function AppearanceSettings() {
                 onClick={() => setThemeMode(option.value)}
                 className={`cursor-pointer rounded-xl border px-4 py-4 text-sm font-medium transition-all flex flex-col items-center justify-center gap-2 ${
                   active
-                    ? "border-foreground bg-secondary text-foreground shadow-sm"
-                    : "border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground"
+                    ? 'border-foreground bg-secondary text-foreground shadow-sm'
+                    : 'border-border bg-background text-muted-foreground hover:border-muted-foreground hover:text-foreground'
                 }`}
               >
                 <Icon className="w-5 h-5" />

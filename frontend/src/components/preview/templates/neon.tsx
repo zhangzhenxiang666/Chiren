@@ -10,19 +10,19 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const BG = "#111827";
-const CYAN = "#22d3ee";
-const VIOLET = "#a78bfa";
-const TEXT = "#d1d5db";
-const TEXT_DIM = "#9ca3af";
+const BG = '#111827';
+const CYAN = '#22d3ee';
+const VIOLET = '#a78bfa';
+const TEXT = '#d1d5db';
+const TEXT_DIM = '#9ca3af';
 
 export function NeonTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -44,7 +44,7 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif", backgroundColor: BG }}
+      style={{ fontFamily: 'Inter, sans-serif', backgroundColor: BG }}
     >
       {/* Header */}
       <div
@@ -71,7 +71,7 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
               className="text-3xl font-extrabold tracking-tight"
               style={{ color: CYAN, textShadow: `0 0 20px ${CYAN}60` }}
             >
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
               <p
@@ -89,9 +89,7 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
                 {contacts.map((c, i) => (
                   <span key={i} className="flex items-center gap-1.5">
                     {c}
-                    {i < contacts.length - 1 && (
-                      <span style={{ color: `${CYAN}40` }}>|</span>
-                    )}
+                    {i < contacts.length - 1 && <span style={{ color: `${CYAN}40` }}>|</span>}
                   </span>
                 ))}
               </div>
@@ -103,10 +101,7 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8 pt-6">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <div className="mb-4 flex items-center gap-3">
@@ -133,17 +128,11 @@ export function NeonTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function NeonSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function NeonSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <div
         className="rounded-lg p-4"
@@ -160,7 +149,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
@@ -185,13 +174,9 @@ function NeonSectionContent({
                   boxShadow: `0 0 8px ${VIOLET}40`,
                 }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
@@ -226,11 +211,7 @@ function NeonSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm"
-                    style={{ color: TEXT }}
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm" style={{ color: TEXT }}>
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{
@@ -249,7 +230,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
@@ -267,9 +248,7 @@ function NeonSectionContent({
                 {item.institution}
               </h3>
               <span className="text-xs" style={{ color: TEXT_DIM }}>
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             <p className="text-sm" style={{ color: TEXT }}>
@@ -283,11 +262,7 @@ function NeonSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm"
-                    style={{ color: TEXT }}
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm" style={{ color: TEXT }}>
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{
@@ -306,12 +281,12 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p
               className="mb-1.5 text-xs font-bold uppercase tracking-wider"
               style={{ color: VIOLET }}
@@ -339,7 +314,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
@@ -358,9 +333,8 @@ function NeonSectionContent({
               </h3>
               {item.startDate && (
                 <span className="text-xs" style={{ color: TEXT_DIM }}>
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -391,11 +365,7 @@ function NeonSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm"
-                    style={{ color: TEXT }}
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm" style={{ color: TEXT }}>
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{
@@ -414,7 +384,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -433,7 +403,7 @@ function NeonSectionContent({
             {(item.issuer || item.date) && (
               <p className="text-xs" style={{ color: TEXT_DIM }}>
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </p>
             )}
@@ -443,7 +413,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
@@ -469,7 +439,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
@@ -487,7 +457,7 @@ function NeonSectionContent({
                 {item.name}
               </span>
               <span className="text-xs" style={{ color: TEXT_DIM }}>
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
@@ -508,7 +478,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
@@ -549,7 +519,7 @@ function NeonSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -558,11 +528,7 @@ function NeonSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-lg p-3"
-            style={{ border: `1px solid ${CYAN}20` }}
-          >
+          <div key={item.id} className="rounded-lg p-3" style={{ border: `1px solid ${CYAN}20` }}>
             <span className="text-sm font-medium" style={{ color: CYAN }}>
               {item.name || item.title || item.language}
             </span>

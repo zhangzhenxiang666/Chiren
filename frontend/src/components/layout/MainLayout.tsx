@@ -50,82 +50,78 @@
  * ============================================
  */
 
-import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { toast } from "sonner";
-import Sidebar from "./Sidebar";
-import { registerSSEHandler } from "../../lib/notification";
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { toast } from 'sonner';
+import Sidebar from './Sidebar';
+import { registerSSEHandler } from '../../lib/notification';
 
 /**
  * 全局 SSE handler 注册 — 在模块加载时执行，保证始终存在。
  * 注意：这里注册的是与页面组件生命周期无关的通用 handler。
  * 页面组件可以在各自的 useEffect 中注册额外的 handler（会被这里的覆盖或共存）。
  */
-registerSSEHandler("jd_generate", {
+registerSSEHandler('jd_generate', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm">
-          子简历「{task.metaInfo?.title || "未命名"}」生成完成
+          子简历「{task.metaInfo?.title || '未命名'}」生成完成
         </span>
       </div>,
     );
   },
-  onError: () => "子简历生成失败",
+  onError: () => '子简历生成失败',
 });
 
-registerSSEHandler("parse", {
+registerSSEHandler('parse', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm">
-          工作空间「{task.metaInfo?.title || "未命名"}」生成完成
+          工作空间「{task.metaInfo?.title || '未命名'}」生成完成
         </span>
       </div>,
     );
   },
-  onError: () => "工作空间解析失败",
+  onError: () => '工作空间解析失败',
 });
 
-registerSSEHandler("jd_score", {
+registerSSEHandler('jd_score', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm">
-          JD 匹配评分「{task.metaInfo?.title || "未命名"}」完成
+          JD 匹配评分「{task.metaInfo?.title || '未命名'}」完成
         </span>
       </div>,
     );
   },
-  onError: () => "JD 匹配评分失败",
+  onError: () => 'JD 匹配评分失败',
 });
 
-registerSSEHandler("interview_summary", {
+registerSSEHandler('interview_summary', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm">面试总结已生成</span>
-        <span className="text-xs text-muted-foreground">
-          「{task.metaInfo?.title || ""}」
-        </span>
+        <span className="text-xs text-muted-foreground">「{task.metaInfo?.title || ''}」</span>
       </div>,
     );
   },
-  onError: () => "面试总结生成失败",
+  onError: () => '面试总结生成失败',
 });
 
-registerSSEHandler("collection_summary", {
+registerSSEHandler('collection_summary', {
   onSuccess: (task) => {
     toast.success(
       <div className="flex flex-col gap-1">
         <span className="font-medium text-sm">面试集合总结已生成</span>
-        <span className="text-xs text-muted-foreground">
-          「{task.metaInfo?.title || ""}」
-        </span>
+        <span className="text-xs text-muted-foreground">「{task.metaInfo?.title || ''}」</span>
       </div>,
     );
   },
-  onError: () => "面试集合总结生成失败",
+  onError: () => '面试集合总结生成失败',
 });
 
 export default function MainLayout() {
@@ -133,10 +129,7 @@ export default function MainLayout() {
 
   return (
     <div className="h-screen w-full flex bg-background">
-      <Sidebar
-        collapsed={collapsed}
-        onToggle={() => setCollapsed((prev) => !prev)}
-      />
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((prev) => !prev)} />
       <main className="flex-1 min-h-0 min-w-0 p-6">
         <Outlet />
       </main>

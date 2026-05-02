@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState } from 'react';
+import { X } from 'lucide-react';
 
 interface CreateCollectionModalProps {
   open: boolean;
@@ -14,7 +14,7 @@ export default function CreateCollectionModal({
   subResumeId: _subResumeId,
   onSubmit,
 }: CreateCollectionModalProps) {
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
 
   if (!open) return null;
@@ -24,7 +24,7 @@ export default function CreateCollectionModal({
     setLoading(true);
     try {
       await onSubmit(name.trim());
-      setName("");
+      setName('');
       onClose();
     } catch {
     } finally {
@@ -48,9 +48,7 @@ export default function CreateCollectionModal({
         </div>
 
         <div className="mb-4">
-          <label className="text-xs text-muted-foreground mb-1.5 block">
-            方案名称
-          </label>
+          <label className="text-xs text-muted-foreground mb-1.5 block">方案名称</label>
           <input
             type="text"
             value={name}
@@ -58,7 +56,7 @@ export default function CreateCollectionModal({
             placeholder="例如：阿里技术面试"
             className="w-full px-3 py-2 bg-background border border-foreground/10 rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50"
             onKeyDown={(e) => {
-              if (e.key === "Enter") handleSubmit();
+              if (e.key === 'Enter') handleSubmit();
             }}
             autoFocus
           />
@@ -70,7 +68,7 @@ export default function CreateCollectionModal({
           disabled={loading || !name.trim()}
           className="w-full px-4 py-2 rounded-lg bg-pink-500 text-white text-sm font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {loading ? "创建中..." : "创建"}
+          {loading ? '创建中...' : '创建'}
         </button>
       </div>
     </div>

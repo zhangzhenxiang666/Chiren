@@ -10,23 +10,23 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const TEAL_800 = "#115e59";
-const TEAL_500 = "#0d9488";
-const TEAL_50 = "#f0fdfa";
+const TEAL_800 = '#115e59';
+const TEAL_500 = '#0d9488';
+const TEAL_50 = '#f0fdfa';
 
 export function MedicalTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div className="mb-6 border-b-2 pb-5" style={{ borderColor: TEAL_500 }}>
@@ -41,13 +41,10 @@ export function MedicalTemplate({ resume }: { resume: Resume }) {
           )}
           <div className="flex-1">
             <h1 className="text-2xl font-bold" style={{ color: TEAL_800 }}>
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
-              <p
-                className="mt-1 text-sm font-medium"
-                style={{ color: TEAL_500 }}
-              >
+              <p className="mt-1 text-sm font-medium" style={{ color: TEAL_500 }}>
                 {pi.jobTitle}
               </p>
             )}
@@ -74,9 +71,7 @@ export function MedicalTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-7 pt-1" data-section>
             <h2
@@ -94,17 +89,11 @@ export function MedicalTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function MedicalSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function MedicalSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-gray-600"
@@ -115,7 +104,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
@@ -129,24 +118,12 @@ function MedicalSectionContent({
                 <span className="text-sm font-bold" style={{ color: TEAL_800 }}>
                   {item.position}
                 </span>
-                {item.company && (
-                  <span className="text-sm text-gray-600">
-                    {" "}
-                    | {item.company}
-                  </span>
-                )}
+                {item.company && <span className="text-sm text-gray-600"> | {item.company}</span>}
               </div>
-              <span
-                className="shrink-0 text-xs font-medium"
-                style={{ color: TEAL_500 }}
-              >
-                {item.startDate} -{" "}
+              <span className="shrink-0 text-xs font-medium" style={{ color: TEAL_500 }}>
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -157,8 +134,7 @@ function MedicalSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-gray-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -178,7 +154,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
@@ -193,24 +169,14 @@ function MedicalSectionContent({
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-gray-600">
-                    {" "}
-                    - {item.institution}
-                  </span>
+                  <span className="text-sm text-gray-600"> - {item.institution}</span>
                 )}
               </div>
-              <span
-                className="shrink-0 text-xs font-medium"
-                style={{ color: TEAL_500 }}
-              >
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+              <span className="shrink-0 text-xs font-medium" style={{ color: TEAL_500 }}>
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-gray-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-gray-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -228,27 +194,22 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1.5">
         {((content as SkillsContent).categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span
-              className="w-32 shrink-0 font-semibold"
-              style={{ color: TEAL_800 }}
-            >
+            <span className="w-32 shrink-0 font-semibold" style={{ color: TEAL_800 }}>
               {cat.name}:
             </span>
-            <span className="text-gray-600">
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span className="text-gray-600">{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
@@ -262,13 +223,9 @@ function MedicalSectionContent({
                 {item.name}
               </span>
               {item.startDate && (
-                <span
-                  className="shrink-0 text-xs font-medium"
-                  style={{ color: TEAL_500 }}
-                >
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                <span className="shrink-0 text-xs font-medium" style={{ color: TEAL_500 }}>
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -280,8 +237,7 @@ function MedicalSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-gray-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -301,7 +257,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -321,7 +277,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="space-y-1.5">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -336,7 +292,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
@@ -354,9 +310,7 @@ function MedicalSectionContent({
                 ⭐ {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-gray-400">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-gray-400">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-gray-600"
@@ -369,7 +323,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
@@ -379,18 +333,10 @@ function MedicalSectionContent({
                 <span className="text-sm font-bold" style={{ color: TEAL_800 }}>
                   {item.title}
                 </span>
-                {item.subtitle && (
-                  <span className="text-sm text-gray-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                {item.subtitle && <span className="text-sm text-gray-500"> — {item.subtitle}</span>}
               </div>
               {item.date && (
-                <span
-                  className="shrink-0 text-xs font-medium"
-                  style={{ color: TEAL_500 }}
-                >
+                <span className="shrink-0 text-xs font-medium" style={{ color: TEAL_500 }}>
                   {item.date}
                 </span>
               )}
@@ -407,7 +353,7 @@ function MedicalSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -416,7 +362,7 @@ function MedicalSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: TEAL_800 }}>
               {item.name || item.title || item.language}
             </span>

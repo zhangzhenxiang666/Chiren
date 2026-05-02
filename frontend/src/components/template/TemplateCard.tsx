@@ -1,6 +1,6 @@
-import type { Resume } from "../../types/resume";
-import ResumePreview from "../preview/ResumePreview";
-import { Eye } from "lucide-react";
+import type { Resume } from '../../types/resume';
+import ResumePreview from '../preview/ResumePreview';
+import { Eye } from 'lucide-react';
 
 interface TemplateCardProps {
   templateId: string;
@@ -20,25 +20,20 @@ export default function TemplateCard({
   return (
     <div
       className="group flex flex-col rounded-2xl overflow-hidden bg-card border border-border transition-colors duration-200 hover:border-muted-foreground/30 hover:bg-muted/50"
-      style={{ width: "300px" }}
+      style={{ width: '300px' }}
     >
       <div className="px-4 py-3 text-center">
-        <h3 className="text-base font-bold text-foreground tracking-wide">
-          {templateName}
-        </h3>
+        <h3 className="text-base font-bold text-foreground tracking-wide">{templateName}</h3>
       </div>
 
-      <div
-        className="relative overflow-hidden rounded-xl mx-2 mb-2"
-        style={{ height: "340px" }}
-      >
+      <div className="relative overflow-hidden rounded-xl mx-2 mb-2" style={{ height: '340px' }}>
         <div
           className="absolute origin-top"
           style={{
-            left: "50%",
-            top: "0",
-            width: "794px",
-            transform: "translateX(-50%) scale(0.30)",
+            left: '50%',
+            top: '0',
+            width: '794px',
+            transform: 'translateX(-50%) scale(0.30)',
           }}
         >
           <ResumePreview resume={resume} />

@@ -45,20 +45,20 @@
  * ============================================
  */
 
-import { useEffect, useRef } from "react";
-import { toast } from "sonner";
-import type { WorkTask } from "../types/work";
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import type { WorkTask } from '../types/work';
 import {
   getNotificationTasks,
   updateNotificationTask,
   markUnread,
   onNotificationTasksChange,
   getRegisteredHandler,
-} from "../lib/notification";
+} from '../lib/notification';
 
 /** 全局任务完成/失败事件（供 Dashboard 等页面监听） */
-const GLOBAL_SSE_COMPLETE = "global-sse-complete";
-const GLOBAL_SSE_ERROR = "global-sse-error";
+const GLOBAL_SSE_COMPLETE = 'global-sse-complete';
+const GLOBAL_SSE_ERROR = 'global-sse-error';
 
 export function useGlobalSSE() {
   const sourcesRef = useRef<Map<string, EventSource>>(new Map());
@@ -71,10 +71,8 @@ export function useGlobalSSE() {
         return;
       }
       // 状态过滤：只连接 running 状态的任务
-      if (task.status !== "running") {
-        console.log(
-          `[SSE] Skip (status=${task.status}): ${task.taskType} (${task.id})`,
-        );
+      if (task.status !== 'running') {
+        console.log(`[SSE] Skip (status=${task.status}): ${task.taskType} (${task.id})`);
         return;
       }
       // Handler 过滤：只连接有注册 handler 的 taskType
@@ -84,14 +82,12 @@ export function useGlobalSSE() {
       }
 
       console.log(`[SSE] Creating connection: ${task.taskType} (${task.id})`);
-      const eventSource = new EventSource(
-        `http://localhost:8000/work/stream/${task.id}`,
-      );
+      const eventSource = new EventSource(`http://localhost:8000/work/stream/${task.id}`);
 
-      eventSource.addEventListener("status", (e: MessageEvent) => {
+      eventSource.addEventListener('status', (e: MessageEvent) => {
         const payload = JSON.parse(e.data);
-        if (payload.content === "error") {
-          updateNotificationTask(task.id, { status: "error" });
+        if (payload.content === 'error') {
+          updateNotificationTask(task.id, { status: 'error' });
           markUnread();
           eventSource.close();
           sourcesRef.current.delete(task.id);
@@ -117,13 +113,13 @@ export function useGlobalSSE() {
         markUnread();
       });
 
-      eventSource.addEventListener("open", () => {
+      eventSource.addEventListener('open', () => {
         console.log(`[SSE] Connected: ${task.taskType} (${task.id})`);
       });
 
-      eventSource.addEventListener("result", (e: MessageEvent) => {
+      eventSource.addEventListener('result', (e: MessageEvent) => {
         const payload = JSON.parse(e.data);
-        updateNotificationTask(task.id, { status: "success" });
+        updateNotificationTask(task.id, { status: 'success' });
         eventSource.close();
         sourcesRef.current.delete(task.id);
 
@@ -146,7 +142,7 @@ export function useGlobalSSE() {
         }
       });
 
-      eventSource.addEventListener("error", () => {
+      eventSource.addEventListener('error', () => {
         console.error(
           `[SSE] Connection error: ${task.taskType} (${task.id}), readyState=${eventSource.readyState}`,
         );

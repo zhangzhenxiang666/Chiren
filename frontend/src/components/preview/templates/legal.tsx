@@ -10,25 +10,25 @@ import type {
   LanguagesContent,
   GitHubContent,
   CustomContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#1a472a";
-const ACCENT = "#15803d";
-const BORDER = "#166534";
-const BODY_TEXT = "#374151";
-const MUTED = "#6b7280";
+const PRIMARY = '#1a472a';
+const ACCENT = '#15803d';
+const BORDER = '#166534';
+const BODY_TEXT = '#374151';
+const MUTED = '#6b7280';
 
 export function LegalTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Georgia, Times New Roman, serif" }}
+      style={{ fontFamily: 'Georgia, Times New Roman, serif' }}
     >
       {/* Header */}
       <div className="mb-6 text-center">
@@ -40,11 +40,8 @@ export function LegalTemplate({ resume }: { resume: Resume }) {
             style={{ border: `2px solid ${PRIMARY}` }}
           />
         )}
-        <h1
-          className="text-2xl font-bold tracking-wide"
-          style={{ color: PRIMARY }}
-        >
-          {pi.fullName || "Your Name"}
+        <h1 className="text-2xl font-bold tracking-wide" style={{ color: PRIMARY }}>
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
           <p className="mt-1 text-sm italic" style={{ color: ACCENT }}>
@@ -76,17 +73,12 @@ export function LegalTemplate({ resume }: { resume: Resume }) {
       {/* Double-line divider */}
       <div className="mb-6">
         <div className="h-px w-full" style={{ backgroundColor: BORDER }} />
-        <div
-          className="mt-0.5 h-px w-full"
-          style={{ backgroundColor: BORDER }}
-        />
+        <div className="mt-0.5 h-px w-full" style={{ backgroundColor: BORDER }} />
       </div>
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-7 pt-1" data-section>
             <h2
@@ -97,10 +89,7 @@ export function LegalTemplate({ resume }: { resume: Resume }) {
             </h2>
             {/* Double-line under section header */}
             <div className="mb-3">
-              <div
-                className="h-px w-full"
-                style={{ backgroundColor: BORDER, opacity: 0.5 }}
-              />
+              <div className="h-px w-full" style={{ backgroundColor: BORDER, opacity: 0.5 }} />
               <div
                 className="mt-0.5 h-px w-full"
                 style={{ backgroundColor: BORDER, opacity: 0.5 }}
@@ -115,17 +104,11 @@ export function LegalTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function LegalSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function LegalSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm italic leading-relaxed"
@@ -137,7 +120,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
@@ -154,22 +137,15 @@ function LegalSectionContent({
                 )}
                 {item.location && (
                   <span className="text-sm" style={{ color: MUTED }}>
-                    {" "}
+                    {' '}
                     ({item.location})
                   </span>
                 )}
               </div>
-              <span
-                className="shrink-0 text-xs italic"
-                style={{ color: MUTED }}
-              >
-                {item.startDate} -{" "}
+              <span className="shrink-0 text-xs italic" style={{ color: MUTED }}>
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -181,8 +157,8 @@ function LegalSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs italic" style={{ color: MUTED }}>
-                {resume.language === "zh" ? "技术栈" : "Technologies"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Technologies'}:{' '}
+                {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -203,7 +179,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
@@ -220,18 +196,13 @@ function LegalSectionContent({
                 )}
                 {item.location && (
                   <span className="text-sm" style={{ color: MUTED }}>
-                    {" "}
+                    {' '}
                     ({item.location})
                   </span>
                 )}
               </div>
-              <span
-                className="shrink-0 text-xs italic"
-                style={{ color: MUTED }}
-              >
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+              <span className="shrink-0 text-xs italic" style={{ color: MUTED }}>
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             {item.gpa && (
@@ -257,24 +228,22 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1.5">
         {((content as SkillsContent).categories || []).map((cat: any) => (
           <div key={cat.id} className="text-sm">
             <span className="font-bold" style={{ color: PRIMARY }}>
-              {cat.name}:{" "}
+              {cat.name}:{' '}
             </span>
-            <span style={{ color: BODY_TEXT }}>
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span style={{ color: BODY_TEXT }}>{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
@@ -284,13 +253,9 @@ function LegalSectionContent({
                 {item.name}
               </span>
               {item.startDate && (
-                <span
-                  className="shrink-0 text-xs italic"
-                  style={{ color: MUTED }}
-                >
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                <span className="shrink-0 text-xs italic" style={{ color: MUTED }}>
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -303,8 +268,8 @@ function LegalSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs italic" style={{ color: MUTED }}>
-                {resume.language === "zh" ? "技术栈" : "Technologies"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Technologies'}:{' '}
+                {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -325,7 +290,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -345,7 +310,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="space-y-1.5">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -360,20 +325,17 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.name}
               </span>
-              <span
-                className="shrink-0 text-xs italic"
-                style={{ color: MUTED }}
-              >
+              <span className="shrink-0 text-xs italic" style={{ color: MUTED }}>
                 ⭐ {item.stars?.toLocaleString()}
               </span>
             </div>
@@ -395,7 +357,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
@@ -412,10 +374,7 @@ function LegalSectionContent({
                 )}
               </div>
               {item.date && (
-                <span
-                  className="shrink-0 text-xs italic"
-                  style={{ color: MUTED }}
-                >
+                <span className="shrink-0 text-xs italic" style={{ color: MUTED }}>
                   {item.date}
                 </span>
               )}
@@ -433,7 +392,7 @@ function LegalSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -442,7 +401,7 @@ function LegalSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-bold" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

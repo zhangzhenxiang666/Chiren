@@ -1,8 +1,8 @@
-import { useState } from "react";
-import { Plus } from "lucide-react";
-import RoundCard from "./RoundCard";
-import RoundConfigPanel from "./RoundConfigPanel";
-import type { InterviewerProfile } from "./CustomInterviewerModal";
+import { useState } from 'react';
+import { Plus } from 'lucide-react';
+import RoundCard from './RoundCard';
+import RoundConfigPanel from './RoundConfigPanel';
+import type { InterviewerProfile } from './CustomInterviewerModal';
 
 interface DraftRound {
   tempId: string;
@@ -15,10 +15,7 @@ interface StepConfigureRoundsProps {
   onChange: (rounds: DraftRound[]) => void;
 }
 
-export default function StepConfigureRounds({
-  rounds,
-  onChange,
-}: StepConfigureRoundsProps) {
+export default function StepConfigureRounds({ rounds, onChange }: StepConfigureRoundsProps) {
   const [configOpen, setConfigOpen] = useState(false);
   const [editingRound, setEditingRound] = useState<DraftRound | undefined>();
 
@@ -41,20 +38,14 @@ export default function StepConfigureRounds({
   const handleMoveUp = (index: number) => {
     if (index === 0) return;
     const newRounds = [...rounds];
-    [newRounds[index - 1], newRounds[index]] = [
-      newRounds[index],
-      newRounds[index - 1],
-    ];
+    [newRounds[index - 1], newRounds[index]] = [newRounds[index], newRounds[index - 1]];
     onChange(newRounds);
   };
 
   const handleMoveDown = (index: number) => {
     if (index === rounds.length - 1) return;
     const newRounds = [...rounds];
-    [newRounds[index], newRounds[index + 1]] = [
-      newRounds[index + 1],
-      newRounds[index],
-    ];
+    [newRounds[index], newRounds[index + 1]] = [newRounds[index + 1], newRounds[index]];
     onChange(newRounds);
   };
 

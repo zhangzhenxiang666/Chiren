@@ -4,11 +4,7 @@ interface StepBasicInfoProps {
   onChange: (name: string) => void;
 }
 
-export default function StepBasicInfo({
-  name,
-  subResumeTitle,
-  onChange,
-}: StepBasicInfoProps) {
+export default function StepBasicInfo({ name, subResumeTitle, onChange }: StepBasicInfoProps) {
   return (
     <div className="space-y-4">
       <div>
@@ -27,9 +23,7 @@ export default function StepBasicInfo({
 
       {subResumeTitle && (
         <div>
-          <label className="text-xs text-muted-foreground mb-1.5 block">
-            关联子简历
-          </label>
+          <label className="text-xs text-muted-foreground mb-1.5 block">关联子简历</label>
           <div className="px-3 py-2 bg-muted/30 border border-border rounded-lg text-foreground text-sm">
             {subResumeTitle}
           </div>

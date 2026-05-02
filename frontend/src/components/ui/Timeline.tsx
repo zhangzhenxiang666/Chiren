@@ -1,9 +1,6 @@
-import {
-  VerticalTimeline,
-  VerticalTimelineElement,
-} from "react-vertical-timeline-component";
-import "react-vertical-timeline-component/style.min.css";
-import type { ReactNode } from "react";
+import { VerticalTimeline, VerticalTimelineElement } from 'react-vertical-timeline-component';
+import 'react-vertical-timeline-component/style.min.css';
+import type { ReactNode } from 'react';
 
 interface TimelineProps {
   children: ReactNode;
@@ -25,7 +22,7 @@ export function Timeline({ children, className }: TimelineProps) {
       layout="1-column-left"
       lineColor="hsl(var(--border))"
       animate={false}
-      className={`compact-timeline ${className || ""}`}
+      className={`compact-timeline ${className || ''}`}
     >
       {children}
     </VerticalTimeline>
@@ -42,16 +39,16 @@ export function TimelineItem({
 }: TimelineItemProps) {
   return (
     <VerticalTimelineElement
-      className={`compact-timeline-element ${className || ""}`}
+      className={`compact-timeline-element ${className || ''}`}
       contentStyle={{
-        background: "transparent",
-        boxShadow: "none",
+        background: 'transparent',
+        boxShadow: 'none',
         padding: 0,
       }}
-      contentArrowStyle={{ display: "none" }}
+      contentArrowStyle={{ display: 'none' }}
       iconStyle={{
-        background: "transparent",
-        boxShadow: "none",
+        background: 'transparent',
+        boxShadow: 'none',
         ...iconStyle,
       }}
       iconClassName={iconClassName}

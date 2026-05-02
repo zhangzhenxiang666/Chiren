@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { X, ChevronLeft, ChevronRight, Check } from "lucide-react";
-import StepBasicInfo from "./StepBasicInfo";
-import StepConfigureRounds from "./StepConfigureRounds";
-import StepReview from "./StepReview";
-import type { InterviewerProfile } from "./CustomInterviewerModal";
+import { useState } from 'react';
+import { X, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import StepBasicInfo from './StepBasicInfo';
+import StepConfigureRounds from './StepConfigureRounds';
+import StepReview from './StepReview';
+import type { InterviewerProfile } from './CustomInterviewerModal';
 
 interface DraftRound {
   tempId: string;
@@ -19,11 +19,7 @@ interface CreateCollectionWizardProps {
   onSubmit: (name: string, rounds: DraftRound[]) => Promise<void>;
 }
 
-const STEPS = [
-  { label: "基本信息" },
-  { label: "配置轮次" },
-  { label: "确认提交" },
-];
+const STEPS = [{ label: '基本信息' }, { label: '配置轮次' }, { label: '确认提交' }];
 
 export default function CreateCollectionWizard({
   open,
@@ -33,7 +29,7 @@ export default function CreateCollectionWizard({
   onSubmit,
 }: CreateCollectionWizardProps) {
   const [step, setStep] = useState(0);
-  const [name, setName] = useState("");
+  const [name, setName] = useState('');
   const [rounds, setRounds] = useState<DraftRound[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -63,7 +59,7 @@ export default function CreateCollectionWizard({
     setLoading(true);
     try {
       await onSubmit(name.trim(), rounds);
-      setName("");
+      setName('');
       setRounds([]);
       setStep(0);
       onClose();
@@ -73,7 +69,7 @@ export default function CreateCollectionWizard({
   };
 
   const handleClose = () => {
-    setName("");
+    setName('');
     setRounds([]);
     setStep(0);
     onClose();
@@ -100,39 +96,31 @@ export default function CreateCollectionWizard({
               <div
                 className={`flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-medium shrink-0 ${
                   i < step
-                    ? "bg-pink-500 text-white"
+                    ? 'bg-pink-500 text-white'
                     : i === step
-                      ? "bg-pink-500/20 text-pink-400 ring-1 ring-pink-500/50"
-                      : "bg-muted/30 text-muted-foreground"
+                      ? 'bg-pink-500/20 text-pink-400 ring-1 ring-pink-500/50'
+                      : 'bg-muted/30 text-muted-foreground'
                 }`}
               >
                 {i < step ? <Check className="w-3 h-3" /> : i + 1}
               </div>
               <span
                 className={`text-[10px] whitespace-nowrap ${
-                  i <= step ? "text-foreground" : "text-muted-foreground"
+                  i <= step ? 'text-foreground' : 'text-muted-foreground'
                 }`}
               >
                 {s.label}
               </span>
-              {i < STEPS.length - 1 && (
-                <div className="flex-1 h-px bg-border mx-1" />
-              )}
+              {i < STEPS.length - 1 && <div className="flex-1 h-px bg-border mx-1" />}
             </div>
           ))}
         </div>
 
         <div className="flex-1 overflow-y-auto p-5">
           {step === 0 && (
-            <StepBasicInfo
-              name={name}
-              subResumeTitle={subResumeTitle}
-              onChange={setName}
-            />
+            <StepBasicInfo name={name} subResumeTitle={subResumeTitle} onChange={setName} />
           )}
-          {step === 1 && (
-            <StepConfigureRounds rounds={rounds} onChange={setRounds} />
-          )}
+          {step === 1 && <StepConfigureRounds rounds={rounds} onChange={setRounds} />}
           {step === 2 && <StepReview name={name} rounds={rounds} />}
         </div>
 
@@ -164,7 +152,7 @@ export default function CreateCollectionWizard({
               disabled={loading || rounds.length === 0}
               className="flex items-center gap-1.5 px-5 py-2 rounded-lg bg-pink-500 text-white text-xs font-medium hover:bg-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              {loading ? "创建中..." : "确认创建"}
+              {loading ? '创建中...' : '确认创建'}
             </button>
           )}
         </div>

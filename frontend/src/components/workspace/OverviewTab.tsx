@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect } from 'react';
 import {
   FileText,
   Users,
@@ -9,7 +9,7 @@ import {
   Key,
   Pencil,
   Lightbulb,
-} from "lucide-react";
+} from 'lucide-react';
 import {
   LineChart,
   Line,
@@ -18,12 +18,12 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-} from "recharts";
-import type { JdAnalysis } from "../../types/workspace";
-import { getScoreColorClass, fmtDateTime } from "../../lib/resume-insights";
-import { enrichJdAnalysis } from "../../lib/jd-analysis-adapter";
-import { useInterviewStore } from "@/stores/interview-store";
-import type { InterviewStatus } from "@/types/interview";
+} from 'recharts';
+import type { JdAnalysis } from '../../types/workspace';
+import { getScoreColorClass, fmtDateTime } from '../../lib/resume-insights';
+import { enrichJdAnalysis } from '../../lib/jd-analysis-adapter';
+import { useInterviewStore } from '@/stores/interview-store';
+import type { InterviewStatus } from '@/types/interview';
 
 interface OverviewTabProps {
   analyses: JdAnalysis[];
@@ -34,20 +34,16 @@ interface OverviewTabProps {
 // Helper to render lucide icons for suggestions based on type
 const getSuggestionIcon = (type: string): any => {
   switch (type) {
-    case "keyword_add":
+    case 'keyword_add':
       return <Key className="w-3 h-3 text-muted-foreground" />;
-    case "wording":
+    case 'wording':
       return <Pencil className="w-3 h-3 text-muted-foreground" />;
     default:
       return <Lightbulb className="w-3 h-3 text-muted-foreground" />;
   }
 };
 
-export default function OverviewTab({
-  analyses,
-  subResumeId,
-  onViewInterview,
-}: OverviewTabProps) {
+export default function OverviewTab({ analyses, subResumeId, onViewInterview }: OverviewTabProps) {
   const currentAnalysis = useMemo(() => {
     if (!analyses.length) return null;
     const latest = analyses[0];
@@ -57,7 +53,7 @@ export default function OverviewTab({
   const keywordMatchesArr = useMemo(() => {
     if (!currentAnalysis?.keywordMatches) return [];
     return Array.isArray(currentAnalysis.keywordMatches) &&
-      typeof currentAnalysis.keywordMatches[0] === "object"
+      typeof currentAnalysis.keywordMatches[0] === 'object'
       ? (currentAnalysis.keywordMatches as any[])
       : [];
   }, [currentAnalysis]);
@@ -69,7 +65,7 @@ export default function OverviewTab({
   const missingKeywordsArr = useMemo(() => {
     if (!currentAnalysis?.missingKeywords) return [];
     return Array.isArray(currentAnalysis.missingKeywords) &&
-      typeof currentAnalysis.missingKeywords[0] === "object"
+      typeof currentAnalysis.missingKeywords[0] === 'object'
       ? (currentAnalysis.missingKeywords as any[])
       : [];
   }, [currentAnalysis]);
@@ -94,9 +90,7 @@ export default function OverviewTab({
     }));
   }, [analyses]);
 
-  const scoreColor = currentAnalysis
-    ? getScoreColorClass(currentAnalysis.overallScore)
-    : null;
+  const scoreColor = currentAnalysis ? getScoreColorClass(currentAnalysis.overallScore) : null;
 
   const interviewCollections = useInterviewStore((s) => s.collections);
   const fetchCollections = useInterviewStore((s) => s.fetchCollections);
@@ -110,18 +104,18 @@ export default function OverviewTab({
   const getStatusColor = (status: InterviewStatus): string => {
     const colors: Record<InterviewStatus, string> = {
       completed:
-        "text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30",
-      in_progress: "text-blue-400 bg-blue-500/10 border border-blue-500/20",
-      not_started: "text-muted-foreground bg-muted/30 border border-border",
+        'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30',
+      in_progress: 'text-blue-400 bg-blue-500/10 border border-blue-500/20',
+      not_started: 'text-muted-foreground bg-muted/30 border border-border',
     };
     return colors[status] || colors.not_started;
   };
 
   const getStatusLabel = (status: InterviewStatus): string => {
     const labels: Record<InterviewStatus, string> = {
-      completed: "已完成",
-      in_progress: "进行中",
-      not_started: "待开始",
+      completed: '已完成',
+      in_progress: '进行中',
+      not_started: '待开始',
     };
     return labels[status] || status;
   };
@@ -167,24 +161,16 @@ export default function OverviewTab({
                     stroke="url(#ovGrad)"
                     strokeWidth="8"
                     strokeDasharray="264"
-                    strokeDashoffset={
-                      264 * (1 - currentAnalysis.overallScore / 100)
-                    }
+                    strokeDashoffset={264 * (1 - currentAnalysis.overallScore / 100)}
                     strokeLinecap="round"
                     style={{
-                      transform: "rotate(-90deg)",
-                      transformOrigin: "50% 50%",
-                      transition: "stroke-dashoffset 1s ease",
+                      transform: 'rotate(-90deg)',
+                      transformOrigin: '50% 50%',
+                      transition: 'stroke-dashoffset 1s ease',
                     }}
                   />
                   <defs>
-                    <linearGradient
-                      id="ovGrad"
-                      x1="0%"
-                      y1="0%"
-                      x2="100%"
-                      y2="100%"
-                    >
+                    <linearGradient id="ovGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                       <stop offset="0%" stopColor="#ec4899" />
                       <stop offset="100%" stopColor="#f472b6" />
                     </linearGradient>
@@ -199,9 +185,7 @@ export default function OverviewTab({
               </div>
               <div className="flex-1 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">
-                    匹配项
-                  </span>
+                  <span className="text-[10px] text-muted-foreground">匹配项</span>
                   <span className="text-xs font-bold text-green-400">
                     {keywordMatchesArr.length}
                     <span className="text-[10px] text-muted-foreground font-normal">
@@ -210,9 +194,7 @@ export default function OverviewTab({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">
-                    部分匹配
-                  </span>
+                  <span className="text-[10px] text-muted-foreground">部分匹配</span>
                   <span className="text-xs font-bold text-yellow-400">
                     {partialMatchesArr.length}
                     <span className="text-[10px] text-muted-foreground font-normal">
@@ -221,9 +203,7 @@ export default function OverviewTab({
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">
-                    缺失
-                  </span>
+                  <span className="text-[10px] text-muted-foreground">缺失</span>
                   <span className="text-xs font-bold text-red-400">
                     {missingKeywordsArr.length}
                     <span className="text-[10px] text-muted-foreground font-normal">
@@ -252,16 +232,12 @@ export default function OverviewTab({
               {strengthsArr.map((s, idx) => (
                 <div key={idx} className="flex items-start gap-2">
                   <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0 mt-0.5" />
-                  <span className="text-[10px] text-foreground break-all">
-                    {s.description}
-                  </span>
+                  <span className="text-[10px] text-foreground break-all">{s.description}</span>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="text-[10px] text-muted-foreground opacity-60">
-              暂无优势分析
-            </p>
+            <p className="text-[10px] text-muted-foreground opacity-60">暂无优势分析</p>
           )}
         </div>
 
@@ -278,9 +254,7 @@ export default function OverviewTab({
                   <div key={idx}>
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-[10px] break-all">{s.skill}</span>
-                      <span className={`text-[10px] font-bold ${c.text}`}>
-                        {s.matchScore}%
-                      </span>
+                      <span className={`text-[10px] font-bold ${c.text}`}>{s.matchScore}%</span>
                     </div>
                     <div className="h-1 bg-muted rounded-full overflow-hidden">
                       <div
@@ -293,9 +267,7 @@ export default function OverviewTab({
               })}
             </div>
           ) : (
-            <p className="text-[10px] text-muted-foreground opacity-60">
-              暂无技能匹配数据
-            </p>
+            <p className="text-[10px] text-muted-foreground opacity-60">暂无技能匹配数据</p>
           )}
         </div>
 
@@ -311,16 +283,14 @@ export default function OverviewTab({
                   key={idx}
                   className="flex items-start gap-2 text-[10px]"
                   style={{
-                    borderLeft: `3px solid ${s.priority === "high" ? "#ef4444" : s.priority === "medium" ? "#facc15" : "#22c55e"}`,
+                    borderLeft: `3px solid ${s.priority === 'high' ? '#ef4444' : s.priority === 'medium' ? '#facc15' : '#22c55e'}`,
                     paddingLeft: 8,
                   }}
                 >
                   <span className="text-muted-foreground shrink-0">
                     {getSuggestionIcon(s.type)}
                   </span>
-                  <span className="text-muted-foreground break-all">
-                    {s.rationale}
-                  </span>
+                  <span className="text-muted-foreground break-all">{s.rationale}</span>
                 </div>
               ))}
             </div>
@@ -346,14 +316,14 @@ export default function OverviewTab({
                   />
                   <XAxis
                     dataKey="version"
-                    tick={{ fontSize: 10, fill: "#888" }}
+                    tick={{ fontSize: 10, fill: '#888' }}
                     tickFormatter={(v) => `v${v}`}
-                    axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
+                    axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
                     tickLine={false}
                   />
                   <YAxis
                     domain={[0, 100]}
-                    tick={{ fontSize: 10, fill: "#888" }}
+                    tick={{ fontSize: 10, fill: '#888' }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -394,14 +364,13 @@ export default function OverviewTab({
                           cx={cx}
                           cy={cy}
                           r={isLatest ? 4 : 3}
-                          fill={isLatest ? "#ec4899" : "#1a1a2e"}
+                          fill={isLatest ? '#ec4899' : '#1a1a2e'}
                           stroke="#ec4899"
                           strokeWidth={2}
                         />
                       );
-                    }
-                    }
-                    activeDot={{ r: 5, fill: "#ec4899", stroke: "#fff", strokeWidth: 2 }}
+                    }}
+                    activeDot={{ r: 5, fill: '#ec4899', stroke: '#fff', strokeWidth: 2 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -420,9 +389,7 @@ export default function OverviewTab({
 
             <div className="space-y-2">
               {interviewCollections.map((col) => {
-                const completedCount = col.rounds.filter(
-                  (r) => r.status === "completed",
-                ).length;
+                const completedCount = col.rounds.filter((r) => r.status === 'completed').length;
                 return (
                   <div
                     key={col.id}
@@ -430,9 +397,7 @@ export default function OverviewTab({
                     onClick={() => onViewInterview(col.id)}
                   >
                     <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-medium">
-                        {col.name}
-                      </span>
+                      <span className="text-[10px] font-medium">{col.name}</span>
                       <span
                         className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(col.status)}`}
                       >
@@ -441,8 +406,7 @@ export default function OverviewTab({
                     </div>
                     <div className="flex items-center justify-between text-[9px] text-muted-foreground">
                       <span>
-                        {completedCount}/{col.rounds.length} ·{" "}
-                        {col.rounds.length} 轮面试
+                        {completedCount}/{col.rounds.length} · {col.rounds.length} 轮面试
                       </span>
                       <span>{fmtDateTime(col.createdAt)}</span>
                     </div>

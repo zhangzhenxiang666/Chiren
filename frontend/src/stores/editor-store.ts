@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface EditorStore {
   selectedSectionId: string | null;
@@ -34,8 +34,7 @@ export const useEditorStore = create<EditorStore>((set) => ({
   setDragging: (isDragging) => set({ isDragging }),
   toggleAiChat: () => set((s) => ({ showAiChat: !s.showAiChat })),
   setShowAiChat: (show) => set({ showAiChat: show }),
-  toggleThemeEditor: () =>
-    set((s) => ({ showThemeEditor: !s.showThemeEditor })),
+  toggleThemeEditor: () => set((s) => ({ showThemeEditor: !s.showThemeEditor })),
   setZoom: (zoom) => set({ zoom }),
   setPendingAiMessage: (message) => set({ pendingAiMessage: message }),
 

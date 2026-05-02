@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 import type {
   InterviewCollectionDetail,
   InterviewRound,
@@ -7,7 +7,7 @@ import type {
   CreateInterviewCollectionWithRoundsParams,
   CreateInterviewRoundParams,
   UpdateInterviewRoundParams,
-} from "@/types/interview";
+} from '@/types/interview';
 import {
   createInterviewCollection,
   createInterviewCollectionWithRounds,
@@ -18,17 +18,13 @@ import {
   updateInterviewRound,
   updateInterviewRoundStatus,
   deleteInterviewRound,
-} from "@/lib/api";
+} from '@/lib/api';
 
-function computeCollectionStatus(
-  collection: InterviewCollectionDetail,
-): InterviewStatus {
-  if (collection.rounds.length === 0) return "not_started";
-  if (collection.rounds.every((r) => r.status === "completed"))
-    return "completed";
-  if (collection.rounds.some((r) => r.status === "in_progress"))
-    return "in_progress";
-  return "not_started";
+function computeCollectionStatus(collection: InterviewCollectionDetail): InterviewStatus {
+  if (collection.rounds.length === 0) return 'not_started';
+  if (collection.rounds.every((r) => r.status === 'completed')) return 'completed';
+  if (collection.rounds.some((r) => r.status === 'in_progress')) return 'in_progress';
+  return 'not_started';
 }
 
 function validateStatusTransition(
@@ -37,45 +33,41 @@ function validateStatusTransition(
   newStatus: InterviewStatus,
 ): string | null {
   const round = collection.rounds.find((r) => r.id === roundId);
-  if (!round) return "Round not found";
+  if (!round) return 'Round not found';
 
   const currentStatus = round.status;
 
   if (currentStatus === newStatus) return null;
 
   const allowedTransitions: Record<InterviewStatus, InterviewStatus[]> = {
-    not_started: ["in_progress"],
-    in_progress: ["completed"],
+    not_started: ['in_progress'],
+    in_progress: ['completed'],
     completed: [],
   };
 
   if (!allowedTransitions[currentStatus].includes(newStatus)) {
     const validNext = allowedTransitions[currentStatus];
-    const validDescriptions = validNext
-      .map((s) => s.replace(/_/g, " "))
-      .join(" or ");
+    const validDescriptions = validNext.map((s) => s.replace(/_/g, ' ')).join(' or ');
     if (validNext.length === 0) {
       return `Round "${round.name}" is already completed and cannot transition further.`;
     }
-    return `Invalid status transition from "${currentStatus.replace(/_/g, " ")}" to "${newStatus.replace(/_/g, " ")}". Round can only transition to ${validDescriptions}.`;
+    return `Invalid status transition from "${currentStatus.replace(/_/g, ' ')}" to "${newStatus.replace(/_/g, ' ')}". Round can only transition to ${validDescriptions}.`;
   }
 
-  if (newStatus === "in_progress") {
+  if (newStatus === 'in_progress') {
     const otherInProgress = collection.rounds.find(
-      (r) => r.id !== roundId && r.status === "in_progress",
+      (r) => r.id !== roundId && r.status === 'in_progress',
     );
     if (otherInProgress) {
       return `Cannot start round "${round.name}" because round "${otherInProgress.name}" is already in progress. Only one round can be in progress at a time.`;
     }
 
-    const sortedRounds = [...collection.rounds].sort(
-      (a, b) => a.sortOrder - b.sortOrder,
-    );
+    const sortedRounds = [...collection.rounds].sort((a, b) => a.sortOrder - b.sortOrder);
     const roundIndex = sortedRounds.findIndex((r) => r.id === roundId);
 
     if (roundIndex > 0) {
       const previousRound = sortedRounds[roundIndex - 1];
-      if (previousRound.status !== "completed") {
+      if (previousRound.status !== 'completed') {
         return `Cannot start round "${round.name}" because the previous round "${previousRound.name}" must be completed first.`;
       }
     }
@@ -99,9 +91,7 @@ interface InterviewState {
 
   // Actions
   fetchCollections: (subResumeId: string) => Promise<void>;
-  createCollection: (
-    params: CreateInterviewCollectionParams,
-  ) => Promise<InterviewCollectionDetail>;
+  createCollection: (params: CreateInterviewCollectionParams) => Promise<InterviewCollectionDetail>;
   createCollectionWithRounds: (
     params: CreateInterviewCollectionWithRoundsParams,
   ) => Promise<InterviewCollectionDetail>;
@@ -155,23 +145,17 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       );
       const { currentCollectionId } = get();
       set({
-        collections: Array.isArray(collectionsWithRounds)
-          ? collectionsWithRounds
-          : [],
+        collections: Array.isArray(collectionsWithRounds) ? collectionsWithRounds : [],
         currentCollectionId:
           currentCollectionId ??
-          (Array.isArray(collectionsWithRounds) &&
-          collectionsWithRounds.length > 0
+          (Array.isArray(collectionsWithRounds) && collectionsWithRounds.length > 0
             ? collectionsWithRounds[0].id
             : null),
         loading: false,
       });
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to fetch interview collections",
+        error: err instanceof Error ? err.message : 'Failed to fetch interview collections',
         loading: false,
       });
     }
@@ -192,10 +176,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return newCollection;
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to create interview collection",
+        error: err instanceof Error ? err.message : 'Failed to create interview collection',
       });
       throw err;
     }
@@ -219,18 +200,13 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       });
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to delete interview collection",
+        error: err instanceof Error ? err.message : 'Failed to delete interview collection',
       });
       throw err;
     }
   },
 
-  createCollectionWithRounds: async (
-    params: CreateInterviewCollectionWithRoundsParams,
-  ) => {
+  createCollectionWithRounds: async (params: CreateInterviewCollectionWithRoundsParams) => {
     set({ error: null });
     try {
       const created = await createInterviewCollectionWithRounds(params);
@@ -245,16 +221,13 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       };
       set((state) => ({
         collections: [...state.collections, collectionWithRounds],
-        currentCollectionId:
-          state.currentCollectionId ?? collectionWithRounds.id,
+        currentCollectionId: state.currentCollectionId ?? collectionWithRounds.id,
       }));
       return collectionWithRounds;
     } catch (err) {
       set({
         error:
-          err instanceof Error
-            ? err.message
-            : "Failed to create interview collection with rounds",
+          err instanceof Error ? err.message : 'Failed to create interview collection with rounds',
       });
       throw err;
     }
@@ -267,9 +240,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       set((state) => ({
         collections: state.collections.map((c) => {
           if (c.id !== params.interviewCollectionId) return c;
-          const updatedRounds = [...c.rounds, created].sort(
-            (a, b) => a.sortOrder - b.sortOrder,
-          );
+          const updatedRounds = [...c.rounds, created].sort((a, b) => a.sortOrder - b.sortOrder);
           return {
             ...c,
             rounds: updatedRounds,
@@ -280,10 +251,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return created;
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to create interview round",
+        error: err instanceof Error ? err.message : 'Failed to create interview round',
       });
       throw err;
     }
@@ -302,10 +270,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return updated;
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to update interview round",
+        error: err instanceof Error ? err.message : 'Failed to update interview round',
       });
       throw err;
     }
@@ -328,20 +293,13 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       }));
     } catch (err) {
       set({
-        error:
-          err instanceof Error
-            ? err.message
-            : "Failed to delete interview round",
+        error: err instanceof Error ? err.message : 'Failed to delete interview round',
       });
       throw err;
     }
   },
 
-  updateRoundStatus: async (
-    collectionId: string,
-    roundId: string,
-    newStatus: InterviewStatus,
-  ) => {
+  updateRoundStatus: async (collectionId: string, roundId: string, newStatus: InterviewStatus) => {
     const { collections } = get();
     const collection = collections.find((c) => c.id === collectionId);
 
@@ -350,11 +308,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       throw new Error(`Collection with id "${collectionId}" not found.`);
     }
 
-    const validationError = validateStatusTransition(
-      collection,
-      roundId,
-      newStatus,
-    );
+    const validationError = validateStatusTransition(collection, roundId, newStatus);
     if (validationError) {
       set({ error: validationError });
       throw new Error(validationError);
@@ -371,9 +325,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
         collections: state.collections.map((c) => {
           if (c.id !== collectionId) return c;
 
-          const updatedRounds = c.rounds.map((r) =>
-            r.id === roundId ? updated : r,
-          );
+          const updatedRounds = c.rounds.map((r) => (r.id === roundId ? updated : r));
 
           return {
             ...c,
@@ -386,8 +338,7 @@ export const useInterviewStore = create<InterviewState>((set, get) => ({
       return updated;
     } catch (err) {
       set({
-        error:
-          err instanceof Error ? err.message : "Failed to update round status",
+        error: err instanceof Error ? err.message : 'Failed to update round status',
       });
       throw err;
     }

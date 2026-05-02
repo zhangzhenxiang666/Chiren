@@ -10,22 +10,22 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const NAVY = "#0f172a";
-const BLUE = "#2563eb";
+const NAVY = '#0f172a';
+const BLUE = '#2563eb';
 
 export function CorporateTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header - full-bleed navy */}
       <div className="px-8 py-8" style={{ background: NAVY }}>
@@ -40,7 +40,7 @@ export function CorporateTemplate({ resume }: { resume: Resume }) {
           )}
           <div className="flex-1">
             <h1 className="text-3xl font-bold tracking-tight text-white">
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
               <p className="mt-1 text-base font-light" style={{ color: BLUE }}>
@@ -69,10 +69,7 @@ export function CorporateTemplate({ resume }: { resume: Resume }) {
       {/* Sections */}
       <div className="p-8">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <h2
@@ -91,17 +88,11 @@ export function CorporateTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function CorporateSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function CorporateSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-slate-600"
@@ -112,7 +103,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
@@ -122,29 +113,16 @@ function CorporateSectionContent({
                 <span className="text-sm font-bold" style={{ color: NAVY }}>
                   {item.position}
                 </span>
-                {item.company && (
-                  <span className="text-sm text-slate-600">
-                    {" "}
-                    | {item.company}
-                  </span>
-                )}
-                {item.location && (
-                  <span className="text-sm text-slate-400">
-                    , {item.location}
-                  </span>
-                )}
+                {item.company && <span className="text-sm text-slate-600"> | {item.company}</span>}
+                {item.location && <span className="text-sm text-slate-400">, {item.location}</span>}
               </div>
               <span
                 className="shrink-0 rounded px-2 py-0.5 text-xs font-medium text-white"
                 style={{ background: BLUE }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -155,8 +133,7 @@ function CorporateSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-slate-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -176,7 +153,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
@@ -187,26 +164,15 @@ function CorporateSectionContent({
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-slate-600">
-                    {" "}
-                    - {item.institution}
-                  </span>
+                  <span className="text-sm text-slate-600"> - {item.institution}</span>
                 )}
-                {item.location && (
-                  <span className="text-sm text-slate-400">
-                    , {item.location}
-                  </span>
-                )}
+                {item.location && <span className="text-sm text-slate-400">, {item.location}</span>}
               </div>
               <span className="shrink-0 text-xs text-slate-400">
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-slate-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-slate-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-5">
                 {item.highlights.map((h: string, i: number) => (
@@ -224,27 +190,22 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1.5">
         {((content as SkillsContent).categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span
-              className="w-32 shrink-0 font-semibold"
-              style={{ color: NAVY }}
-            >
+            <span className="w-32 shrink-0 font-semibold" style={{ color: NAVY }}>
               {cat.name}:
             </span>
-            <span className="text-slate-600">
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span className="text-slate-600">{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
@@ -255,9 +216,8 @@ function CorporateSectionContent({
               </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-slate-400">
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -269,8 +229,7 @@ function CorporateSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-slate-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -290,7 +249,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -310,7 +269,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="space-y-1.5">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -318,33 +277,26 @@ function CorporateSectionContent({
             <span className="text-sm font-bold" style={{ color: NAVY }}>
               {item.language}
             </span>
-            <span className="text-sm text-slate-600">
-              {" "}
-              — {item.proficiency}
-            </span>
+            <span className="text-sm text-slate-600"> — {item.proficiency}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: NAVY }}>
                 {item.name}
               </span>
-              <span className="text-xs text-slate-400">
-                ⭐ {item.stars?.toLocaleString()}
-              </span>
+              <span className="text-xs text-slate-400">⭐ {item.stars?.toLocaleString()}</span>
             </div>
-            {item.language && (
-              <span className="text-xs text-slate-400">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-slate-400">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-slate-600"
@@ -357,7 +309,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
@@ -368,17 +320,10 @@ function CorporateSectionContent({
                   {item.title}
                 </span>
                 {item.subtitle && (
-                  <span className="text-sm text-slate-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
+                  <span className="text-sm text-slate-500"> — {item.subtitle}</span>
                 )}
               </div>
-              {item.date && (
-                <span className="shrink-0 text-xs text-slate-400">
-                  {item.date}
-                </span>
-              )}
+              {item.date && <span className="shrink-0 text-xs text-slate-400">{item.date}</span>}
             </div>
             {item.description && (
               <p
@@ -392,7 +337,7 @@ function CorporateSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -401,7 +346,7 @@ function CorporateSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: NAVY }}>
               {item.name || item.title || item.language}
             </span>

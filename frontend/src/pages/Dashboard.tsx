@@ -1,16 +1,11 @@
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { Plus, Search, X } from "lucide-react";
-import { toast } from "sonner";
-import WorkspaceCard from "../components/workspace/WorkspaceCard";
-import CreateWorkspaceModal from "../components/workspace/CreateWorkspaceModal";
-import {
-  fetchWorkspaces,
-  createWorkspace,
-  deleteWorkspace,
-  updateResume,
-} from "../lib/api";
-import type { Workspace } from "../types/workspace";
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, Search, X } from 'lucide-react';
+import { toast } from 'sonner';
+import WorkspaceCard from '../components/workspace/WorkspaceCard';
+import CreateWorkspaceModal from '../components/workspace/CreateWorkspaceModal';
+import { fetchWorkspaces, createWorkspace, deleteWorkspace, updateResume } from '../lib/api';
+import type { Workspace } from '../types/workspace';
 
 function formatRelativeTime(dateString: string): string {
   const date = new Date(dateString);
@@ -21,21 +16,21 @@ function formatRelativeTime(dateString: string): string {
   const diffHour = Math.floor(diffMin / 60);
   const diffDay = Math.floor(diffHour / 24);
 
-  const hhmm = date.toLocaleTimeString("zh-CN", {
-    hour: "2-digit",
-    minute: "2-digit",
+  const hhmm = date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
     hour12: false,
   });
 
-  if (diffSec < 60) return "刚刚";
+  if (diffSec < 60) return '刚刚';
   if (diffMin < 60) return `${diffMin} 分钟前`;
   if (diffHour < 24) return `${diffHour} 小时前`;
   if (diffDay === 1) return `昨天 ${hhmm}`;
   if (diffDay === 2) return `前天 ${hhmm}`;
 
   const mmdd = date
-    .toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" })
-    .replace(/\//g, "-");
+    .toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' })
+    .replace(/\//g, '-');
   return `${mmdd} ${hhmm}`;
 }
 
@@ -44,19 +39,16 @@ export default function Dashboard() {
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const handleSearchChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const value = e.target.value;
-      setSearchQuery(value);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setDebouncedQuery(value), 300);
-    },
-    [],
-  );
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchQuery(value);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setDebouncedQuery(value), 300);
+  }, []);
 
   const refreshWorkspaces = useCallback(() => {
     fetchWorkspaces().then((data) => {
@@ -75,9 +67,9 @@ export default function Dashboard() {
     const handler = () => {
       refreshWorkspaces();
     };
-    window.addEventListener("global-sse-complete", handler);
+    window.addEventListener('global-sse-complete', handler);
     return () => {
-      window.removeEventListener("global-sse-complete", handler);
+      window.removeEventListener('global-sse-complete', handler);
     };
   }, [refreshWorkspaces]);
 
@@ -101,15 +93,10 @@ export default function Dashboard() {
     <div className="flex flex-col h-[calc(100vh-73px-64px)]">
       <div className="flex items-center justify-between mb-8 shrink-0">
         <div>
-          <div className="text-pink-500 text-xs font-medium tracking-widest mb-2">
-            MANAGEMENT
-          </div>
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            工作空间管理
-          </h1>
+          <div className="text-pink-500 text-xs font-medium tracking-widest mb-2">MANAGEMENT</div>
+          <h1 className="text-4xl font-bold text-foreground mb-2">工作空间管理</h1>
           <p className="text-muted-foreground text-sm">
-            管理您的职业身份。Chiren
-            为不同岗位精准定制简历，帮助您在每个领域都展现出最佳状态。
+            管理您的职业身份。Chiren 为不同岗位精准定制简历，帮助您在每个领域都展现出最佳状态。
           </p>
         </div>
         <div className="flex items-center gap-3">
@@ -129,8 +116,8 @@ export default function Dashboard() {
               <button
                 type="button"
                 onClick={() => {
-                  setSearchQuery("");
-                  setDebouncedQuery("");
+                  setSearchQuery('');
+                  setDebouncedQuery('');
                 }}
                 className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
               >
@@ -165,19 +152,19 @@ export default function Dashboard() {
               onDelete={async (id) => {
                 try {
                   await deleteWorkspace(id);
-                  toast.success("工作空间已删除");
+                  toast.success('工作空间已删除');
                   refreshWorkspaces();
                 } catch (err: any) {
-                  toast.error(err.message || "删除失败");
+                  toast.error(err.message || '删除失败');
                 }
               }}
               onRename={async (id, newTitle) => {
                 try {
                   await updateResume({ id, title: newTitle });
-                  toast.success("重命名成功");
+                  toast.success('重命名成功');
                   refreshWorkspaces();
                 } catch (err: any) {
-                  toast.error(err.message || "重命名失败");
+                  toast.error(err.message || '重命名失败');
                 }
               }}
             />

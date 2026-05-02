@@ -1,8 +1,8 @@
-import { create } from "zustand";
-import { applyThemeMode } from "../lib/theme";
+import { create } from 'zustand';
+import { applyThemeMode } from '../lib/theme';
 
-export type AIProvider = "openai" | "anthropic" | "gemini";
-export type ThemeMode = "light" | "dark" | "system";
+export type AIProvider = 'openai' | 'anthropic' | 'gemini';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 interface SettingsStore {
   aiProvider: AIProvider;
@@ -24,23 +24,23 @@ interface SettingsStore {
   hydrate: () => void;
 }
 
-const API_KEY_STORAGE_KEY = "jade_api_key";
-const PROVIDER_CONFIGS_KEY = "jade_provider_configs";
-const THEME_MODE_KEY = "jade_theme_mode";
+const API_KEY_STORAGE_KEY = 'jade_api_key';
+const PROVIDER_CONFIGS_KEY = 'jade_provider_configs';
+const THEME_MODE_KEY = 'jade_theme_mode';
 
 function loadThemeMode(): ThemeMode {
-  if (typeof window === "undefined") return "system";
+  if (typeof window === 'undefined') return 'system';
   try {
     const raw = localStorage.getItem(THEME_MODE_KEY);
-    if (raw === "light" || raw === "dark" || raw === "system") return raw;
-    return "system";
+    if (raw === 'light' || raw === 'dark' || raw === 'system') return raw;
+    return 'system';
   } catch {
-    return "system";
+    return 'system';
   }
 }
 
 function saveThemeMode(mode: ThemeMode) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(THEME_MODE_KEY, mode);
   } catch {}
@@ -53,21 +53,21 @@ interface ProviderConfig {
 }
 
 const PROVIDER_DEFAULTS: Record<AIProvider, ProviderConfig> = {
-  openai: { baseURL: "https://api.openai.com/v1", model: "gpt-4o", apiKey: "" },
+  openai: { baseURL: 'https://api.openai.com/v1', model: 'gpt-4o', apiKey: '' },
   anthropic: {
-    baseURL: "https://api.anthropic.com",
-    model: "claude-sonnet-4-20250514",
-    apiKey: "",
+    baseURL: 'https://api.anthropic.com',
+    model: 'claude-sonnet-4-20250514',
+    apiKey: '',
   },
   gemini: {
-    baseURL: "https://generativelanguage.googleapis.com/v1beta",
-    model: "gemini-2.0-flash",
-    apiKey: "",
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+    model: 'gemini-2.0-flash',
+    apiKey: '',
   },
 };
 
 function loadProviderConfigs(): Partial<Record<AIProvider, ProviderConfig>> {
-  if (typeof window === "undefined") return {};
+  if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(PROVIDER_CONFIGS_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -76,10 +76,8 @@ function loadProviderConfigs(): Partial<Record<AIProvider, ProviderConfig>> {
   }
 }
 
-function saveProviderConfigs(
-  configs: Partial<Record<AIProvider, ProviderConfig>>,
-) {
-  if (typeof window === "undefined") return;
+function saveProviderConfigs(configs: Partial<Record<AIProvider, ProviderConfig>>) {
+  if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(PROVIDER_CONFIGS_KEY, JSON.stringify(configs));
   } catch {
@@ -88,7 +86,7 @@ function saveProviderConfigs(
 }
 
 function saveApiKeyLocally(key: string) {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     if (key) localStorage.setItem(API_KEY_STORAGE_KEY, key);
     else localStorage.removeItem(API_KEY_STORAGE_KEY);
@@ -98,30 +96,29 @@ function saveApiKeyLocally(key: string) {
 }
 
 function loadApiKeyLocally(): string {
-  if (typeof window === "undefined") return "";
+  if (typeof window === 'undefined') return '';
   try {
-    return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
+    return localStorage.getItem(API_KEY_STORAGE_KEY) || '';
   } catch {
-    return "";
+    return '';
   }
 }
 
 export function getAIHeaders(): Record<string, string> {
-  const { aiProvider, aiApiKey, aiBaseURL, aiModel } =
-    useSettingsStore.getState();
+  const { aiProvider, aiApiKey, aiBaseURL, aiModel } = useSettingsStore.getState();
   const headers: Record<string, string> = {};
-  if (aiProvider) headers["x-provider"] = aiProvider;
-  if (aiApiKey) headers["x-api-key"] = aiApiKey;
-  if (aiBaseURL) headers["x-base-url"] = aiBaseURL;
-  if (aiModel) headers["x-model"] = aiModel;
+  if (aiProvider) headers['x-provider'] = aiProvider;
+  if (aiApiKey) headers['x-api-key'] = aiApiKey;
+  if (aiBaseURL) headers['x-base-url'] = aiBaseURL;
+  if (aiModel) headers['x-model'] = aiModel;
   return headers;
 }
 
 export const useSettingsStore = create<SettingsStore>((set, get) => ({
-  aiProvider: "openai",
-  aiApiKey: "",
-  aiBaseURL: "https://api.openai.com/v1",
-  aiModel: "gpt-4o",
+  aiProvider: 'openai',
+  aiApiKey: '',
+  aiBaseURL: 'https://api.openai.com/v1',
+  aiModel: 'gpt-4o',
   autoSave: true,
   autoSaveInterval: 500,
   themeMode: loadThemeMode(),
@@ -184,6 +181,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
 }));
 
-if (typeof window !== "undefined") {
+if (typeof window !== 'undefined') {
   useSettingsStore.getState().hydrate();
 }

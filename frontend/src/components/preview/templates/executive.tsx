@@ -7,22 +7,22 @@ import type {
   LanguagesContent,
   GitHubContent,
   CustomContent,
-} from "../../../types/resume";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { AvatarImage } from "../avatar-image";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { AvatarImage } from '../avatar-image';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const CHARCOAL = "#2d3436";
-const EMERALD = "#00b894";
+const CHARCOAL = '#2d3436';
+const EMERALD = '#00b894';
 
 export function ExecutiveTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div className="px-8 py-8" style={{ background: CHARCOAL }}>
@@ -37,13 +37,10 @@ export function ExecutiveTemplate({ resume }: { resume: Resume }) {
           )}
           <div className="flex-1">
             <h1 className="text-3xl font-bold tracking-tight text-white">
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
-              <p
-                className="mt-1 text-base font-light"
-                style={{ color: EMERALD }}
-              >
+              <p className="mt-1 text-base font-light" style={{ color: EMERALD }}>
                 {pi.jobTitle}
               </p>
             )}
@@ -70,10 +67,7 @@ export function ExecutiveTemplate({ resume }: { resume: Resume }) {
 
       <div className="p-8">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <h2
@@ -92,17 +86,11 @@ export function ExecutiveTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function ExecutiveSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function ExecutiveSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -113,7 +101,7 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {(content.items || []).map((item: any) => (
@@ -123,24 +111,15 @@ function ExecutiveSectionContent({
                 <span className="text-sm font-bold" style={{ color: CHARCOAL }}>
                   {item.position}
                 </span>
-                {item.company && (
-                  <span className="text-sm text-zinc-600">
-                    {" "}
-                    | {item.company}
-                  </span>
-                )}
+                {item.company && <span className="text-sm text-zinc-600"> | {item.company}</span>}
               </div>
               <span
                 className="shrink-0 rounded px-2 py-0.5 text-xs font-medium text-white"
                 style={{ background: EMERALD }}
               >
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -151,8 +130,7 @@ function ExecutiveSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -172,7 +150,7 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {(content.items || []).map((item: any) => (
@@ -183,21 +161,14 @@ function ExecutiveSectionContent({
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-zinc-600">
-                    {" "}
-                    — {item.institution}
-                  </span>
+                  <span className="text-sm text-zinc-600"> — {item.institution}</span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-5">
                 {item.highlights.map((h: string, i: number) => (
@@ -215,7 +186,7 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="flex flex-wrap gap-2">
         {(content.categories || []).flatMap((cat: any) =>
@@ -233,12 +204,12 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: CHARCOAL }}>
                 {item.name}
@@ -248,9 +219,8 @@ function ExecutiveSectionContent({
                   className="shrink-0 rounded px-2 py-0.5 text-xs font-medium text-white"
                   style={{ background: EMERALD }}
                 >
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -262,8 +232,7 @@ function ExecutiveSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -283,35 +252,26 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-baseline justify-between text-sm"
-          >
+          <div key={item.id} className="flex items-baseline justify-between text-sm">
             <div>
               <span className="font-bold" style={{ color: CHARCOAL }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-zinc-600"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-zinc-600"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="shrink-0 text-xs text-zinc-400">
-                {item.date}
-              </span>
-            )}
+            {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -329,23 +289,21 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: CHARCOAL }}>
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-400">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-400">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -358,29 +316,20 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <div>
                 <span className="text-sm font-bold" style={{ color: CHARCOAL }}>
                   {item.title}
                 </span>
-                {item.subtitle && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
               </div>
-              {item.date && (
-                <span className="shrink-0 text-xs text-zinc-400">
-                  {item.date}
-                </span>
-              )}
+              {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
             </div>
             {item.description && (
               <p
@@ -394,7 +343,7 @@ function ExecutiveSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -402,7 +351,7 @@ function ExecutiveSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: CHARCOAL }}>
               {item.name || item.title || item.language}
             </span>

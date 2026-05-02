@@ -10,25 +10,25 @@ import type {
   LanguagesContent,
   GitHubContent,
   CustomContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#9a3412";
-const ACCENT = "#ea580c";
-const WARM_BG = "#fff7ed";
-const BODY_TEXT = "#374151";
-const MUTED = "#78716c";
+const PRIMARY = '#9a3412';
+const ACCENT = '#ea580c';
+const WARM_BG = '#fff7ed';
+const BODY_TEXT = '#374151';
+const MUTED = '#78716c';
 
 export function TeacherTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div className="mb-6 flex items-center gap-5">
@@ -42,7 +42,7 @@ export function TeacherTemplate({ resume }: { resume: Resume }) {
         )}
         <div className="flex-1">
           <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>
-            {pi.fullName || "Your Name"}
+            {pi.fullName || 'Your Name'}
           </h1>
           {pi.jobTitle && (
             <p
@@ -52,10 +52,7 @@ export function TeacherTemplate({ resume }: { resume: Resume }) {
               {pi.jobTitle}
             </p>
           )}
-          <div
-            className="mt-2 flex flex-wrap gap-3 text-xs"
-            style={{ color: MUTED }}
-          >
+          <div className="mt-2 flex flex-wrap gap-3 text-xs" style={{ color: MUTED }}>
             {pi.age && <span>{pi.age}</span>}
             {pi.politicalStatus && <span>{pi.politicalStatus}</span>}
             {pi.gender && <span>{pi.gender}</span>}
@@ -83,9 +80,7 @@ export function TeacherTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-7 pt-1" data-section>
             <h2
@@ -103,17 +98,11 @@ export function TeacherTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function TeacherSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function TeacherSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="rounded-lg p-3 text-sm leading-relaxed"
@@ -125,7 +114,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
@@ -141,22 +130,18 @@ function TeacherSectionContent({
                 </span>
                 {item.company && (
                   <span className="text-sm" style={{ color: ACCENT }}>
-                    {" "}
+                    {' '}
                     at {item.company}
                   </span>
                 )}
               </div>
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: "#fed7aa", color: PRIMARY }}
+                style={{ backgroundColor: '#fed7aa', color: PRIMARY }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -172,7 +157,7 @@ function TeacherSectionContent({
                   <span
                     key={i}
                     className="rounded-full px-2 py-0.5 text-[10px]"
-                    style={{ backgroundColor: "#fed7aa", color: PRIMARY }}
+                    style={{ backgroundColor: '#fed7aa', color: PRIMARY }}
                   >
                     {t}
                   </span>
@@ -202,7 +187,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
@@ -218,15 +203,13 @@ function TeacherSectionContent({
                 </span>
                 {item.institution && (
                   <span className="text-sm" style={{ color: MUTED }}>
-                    {" "}
+                    {' '}
                     — {item.institution}
                   </span>
                 )}
               </div>
               <span className="shrink-0 text-xs" style={{ color: MUTED }}>
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             {item.gpa && (
@@ -257,15 +240,11 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="flex flex-wrap gap-2">
         {((content as SkillsContent).categories || []).map((cat: any) => (
-          <div
-            key={cat.id}
-            className="rounded-lg p-2.5"
-            style={{ backgroundColor: WARM_BG }}
-          >
+          <div key={cat.id} className="rounded-lg p-2.5" style={{ backgroundColor: WARM_BG }}>
             <span className="text-xs font-bold" style={{ color: PRIMARY }}>
               {cat.name}
             </span>
@@ -274,7 +253,7 @@ function TeacherSectionContent({
                 <span
                   key={i}
                   className="rounded-full px-2 py-0.5 text-[10px]"
-                  style={{ backgroundColor: "#fed7aa", color: PRIMARY }}
+                  style={{ backgroundColor: '#fed7aa', color: PRIMARY }}
                 >
                   {skill}
                 </span>
@@ -286,7 +265,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
@@ -301,9 +280,8 @@ function TeacherSectionContent({
               </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs" style={{ color: MUTED }}>
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -320,7 +298,7 @@ function TeacherSectionContent({
                   <span
                     key={i}
                     className="rounded-full px-2 py-0.5 text-[10px]"
-                    style={{ backgroundColor: "#fed7aa", color: PRIMARY }}
+                    style={{ backgroundColor: '#fed7aa', color: PRIMARY }}
                   >
                     {t}
                   </span>
@@ -350,7 +328,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -374,7 +352,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="flex flex-wrap gap-2">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -393,7 +371,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
@@ -409,7 +387,7 @@ function TeacherSectionContent({
               </span>
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                style={{ backgroundColor: "#fed7aa", color: PRIMARY }}
+                style={{ backgroundColor: '#fed7aa', color: PRIMARY }}
               >
                 ⭐ {item.stars?.toLocaleString()}
               </span>
@@ -432,7 +410,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
@@ -448,7 +426,7 @@ function TeacherSectionContent({
                 </span>
                 {item.subtitle && (
                   <span className="text-sm" style={{ color: MUTED }}>
-                    {" "}
+                    {' '}
                     — {item.subtitle}
                   </span>
                 )}
@@ -472,7 +450,7 @@ function TeacherSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -481,7 +459,7 @@ function TeacherSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="flex items-center gap-2">
+          <div key={item.id} data-pdf-item className="flex items-center gap-2">
             <span
               className="h-1.5 w-1.5 shrink-0 rounded-full"
               style={{ backgroundColor: ACCENT }}
@@ -494,7 +472,7 @@ function TeacherSectionContent({
                 className="text-sm"
                 style={{ color: BODY_TEXT }}
                 dangerouslySetInnerHTML={{
-                  __html: " — " + md(item.description),
+                  __html: ' — ' + md(item.description),
                 }}
               />
             )}

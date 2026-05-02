@@ -10,17 +10,17 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#37352f";
-const ACCENT = "#2383e2";
-const SUBTLE_BG = "#f7f6f3";
+const PRIMARY = '#37352f';
+const ACCENT = '#2383e2';
+const SUBTLE_BG = '#f7f6f3';
 
 export function BlocksTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -44,30 +44,25 @@ export function BlocksTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header - clean Notion-like */}
       <div className="mb-6">
         <div className="flex items-center gap-4">
-          {pi.avatar && (
-            <AvatarImage src={pi.avatar} size={56} className="shrink-0" />
-          )}
+          {pi.avatar && <AvatarImage src={pi.avatar} size={56} className="shrink-0" />}
           <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
-              <p className="mt-0.5 text-sm" style={{ color: "#787774" }}>
+              <p className="mt-0.5 text-sm" style={{ color: '#787774' }}>
                 {pi.jobTitle}
               </p>
             )}
           </div>
         </div>
         {contacts.length > 0 && (
-          <div
-            className="mt-3 flex flex-wrap gap-2 text-xs"
-            style={{ color: "#787774" }}
-          >
+          <div className="mt-3 flex flex-wrap gap-2 text-xs" style={{ color: '#787774' }}>
             {contacts.map((c, i) => (
               <span
                 key={i}
@@ -79,21 +74,16 @@ export function BlocksTemplate({ resume }: { resume: Resume }) {
             ))}
           </div>
         )}
-        <div
-          className="mt-4 h-px w-full"
-          style={{ backgroundColor: "#e3e2de" }}
-        />
+        <div className="mt-4 h-px w-full" style={{ backgroundColor: '#e3e2de' }} />
       </div>
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-6 pt-1" data-section>
             <div className="mb-2.5 flex items-center gap-2">
-              <span className="text-sm" style={{ color: "#9b9a97" }}>
+              <span className="text-sm" style={{ color: '#9b9a97' }}>
                 &#9654;
               </span>
               <h2 className="text-sm font-semibold" style={{ color: PRIMARY }}>
@@ -109,17 +99,11 @@ export function BlocksTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function BlocksSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function BlocksSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <div className="rounded-md p-3" style={{ backgroundColor: SUBTLE_BG }}>
         <p
@@ -133,40 +117,32 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-md border p-3"
-            style={{ borderColor: "#e3e2de" }}
-          >
+          <div key={item.id} className="rounded-md border p-3" style={{ borderColor: '#e3e2de' }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.position}
               </h3>
-              <span className="shrink-0 text-xs" style={{ color: "#9b9a97" }}>
-                {item.startDate} -{" "}
+              <span className="shrink-0 text-xs" style={{ color: '#9b9a97' }}>
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
               <p className="text-sm" style={{ color: ACCENT }}>
                 {item.company}
-                {item.location ? ` , ${item.location}` : ""}
+                {item.location ? ` , ${item.location}` : ''}
               </p>
             )}
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#787774" }}
+                style={{ color: '#787774' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -176,7 +152,7 @@ function BlocksSectionContent({
                   <span
                     key={i}
                     className="rounded-sm px-1.5 py-0.5 text-[10px]"
-                    style={{ backgroundColor: SUBTLE_BG, color: "#787774" }}
+                    style={{ backgroundColor: SUBTLE_BG, color: '#787774' }}
                   >
                     {t}
                   </span>
@@ -189,7 +165,7 @@ function BlocksSectionContent({
                   <li
                     key={i}
                     className="text-sm"
-                    style={{ color: "#787774" }}
+                    style={{ color: '#787774' }}
                     dangerouslySetInnerHTML={{ __html: md(h) }}
                   />
                 ))}
@@ -201,32 +177,26 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-md border p-3"
-            style={{ borderColor: "#e3e2de" }}
-          >
+          <div key={item.id} className="rounded-md border p-3" style={{ borderColor: '#e3e2de' }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.institution}
               </h3>
-              <span className="text-xs" style={{ color: "#9b9a97" }}>
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+              <span className="text-xs" style={{ color: '#9b9a97' }}>
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm" style={{ color: "#787774" }}>
+            <p className="text-sm" style={{ color: '#787774' }}>
               {degreeField(item.degree, item.field)}
-              {item.location ? ` , ${item.location}` : ""}
+              {item.location ? ` , ${item.location}` : ''}
             </p>
             {item.gpa && (
-              <p className="text-xs" style={{ color: "#9b9a97" }}>
+              <p className="text-xs" style={{ color: '#9b9a97' }}>
                 GPA: {item.gpa}
               </p>
             )}
@@ -236,7 +206,7 @@ function BlocksSectionContent({
                   <li
                     key={i}
                     className="text-sm"
-                    style={{ color: "#787774" }}
+                    style={{ color: '#787774' }}
                     dangerouslySetInnerHTML={{ __html: md(h) }}
                   />
                 ))}
@@ -248,17 +218,14 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
-      <div
-        className="overflow-hidden rounded-md border"
-        style={{ borderColor: "#e3e2de" }}
-      >
+      <div className="overflow-hidden rounded-md border" style={{ borderColor: '#e3e2de' }}>
         <table className="w-full text-sm">
           <tbody>
             {categories.map((cat: any) => (
-              <tr key={cat.id} style={{ borderBottom: "1px solid #e3e2de" }}>
+              <tr key={cat.id} style={{ borderBottom: '1px solid #e3e2de' }}>
                 <td
                   className="w-28 shrink-0 px-3 py-2 font-medium"
                   style={{ color: PRIMARY, backgroundColor: SUBTLE_BG }}
@@ -289,32 +256,27 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-md border p-3"
-            style={{ borderColor: "#e3e2de" }}
-          >
+          <div key={item.id} className="rounded-md border p-3" style={{ borderColor: '#e3e2de' }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: ACCENT }}>
                 {item.name}
               </h3>
               {item.startDate && (
-                <span className="text-xs" style={{ color: "#9b9a97" }}>
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                <span className="text-xs" style={{ color: '#9b9a97' }}>
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#787774" }}
+                style={{ color: '#787774' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -324,7 +286,7 @@ function BlocksSectionContent({
                   <span
                     key={i}
                     className="rounded-sm px-1.5 py-0.5 text-[10px]"
-                    style={{ backgroundColor: SUBTLE_BG, color: "#787774" }}
+                    style={{ backgroundColor: SUBTLE_BG, color: '#787774' }}
                   >
                     {t}
                   </span>
@@ -337,7 +299,7 @@ function BlocksSectionContent({
                   <li
                     key={i}
                     className="text-sm"
-                    style={{ color: "#787774" }}
+                    style={{ color: '#787774' }}
                     dangerouslySetInnerHTML={{ __html: md(h) }}
                   />
                 ))}
@@ -349,33 +311,29 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-md border p-3"
-            style={{ borderColor: "#e3e2de" }}
-          >
+          <div key={item.id} className="rounded-md border p-3" style={{ borderColor: '#e3e2de' }}>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold" style={{ color: ACCENT }}>
                 {item.name}
               </span>
-              <span className="text-xs" style={{ color: "#9b9a97" }}>
+              <span className="text-xs" style={{ color: '#9b9a97' }}>
                 ⭐ {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
-              <span className="text-xs" style={{ color: "#9b9a97" }}>
+              <span className="text-xs" style={{ color: '#9b9a97' }}>
                 {item.language}
               </span>
             )}
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#787774" }}
+                style={{ color: '#787774' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -385,29 +343,25 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
-      <div
-        className="overflow-hidden rounded-md border"
-        style={{ borderColor: "#e3e2de" }}
-      >
+      <div className="overflow-hidden rounded-md border" style={{ borderColor: '#e3e2de' }}>
         {items.map((item: any, idx: number) => (
           <div
             key={item.id}
             className="flex items-baseline justify-between px-3 py-2"
             style={{
-              borderBottom:
-                idx < items.length - 1 ? "1px solid #e3e2de" : "none",
+              borderBottom: idx < items.length - 1 ? '1px solid #e3e2de' : 'none',
             }}
           >
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name}
             </span>
             {(item.issuer || item.date) && (
-              <span className="text-xs" style={{ color: "#9b9a97" }}>
+              <span className="text-xs" style={{ color: '#9b9a97' }}>
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </span>
             )}
@@ -417,27 +371,18 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
-      <div
-        className="overflow-hidden rounded-md border"
-        style={{ borderColor: "#e3e2de" }}
-      >
+      <div className="overflow-hidden rounded-md border" style={{ borderColor: '#e3e2de' }}>
         <table className="w-full text-sm">
           <tbody>
             {items.map((item: any) => (
-              <tr key={item.id} style={{ borderBottom: "1px solid #e3e2de" }}>
-                <td
-                  className="px-3 py-2 font-medium"
-                  style={{ color: PRIMARY }}
-                >
+              <tr key={item.id} style={{ borderBottom: '1px solid #e3e2de' }}>
+                <td className="px-3 py-2 font-medium" style={{ color: PRIMARY }}>
                   {item.language}
                 </td>
-                <td
-                  className="px-3 py-2 text-right"
-                  style={{ color: "#9b9a97" }}
-                >
+                <td className="px-3 py-2 text-right" style={{ color: '#9b9a97' }}>
                   {item.proficiency}
                 </td>
               </tr>
@@ -448,35 +393,31 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-md border p-3"
-            style={{ borderColor: "#e3e2de" }}
-          >
+          <div key={item.id} className="rounded-md border p-3" style={{ borderColor: '#e3e2de' }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.title}
               </h3>
               {item.date && (
-                <span className="text-xs" style={{ color: "#9b9a97" }}>
+                <span className="text-xs" style={{ color: '#9b9a97' }}>
                   {item.date}
                 </span>
               )}
             </div>
             {item.subtitle && (
-              <p className="text-sm" style={{ color: "#9b9a97" }}>
+              <p className="text-sm" style={{ color: '#9b9a97' }}>
                 {item.subtitle}
               </p>
             )}
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#787774" }}
+                style={{ color: '#787774' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -486,7 +427,7 @@ function BlocksSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -498,7 +439,7 @@ function BlocksSectionContent({
           <div
             key={item.id}
             className="rounded-md border px-3 py-2"
-            style={{ borderColor: "#e3e2de" }}
+            style={{ borderColor: '#e3e2de' }}
           >
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
@@ -506,7 +447,7 @@ function BlocksSectionContent({
             {item.description && (
               <p
                 className="text-sm"
-                style={{ color: "#787774" }}
+                style={{ color: '#787774' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}

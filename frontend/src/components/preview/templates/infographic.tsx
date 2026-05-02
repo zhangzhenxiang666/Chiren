@@ -7,33 +7,26 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const COLORS = [
-  "#3b82f6",
-  "#ef4444",
-  "#f59e0b",
-  "#10b981",
-  "#8b5cf6",
-  "#ec4899",
-];
+const COLORS = ['#3b82f6', '#ef4444', '#f59e0b', '#10b981', '#8b5cf6', '#ec4899'];
 
 export function InfographicTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div
         className="relative overflow-hidden px-8 py-8"
-        style={{ background: "linear-gradient(135deg, #1e40af, #7c3aed)" }}
+        style={{ background: 'linear-gradient(135deg, #1e40af, #7c3aed)' }}
       >
         <div className="relative flex items-center gap-5">
           {pi.avatar && (
@@ -41,16 +34,12 @@ export function InfographicTemplate({ resume }: { resume: Resume }) {
               src={pi.avatar}
               size={80}
               className="shrink-0"
-              style={{ border: "3px solid rgba(255,255,255,0.3)" }}
+              style={{ border: '3px solid rgba(255,255,255,0.3)' }}
             />
           )}
           <div>
-            <h1 className="text-3xl font-bold text-white">
-              {pi.fullName || "Your Name"}
-            </h1>
-            {pi.jobTitle && (
-              <p className="mt-1 text-base text-white/70">{pi.jobTitle}</p>
-            )}
+            <h1 className="text-3xl font-bold text-white">{pi.fullName || 'Your Name'}</h1>
+            {pi.jobTitle && <p className="mt-1 text-base text-white/70">{pi.jobTitle}</p>}
             <div className="mt-2 flex flex-wrap gap-3 text-sm text-white/60">
               {pi.age && <span>{pi.age}</span>}
               {pi.politicalStatus && <span>{pi.politicalStatus}</span>}
@@ -74,10 +63,7 @@ export function InfographicTemplate({ resume }: { resume: Resume }) {
 
       <div className="p-8">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section, idx) => (
             <div key={section.id} className="mb-6" data-section>
               <h2 className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wider">
@@ -87,16 +73,10 @@ export function InfographicTemplate({ resume }: { resume: Resume }) {
                 >
                   {idx + 1}
                 </span>
-                <span style={{ color: COLORS[idx % COLORS.length] }}>
-                  {section.title}
-                </span>
+                <span style={{ color: COLORS[idx % COLORS.length] }}>{section.title}</span>
               </h2>
               <div className="mt-2">
-                <InfographicSectionContent
-                  section={section}
-                  colorIndex={idx}
-                  resume={resume}
-                />
+                <InfographicSectionContent section={section} colorIndex={idx} resume={resume} />
               </div>
             </div>
           ))}
@@ -118,7 +98,7 @@ function InfographicSectionContent({
   if (!content) return null;
   const color = COLORS[colorIndex % COLORS.length];
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="rounded-lg border-l-4 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-600"
@@ -130,26 +110,20 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {(content.items || []).map((item: any) => (
           <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold text-zinc-800">
-                {item.position}
-              </h3>
+              <h3 className="text-sm font-bold text-zinc-800">{item.position}</h3>
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
                 style={{ background: color }}
               >
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
@@ -193,7 +167,7 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {(content.items || []).map((item: any) => (
@@ -204,21 +178,14 @@ function InfographicSectionContent({
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.institution}
-                  </span>
+                  <span className="text-sm text-zinc-500"> — {item.institution}</span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -236,7 +203,7 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-2">
         {(content.categories || []).map((cat: any, ci: number) => (
@@ -261,12 +228,12 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color }}>
                 {item.name}
@@ -276,9 +243,8 @@ function InfographicSectionContent({
                   className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium text-white"
                   style={{ background: color }}
                 >
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -318,7 +284,7 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
@@ -331,22 +297,16 @@ function InfographicSectionContent({
               <span className="text-sm font-bold" style={{ color }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-sm text-zinc-500"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-sm text-zinc-500"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="shrink-0 text-xs text-zinc-400">
-                {item.date}
-              </span>
-            )}
+            {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -363,18 +323,18 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color }}>
                 {item.name}
               </span>
               <span className="shrink-0 text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
@@ -394,29 +354,20 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <div>
                 <span className="text-sm font-bold" style={{ color }}>
                   {item.title}
                 </span>
-                {item.subtitle && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
               </div>
-              {item.date && (
-                <span className="shrink-0 text-xs text-zinc-400">
-                  {item.date}
-                </span>
-              )}
+              {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
             </div>
             {item.description && (
               <p
@@ -430,7 +381,7 @@ function InfographicSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -438,7 +389,7 @@ function InfographicSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-3">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-3">
             <span className="text-sm font-medium text-zinc-800">
               {item.name || item.title || item.language}
             </span>

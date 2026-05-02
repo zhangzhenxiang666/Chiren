@@ -7,31 +7,29 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const BLUE = "#1e40af";
+const BLUE = '#1e40af';
 
 export function EuroTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header - EU CV style with photo on right */}
       <div className="mb-6 flex items-start gap-6">
         <div className="flex-1">
           <h1 className="text-3xl font-bold" style={{ color: BLUE }}>
-            {pi.fullName || "Your Name"}
+            {pi.fullName || 'Your Name'}
           </h1>
-          {pi.jobTitle && (
-            <p className="mt-1 text-base text-zinc-500">{pi.jobTitle}</p>
-          )}
+          {pi.jobTitle && <p className="mt-1 text-base text-zinc-500">{pi.jobTitle}</p>}
           <div className="mt-3 space-y-0.5 text-sm text-zinc-600">
             {pi.age && (
               <div>
@@ -170,24 +168,15 @@ export function EuroTemplate({ resume }: { resume: Resume }) {
       {/* Sections */}
       <div className="mt-6">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6 pt-1 flex gap-4" data-section>
               <div className="w-28 shrink-0 pt-1 text-right">
-                <h2
-                  className="text-xs font-bold uppercase tracking-wider"
-                  style={{ color: BLUE }}
-                >
+                <h2 className="text-xs font-bold uppercase tracking-wider" style={{ color: BLUE }}>
                   {section.title}
                 </h2>
               </div>
-              <div
-                className="flex-1 border-l-2 pl-4"
-                style={{ borderColor: "#dbeafe" }}
-              >
+              <div className="flex-1 border-l-2 pl-4" style={{ borderColor: '#dbeafe' }}>
                 <EuroSectionContent section={section} resume={resume} />
               </div>
             </div>
@@ -197,17 +186,11 @@ export function EuroTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function EuroSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function EuroSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -218,31 +201,20 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-3">
         {(content.items || []).map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-bold text-zinc-800">
-                  {item.position}
-                </span>
-                {item.company && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.company}
-                  </span>
-                )}
+                <span className="text-sm font-bold text-zinc-800">{item.position}</span>
+                {item.company && <span className="text-sm text-zinc-500"> — {item.company}</span>}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -253,8 +225,7 @@ function EuroSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -274,7 +245,7 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {(content.items || []).map((item: any) => (
@@ -285,21 +256,14 @@ function EuroSectionContent({
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.institution}
-                  </span>
+                  <span className="text-sm text-zinc-500"> — {item.institution}</span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -317,7 +281,7 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1">
         {(content.categories || []).map((cat: any) => (
@@ -325,30 +289,25 @@ function EuroSectionContent({
             <span className="w-28 shrink-0 font-medium" style={{ color: BLUE }}>
               {cat.name}:
             </span>
-            <span className="text-zinc-600">
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span className="text-zinc-600">{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold text-zinc-800">
-                {item.name}
-              </span>
+              <span className="text-sm font-bold text-zinc-800">{item.name}</span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -360,8 +319,7 @@ function EuroSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400">
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -381,38 +339,29 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-baseline justify-between text-sm"
-          >
+          <div key={item.id} className="flex items-baseline justify-between text-sm">
             <div>
               <span className="font-semibold text-zinc-800">{item.name}</span>
-              {item.issuer && (
-                <span className="text-zinc-500"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-zinc-500"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="shrink-0 text-xs text-zinc-400">
-                {item.date}
-              </span>
-            )}
+            {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="space-y-1">
         {items.map((item: any) => (
-          <div key={item.id} className="flex text-sm">
+          <div key={item.id} data-pdf-item className="flex text-sm">
             <span className="w-28 shrink-0 font-medium" style={{ color: BLUE }}>
               {item.language}:
             </span>
@@ -423,23 +372,19 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold text-zinc-800">
-                {item.name}
-              </span>
+              <span className="text-sm font-bold text-zinc-800">{item.name}</span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-500">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -452,29 +397,18 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-semibold text-zinc-800">
-                  {item.title}
-                </span>
-                {item.subtitle && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                <span className="text-sm font-semibold text-zinc-800">{item.title}</span>
+                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
               </div>
-              {item.date && (
-                <span className="shrink-0 text-xs text-zinc-400">
-                  {item.date}
-                </span>
-              )}
+              {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
             </div>
             {item.description && (
               <p
@@ -488,7 +422,7 @@ function EuroSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -496,7 +430,7 @@ function EuroSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium text-zinc-700">
               {item.name || item.title || item.language}
             </span>

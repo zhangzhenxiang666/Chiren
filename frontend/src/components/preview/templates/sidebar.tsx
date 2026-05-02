@@ -10,47 +10,35 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const SIDEBAR_BG = "#1e40af";
-const ACCENT = "#3b82f6";
+const SIDEBAR_BG = '#1e40af';
+const ACCENT = '#3b82f6';
 
 // Section types that go in the sidebar
-const SIDEBAR_TYPES = new Set([
-  "skills",
-  "languages",
-  "certifications",
-  "custom",
-]);
+const SIDEBAR_TYPES = new Set(['skills', 'languages', 'certifications', 'custom']);
 
 export function SidebarTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const visibleSections = resume.sections.filter(
-    (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
+    (s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s),
   );
 
-  const sidebarSections = visibleSections.filter((s) =>
-    SIDEBAR_TYPES.has(s.type),
-  );
-  const mainSections = visibleSections.filter(
-    (s) => !SIDEBAR_TYPES.has(s.type),
-  );
+  const sidebarSections = visibleSections.filter((s) => SIDEBAR_TYPES.has(s.type));
+  const mainSections = visibleSections.filter((s) => !SIDEBAR_TYPES.has(s.type));
 
   return (
     <div
       className="mx-auto flex max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif", minHeight: "297mm" }}
+      style={{ fontFamily: 'Inter, sans-serif', minHeight: '297mm' }}
     >
       {/* Sidebar */}
-      <div
-        className="w-[35%] shrink-0 p-6 text-white"
-        style={{ backgroundColor: SIDEBAR_BG }}
-      >
+      <div className="w-[35%] shrink-0 p-6 text-white" style={{ backgroundColor: SIDEBAR_BG }}>
         {/* Avatar & Name */}
         <div className="mb-6 text-center">
           {pi.avatar && (
@@ -61,13 +49,9 @@ export function SidebarTemplate({ resume }: { resume: Resume }) {
             />
           )}
           <h1 className="text-xl font-bold tracking-tight text-white">
-            {pi.fullName || "Your Name"}
+            {pi.fullName || 'Your Name'}
           </h1>
-          {pi.jobTitle && (
-            <p className="mt-1 text-sm font-light text-blue-200">
-              {pi.jobTitle}
-            </p>
-          )}
+          {pi.jobTitle && <p className="mt-1 text-sm font-light text-blue-200">{pi.jobTitle}</p>}
         </div>
 
         {/* Contact Info */}
@@ -169,7 +153,7 @@ export function SidebarTemplate({ resume }: { resume: Resume }) {
           <div key={section.id} className="mb-6 pt-1" data-section>
             <h2
               className="mb-2 pb-1.5 border-b-2 text-xs font-bold uppercase tracking-wider"
-              style={{ color: "rgba(255,255,255,0.4)" }}
+              style={{ color: 'rgba(255,255,255,0.4)' }}
             >
               {section.title}
             </h2>
@@ -204,19 +188,19 @@ function SidebarSectionContent({ section }: { section: any }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p className="text-xs font-semibold text-blue-100">{cat.name}</p>
             <div className="mt-1 flex flex-wrap gap-1">
               {(cat.skills || []).map((skill: string, i: number) => (
                 <span
                   key={i}
                   className="rounded-sm px-1.5 py-0.5 text-[10px] text-blue-100"
-                  style={{ backgroundColor: "rgba(59,130,246,0.3)" }}
+                  style={{ backgroundColor: 'rgba(59,130,246,0.3)' }}
                 >
                   {skill}
                 </span>
@@ -228,15 +212,12 @@ function SidebarSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-center justify-between text-xs"
-          >
+          <div key={item.id} className="flex items-center justify-between text-xs">
             <span className="text-blue-100">{item.language}</span>
             <span className="text-blue-300">{item.proficiency}</span>
           </div>
@@ -245,17 +226,17 @@ function SidebarSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <p className="text-xs font-semibold text-blue-100">{item.name}</p>
             {(item.issuer || item.date) && (
               <p className="text-[10px] text-blue-300">
                 {item.issuer}
-                {item.date ? ` (${item.date})` : ""}
+                {item.date ? ` (${item.date})` : ''}
               </p>
             )}
           </div>
@@ -264,16 +245,14 @@ function SidebarSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <p className="text-xs font-semibold text-blue-100">{item.title}</p>
-            {item.subtitle && (
-              <p className="text-[10px] text-blue-300">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-[10px] text-blue-300">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="text-[10px] text-blue-300"
@@ -286,7 +265,7 @@ function SidebarSectionContent({ section }: { section: any }) {
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -295,7 +274,7 @@ function SidebarSectionContent({ section }: { section: any }) {
     return (
       <div className="space-y-1.5">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-xs font-medium text-blue-100">
               {item.name || item.title || item.language}
             </span>
@@ -314,17 +293,11 @@ function SidebarSectionContent({ section }: { section: any }) {
   return null;
 }
 
-function MainSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function MainSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -335,32 +308,26 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <div>
-                <span className="text-sm font-semibold text-zinc-800">
-                  {item.position}
-                </span>
+                <span className="text-sm font-semibold text-zinc-800">{item.position}</span>
                 {item.company && (
                   <span className="text-sm" style={{ color: ACCENT }}>
-                    {" "}
+                    {' '}
                     | {item.company}
                   </span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -399,28 +366,20 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">
-                {item.institution}
-              </span>
+              <span className="text-sm font-semibold text-zinc-800">{item.institution}</span>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm text-zinc-600">
-              {degreeField(item.degree, item.field)}
-            </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -438,21 +397,18 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">
-                {item.name}
-              </span>
+              <span className="text-sm font-semibold text-zinc-800">{item.name}</span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -493,47 +449,38 @@ function MainSectionContent({
   }
 
   // Fallback for section types that end up in main area
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-1">
         {categories.map((cat: any) => (
-          <div key={cat.id} className="flex text-sm">
-            <span className="w-28 shrink-0 font-medium text-zinc-700">
-              {cat.name}:
-            </span>
-            <span className="text-zinc-600">{cat.skills?.join(", ")}</span>
+          <div key={cat.id} data-pdf-item className="flex text-sm">
+            <span className="w-28 shrink-0 font-medium text-zinc-700">{cat.name}:</span>
+            <span className="text-zinc-600">{cat.skills?.join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-baseline justify-between text-sm"
-          >
+          <div key={item.id} className="flex items-baseline justify-between text-sm">
             <div>
               <span className="font-semibold text-zinc-800">{item.name}</span>
-              {item.issuer && (
-                <span className="text-zinc-600"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-zinc-600"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="text-xs text-zinc-400">{item.date}</span>
-            )}
+            {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -547,19 +494,15 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">
-                {item.name}
-              </span>
-              <span className="text-xs text-zinc-400">
-                &#11088; {item.stars?.toLocaleString()}
-              </span>
+              <span className="text-sm font-semibold text-zinc-800">{item.name}</span>
+              <span className="text-xs text-zinc-400">&#11088; {item.stars?.toLocaleString()}</span>
             </div>
             {item.language && (
               <span className="text-xs" style={{ color: ACCENT }}>
@@ -578,23 +521,17 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-semibold text-zinc-800">
-                {item.title}
-              </span>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              <span className="text-sm font-semibold text-zinc-800">{item.title}</span>
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="text-sm text-zinc-600"
@@ -607,7 +544,7 @@ function MainSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -616,7 +553,7 @@ function MainSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium text-zinc-700">
               {item.name || item.title || item.language}
             </span>

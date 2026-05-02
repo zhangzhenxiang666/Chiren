@@ -10,16 +10,16 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#4f46e5";
-const VIOLET = "#7c3aed";
+const PRIMARY = '#4f46e5';
+const VIOLET = '#7c3aed';
 
 export function MaterialTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -41,7 +41,7 @@ export function MaterialTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-zinc-50 shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Material elevated header card */}
       <div
@@ -59,21 +59,14 @@ export function MaterialTemplate({ resume }: { resume: Resume }) {
             />
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {pi.fullName || "Your Name"}
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">{pi.fullName || 'Your Name'}</h1>
             {pi.jobTitle && (
-              <p className="mt-1 text-base font-light text-white/80">
-                {pi.jobTitle}
-              </p>
+              <p className="mt-1 text-base font-light text-white/80">{pi.jobTitle}</p>
             )}
             {contacts.length > 0 && (
               <div className="mt-3 flex flex-wrap gap-2 text-[13px]">
                 {contacts.map((c, i) => (
-                  <span
-                    key={i}
-                    className="rounded-full bg-white/15 px-3 py-0.5"
-                  >
+                  <span key={i} className="rounded-full bg-white/15 px-3 py-0.5">
                     {c}
                   </span>
                 ))}
@@ -86,10 +79,7 @@ export function MaterialTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-6 pt-4">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-4" data-section>
               <div className="mb-3 rounded-xl bg-white p-5 shadow-sm">
@@ -114,17 +104,11 @@ export function MaterialTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function MaterialSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function MaterialSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -135,33 +119,27 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-semibold text-zinc-800">
-                {item.position}
-              </h3>
+              <h3 className="text-sm font-semibold text-zinc-800">{item.position}</h3>
               <span
                 className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white shadow-sm"
                 style={{ backgroundColor: PRIMARY }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
               <p className="text-sm font-medium" style={{ color: VIOLET }}>
                 {item.company}
-                {item.location ? `, ${item.location}` : ""}
+                {item.location ? `, ${item.location}` : ''}
               </p>
             )}
             {item.description && (
@@ -200,29 +178,23 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-semibold text-zinc-800">
-                {item.institution}
-              </h3>
+              <h3 className="text-sm font-semibold text-zinc-800">{item.institution}</h3>
               <span className="text-xs text-zinc-400">
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             <p className="text-sm text-zinc-600">
               {degreeField(item.degree, item.field)}
-              {item.location ? ` — ${item.location}` : ""}
+              {item.location ? ` — ${item.location}` : ''}
             </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -240,12 +212,12 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500">
               {cat.name}
             </p>
@@ -266,21 +238,20 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-4">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
               </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -320,7 +291,7 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
@@ -335,7 +306,7 @@ function MaterialSectionContent({
             {(item.issuer || item.date) && (
               <span className="text-xs text-zinc-500">
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </span>
             )}
@@ -345,7 +316,7 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -355,13 +326,8 @@ function MaterialSectionContent({
             className="flex items-center gap-2 rounded-full px-4 py-1.5 shadow-sm"
             style={{ backgroundColor: `${PRIMARY}10` }}
           >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: VIOLET }}
-            />
-            <span className="text-sm font-medium text-zinc-700">
-              {item.language}
-            </span>
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: VIOLET }} />
+            <span className="text-sm font-medium text-zinc-700">{item.language}</span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -369,21 +335,18 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-4">
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
@@ -403,23 +366,19 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-4">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.title}
               </h3>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -432,7 +391,7 @@ function MaterialSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -441,7 +400,7 @@ function MaterialSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="rounded-lg bg-zinc-50 p-3">
+          <div key={item.id} data-pdf-item className="rounded-lg bg-zinc-50 p-3">
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

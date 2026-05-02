@@ -1,31 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import {
-  FileText,
-  Palette,
-  ChevronLeft,
-  ChevronRight,
-  Bell,
-  Settings,
-} from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { fetchErrorTasks } from "../../lib/api";
+import { useEffect, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { FileText, Palette, ChevronLeft, ChevronRight, Bell, Settings } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { fetchErrorTasks } from '../../lib/api';
 import {
   hasUnreadNotification,
   onNotificationChange,
   getNotificationTasks,
   getNotificationTasksAndClear,
   onNotificationTasksChange,
-} from "../../lib/notification";
-import type { WorkTask } from "../../types/work";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import MessageList from "./MessageDropdown";
-import SettingsModal from "../settings/SettingsModal";
-import logoSvg from "../../assets/logo.svg";
+} from '../../lib/notification';
+import type { WorkTask } from '../../types/work';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import MessageList from './MessageDropdown';
+import SettingsModal from '../settings/SettingsModal';
+import logoSvg from '../../assets/logo.svg';
 
 export default function Sidebar({
   collapsed,
@@ -39,12 +28,10 @@ export default function Sidebar({
   const [showSettings, setShowSettings] = useState(false);
   const [messagesOpen, setMessagesOpen] = useState(false);
   const [hasUnread, setHasUnread] = useState(false);
-  const [localTasks, setLocalTasks] = useState<WorkTask[]>(() =>
-    getNotificationTasksAndClear(),
-  );
+  const [localTasks, setLocalTasks] = useState<WorkTask[]>(() => getNotificationTasksAndClear());
 
   const { data: errorTasks } = useQuery({
-    queryKey: ["work-tasks", "error"],
+    queryKey: ['work-tasks', 'error'],
     queryFn: fetchErrorTasks,
     refetchInterval: 15000,
   });
@@ -84,8 +71,8 @@ export default function Sidebar({
   }, [messagesOpen]);
 
   const navItems = [
-    { label: "工作空间", path: "/", icon: FileText },
-    { label: "模板库", path: "/templates", icon: Palette },
+    { label: '工作空间', path: '/', icon: FileText },
+    { label: '模板库', path: '/templates', icon: Palette },
   ];
 
   return (
@@ -93,15 +80,15 @@ export default function Sidebar({
       <aside
         className="bg-card border-r border-muted-foreground/20 flex flex-col h-full shrink-0 transition-[width] duration-150 ease-out overflow-hidden"
         style={{
-          width: collapsed ? "64px" : "208px",
-          willChange: "width",
-          transform: "translateZ(0)",
+          width: collapsed ? '64px' : '208px',
+          willChange: 'width',
+          transform: 'translateZ(0)',
         }}
       >
         <div className="h-14 flex items-center px-4 border-b border-muted-foreground/20 shrink-0 gap-3">
           <button
             type="button"
-            onClick={() => navigate("/workspace")}
+            onClick={() => navigate('/workspace')}
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
             <img src={logoSvg} alt="Chiren" className="w-7 h-7 shrink-0" />
@@ -118,9 +105,7 @@ export default function Sidebar({
           <ul className="space-y-1">
             {navItems.map(({ label, path, icon: Icon }) => {
               const isActive =
-                path === "/"
-                  ? location.pathname === "/"
-                  : location.pathname.startsWith(path);
+                path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
               return (
                 <li key={path}>
                   <button
@@ -128,13 +113,11 @@ export default function Sidebar({
                     onClick={() => navigate(path)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
                       isActive
-                        ? "text-pink-400 bg-accent/20 dark:bg-pink-500/10"
-                        : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                        ? 'text-pink-400 bg-accent/20 dark:bg-pink-500/10'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                     }`}
                   >
-                    <Icon
-                      className={`w-4 h-4 shrink-0 ${isActive ? "text-pink-500" : ""}`}
-                    />
+                    <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-pink-500' : ''}`} />
                     <span
                       className="text-sm whitespace-nowrap transition-opacity duration-200"
                       style={{ opacity: collapsed ? 0 : 1 }}
@@ -200,20 +183,13 @@ export default function Sidebar({
             onClick={onToggle}
             className="flex items-center justify-center w-full h-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
           >
-            {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
-            ) : (
-              <ChevronLeft className="w-4 h-4" />
-            )}
+            {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
             {!collapsed && <span className="ml-2 text-sm whitespace-nowrap">折叠侧边栏</span>}
           </button>
         </div>
       </aside>
 
-      <SettingsModal
-        open={showSettings}
-        onClose={() => setShowSettings(false)}
-      />
+      <SettingsModal open={showSettings} onClose={() => setShowSettings(false)} />
     </>
   );
 }

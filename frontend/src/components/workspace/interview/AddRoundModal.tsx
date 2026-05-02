@@ -1,13 +1,13 @@
-import { useState, useEffect } from "react";
-import { X } from "lucide-react";
-import { fetchBuiltInInterviewers } from "@/lib/api";
+import { useState, useEffect } from 'react';
+import { X } from 'lucide-react';
+import { fetchBuiltInInterviewers } from '@/lib/api';
 import type {
   BuiltInInterviewer,
   InterviewRound,
   CreateInterviewRoundParams,
-} from "@/types/interview";
+} from '@/types/interview';
 
-const BUILT_IN_NAMES = ["李莉", "张明", "王强", "刘芳", "陈刚", "赵总"];
+const BUILT_IN_NAMES = ['李莉', '张明', '王强', '刘芳', '陈刚', '赵总'];
 
 interface AddRoundModalProps {
   open: boolean;
@@ -16,12 +16,10 @@ interface AddRoundModalProps {
   nextSortOrder: number;
   initialData?: InterviewRound | null;
   existingRounds?: InterviewRound[];
-  onSubmit: (
-    params: CreateInterviewRoundParams & { id?: string },
-  ) => Promise<void>;
+  onSubmit: (params: CreateInterviewRoundParams & { id?: string }) => Promise<void>;
 }
 
-const REQUIRED_MSG = "此项为必填";
+const REQUIRED_MSG = '此项为必填';
 
 export default function AddRoundModal({
   open,
@@ -34,19 +32,17 @@ export default function AddRoundModal({
 }: AddRoundModalProps) {
   const isEditMode = !!initialData;
 
-  const [name, setName] = useState("");
-  const [interviewerName, setInterviewerName] = useState("");
-  const [interviewerTitle, setInterviewerTitle] = useState("");
-  const [interviewerBio, setInterviewerBio] = useState("");
-  const [questionStyle, setQuestionStyle] = useState("");
-  const [assessmentDimensions, setAssessmentDimensions] = useState("");
-  const [personalityTraits, setPersonalityTraits] = useState("");
+  const [name, setName] = useState('');
+  const [interviewerName, setInterviewerName] = useState('');
+  const [interviewerTitle, setInterviewerTitle] = useState('');
+  const [interviewerBio, setInterviewerBio] = useState('');
+  const [questionStyle, setQuestionStyle] = useState('');
+  const [assessmentDimensions, setAssessmentDimensions] = useState('');
+  const [personalityTraits, setPersonalityTraits] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [builtInInterviewers, setBuiltInInterviewers] = useState<
-    BuiltInInterviewer[]
-  >([]);
+  const [builtInInterviewers, setBuiltInInterviewers] = useState<BuiltInInterviewer[]>([]);
   const [loadingBuiltIn, setLoadingBuiltIn] = useState(false);
 
   useEffect(() => {
@@ -62,21 +58,19 @@ export default function AddRoundModal({
     if (open && initialData) {
       setName(initialData.name);
       setInterviewerName(initialData.interviewerName);
-      setInterviewerTitle(initialData.interviewerTitle || "");
-      setInterviewerBio(initialData.interviewerBio || "");
-      setQuestionStyle(initialData.questionStyle || "");
-      setAssessmentDimensions(
-        (initialData.assessmentDimensions || []).join(", "),
-      );
-      setPersonalityTraits((initialData.personalityTraits || []).join(", "));
+      setInterviewerTitle(initialData.interviewerTitle || '');
+      setInterviewerBio(initialData.interviewerBio || '');
+      setQuestionStyle(initialData.questionStyle || '');
+      setAssessmentDimensions((initialData.assessmentDimensions || []).join(', '));
+      setPersonalityTraits((initialData.personalityTraits || []).join(', '));
     } else if (open) {
-      setName("");
-      setInterviewerName("");
-      setInterviewerTitle("");
-      setInterviewerBio("");
-      setQuestionStyle("");
-      setAssessmentDimensions("");
-      setPersonalityTraits("");
+      setName('');
+      setInterviewerName('');
+      setInterviewerTitle('');
+      setInterviewerBio('');
+      setQuestionStyle('');
+      setAssessmentDimensions('');
+      setPersonalityTraits('');
     }
     setErrors({});
   }, [open, initialData]);
@@ -94,8 +88,8 @@ export default function AddRoundModal({
     setInterviewerTitle(interviewer.title);
     setInterviewerBio(interviewer.bio);
     setQuestionStyle(interviewer.questionStyle);
-    setAssessmentDimensions(interviewer.assessmentDimensions.join(", "));
-    setPersonalityTraits(interviewer.personalityTraits.join(", "));
+    setAssessmentDimensions(interviewer.assessmentDimensions.join(', '));
+    setPersonalityTraits(interviewer.personalityTraits.join(', '));
     setErrors({});
   };
 
@@ -108,8 +102,7 @@ export default function AddRoundModal({
     if (!interviewerTitle.trim()) newErrors.interviewerTitle = REQUIRED_MSG;
     if (!interviewerBio.trim()) newErrors.interviewerBio = REQUIRED_MSG;
     if (!questionStyle.trim()) newErrors.questionStyle = REQUIRED_MSG;
-    if (!assessmentDimensions.trim())
-      newErrors.assessmentDimensions = REQUIRED_MSG;
+    if (!assessmentDimensions.trim()) newErrors.assessmentDimensions = REQUIRED_MSG;
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -134,11 +127,11 @@ export default function AddRoundModal({
         interviewerBio: interviewerBio.trim(),
         questionStyle: questionStyle.trim(),
         assessmentDimensions: assessmentDimensions
-          .split(",")
+          .split(',')
           .map((s) => s.trim())
           .filter(Boolean),
         personalityTraits: personalityTraits
-          .split(",")
+          .split(',')
           .map((s) => s.trim())
           .filter(Boolean),
         sortOrder: initialData ? initialData.sortOrder : nextSortOrder,
@@ -156,7 +149,7 @@ export default function AddRoundModal({
 
   const inputCls = (fieldKey: string) =>
     `w-full px-3 py-2 bg-background border rounded-lg text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-pink-500/50 focus:border-pink-500/50 ${
-      errors[fieldKey] ? "border-red-500/60" : "border-foreground/10"
+      errors[fieldKey] ? 'border-red-500/60' : 'border-foreground/10'
     }`;
 
   return (
@@ -164,9 +157,7 @@ export default function AddRoundModal({
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-card border border-border rounded-xl shadow-2xl w-full max-w-lg mx-4 flex flex-col max-h-[85vh]">
         <div className="flex items-center justify-between p-5 border-b border-border shrink-0">
-          <h2 className="text-sm font-semibold">
-            {isEditMode ? "编辑面试轮次" : "添加面试轮次"}
-          </h2>
+          <h2 className="text-sm font-semibold">{isEditMode ? '编辑面试轮次' : '添加面试轮次'}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -178,13 +169,9 @@ export default function AddRoundModal({
 
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           <div>
-            <label className="text-xs text-muted-foreground mb-2 block">
-              快速选择面试官
-            </label>
+            <label className="text-xs text-muted-foreground mb-2 block">快速选择面试官</label>
             {loadingBuiltIn ? (
-              <div className="text-[10px] text-muted-foreground py-2">
-                加载中...
-              </div>
+              <div className="text-[10px] text-muted-foreground py-2">加载中...</div>
             ) : builtInInterviewers.length > 0 ? (
               <div className="flex gap-2 overflow-x-auto py-1.5 -mx-1 px-1">
                 {builtInInterviewers.map((bi) => {
@@ -198,21 +185,17 @@ export default function AddRoundModal({
                       onClick={() => handleSelectBuiltIn(bi)}
                       className={`group shrink-0 w-[72px] rounded-lg border p-2 flex flex-col items-center gap-1 transition-all ${
                         isUsed
-                          ? "border-border/30 bg-muted/10 opacity-40 cursor-not-allowed"
+                          ? 'border-border/30 bg-muted/10 opacity-40 cursor-not-allowed'
                           : isActive
-                            ? "border-pink-500 ring-1 ring-pink-500 bg-pink-500/5 cursor-default"
-                            : "border-border bg-card hover:border-foreground/20 hover:bg-muted/30 cursor-pointer"
+                            ? 'border-pink-500 ring-1 ring-pink-500 bg-pink-500/5 cursor-default'
+                            : 'border-border bg-card hover:border-foreground/20 hover:bg-muted/30 cursor-pointer'
                       }`}
-                      title={
-                        isUsed
-                          ? "该面试官已在此方案中"
-                          : `使用 ${bi.name} 的资料`
-                      }
+                      title={isUsed ? '该面试官已在此方案中' : `使用 ${bi.name} 的资料`}
                     >
                       <div
                         className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
                         style={{
-                          backgroundColor: isUsed ? "#4B5563" : bi.avatarColor,
+                          backgroundColor: isUsed ? '#4B5563' : bi.avatarColor,
                         }}
                       >
                         {bi.avatarText}
@@ -220,10 +203,10 @@ export default function AddRoundModal({
                       <span
                         className={`text-[10px] font-medium leading-tight text-center line-clamp-1 w-full ${
                           isUsed
-                            ? "text-muted-foreground"
+                            ? 'text-muted-foreground'
                             : isActive
-                              ? "text-pink-400"
-                              : "text-foreground"
+                              ? 'text-pink-400'
+                              : 'text-foreground'
                         }`}
                       >
                         {bi.name}
@@ -249,14 +232,12 @@ export default function AddRoundModal({
               value={name}
               onChange={(e) => {
                 setName(e.target.value);
-                clearError("name");
+                clearError('name');
               }}
               placeholder="例如：技术一面"
-              className={inputCls("name")}
+              className={inputCls('name')}
             />
-            {errors.name && (
-              <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>
-            )}
+            {errors.name && <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>}
           </div>
 
           <div>
@@ -268,15 +249,13 @@ export default function AddRoundModal({
               value={interviewerName}
               onChange={(e) => {
                 setInterviewerName(e.target.value);
-                clearError("interviewerName");
+                clearError('interviewerName');
               }}
               placeholder="例如：张明"
-              className={inputCls("interviewerName")}
+              className={inputCls('interviewerName')}
             />
             {errors.interviewerName && (
-              <p className="text-[10px] text-red-400 mt-1">
-                {errors.interviewerName}
-              </p>
+              <p className="text-[10px] text-red-400 mt-1">{errors.interviewerName}</p>
             )}
           </div>
 
@@ -289,15 +268,13 @@ export default function AddRoundModal({
               value={interviewerTitle}
               onChange={(e) => {
                 setInterviewerTitle(e.target.value);
-                clearError("interviewerTitle");
+                clearError('interviewerTitle');
               }}
               placeholder="例如：技术架构师"
-              className={inputCls("interviewerTitle")}
+              className={inputCls('interviewerTitle')}
             />
             {errors.interviewerTitle && (
-              <p className="text-[10px] text-red-400 mt-1">
-                {errors.interviewerTitle}
-              </p>
+              <p className="text-[10px] text-red-400 mt-1">{errors.interviewerTitle}</p>
             )}
           </div>
 
@@ -309,16 +286,14 @@ export default function AddRoundModal({
               value={interviewerBio}
               onChange={(e) => {
                 setInterviewerBio(e.target.value);
-                clearError("interviewerBio");
+                clearError('interviewerBio');
               }}
               placeholder="描述面试官的背景和风格"
               rows={2}
-              className={`${inputCls("interviewerBio")} resize-none`}
+              className={`${inputCls('interviewerBio')} resize-none`}
             />
             {errors.interviewerBio && (
-              <p className="text-[10px] text-red-400 mt-1">
-                {errors.interviewerBio}
-              </p>
+              <p className="text-[10px] text-red-400 mt-1">{errors.interviewerBio}</p>
             )}
           </div>
 
@@ -331,15 +306,13 @@ export default function AddRoundModal({
               value={questionStyle}
               onChange={(e) => {
                 setQuestionStyle(e.target.value);
-                clearError("questionStyle");
+                clearError('questionStyle');
               }}
               placeholder="例如：由浅入深、追问细节"
-              className={inputCls("questionStyle")}
+              className={inputCls('questionStyle')}
             />
             {errors.questionStyle && (
-              <p className="text-[10px] text-red-400 mt-1">
-                {errors.questionStyle}
-              </p>
+              <p className="text-[10px] text-red-400 mt-1">{errors.questionStyle}</p>
             )}
           </div>
 
@@ -352,15 +325,13 @@ export default function AddRoundModal({
               value={assessmentDimensions}
               onChange={(e) => {
                 setAssessmentDimensions(e.target.value);
-                clearError("assessmentDimensions");
+                clearError('assessmentDimensions');
               }}
               placeholder="例如：算法能力, 系统设计, 代码质量"
-              className={inputCls("assessmentDimensions")}
+              className={inputCls('assessmentDimensions')}
             />
             {errors.assessmentDimensions && (
-              <p className="text-[10px] text-red-400 mt-1">
-                {errors.assessmentDimensions}
-              </p>
+              <p className="text-[10px] text-red-400 mt-1">{errors.assessmentDimensions}</p>
             )}
           </div>
 
@@ -387,11 +358,11 @@ export default function AddRoundModal({
           >
             {loading
               ? isEditMode
-                ? "保存中..."
-                : "添加中..."
+                ? '保存中...'
+                : '添加中...'
               : isEditMode
-                ? "保存修改"
-                : "添加轮次"}
+                ? '保存修改'
+                : '添加轮次'}
           </button>
         </div>
       </div>

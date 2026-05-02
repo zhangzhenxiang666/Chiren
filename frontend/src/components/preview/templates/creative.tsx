@@ -10,16 +10,16 @@ import type {
   LanguagesContent,
   GitHubContent,
   CustomContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { isSectionEmpty, md, degreeField } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { isSectionEmpty, md, degreeField } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const GRADIENT = "linear-gradient(135deg, #7c3aed 0%, #f97316 100%)";
-const PRIMARY = "#7c3aed";
+const GRADIENT = 'linear-gradient(135deg, #7c3aed 0%, #f97316 100%)';
+const PRIMARY = '#7c3aed';
 
 export function CreativeTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -41,13 +41,10 @@ export function CreativeTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header with gradient */}
-      <div
-        className="relative px-8 py-10 text-white"
-        style={{ background: GRADIENT }}
-      >
+      <div className="relative px-8 py-10 text-white" style={{ background: GRADIENT }}>
         {/* Decorative shapes */}
         <div className="absolute right-8 top-6 h-32 w-32 rounded-full border-4 border-white/10" />
         <div className="absolute right-20 top-16 h-16 w-16 rounded-full border-2 border-white/10" />
@@ -60,26 +57,18 @@ export function CreativeTemplate({ resume }: { resume: Resume }) {
               size={96}
               className="shrink-0"
               wrapperClassName="shrink-0 p-0.5"
-              wrapperStyle={{ border: "4px solid rgba(255,255,255,0.3)" }}
+              wrapperStyle={{ border: '4px solid rgba(255,255,255,0.3)' }}
             />
           )}
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              {pi.fullName || "Your Name"}
-            </h1>
-            {pi.jobTitle && (
-              <p className="mt-1 text-lg font-light text-white/80">
-                {pi.jobTitle}
-              </p>
-            )}
+            <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>
+            {pi.jobTitle && <p className="mt-1 text-lg font-light text-white/80">{pi.jobTitle}</p>}
             {contacts.length > 0 && (
               <div className="mt-3 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-white/70">
                 {contacts.map((c, i) => (
                   <span key={i} className="flex items-center gap-1.5">
                     {c}
-                    {i < contacts.length - 1 && (
-                      <span className="text-white/30">|</span>
-                    )}
+                    {i < contacts.length - 1 && <span className="text-white/30">|</span>}
                   </span>
                 ))}
               </div>
@@ -91,17 +80,11 @@ export function CreativeTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <div className="mb-4 flex items-center gap-3">
-                <div
-                  className="h-8 w-1 rounded-full"
-                  style={{ background: GRADIENT }}
-                />
+                <div className="h-8 w-1 rounded-full" style={{ background: GRADIENT }} />
                 <h2
                   className="text-base font-extrabold uppercase tracking-wide"
                   style={{ color: PRIMARY }}
@@ -119,17 +102,11 @@ export function CreativeTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function CreativeSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function CreativeSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="rounded-lg bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-600 italic"
@@ -140,7 +117,7 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
@@ -154,29 +131,21 @@ function CreativeSectionContent({
               style={{ background: GRADIENT }}
             />
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold text-zinc-800">
-                {item.position}
-              </h3>
+              <h3 className="text-sm font-bold text-zinc-800">{item.position}</h3>
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
                 style={{ background: PRIMARY }}
               >
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
               <p className="text-sm font-medium" style={{ color: PRIMARY }}>
                 {item.company}
                 {item.location && (
-                  <span className="text-xs font-normal text-zinc-400">
-                    , {item.location}
-                  </span>
+                  <span className="text-xs font-normal text-zinc-400">, {item.location}</span>
                 )}
               </p>
             )}
@@ -202,10 +171,7 @@ function CreativeSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: GRADIENT }}
@@ -221,38 +187,27 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-bold text-zinc-800">
-                {item.institution}
-              </h3>
+              <h3 className="text-sm font-bold text-zinc-800">{item.institution}</h3>
               <span className="text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             <p className="text-sm text-zinc-600">
               {degreeField(item.degree, item.field)}
-              {item.location && (
-                <span className="text-zinc-400">, {item.location}</span>
-              )}
+              {item.location && <span className="text-zinc-400">, {item.location}</span>}
             </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: GRADIENT }}
@@ -268,12 +223,12 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500">
               {cat.name}
             </p>
@@ -297,21 +252,20 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.name}
               </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -337,10 +291,7 @@ function CreativeSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ background: GRADIENT }}
@@ -356,22 +307,19 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-lg border border-zinc-100 px-4 py-2"
-          >
+          <div key={item.id} className="rounded-lg border border-zinc-100 px-4 py-2">
             <p className="text-sm font-bold" style={{ color: PRIMARY }}>
               {item.name}
             </p>
             {(item.issuer || item.date) && (
               <p className="text-xs text-zinc-500">
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </p>
             )}
@@ -381,7 +329,7 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
@@ -390,13 +338,8 @@ function CreativeSectionContent({
             key={item.id}
             className="flex items-center gap-2 rounded-full border border-zinc-100 px-4 py-1.5"
           >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ background: GRADIENT }}
-            />
-            <span className="text-sm font-medium text-zinc-700">
-              {item.language}
-            </span>
+            <span className="h-2 w-2 rounded-full" style={{ background: GRADIENT }} />
+            <span className="text-sm font-medium text-zinc-700">{item.language}</span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -404,23 +347,21 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-500">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -433,23 +374,19 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-4">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-4">
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.title}
               </h3>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -462,7 +399,7 @@ function CreativeSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -471,7 +408,7 @@ function CreativeSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="rounded-lg border border-zinc-100 p-3">
+          <div key={item.id} data-pdf-item className="rounded-lg border border-zinc-100 p-3">
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

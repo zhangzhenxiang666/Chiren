@@ -1,12 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  X,
-  Copy,
-  Download,
-  Sparkles,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { X, Copy, Download, Sparkles, Loader2, AlertCircle } from 'lucide-react';
 
 interface CoverLetterDialogProps {
   resumeId: string;
@@ -14,39 +7,35 @@ interface CoverLetterDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-type GenerationStatus = "idle" | "generating" | "done" | "error";
+type GenerationStatus = 'idle' | 'generating' | 'done' | 'error';
 
-type CoverLetterStyle = "正式" | "亲切" | "自信";
-type CoverLetterLanguage = "中文" | "English";
+type CoverLetterStyle = '正式' | '亲切' | '自信';
+type CoverLetterLanguage = '中文' | 'English';
 
 const STYLE_OPTIONS: {
   value: CoverLetterStyle;
   label: string;
   desc: string;
 }[] = [
-  { value: "正式", label: "正式", desc: "专业严谨" },
-  { value: "亲切", label: "亲切", desc: "温暖友好" },
-  { value: "自信", label: "自信", desc: "突出优势" },
+  { value: '正式', label: '正式', desc: '专业严谨' },
+  { value: '亲切', label: '亲切', desc: '温暖友好' },
+  { value: '自信', label: '自信', desc: '突出优势' },
 ];
 
 const LANGUAGE_OPTIONS: { value: CoverLetterLanguage; label: string }[] = [
-  { value: "中文", label: "中文" },
-  { value: "English", label: "English" },
+  { value: '中文', label: '中文' },
+  { value: 'English', label: 'English' },
 ];
 
-export function CoverLetterDialog({
-  resumeId,
-  open,
-  onOpenChange,
-}: CoverLetterDialogProps) {
-  const [status, setStatus] = useState<GenerationStatus>("idle");
-  const [content, setContent] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+export function CoverLetterDialog({ resumeId, open, onOpenChange }: CoverLetterDialogProps) {
+  const [status, setStatus] = useState<GenerationStatus>('idle');
+  const [content, setContent] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const [jdDescription, setJdDescription] = useState("");
-  const [style, setStyle] = useState<CoverLetterStyle>("正式");
-  const [language, setLanguage] = useState<CoverLetterLanguage>("中文");
+  const [jdDescription, setJdDescription] = useState('');
+  const [style, setStyle] = useState<CoverLetterStyle>('正式');
+  const [language, setLanguage] = useState<CoverLetterLanguage>('中文');
 
   const contentRef = useRef<HTMLDivElement>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -69,9 +58,7 @@ export function CoverLetterDialog({
 
     const fetchJdDescription = async () => {
       try {
-        const resumeResponse = await fetch(
-          `http://localhost:8000/resume/${resumeId}`,
-        );
+        const resumeResponse = await fetch(`http://localhost:8000/resume/${resumeId}`);
         if (resumeResponse.ok) {
           const resumeData = await resumeResponse.json();
           const metaInfo = resumeData?.metaInfo;
@@ -81,13 +68,11 @@ export function CoverLetterDialog({
           }
         }
 
-        const jdResponse = await fetch(
-          `http://localhost:8000/jd-analysis/list/${resumeId}`,
-        );
+        const jdResponse = await fetch(`http://localhost:8000/jd-analysis/list/${resumeId}`);
         if (jdResponse.ok) {
           const jdData = await jdResponse.json();
           if (jdData && jdData.length > 0) {
-            setJdDescription(jdData[0].job_description || "");
+            setJdDescription(jdData[0].job_description || '');
           }
         }
       } catch {
@@ -100,22 +85,22 @@ export function CoverLetterDialog({
 
   const handleGenerate = useCallback(async () => {
     if (!jdDescription.trim()) {
-      setStatus("error");
-      setErrorMessage("请输入岗位描述");
+      setStatus('error');
+      setErrorMessage('请输入岗位描述');
       return;
     }
 
     const abortController = new AbortController();
     abortRef.current = abortController;
 
-    setStatus("generating");
-    setContent("");
-    setErrorMessage("");
+    setStatus('generating');
+    setContent('');
+    setErrorMessage('');
 
     try {
-      const response = await fetch("http://localhost:8000/cover-letter", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('http://localhost:8000/cover-letter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           resume_id: resumeId,
           jd_description: jdDescription,
@@ -132,41 +117,41 @@ export function CoverLetterDialog({
 
       const reader = response.body?.getReader();
       if (!reader) {
-        throw new Error("不支持的响应格式");
+        throw new Error('不支持的响应格式');
       }
 
       const decoder = new TextDecoder();
-      let buffer = "";
+      let buffer = '';
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() || "";
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
 
         for (const line of lines) {
-          if (line.startsWith("event:")) {
+          if (line.startsWith('event:')) {
             const eventType = line.slice(6).trim();
             const nextLine = lines[lines.indexOf(line) + 1];
-            if (nextLine?.startsWith("data:")) {
+            if (nextLine?.startsWith('data:')) {
               const dataStr = nextLine.slice(5).trim();
               try {
                 const data = JSON.parse(dataStr);
 
                 switch (eventType) {
-                  case "text_start":
+                  case 'text_start':
                     break;
-                  case "text_delta":
-                    setContent((prev) => prev + (data.text || ""));
+                  case 'text_delta':
+                    setContent((prev) => prev + (data.text || ''));
                     break;
-                  case "done":
-                    setStatus("done");
+                  case 'done':
+                    setStatus('done');
                     break;
-                  case "error":
-                    setStatus("error");
-                    setErrorMessage(data.message || "生成失败");
+                  case 'error':
+                    setStatus('error');
+                    setErrorMessage(data.message || '生成失败');
                     break;
                 }
               } catch {
@@ -177,19 +162,19 @@ export function CoverLetterDialog({
         }
       }
     } catch (err: unknown) {
-      if (err instanceof DOMException && err.name === "AbortError") {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         return;
       }
-      setStatus("error");
-      setErrorMessage(err instanceof Error ? err.message : "未知错误");
+      setStatus('error');
+      setErrorMessage(err instanceof Error ? err.message : '未知错误');
     }
   }, [jdDescription, style, language, resumeId]);
 
   const handleDownload = useCallback(() => {
-    const cleanContent = content.replace(/\n{2,}/g, "\n\n").trim();
-    const blob = new Blob([cleanContent], { type: "text/plain;charset=utf-8" });
+    const cleanContent = content.replace(/\n{2,}/g, '\n\n').trim();
+    const blob = new Blob([cleanContent], { type: 'text/plain;charset=utf-8' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
     a.download = `求职信_${new Date().toISOString().slice(0, 10)}.txt`;
     document.body.appendChild(a);
@@ -204,11 +189,11 @@ export function CoverLetterDialog({
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      const textarea = document.createElement("textarea");
+      const textarea = document.createElement('textarea');
       textarea.value = content;
       document.body.appendChild(textarea);
       textarea.select();
-      document.execCommand("copy");
+      document.execCommand('copy');
       document.body.removeChild(textarea);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -217,12 +202,12 @@ export function CoverLetterDialog({
 
   const handleClose = useCallback(() => {
     abortRef.current?.abort();
-    setStatus("idle");
-    setContent("");
-    setErrorMessage("");
-    setJdDescription("");
-    setStyle("正式");
-    setLanguage("中文");
+    setStatus('idle');
+    setContent('');
+    setErrorMessage('');
+    setJdDescription('');
+    setStyle('正式');
+    setLanguage('中文');
     onOpenChange(false);
   }, [onOpenChange]);
 
@@ -257,7 +242,7 @@ export function CoverLetterDialog({
 
         {/* Content */}
         <div className="flex min-h-0 flex-1 flex-col">
-          {status === "idle" && (
+          {status === 'idle' && (
             <div className="flex h-full flex-col gap-3 p-6">
               {/* 岗位描述输入 */}
               <div className="flex flex-[4] flex-col gap-1.5">
@@ -287,16 +272,16 @@ export function CoverLetterDialog({
                       onClick={() => setStyle(option.value)}
                       className={`relative overflow-hidden rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                         style === option.value
-                          ? "bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/25 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
-                          : "border border-border bg-white text-foreground hover:border-pink-300 hover:bg-pink-500/10 dark:border-border dark:bg-muted dark:text-muted-foreground dark:hover:border-pink-400/60 dark:hover:bg-pink-500/5"
+                          ? 'bg-gradient-to-br from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/25 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25'
+                          : 'border border-border bg-white text-foreground hover:border-pink-300 hover:bg-pink-500/10 dark:border-border dark:bg-muted dark:text-muted-foreground dark:hover:border-pink-400/60 dark:hover:bg-pink-500/5'
                       }`}
                     >
                       <span className="block">{option.label}</span>
                       <span
                         className={`block text-xs mt-0.5 ${
                           style === option.value
-                            ? "text-pink-100 dark:text-pink-200"
-                            : "text-muted-foreground dark:text-muted-foreground"
+                            ? 'text-pink-100 dark:text-pink-200'
+                            : 'text-muted-foreground dark:text-muted-foreground'
                         }`}
                       >
                         {option.desc}
@@ -314,15 +299,13 @@ export function CoverLetterDialog({
                 </label>
                 <select
                   value={language}
-                  onChange={(e) =>
-                    setLanguage(e.target.value as CoverLetterLanguage)
-                  }
+                  onChange={(e) => setLanguage(e.target.value as CoverLetterLanguage)}
                   className="w-full cursor-pointer rounded-xl border border-border bg-white px-4 py-2.5 text-sm text-foreground transition-all focus:border-pink-500/50 focus:outline-none focus:ring-2 focus:ring-pink-500/20 dark:border-border dark:bg-muted dark:text-foreground dark:focus:border-pink-500/50"
                   style={{
-                    appearance: "none",
+                    appearance: 'none',
                     backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E")`,
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "right 16px center",
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'right 16px center',
                   }}
                 >
                   {LANGUAGE_OPTIONS.map((option) => (
@@ -348,7 +331,7 @@ export function CoverLetterDialog({
             </div>
           )}
 
-          {status === "generating" && (
+          {status === 'generating' && (
             <div className="flex h-0 min-h-0 flex-1 flex-col p-6">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-500/10 dark:bg-pink-500/10">
@@ -367,18 +350,15 @@ export function CoverLetterDialog({
                 ref={contentRef}
                 className="flex-1 overflow-y-auto rounded-xl border border-border bg-white p-6 text-foreground dark:border-border/50 dark:bg-muted dark:text-muted-foreground"
                 style={{
-                  fontFamily:
-                    "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
-                  fontSize: "14px",
-                  lineHeight: "1.9",
-                  letterSpacing: "0.02em",
-                  whiteSpace: "pre-wrap",
-                  wordWrap: "break-word",
+                  fontFamily: "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
+                  fontSize: '14px',
+                  lineHeight: '1.9',
+                  letterSpacing: '0.02em',
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
                 }}
               >
-                {content
-                  .replace(/^\s+|\s+$/g, "")
-                  .replace(/\n{3,}/g, "\n\n") || (
+                {content.replace(/^\s+|\s+$/g, '').replace(/\n{3,}/g, '\n\n') || (
                   <span className="flex items-center gap-2 text-muted-foreground dark:text-muted-foreground">
                     <Loader2 className="h-4 w-4 animate-spin" />
                     正在思考内容结构...
@@ -388,7 +368,7 @@ export function CoverLetterDialog({
             </div>
           )}
 
-          {status === "done" && (
+          {status === 'done' && (
             <div className="flex h-0 min-h-0 flex-1 flex-col p-6">
               <div className="mb-4 flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-500/10 dark:bg-pink-500/10">
@@ -407,22 +387,21 @@ export function CoverLetterDialog({
                 ref={contentRef}
                 className="flex-1 overflow-y-auto rounded-xl border border-border bg-white p-6 text-foreground dark:border-border/50 dark:bg-muted dark:text-muted-foreground"
                 style={{
-                  fontFamily:
-                    "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
-                  fontSize: "14px",
-                  lineHeight: "1.9",
-                  letterSpacing: "0.02em",
-                  whiteSpace: "pre-wrap",
-                  wordWrap: "break-word",
-                  textAlign: "justify",
+                  fontFamily: "'Georgia', 'Times New Roman', '宋体', 'SimSun', serif",
+                  fontSize: '14px',
+                  lineHeight: '1.9',
+                  letterSpacing: '0.02em',
+                  whiteSpace: 'pre-wrap',
+                  wordWrap: 'break-word',
+                  textAlign: 'justify',
                 }}
               >
-                {content.replace(/\n{2,}/g, "\n\n").trimStart()}
+                {content.replace(/\n{2,}/g, '\n\n').trimStart()}
               </div>
               <div className="mt-4 flex items-center justify-between">
                 <button
                   type="button"
-                  onClick={() => setStatus("idle")}
+                  onClick={() => setStatus('idle')}
                   className="flex items-center gap-2 rounded-xl border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:border-pink-400 hover:text-pink-600 dark:border-border dark:text-muted-foreground dark:hover:border-pink-400 dark:hover:text-pink-400"
                 >
                   <Sparkles className="h-4 w-4" />
@@ -463,22 +442,20 @@ export function CoverLetterDialog({
             </div>
           )}
 
-          {status === "error" && (
+          {status === 'error' && (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 p-6">
               <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 dark:bg-red-500/10">
                 <AlertCircle className="h-8 w-8 text-red-500 dark:text-red-400" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-medium text-red-600 dark:text-red-400">
-                  {errorMessage}
-                </p>
+                <p className="text-sm font-medium text-red-600 dark:text-red-400">{errorMessage}</p>
                 <p className="mt-1 text-xs text-muted-foreground dark:text-muted-foreground">
                   请检查输入后重试
                 </p>
               </div>
               <button
                 type="button"
-                onClick={() => setStatus("idle")}
+                onClick={() => setStatus('idle')}
                 className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-pink-500 to-pink-600 px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-pink-500/25 transition-all hover:from-pink-600 hover:to-pink-700 dark:from-pink-500 dark:to-pink-600 dark:shadow-pink-500/25"
               >
                 <Sparkles className="h-4 w-4" />

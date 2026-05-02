@@ -1,15 +1,15 @@
-import { useState, useEffect } from "react";
-import { X, Check, Upload, FileText, Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import { TemplateThumbnail } from "../template/TemplateThumbnail";
-import { templateLabelsMap, TEMPLATE_ORDER } from "../../lib/template-labels";
+import { useState, useEffect } from 'react';
+import { X, Check, Upload, FileText, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { TemplateThumbnail } from '../template/TemplateThumbnail';
+import { templateLabelsMap, TEMPLATE_ORDER } from '../../lib/template-labels';
 import {
   getProviderConfig,
   uploadAndParse,
   type ProviderConfigItem,
   type ProviderType,
-} from "../../lib/api";
-import { addNotificationTask } from "../../lib/notification";
+} from '../../lib/api';
+import { addNotificationTask } from '../../lib/notification';
 
 export interface CreateWorkspaceModalProps {
   open: boolean;
@@ -18,9 +18,9 @@ export interface CreateWorkspaceModalProps {
   onRefreshWs: () => void;
 }
 
-export type CreateTab = "template" | "upload";
+export type CreateTab = 'template' | 'upload';
 
-const ACCEPTED_EXTENSIONS = ".pdf";
+const ACCEPTED_EXTENSIONS = '.pdf';
 
 export default function CreateWorkspaceModal({
   open,
@@ -28,13 +28,13 @@ export default function CreateWorkspaceModal({
   onCreate,
 }: CreateWorkspaceModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATE_ORDER[0]);
-  const [name, setName] = useState("");
-  const [tab, setTab] = useState<CreateTab>("template");
+  const [name, setName] = useState('');
+  const [tab, setTab] = useState<CreateTab>('template');
   const [isCreating, setIsCreating] = useState(false);
 
   const [file, setFile] = useState<File | null>(null);
   const [isParsing, setIsParsing] = useState(false);
-  const [parseError, setParseError] = useState("");
+  const [parseError, setParseError] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [providerConfig, setProviderConfig] = useState<{
     providers: Record<string, ProviderConfigItem>;
@@ -64,27 +64,27 @@ export default function CreateWorkspaceModal({
     setIsCreating(true);
     try {
       await onCreate(selectedTemplate, name);
-      setName("");
-      setTab("template");
+      setName('');
+      setTab('template');
     } finally {
       setIsCreating(false);
     }
   };
 
   const handleFileSelect = (selectedFile: File) => {
-    setParseError("");
-    const validTypes = ["application/pdf"];
+    setParseError('');
+    const validTypes = ['application/pdf'];
     if (!validTypes.includes(selectedFile.type)) {
-      setParseError("不支持的文件类型，请上传 PDF 文件");
+      setParseError('不支持的文件类型，请上传 PDF 文件');
       return;
     }
     if (selectedFile.size > 10 * 1024 * 1024) {
-      setParseError("文件大小不能超过 10MB");
+      setParseError('文件大小不能超过 10MB');
       return;
     }
     const configured = activeProviderConfigured();
     if (!configured) {
-      toast.error("当前供应商未配置 API，请先在设置中配置");
+      toast.error('当前供应商未配置 API，请先在设置中配置');
       return;
     }
     setFile(selectedFile);
@@ -94,11 +94,11 @@ export default function CreateWorkspaceModal({
     if (!file) return;
     const configured = activeProviderConfigured();
     if (!configured) {
-      toast.error("当前供应商未配置 API，请先在设置中配置");
+      toast.error('当前供应商未配置 API，请先在设置中配置');
       return;
     }
     setIsParsing(true);
-    setParseError("");
+    setParseError('');
     try {
       const { taskId } = await uploadAndParse(file, {
         type: providerConfig!.active as ProviderType,
@@ -111,32 +111,32 @@ export default function CreateWorkspaceModal({
       onClose();
       setIsParsing(false);
       setFile(null);
-      setName("");
-      setTab("template");
+      setName('');
+      setTab('template');
       addNotificationTask({
         id: taskId,
-        taskType: "parse",
-        status: "running",
+        taskType: 'parse',
+        status: 'running',
         workspaceId: undefined,
         metaInfo: { title: name || file.name },
         errorMessage: null,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       });
-      toast.success("上传成功，简历正在解析中");
+      toast.success('上传成功，简历正在解析中');
     } catch (err: any) {
-      setParseError(err.message || "解析失败");
+      setParseError(err.message || '解析失败');
       setIsParsing(false);
     }
   };
 
   const resetAndClose = () => {
     onClose();
-    setName("");
-    setSelectedTemplate("classic");
-    setTab("template");
+    setName('');
+    setSelectedTemplate('classic');
+    setTab('template');
     setFile(null);
-    setParseError("");
+    setParseError('');
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -162,21 +162,14 @@ export default function CreateWorkspaceModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-        onClick={resetAndClose}
-      />
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={resetAndClose} />
 
       <div className="relative w-[896px] h-[768px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">
-              新建工作空间
-            </h2>
-            <p className="text-muted-foreground text-sm mt-1">
-              选择模板或上传简历文件开始创建
-            </p>
+            <h2 className="text-xl font-semibold text-foreground">新建工作空间</h2>
+            <p className="text-muted-foreground text-sm mt-1">选择模板或上传简历文件开始创建</p>
           </div>
           <button
             onClick={resetAndClose}
@@ -191,22 +184,22 @@ export default function CreateWorkspaceModal({
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === "template"
-                ? "bg-secondary text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              tab === 'template'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
-            onClick={() => setTab("template")}
+            onClick={() => setTab('template')}
           >
             从模板创建
           </button>
           <button
             type="button"
             className={`flex-1 cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-              tab === "upload"
-                ? "bg-secondary text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+              tab === 'upload'
+                ? 'bg-secondary text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
             }`}
-            onClick={() => setTab("upload")}
+            onClick={() => setTab('upload')}
           >
             上传简历
           </button>
@@ -224,11 +217,9 @@ export default function CreateWorkspaceModal({
         </div>
 
         <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
-          {tab === "template" ? (
+          {tab === 'template' ? (
             <div className="flex flex-col flex-1 min-h-0">
-              <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">
-                选择模板
-              </p>
+              <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">选择模板</p>
               <div className="flex-1 overflow-y-auto pr-1 min-h-0">
                 <div className="grid grid-cols-5 gap-3">
                   {TEMPLATE_ORDER.map((tpl) => {
@@ -239,8 +230,8 @@ export default function CreateWorkspaceModal({
                         type="button"
                         className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                           isSelected
-                            ? "border-pink-500 shadow-md shadow-pink-500/10"
-                            : "border-border hover:border-foreground/30"
+                            ? 'border-pink-500 shadow-md shadow-pink-500/10'
+                            : 'border-border hover:border-foreground/30'
                         }`}
                         onClick={() => setSelectedTemplate(tpl)}
                       >
@@ -261,8 +252,8 @@ export default function CreateWorkspaceModal({
                         <div
                           className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
                             isSelected
-                              ? "bg-pink-500/10 text-pink-400"
-                              : "text-muted-foreground hover:text-foreground"
+                              ? 'bg-pink-500/10 text-pink-400'
+                              : 'text-muted-foreground hover:text-foreground'
                           }`}
                         >
                           {templateLabelsMap[tpl]}
@@ -279,10 +270,10 @@ export default function CreateWorkspaceModal({
               <div
                 className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 transition-colors ${
                   isDragging
-                    ? "border-pink-400 bg-pink-500/10"
+                    ? 'border-pink-400 bg-pink-500/10'
                     : file
-                      ? "border-green-500/50 bg-green-500/5"
-                      : "border-foreground/20 hover:border-foreground/40"
+                      ? 'border-green-500/50 bg-green-500/5'
+                      : 'border-foreground/20 hover:border-foreground/40'
                 }`}
                 onDrop={handleDrop}
                 onDragOver={handleDragOver}
@@ -292,9 +283,7 @@ export default function CreateWorkspaceModal({
                   <div className="flex items-center gap-3">
                     <FileIcon className="h-8 w-8 text-green-400" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {file.name}
-                      </p>
+                      <p className="truncate text-sm font-medium text-foreground">{file.name}</p>
                       <p className="text-xs text-muted-foreground">
                         {(file.size / 1024).toFixed(0)} KB
                       </p>
@@ -313,15 +302,13 @@ export default function CreateWorkspaceModal({
                     <p className="text-sm text-muted-foreground">
                       拖拽文件到此处，或点击下方按钮选择
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground/60">
-                      支持 PDF（最大 10MB）
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground/60">支持 PDF（最大 10MB）</p>
                     <button
                       type="button"
                       className="mt-3 cursor-pointer rounded-md bg-secondary px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted transition-colors"
                       onClick={() => {
-                        const input = document.createElement("input");
-                        input.type = "file";
+                        const input = document.createElement('input');
+                        input.type = 'file';
                         input.accept = ACCEPTED_EXTENSIONS;
                         input.onchange = (e: Event) => {
                           const f = (e.target as HTMLInputElement).files?.[0];
@@ -336,15 +323,11 @@ export default function CreateWorkspaceModal({
                 )}
               </div>
 
-              {parseError && (
-                <p className="text-sm text-red-400">{parseError}</p>
-              )}
+              {parseError && <p className="text-sm text-red-400">{parseError}</p>}
 
               {/* Template selector for upload */}
               <div className="flex flex-col flex-1 min-h-0 mt-4">
-                <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">
-                  选择模板
-                </p>
+                <p className="mb-3 text-sm font-medium text-muted-foreground shrink-0">选择模板</p>
                 <div className="flex-1 overflow-y-auto pr-1 min-h-0">
                   <div className="grid grid-cols-5 gap-3">
                     {TEMPLATE_ORDER.map((tpl) => {
@@ -355,8 +338,8 @@ export default function CreateWorkspaceModal({
                           type="button"
                           className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                             isSelected
-                              ? "border-pink-500 shadow-md shadow-pink-500/10"
-                              : "border-border hover:border-foreground/30"
+                              ? 'border-pink-500 shadow-md shadow-pink-500/10'
+                              : 'border-border hover:border-foreground/30'
                           }`}
                           onClick={() => setSelectedTemplate(tpl)}
                         >
@@ -374,8 +357,8 @@ export default function CreateWorkspaceModal({
                           <div
                             className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
                               isSelected
-                                ? "bg-pink-500/10 text-pink-400"
-                                : "text-muted-foreground hover:text-foreground"
+                                ? 'bg-pink-500/10 text-pink-400'
+                                : 'text-muted-foreground hover:text-foreground'
                             }`}
                           >
                             {templateLabelsMap[tpl]}
@@ -398,7 +381,7 @@ export default function CreateWorkspaceModal({
           >
             取消
           </button>
-          {tab === "template" ? (
+          {tab === 'template' ? (
             <button
               onClick={handleCreate}
               disabled={isCreating}
@@ -410,7 +393,7 @@ export default function CreateWorkspaceModal({
                   创建中...
                 </>
               ) : (
-                "创建"
+                '创建'
               )}
             </button>
           ) : (
@@ -425,7 +408,7 @@ export default function CreateWorkspaceModal({
                   解析中...
                 </>
               ) : (
-                "上传并解析"
+                '上传并解析'
               )}
             </button>
           )}

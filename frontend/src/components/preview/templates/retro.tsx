@@ -10,17 +10,17 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#78350f";
-const ACCENT = "#92400e";
-const BG = "#fefce8";
+const PRIMARY = '#78350f';
+const ACCENT = '#92400e';
+const BG = '#fefce8';
 
 export function RetroTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -42,13 +42,10 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] shadow-lg"
-      style={{ fontFamily: "Georgia, serif", backgroundColor: BG }}
+      style={{ fontFamily: 'Georgia, serif', backgroundColor: BG }}
     >
       {/* Header */}
-      <div
-        className="mb-6 pb-4 text-center"
-        style={{ borderBottom: `3px double ${PRIMARY}` }}
-      >
+      <div className="mb-6 pb-4 text-center" style={{ borderBottom: `3px double ${PRIMARY}` }}>
         {pi.avatar && (
           <AvatarImage
             src={pi.avatar}
@@ -61,7 +58,7 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
           className="text-3xl font-bold"
           style={{ color: PRIMARY, fontFamily: "'Courier New', monospace" }}
         >
-          {pi.fullName || "Your Name"}
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
           <p className="mt-1 text-sm italic" style={{ color: ACCENT }}>
@@ -81,7 +78,7 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
               >
                 {c}
                 {i < contacts.length - 1 && (
-                  <span style={{ color: `${PRIMARY}40` }}>{"\u2022"}</span>
+                  <span style={{ color: `${PRIMARY}40` }}>{'\u2022'}</span>
                 )}
               </span>
             ))}
@@ -93,16 +90,14 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
           style={{ color: `${PRIMARY}60` }}
         >
           <span>~</span>
-          <span>{"\u2666"}</span>
+          <span>{'\u2666'}</span>
           <span>~</span>
         </div>
       </div>
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section, idx, arr) => (
           <div key={section.id} data-section className="mb-7 pt-2">
             <div className="mb-3 text-center">
@@ -112,7 +107,7 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
                   color: PRIMARY,
                   borderBottom: `2px solid ${PRIMARY}`,
                   borderTop: `2px solid ${PRIMARY}`,
-                  padding: "6px 16px",
+                  padding: '6px 16px',
                 }}
               >
                 {section.title}
@@ -127,15 +122,9 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
                 className="mb-4 flex items-center justify-center gap-2 text-xs"
                 style={{ color: `${PRIMARY}40` }}
               >
-                <div
-                  className="h-px w-12"
-                  style={{ backgroundColor: `${PRIMARY}20` }}
-                />
-                <span>{"\u2726"}</span>
-                <div
-                  className="h-px w-12"
-                  style={{ backgroundColor: `${PRIMARY}20` }}
-                />
+                <div className="h-px w-12" style={{ backgroundColor: `${PRIMARY}20` }} />
+                <span>{'\u2726'}</span>
+                <div className="h-px w-12" style={{ backgroundColor: `${PRIMARY}20` }} />
               </div>
             )}
           </div>
@@ -144,22 +133,13 @@ export function RetroTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function RetroSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function RetroSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
-      <p
-        className="text-center text-sm italic leading-relaxed"
-        style={{ color: ACCENT }}
-      >
+      <p className="text-center text-sm italic leading-relaxed" style={{ color: ACCENT }}>
         &ldquo;
         <span
           dangerouslySetInnerHTML={{
@@ -171,12 +151,12 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.position}
@@ -188,13 +168,9 @@ function RetroSectionContent({
                   fontFamily: "'Courier New', monospace",
                 }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
@@ -205,13 +181,13 @@ function RetroSectionContent({
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#57534e" }}
+                style={{ color: '#57534e' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-1 text-xs italic" style={{ color: ACCENT }}>
-                Technologies: {item.technologies.join(", ")}
+                Technologies: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -220,13 +196,10 @@ function RetroSectionContent({
                   <li
                     key={i}
                     className="flex items-start gap-2 text-sm"
-                    style={{ color: "#57534e" }}
+                    style={{ color: '#57534e' }}
                   >
-                    <span
-                      className="mt-1 shrink-0 text-xs"
-                      style={{ color: PRIMARY }}
-                    >
-                      {"\u2022"}
+                    <span className="mt-1 shrink-0 text-xs" style={{ color: PRIMARY }}>
+                      {'\u2022'}
                     </span>
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
@@ -239,12 +212,12 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.institution}
@@ -256,12 +229,10 @@ function RetroSectionContent({
                   fontFamily: "'Courier New', monospace",
                 }}
               >
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm" style={{ color: "#57534e" }}>
+            <p className="text-sm" style={{ color: '#57534e' }}>
               {degreeField(item.degree, item.field)}
             </p>
             {item.gpa && (
@@ -275,13 +246,10 @@ function RetroSectionContent({
                   <li
                     key={i}
                     className="flex items-start gap-2 text-sm"
-                    style={{ color: "#57534e" }}
+                    style={{ color: '#57534e' }}
                   >
-                    <span
-                      className="mt-1 shrink-0 text-xs"
-                      style={{ color: PRIMARY }}
-                    >
-                      {"\u2022"}
+                    <span className="mt-1 shrink-0 text-xs" style={{ color: PRIMARY }}>
+                      {'\u2022'}
                     </span>
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
@@ -294,33 +262,31 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2">
         {categories.map((cat: any) => (
-          <div key={cat.id} className="flex text-sm">
+          <div key={cat.id} data-pdf-item className="flex text-sm">
             <span
               className="w-32 shrink-0 font-bold"
               style={{ color: PRIMARY, fontFamily: "'Courier New', monospace" }}
             >
               {cat.name}:
             </span>
-            <span style={{ color: "#57534e" }}>
-              {cat.skills?.join(" \u2022 ")}
-            </span>
+            <span style={{ color: '#57534e' }}>{cat.skills?.join(' \u2022 ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.name}
@@ -333,22 +299,21 @@ function RetroSectionContent({
                     fontFamily: "'Courier New', monospace",
                   }}
                 >
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
             {item.description && (
               <p
                 className="mt-0.5 text-sm"
-                style={{ color: "#57534e" }}
+                style={{ color: '#57534e' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-1 text-xs italic" style={{ color: ACCENT }}>
-                Technologies: {item.technologies.join(", ")}
+                Technologies: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -357,13 +322,10 @@ function RetroSectionContent({
                   <li
                     key={i}
                     className="flex items-start gap-2 text-sm"
-                    style={{ color: "#57534e" }}
+                    style={{ color: '#57534e' }}
                   >
-                    <span
-                      className="mt-1 shrink-0 text-xs"
-                      style={{ color: PRIMARY }}
-                    >
-                      {"\u2022"}
+                    <span className="mt-1 shrink-0 text-xs" style={{ color: PRIMARY }}>
+                      {'\u2022'}
                     </span>
                     <span dangerouslySetInnerHTML={{ __html: md(h) }} />
                   </li>
@@ -376,14 +338,14 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline gap-2">
+          <div key={item.id} data-pdf-item className="flex items-baseline gap-2">
             <span className="shrink-0 text-xs" style={{ color: PRIMARY }}>
-              {"\u2666"}
+              {'\u2666'}
             </span>
             <span className="text-sm font-bold" style={{ color: PRIMARY }}>
               {item.name}
@@ -391,7 +353,7 @@ function RetroSectionContent({
             {(item.issuer || item.date) && (
               <span className="text-xs" style={{ color: ACCENT }}>
                 {item.issuer}
-                {item.issuer && item.date ? " " : ""}
+                {item.issuer && item.date ? ' ' : ''}
                 {item.date && `(${item.date})`}
               </span>
             )}
@@ -401,12 +363,12 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-4">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline gap-2">
+          <div key={item.id} data-pdf-item className="flex items-baseline gap-2">
             <span className="text-sm font-bold" style={{ color: PRIMARY }}>
               {item.language}
             </span>
@@ -419,12 +381,12 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.name}
@@ -436,7 +398,7 @@ function RetroSectionContent({
                   fontFamily: "'Courier New', monospace",
                 }}
               >
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
@@ -447,7 +409,7 @@ function RetroSectionContent({
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#57534e" }}
+                style={{ color: '#57534e' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -457,12 +419,12 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.title}
@@ -487,7 +449,7 @@ function RetroSectionContent({
             {item.description && (
               <p
                 className="mt-1 text-sm"
-                style={{ color: "#57534e" }}
+                style={{ color: '#57534e' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}
@@ -497,7 +459,7 @@ function RetroSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -506,14 +468,14 @@ function RetroSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-bold" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>
             {item.description && (
               <p
                 className="text-sm"
-                style={{ color: "#57534e" }}
+                style={{ color: '#57534e' }}
                 dangerouslySetInnerHTML={{ __html: md(item.description) }}
               />
             )}

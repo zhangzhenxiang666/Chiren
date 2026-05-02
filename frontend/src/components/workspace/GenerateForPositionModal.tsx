@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { X, Check, Loader2, Sparkles, FileText } from "lucide-react";
-import { TemplateThumbnail } from "../template/TemplateThumbnail";
-import { templateLabelsMap, TEMPLATE_ORDER } from "../../lib/template-labels";
+import { useState } from 'react';
+import { X, Check, Loader2, Sparkles, FileText } from 'lucide-react';
+import { TemplateThumbnail } from '../template/TemplateThumbnail';
+import { templateLabelsMap, TEMPLATE_ORDER } from '../../lib/template-labels';
 
 export interface GenerateForPositionModalProps {
   open: boolean;
@@ -27,9 +27,9 @@ export default function GenerateForPositionModal({
   onCreateDirect,
 }: GenerateForPositionModalProps) {
   const [selectedTemplate, setSelectedTemplate] = useState(TEMPLATE_ORDER[0]);
-  const [name, setName] = useState("");
-  const [jobTitle, setJobTitle] = useState("");
-  const [jdDescription, setJdDescription] = useState("");
+  const [name, setName] = useState('');
+  const [jobTitle, setJobTitle] = useState('');
+  const [jdDescription, setJdDescription] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCreatingDirect, setIsCreatingDirect] = useState(false);
 
@@ -64,9 +64,9 @@ export default function GenerateForPositionModal({
 
   const resetAndClose = () => {
     onClose();
-    setName("");
-    setJobTitle("");
-    setJdDescription("");
+    setName('');
+    setJobTitle('');
+    setJdDescription('');
     setSelectedTemplate(TEMPLATE_ORDER[0]);
   };
 
@@ -79,7 +79,7 @@ export default function GenerateForPositionModal({
         tabIndex={0}
         onClick={resetAndClose}
         onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") resetAndClose();
+          if (e.key === 'Enter' || e.key === ' ') resetAndClose();
         }}
         className="absolute inset-0 bg-black/60 backdrop-blur-sm cursor-pointer"
       />
@@ -87,9 +87,7 @@ export default function GenerateForPositionModal({
       <div className="relative w-[896px] h-[768px] bg-card rounded-2xl shadow-2xl shadow-black/20 flex flex-col">
         <div className="flex items-start justify-between px-6 pt-6 pb-4">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">
-              针对新职位生成
-            </h2>
+            <h2 className="text-xl font-semibold text-foreground">针对新职位生成</h2>
             <p className="text-muted-foreground text-sm mt-1">
               填写岗位要求，AI 将为您生成定制简历
             </p>
@@ -106,12 +104,8 @@ export default function GenerateForPositionModal({
         <div className="px-6 py-4 flex-1 flex flex-col overflow-hidden">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label
-                htmlFor="gen-name"
-                className="text-xs text-muted-foreground mb-1.5 block"
-              >
-                简历名称{" "}
-                <span className="text-muted-foreground/60">(选填)</span>
+              <label htmlFor="gen-name" className="text-xs text-muted-foreground mb-1.5 block">
+                简历名称 <span className="text-muted-foreground/60">(选填)</span>
               </label>
               <input
                 id="gen-name"
@@ -123,12 +117,8 @@ export default function GenerateForPositionModal({
               />
             </div>
             <div>
-              <label
-                htmlFor="gen-job-title"
-                className="text-xs text-muted-foreground mb-1.5 block"
-              >
-                岗位名称{" "}
-                <span className="text-muted-foreground/60">(选填)</span>
+              <label htmlFor="gen-job-title" className="text-xs text-muted-foreground mb-1.5 block">
+                岗位名称 <span className="text-muted-foreground/60">(选填)</span>
               </label>
               <input
                 id="gen-job-title"
@@ -142,10 +132,7 @@ export default function GenerateForPositionModal({
           </div>
 
           <div className="mt-4">
-            <label
-              htmlFor="gen-jd"
-              className="text-xs text-muted-foreground mb-1.5 block"
-            >
+            <label htmlFor="gen-jd" className="text-xs text-muted-foreground mb-1.5 block">
               JD 描述 <span className="text-red-400">*</span>
             </label>
             <textarea
@@ -161,11 +148,9 @@ export default function GenerateForPositionModal({
                 请尽量填写完整的岗位要求和职责描述
               </span>
               <span
-                className={`text-[11px] ${jdDescription.trim() ? "text-pink-400" : "text-muted-foreground/60"}`}
+                className={`text-[11px] ${jdDescription.trim() ? 'text-pink-400' : 'text-muted-foreground/60'}`}
               >
-                {jdDescription.length > 0
-                  ? `${jdDescription.length} 字`
-                  : "必填"}
+                {jdDescription.length > 0 ? `${jdDescription.length} 字` : '必填'}
               </span>
             </div>
           </div>
@@ -184,8 +169,8 @@ export default function GenerateForPositionModal({
                       type="button"
                       className={`relative cursor-pointer overflow-hidden rounded-xl border-2 transition-all duration-200 ${
                         isSelected
-                          ? "border-pink-500 shadow-md shadow-pink-500/10"
-                          : "border-border hover:border-foreground/30"
+                          ? 'border-pink-500 shadow-md shadow-pink-500/10'
+                          : 'border-border hover:border-foreground/30'
                       }`}
                       onClick={() => setSelectedTemplate(tpl)}
                     >
@@ -203,8 +188,8 @@ export default function GenerateForPositionModal({
                       <div
                         className={`px-2 py-1.5 text-center text-xs font-medium transition-colors ${
                           isSelected
-                            ? "bg-pink-500/10 text-pink-400"
-                            : "text-muted-foreground hover:text-foreground"
+                            ? 'bg-pink-500/10 text-pink-400'
+                            : 'text-muted-foreground hover:text-foreground'
                         }`}
                       >
                         {templateLabelsMap[tpl]}

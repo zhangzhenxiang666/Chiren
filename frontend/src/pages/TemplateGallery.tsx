@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { X } from "lucide-react";
-import TemplateCard from "../components/template/TemplateCard";
-import ResumePreview from "../components/preview/ResumePreview";
-import { mockResume } from "../data/mockResume";
-import { templateLabelsMap, TEMPLATE_ORDER } from "../lib/template-labels";
+import { useState } from 'react';
+import { X } from 'lucide-react';
+import TemplateCard from '../components/template/TemplateCard';
+import ResumePreview from '../components/preview/ResumePreview';
+import { mockResume } from '../data/mockResume';
+import { templateLabelsMap, TEMPLATE_ORDER } from '../lib/template-labels';
 
 export default function TemplateGallery() {
   const [previewTemplate, setPreviewTemplate] = useState<string | null>(null);
@@ -16,9 +16,7 @@ export default function TemplateGallery() {
     <div className="flex flex-col h-full">
       <div className="shrink-0 mb-8">
         <h1 className="text-3xl font-bold text-foreground">模板</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          选择一个模板开始创建你的简历
-        </p>
+        <p className="text-sm text-muted-foreground mt-1">选择一个模板开始创建你的简历</p>
       </div>
 
       <div className="flex-1 overflow-y-auto min-h-0">
@@ -78,9 +76,7 @@ function PreviewModal({
           <div className="flex items-center gap-6">
             <h2 className="text-lg font-semibold text-foreground">
               预览：
-              <span className="text-pink-400">
-                {templateLabelsMap[templateId]}
-              </span>
+              <span className="text-pink-400">{templateLabelsMap[templateId]}</span>
             </h2>
             <button
               onClick={() => onUse(templateId)}

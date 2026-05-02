@@ -10,17 +10,17 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#1e293b";
-const ACCENT = "#b91c1c";
-const RIBBON = "#dc2626";
+const PRIMARY = '#1e293b';
+const ACCENT = '#b91c1c';
+const RIBBON = '#dc2626';
 
 export function RibbonTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -42,25 +42,22 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Ribbon Header */}
-      <div
-        className="relative px-8 py-8 text-white"
-        style={{ backgroundColor: RIBBON }}
-      >
+      <div className="relative px-8 py-8 text-white" style={{ backgroundColor: RIBBON }}>
         {/* Decorative ribbon fold */}
         <div
           className="absolute bottom-0 left-0 h-0 w-0"
           style={{
-            borderLeft: "20px solid transparent",
+            borderLeft: '20px solid transparent',
             borderTop: `12px solid ${ACCENT}`,
           }}
         />
         <div
           className="absolute bottom-0 right-0 h-0 w-0"
           style={{
-            borderRight: "20px solid transparent",
+            borderRight: '20px solid transparent',
             borderTop: `12px solid ${ACCENT}`,
           }}
         />
@@ -75,13 +72,9 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
           )}
           <div>
             <h1 className="text-2xl font-bold tracking-tight text-white">
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
-            {pi.jobTitle && (
-              <p className="mt-1 text-sm font-light text-red-100">
-                {pi.jobTitle}
-              </p>
-            )}
+            {pi.jobTitle && <p className="mt-1 text-sm font-light text-red-100">{pi.jobTitle}</p>}
             {contacts.length > 0 && (
               <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-red-100/80">
                 {contacts.map((c, i) => (
@@ -96,10 +89,7 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-5" data-section>
               {/* Ribbon tab section header */}
@@ -116,15 +106,12 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
                 <div
                   className="h-0 w-0"
                   style={{
-                    borderTop: "13px solid transparent",
-                    borderBottom: "13px solid transparent",
+                    borderTop: '13px solid transparent',
+                    borderBottom: '13px solid transparent',
                     borderLeft: `8px solid ${RIBBON}`,
                   }}
                 />
-                <div
-                  className="ml-2 h-px flex-1"
-                  style={{ backgroundColor: "#e5e7eb" }}
-                />
+                <div className="ml-2 h-px flex-1" style={{ backgroundColor: '#e5e7eb' }} />
               </div>
               <div className="mt-2">
                 <RibbonSectionContent section={section} resume={resume} />
@@ -136,17 +123,11 @@ export function RibbonTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function RibbonSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function RibbonSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -157,39 +138,28 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-2 pl-3"
-            style={{ borderColor: RIBBON }}
-          >
+          <div key={item.id} className="border-l-2 pl-3" style={{ borderColor: RIBBON }}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: PRIMARY }}
-                >
+                <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                   {item.position}
                 </span>
                 {item.company && (
                   <span className="text-sm" style={{ color: ACCENT }}>
-                    {" "}
+                    {' '}
                     | {item.company}
                   </span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -228,35 +198,22 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-2 pl-3"
-            style={{ borderColor: RIBBON }}
-          >
+          <div key={item.id} className="border-l-2 pl-3" style={{ borderColor: RIBBON }}>
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.institution}
               </span>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm text-zinc-600">
-              {degreeField(item.degree, item.field)}
-            </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -274,15 +231,13 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
-            <p className="mb-1 text-xs font-semibold text-zinc-500">
-              {cat.name}
-            </p>
+          <div key={cat.id} data-pdf-item>
+            <p className="mb-1 text-xs font-semibold text-zinc-500">{cat.name}</p>
             <div className="flex flex-wrap gap-1.5">
               {(cat.skills || []).map((skill: string, i: number) => (
                 <span
@@ -300,25 +255,20 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-2 pl-3"
-            style={{ borderColor: RIBBON }}
-          >
+          <div key={item.id} className="border-l-2 pl-3" style={{ borderColor: RIBBON }}>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold" style={{ color: ACCENT }}>
                 {item.name}
               </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -358,16 +308,12 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-2 pl-3"
-            style={{ borderColor: RIBBON }}
-          >
+          <div key={item.id} className="border-l-2 pl-3" style={{ borderColor: RIBBON }}>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold" style={{ color: ACCENT }}>
                 {item.name}
@@ -376,9 +322,7 @@ function RibbonSectionContent({
                 ⭐ {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-400">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-400">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -391,33 +335,26 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between">
+          <div key={item.id} data-pdf-item className="flex items-baseline justify-between">
             <div>
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-sm text-zinc-600"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-sm text-zinc-600"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="text-xs text-zinc-400">{item.date}</span>
-            )}
+            {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
@@ -433,30 +370,19 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-2 pl-3"
-            style={{ borderColor: RIBBON }}
-          >
+          <div key={item.id} className="border-l-2 pl-3" style={{ borderColor: RIBBON }}>
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.title}
               </span>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -469,7 +395,7 @@ function RibbonSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -478,7 +404,7 @@ function RibbonSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

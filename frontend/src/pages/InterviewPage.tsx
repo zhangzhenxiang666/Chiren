@@ -1,5 +1,5 @@
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { useEffect, useState, useRef, useCallback, useMemo } from "react";
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import {
   SkipForward,
   Lightbulb,
@@ -15,9 +15,9 @@ import {
   Brain,
   Inbox,
   FileX,
-} from "lucide-react";
-import { toast } from "sonner";
-import { useInterviewStore } from "@/stores/interview-store";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import { useInterviewStore } from '@/stores/interview-store';
 import {
   streamInterviewChat,
   getProviderConfig,
@@ -27,20 +27,20 @@ import {
   regenerateRoundSummary,
   regenerateCollectionSummary,
   checkRunningInterviewSummaryTask,
-} from "@/lib/api";
-import { addNotificationTask, markUnread } from "@/lib/notification";
-import type { InterviewRound, InterviewChatAction } from "@/types/interview";
+} from '@/lib/api';
+import { addNotificationTask, markUnread } from '@/lib/notification';
+import type { InterviewRound, InterviewChatAction } from '@/types/interview';
 import type {
   SSEEvent,
   ProviderConfig,
   ConversationMessage as ApiConversationMessage,
-} from "@/lib/api";
+} from '@/lib/api';
 
-const SKIP_MARKERS = ["<INTERVIEW_START>", "<SKIP>", "<HINT>"];
+const SKIP_MARKERS = ['<INTERVIEW_START>', '<SKIP>', '<HINT>'];
 
 interface Message {
   id: string;
-  role: "interviewer" | "candidate";
+  role: 'interviewer' | 'candidate';
   content: string;
   reasoning: string | null;
   timestamp: Date;
@@ -57,16 +57,16 @@ interface StreamingState {
 function apiMessagesToLocal(messages: ApiConversationMessage[]): Message[] {
   const result: Message[] = [];
   for (const msg of messages) {
-    let text = "";
+    let text = '';
     for (const block of msg.content) {
-      if (block.type === "text") {
+      if (block.type === 'text') {
         text += block.text;
       }
     }
     if (SKIP_MARKERS.includes(text.trim())) continue;
     result.push({
       id: `db-${msg.id}`,
-      role: msg.role === "user" ? "candidate" : "interviewer",
+      role: msg.role === 'user' ? 'candidate' : 'interviewer',
       content: text,
       reasoning: msg.reasoning || null,
       timestamp: msg.createdAt ? new Date(msg.createdAt) : new Date(),
@@ -84,42 +84,38 @@ export default function InterviewPage() {
   }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const autoStart = searchParams.get("autoStart") === "1";
+  const autoStart = searchParams.get('autoStart') === '1';
 
   const backUrl =
     workspaceId && resumeId
-      ? `/workspace/${workspaceId}/resumes/${resumeId}/interview${collectionId ? `?activate=${collectionId}` : ""}`
+      ? `/workspace/${workspaceId}/resumes/${resumeId}/interview${collectionId ? `?activate=${collectionId}` : ''}`
       : workspaceId
         ? `/workspace/${workspaceId}`
-        : "/workspace";
+        : '/workspace';
 
   const getCollectionById = useInterviewStore((s) => s.getCollectionById);
   const updateRoundStatus = useInterviewStore((s) => s.updateRoundStatus);
 
   const [loading, setLoading] = useState(true);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isEnding, setIsEnding] = useState(false);
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [summaryTaskId, setSummaryTaskId] = useState<string | null>(null);
   const [localStarted, setLocalStarted] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
-  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(
-    null,
-  );
+  const [providerConfig, setProviderConfig] = useState<ProviderConfig | null>(null);
   const [streaming, setStreaming] = useState<StreamingState>({
-    content: "",
-    thinking: "",
+    content: '',
+    thinking: '',
     thinkingVisible: false,
     isThinking: false,
     isActive: false,
   });
-  const [expandedReasoning, setExpandedReasoning] = useState<Set<string>>(
-    new Set(),
-  );
+  const [expandedReasoning, setExpandedReasoning] = useState<Set<string>>(new Set());
   const streamingRef = useRef<StreamingState>({
-    content: "",
-    thinking: "",
+    content: '',
+    thinking: '',
     thinkingVisible: false,
     isThinking: false,
     isActive: false,
@@ -144,9 +140,7 @@ export default function InterviewPage() {
       fetchResumeDetail(workspaceId).catch(() => null),
     ])
       .then(async ([workspaces, resumeData]) => {
-        const ws = (workspaces as any[])?.find(
-          (w: any) => w.id === workspaceId,
-        );
+        const ws = (workspaces as any[])?.find((w: any) => w.id === workspaceId);
         if (!ws) {
           setWorkspaceNotFound(true);
           return;
@@ -160,9 +154,7 @@ export default function InterviewPage() {
         }
 
         await fetchCollections(resumeId);
-        const col = useInterviewStore
-          .getState()
-          .getCollectionById(collectionId);
+        const col = useInterviewStore.getState().getCollectionById(collectionId);
         if (!col) {
           setCollectionNotFound(true);
           return;
@@ -181,15 +173,13 @@ export default function InterviewPage() {
   const sortedRounds = [...rounds].sort((a, b) => a.sortOrder - b.sortOrder);
   const currentRound = sortedRounds.find((r) => r.id === roundId);
   const currentRoundIndex = sortedRounds.findIndex((r) => r.id === roundId);
-  const initialStarted = currentRound
-    ? currentRound.status !== "not_started"
-    : false;
+  const initialStarted = currentRound ? currentRound.status !== 'not_started' : false;
   const hasStarted = initialStarted || localStarted;
-  const isCompleted = currentRound?.status === "completed";
+  const isCompleted = currentRound?.status === 'completed';
 
   const configValidation = useMemo(() => {
     if (!providerConfig) {
-      return { valid: false, message: "正在加载 AI 配置...", isLoaded: false };
+      return { valid: false, message: '正在加载 AI 配置...', isLoaded: false };
     }
     const active = providerConfig.active;
     const cfg = providerConfig.providers[active];
@@ -201,17 +191,17 @@ export default function InterviewPage() {
       };
     }
     const missing: string[] = [];
-    if (!cfg.model?.trim()) missing.push("Model");
-    if (!cfg.apiKey?.trim()) missing.push("API Key");
-    if (!cfg.baseUrl?.trim()) missing.push("Base URL");
+    if (!cfg.model?.trim()) missing.push('Model');
+    if (!cfg.apiKey?.trim()) missing.push('API Key');
+    if (!cfg.baseUrl?.trim()) missing.push('Base URL');
     if (missing.length > 0) {
       return {
         valid: false,
-        message: `AI 配置不完整，缺少: ${missing.join("、")}`,
+        message: `AI 配置不完整，缺少: ${missing.join('、')}`,
         isLoaded: true,
       };
     }
-    return { valid: true, message: "配置就绪", isLoaded: true };
+    return { valid: true, message: '配置就绪', isLoaded: true };
   }, [providerConfig]);
 
   interface RoundSummary {
@@ -224,20 +214,21 @@ export default function InterviewPage() {
 
   const roundSummary = useMemo(
     () =>
-      (currentRound?.metaInfo as Record<string, unknown> | undefined)
-        ?.round_summary as RoundSummary | undefined,
+      (currentRound?.metaInfo as Record<string, unknown> | undefined)?.round_summary as
+        | RoundSummary
+        | undefined,
     [currentRound?.metaInfo],
   );
 
   const answeredCount = useMemo(
-    () => messages.filter((m) => m.role === "candidate").length,
+    () => messages.filter((m) => m.role === 'candidate').length,
     [messages],
   );
 
   useEffect(() => {
     getProviderConfig()
       .then(setProviderConfig)
-      .catch(() => toast.error("加载 AI 配置失败"));
+      .catch(() => toast.error('加载 AI 配置失败'));
   }, []);
 
   useEffect(() => {
@@ -251,7 +242,7 @@ export default function InterviewPage() {
   }, [hasStarted, roundId]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, streaming.content, streaming.thinking]);
 
   useEffect(() => {
@@ -282,35 +273,35 @@ export default function InterviewPage() {
     const ref = streamingRef;
 
     switch (event.type) {
-      case "next":
+      case 'next':
         ref.current = {
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
         };
         setStreaming({
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
         });
         break;
 
-      case "thinking_start":
+      case 'thinking_start':
         ref.current = {
           ...ref.current,
-          thinking: "",
+          thinking: '',
           thinkingVisible: false,
           isThinking: true,
         };
         setStreaming({ ...ref.current });
         break;
 
-      case "thinking_delta": {
-        const text = (event.data.text as string) || "";
+      case 'thinking_delta': {
+        const text = (event.data.text as string) || '';
         ref.current = {
           ...ref.current,
           thinking: ref.current.thinking + text,
@@ -319,10 +310,10 @@ export default function InterviewPage() {
         break;
       }
 
-      case "text_start":
+      case 'text_start':
         ref.current = {
           ...ref.current,
-          content: "",
+          content: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: true,
@@ -330,14 +321,14 @@ export default function InterviewPage() {
         setStreaming({ ...ref.current });
         break;
 
-      case "text_delta": {
-        const text = (event.data.text as string) || "";
+      case 'text_delta': {
+        const text = (event.data.text as string) || '';
         ref.current = { ...ref.current, content: ref.current.content + text };
         setStreaming({ ...ref.current });
         break;
       }
 
-      case "done": {
+      case 'done': {
         if (isDoneRef.current) break;
         isDoneRef.current = true;
 
@@ -345,15 +336,15 @@ export default function InterviewPage() {
         const finalThinking = ref.current.thinking;
 
         ref.current = {
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
         };
         setStreaming({
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
@@ -364,7 +355,7 @@ export default function InterviewPage() {
         if (finalContent) {
           const msg: Message = {
             id: `interviewer-${Date.now()}`,
-            role: "interviewer",
+            role: 'interviewer',
             content: finalContent,
             reasoning: finalThinking || null,
             timestamp: new Date(),
@@ -374,19 +365,19 @@ export default function InterviewPage() {
         break;
       }
 
-      case "error": {
-        const msg = (event.data.message as string) || "未知错误";
+      case 'error': {
+        const msg = (event.data.message as string) || '未知错误';
         toast.error(msg);
         ref.current = {
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
         };
         setStreaming({
-          content: "",
-          thinking: "",
+          content: '',
+          thinking: '',
           thinkingVisible: false,
           isThinking: false,
           isActive: false,
@@ -402,7 +393,7 @@ export default function InterviewPage() {
     (action: InterviewChatAction, content?: string) => {
       const params = getApiParams(action, content);
       if (!params) {
-        toast.error("AI 配置未加载");
+        toast.error('AI 配置未加载');
         return;
       }
 
@@ -411,15 +402,15 @@ export default function InterviewPage() {
       setIsStreaming(true);
 
       streamingRef.current = {
-        content: "",
-        thinking: "",
+        content: '',
+        thinking: '',
         thinkingVisible: false,
         isThinking: false,
         isActive: false,
       };
       setStreaming({
-        content: "",
-        thinking: "",
+        content: '',
+        thinking: '',
         thinkingVisible: false,
         isThinking: false,
         isActive: false,
@@ -434,7 +425,7 @@ export default function InterviewPage() {
   const handleStart = () => {
     if (!roundId || !collectionId) return;
     setLocalStarted(true);
-    doChat("start");
+    doChat('start');
   };
 
   const autoStartTriggered = useRef(false);
@@ -456,19 +447,19 @@ export default function InterviewPage() {
     if (!inputValue.trim() || isStreaming) return;
     const candidateMsg: Message = {
       id: `candidate-${Date.now()}`,
-      role: "candidate",
+      role: 'candidate',
       content: inputValue.trim(),
       reasoning: null,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, candidateMsg]);
     const answer = inputValue.trim();
-    setInputValue("");
-    doChat("answer", answer);
+    setInputValue('');
+    doChat('answer', answer);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
+    if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
     }
@@ -476,12 +467,12 @@ export default function InterviewPage() {
 
   const handleSkip = () => {
     if (isStreaming) return;
-    doChat("skip");
+    doChat('skip');
   };
 
   const handleHint = () => {
     if (isStreaming) return;
-    doChat("hint");
+    doChat('hint');
   };
 
   const handleEndRound = async () => {
@@ -490,7 +481,7 @@ export default function InterviewPage() {
     try {
       cleanupRef.current?.();
 
-      await updateRoundStatus(collectionId, roundId, "completed");
+      await updateRoundStatus(collectionId, roundId, 'completed');
 
       const active = providerConfig.active;
       const cfg = providerConfig.providers[active];
@@ -508,10 +499,10 @@ export default function InterviewPage() {
         markUnread();
         addNotificationTask({
           id: taskId,
-          taskType: "collection_summary",
-          status: "running",
+          taskType: 'collection_summary',
+          status: 'running',
           metaInfo: {
-            title: collection?.name || "",
+            title: collection?.name || '',
             fileName: collectionId,
           },
           errorMessage: null,
@@ -519,7 +510,7 @@ export default function InterviewPage() {
           updatedAt: new Date().toISOString(),
         });
 
-        toast.success("面试全部完成，正在生成集合总结...");
+        toast.success('面试全部完成，正在生成集合总结...');
       } else {
         const { taskId } = await regenerateRoundSummary({
           roundId,
@@ -532,10 +523,10 @@ export default function InterviewPage() {
         markUnread();
         addNotificationTask({
           id: taskId,
-          taskType: "interview_summary",
-          status: "running",
+          taskType: 'interview_summary',
+          status: 'running',
           metaInfo: {
-            title: currentRound?.name || "",
+            title: currentRound?.name || '',
             fileName: roundId,
           },
           errorMessage: null,
@@ -545,14 +536,14 @@ export default function InterviewPage() {
 
         const nextRound = sortedRounds[currentRoundIndex + 1];
         if (nextRound) {
-          toast.success("本轮面试已结束，正在生成总结...");
+          toast.success('本轮面试已结束，正在生成总结...');
           navigate(
             `/workspace/${workspaceId}/resumes/${resumeId}/interview/${collectionId}/${nextRound.id}?autoStart=1`,
           );
         }
       }
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "结束面试失败");
+      toast.error(err instanceof Error ? err.message : '结束面试失败');
     } finally {
       setIsEnding(false);
     }
@@ -564,7 +555,7 @@ export default function InterviewPage() {
     const existing = await checkRunningInterviewSummaryTask(roundId);
     if (existing) {
       setSummaryTaskId(existing.taskId);
-      toast.error("该轮次已有正在进行的摘要生成任务");
+      toast.error('该轮次已有正在进行的摘要生成任务');
       return;
     }
 
@@ -583,10 +574,10 @@ export default function InterviewPage() {
       markUnread();
       addNotificationTask({
         id: taskId,
-        taskType: "interview_summary",
-        status: "running",
+        taskType: 'interview_summary',
+        status: 'running',
         metaInfo: {
-          title: currentRound?.name || "",
+          title: currentRound?.name || '',
           fileName: roundId,
         },
         errorMessage: null,
@@ -595,9 +586,9 @@ export default function InterviewPage() {
       });
 
       setSummaryTaskId(taskId);
-      toast.success("摘要生成已开始");
+      toast.success('摘要生成已开始');
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "生成摘要失败");
+      toast.error(err instanceof Error ? err.message : '生成摘要失败');
     } finally {
       setIsGeneratingSummary(false);
     }
@@ -605,7 +596,7 @@ export default function InterviewPage() {
 
   const handleRoundClick = (round: InterviewRound) => {
     if (round.id === roundId) return;
-    if (round.status === "completed" || round.status === "in_progress") {
+    if (round.status === 'completed' || round.status === 'in_progress') {
       navigate(
         `/workspace/${workspaceId}/resumes/${resumeId}/interview/${collectionId}/${round.id}`,
       );
@@ -628,19 +619,14 @@ export default function InterviewPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
-          <Inbox
-            className="w-16 h-16 text-muted-foreground/40"
-            strokeWidth={1.5}
-          />
+          <Inbox className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-foreground mb-1">工作空间不存在</p>
-            <p className="text-sm text-muted-foreground">
-              访问的工作空间可能已被删除或不存在
-            </p>
+            <p className="text-sm text-muted-foreground">访问的工作空间可能已被删除或不存在</p>
           </div>
           <button
             type="button"
-            onClick={() => navigate("/workspace")}
+            onClick={() => navigate('/workspace')}
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
             返回工作空间列表
@@ -654,22 +640,15 @@ export default function InterviewPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
-          <FileX
-            className="w-16 h-16 text-muted-foreground/40"
-            strokeWidth={1.5}
-          />
+          <FileX className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-foreground mb-1">子简历不存在</p>
-            <p className="text-sm text-muted-foreground">
-              访问的子简历可能已被删除或不存在
-            </p>
+            <p className="text-sm text-muted-foreground">访问的子简历可能已被删除或不存在</p>
           </div>
           <button
             type="button"
             onClick={() =>
-              workspaceId
-                ? navigate(`/workspace/${workspaceId}`)
-                : navigate("/workspace")
+              workspaceId ? navigate(`/workspace/${workspaceId}`) : navigate('/workspace')
             }
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
@@ -684,23 +663,14 @@ export default function InterviewPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
-          <Circle
-            className="w-16 h-16 text-muted-foreground/40"
-            strokeWidth={1.5}
-          />
+          <Circle className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-foreground mb-1">面试方案不存在</p>
-            <p className="text-sm text-muted-foreground">
-              该面试方案可能已被删除或不存在
-            </p>
+            <p className="text-sm text-muted-foreground">该面试方案可能已被删除或不存在</p>
           </div>
           <button
             type="button"
-            onClick={() =>
-              navigate(
-                `/workspace/${workspaceId}/resumes/${resumeId}/interview`,
-              )
-            }
+            onClick={() => navigate(`/workspace/${workspaceId}/resumes/${resumeId}/interview`)}
             className="mt-2 px-4 py-2 rounded-lg bg-pink-500/20 text-pink-400 hover:bg-pink-500/30 transition-colors text-sm"
           >
             返回面试方案列表
@@ -722,15 +692,10 @@ export default function InterviewPage() {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center justify-center text-muted-foreground gap-4">
-          <Circle
-            className="w-16 h-16 text-muted-foreground/40"
-            strokeWidth={1.5}
-          />
+          <Circle className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
           <div className="text-center">
             <p className="text-lg text-foreground mb-1">面试轮次不存在</p>
-            <p className="text-sm text-muted-foreground">
-              该面试轮次可能已被删除或不存在
-            </p>
+            <p className="text-sm text-muted-foreground">该面试轮次可能已被删除或不存在</p>
           </div>
           <button
             type="button"
@@ -758,9 +723,7 @@ export default function InterviewPage() {
             >
               <ArrowLeft className="w-4 h-4" />
             </button>
-            <span className="text-sm text-muted-foreground">
-              {collection.name}
-            </span>
+            <span className="text-sm text-muted-foreground">{collection.name}</span>
           </div>
         </div>
 
@@ -770,25 +733,18 @@ export default function InterviewPage() {
               {getInterviewerInitial(currentRound.interviewerName)}
             </div>
             <div>
-              <h2 className="text-lg font-semibold mb-1">
-                {currentRound.name}
-              </h2>
+              <h2 className="text-lg font-semibold mb-1">{currentRound.name}</h2>
               <p className="text-sm text-muted-foreground">
                 {currentRound.interviewerName}
-                {currentRound.interviewerTitle
-                  ? ` · ${currentRound.interviewerTitle}`
-                  : ""}
+                {currentRound.interviewerTitle ? ` · ${currentRound.interviewerTitle}` : ''}
               </p>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {currentRound.interviewerBio ||
-                "准备好开始面试了吗？点击下方按钮开始。"}
+              {currentRound.interviewerBio || '准备好开始面试了吗？点击下方按钮开始。'}
             </p>
             {configValidation.isLoaded && !configValidation.valid && (
               <div className="w-full px-4 py-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-left">
-                <p className="text-sm text-yellow-400">
-                  {configValidation.message}
-                </p>
+                <p className="text-sm text-yellow-400">{configValidation.message}</p>
                 <p className="text-xs text-muted-foreground mt-1">
                   请前往设置页面完善 AI 配置后再开始面试
                 </p>
@@ -797,18 +753,15 @@ export default function InterviewPage() {
             <button
               type="button"
               onClick={handleStart}
-              disabled={
-                !providerConfig ||
-                (configValidation.isLoaded && !configValidation.valid)
-              }
+              disabled={!providerConfig || (configValidation.isLoaded && !configValidation.valid)}
               className="flex items-center gap-2 px-6 py-3 rounded-xl bg-pink-500 text-white font-medium hover:bg-pink-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="w-4 h-4" />
               {!providerConfig
-                ? "加载配置中..."
+                ? '加载配置中...'
                 : configValidation.valid
-                  ? "开始面试"
-                  : "配置未就绪"}
+                  ? '开始面试'
+                  : '配置未就绪'}
             </button>
           </div>
         </div>
@@ -828,18 +781,16 @@ export default function InterviewPage() {
           >
             <ArrowLeft className="w-4 h-4" />
           </button>
-          <span className="text-sm text-muted-foreground shrink-0">
-            {collection.name}
-          </span>
+          <span className="text-sm text-muted-foreground shrink-0">{collection.name}</span>
           <div className="flex items-center gap-0 overflow-x-auto flex-1 justify-center">
             {sortedRounds.map((round, index) => (
               <div key={round.id} className="flex items-center shrink-0">
                 {index > 0 && (
                   <div
                     className={`w-6 h-[2px] mx-1 ${
-                      sortedRounds[index - 1].status === "completed"
-                        ? "bg-green-500/40"
-                        : "bg-muted"
+                      sortedRounds[index - 1].status === 'completed'
+                        ? 'bg-green-500/40'
+                        : 'bg-muted'
                     }`}
                   />
                 )}
@@ -847,28 +798,28 @@ export default function InterviewPage() {
                   type="button"
                   onClick={() => handleRoundClick(round)}
                   disabled={
-                    round.status !== "completed" &&
-                    round.status !== "in_progress" &&
+                    round.status !== 'completed' &&
+                    round.status !== 'in_progress' &&
                     round.id !== roundId
                   }
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium shrink-0 border-2 ${
                     round.id === roundId
-                      ? "bg-pink-500/20 text-pink-400 border-pink-500"
-                      : round.status === "completed"
-                        ? "bg-green-500/10 text-green-400 border-green-500 hover:bg-green-500/15"
-                        : round.status === "in_progress"
-                          ? "bg-muted text-foreground border-border/30 hover:bg-muted"
-                          : "bg-muted text-muted-foreground border-border/20 opacity-50"
+                      ? 'bg-pink-500/20 text-pink-400 border-pink-500'
+                      : round.status === 'completed'
+                        ? 'bg-green-500/10 text-green-400 border-green-500 hover:bg-green-500/15'
+                        : round.status === 'in_progress'
+                          ? 'bg-muted text-foreground border-border/30 hover:bg-muted'
+                          : 'bg-muted text-muted-foreground border-border/20 opacity-50'
                   }`}
                 >
-                  {round.status === "completed" ? (
+                  {round.status === 'completed' ? (
                     <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
                   ) : (
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-bold align-super ${
                         round.id === roundId
-                          ? "bg-pink-500 text-white"
-                          : "bg-muted text-muted-foreground"
+                          ? 'bg-pink-500 text-white'
+                          : 'bg-muted text-muted-foreground'
                       }`}
                     >
                       {index + 1}
@@ -894,9 +845,7 @@ export default function InterviewPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-semibold">
-                      {currentRound.interviewerName}
-                    </span>
+                    <span className="text-sm font-semibold">{currentRound.interviewerName}</span>
                     <span className="px-1.5 py-0.5 rounded text-[9px] bg-muted text-muted-foreground">
                       {currentRound.name}
                     </span>
@@ -908,9 +857,7 @@ export default function InterviewPage() {
                   )}
                 </div>
                 <div className="text-right shrink-0">
-                  <div className="text-xs font-bold text-pink-400">
-                    {answeredCount}
-                  </div>
+                  <div className="text-xs font-bold text-pink-400">{answeredCount}</div>
                   <div className="text-[10px] text-muted-foreground">已答</div>
                 </div>
               </div>
@@ -926,38 +873,25 @@ export default function InterviewPage() {
               {roundSummary ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-green-400">
-                      面试总结
-                    </span>
+                    <span className="text-xs font-semibold text-green-400">面试总结</span>
                     <span className="text-[10px] text-muted-foreground">
                       {new Date(roundSummary.generated_at).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground">
-                      综合评分
-                    </span>
-                    <span className="text-lg font-bold text-pink-400">
-                      {roundSummary.score}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      / 100
-                    </span>
+                    <span className="text-xs text-muted-foreground">综合评分</span>
+                    <span className="text-lg font-bold text-pink-400">{roundSummary.score}</span>
+                    <span className="text-[10px] text-muted-foreground">/ 100</span>
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
                     {roundSummary.overall_assessment}
                   </p>
                   {roundSummary.strengths.length > 0 && (
                     <div>
-                      <span className="text-[10px] text-green-400 font-medium">
-                        优势
-                      </span>
+                      <span className="text-[10px] text-green-400 font-medium">优势</span>
                       <ul className="mt-1 space-y-0.5">
                         {roundSummary.strengths.map((s, i) => (
-                          <li
-                            key={i}
-                            className="text-[10px] text-muted-foreground"
-                          >
+                          <li key={i} className="text-[10px] text-muted-foreground">
                             · {s}
                           </li>
                         ))}
@@ -966,15 +900,10 @@ export default function InterviewPage() {
                   )}
                   {roundSummary.weaknesses.length > 0 && (
                     <div>
-                      <span className="text-[10px] text-yellow-400 font-medium">
-                        待改进
-                      </span>
+                      <span className="text-[10px] text-yellow-400 font-medium">待改进</span>
                       <ul className="mt-1 space-y-0.5">
                         {roundSummary.weaknesses.map((w, i) => (
-                          <li
-                            key={i}
-                            className="text-[10px] text-muted-foreground"
-                          >
+                          <li key={i} className="text-[10px] text-muted-foreground">
                             · {w}
                           </li>
                         ))}
@@ -985,9 +914,7 @@ export default function InterviewPage() {
               ) : summaryTaskId ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-8">
                   <Loader2 className="w-5 h-5 text-pink-400 animate-spin" />
-                  <span className="text-xs text-muted-foreground">
-                    摘要生成中...
-                  </span>
+                  <span className="text-xs text-muted-foreground">摘要生成中...</span>
                 </div>
               ) : (
                 <button
@@ -1001,7 +928,7 @@ export default function InterviewPage() {
                   ) : (
                     <Brain className="w-3.5 h-3.5" />
                   )}
-                  {isGeneratingSummary ? "创建中..." : "生成总结"}
+                  {isGeneratingSummary ? '创建中...' : '生成总结'}
                 </button>
               )}
             </div>
@@ -1028,12 +955,8 @@ export default function InterviewPage() {
                       )}
                     </div>
                     <div className="text-right shrink-0">
-                      <div className="text-xs font-bold text-pink-400">
-                        {answeredCount}
-                      </div>
-                      <div className="text-[10px] text-muted-foreground">
-                        已答
-                      </div>
+                      <div className="text-xs font-bold text-pink-400">{answeredCount}</div>
+                      <div className="text-[10px] text-muted-foreground">已答</div>
                     </div>
                   </div>
                 </div>
@@ -1044,13 +967,13 @@ export default function InterviewPage() {
                     {messages.map((msg) => (
                       <div
                         key={msg.id}
-                        className={`flex ${msg.role === "candidate" ? "justify-end" : "justify-start"}`}
+                        className={`flex ${msg.role === 'candidate' ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
                           className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
-                            msg.role === "candidate"
-                              ? "bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl"
-                              : "bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
+                            msg.role === 'candidate'
+                              ? 'bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl'
+                              : 'bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl'
                           }`}
                         >
                           {msg.reasoning && (
@@ -1076,8 +999,8 @@ export default function InterviewPage() {
                               )}
                             </div>
                           )}
-                          {msg.content.split("\n").map((line, i) => (
-                            <p key={i} className={i > 0 ? "mt-2" : ""}>
+                          {msg.content.split('\n').map((line, i) => (
+                            <p key={i} className={i > 0 ? 'mt-2' : ''}>
                               {line}
                             </p>
                           ))}
@@ -1096,13 +1019,13 @@ export default function InterviewPage() {
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
-                    className={`flex ${msg.role === "candidate" ? "justify-end" : "justify-start"}`}
+                    className={`flex ${msg.role === 'candidate' ? 'justify-end' : 'justify-start'}`}
                   >
                     <div
                       className={`max-w-[80%] px-4 py-3 text-sm leading-relaxed ${
-                        msg.role === "candidate"
-                          ? "bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl"
-                          : "bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl"
+                        msg.role === 'candidate'
+                          ? 'bg-pink-500/10 border border-pink-500/20 text-foreground rounded-xl'
+                          : 'bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl'
                       }`}
                     >
                       {msg.reasoning && (
@@ -1128,8 +1051,8 @@ export default function InterviewPage() {
                           )}
                         </div>
                       )}
-                      {msg.content.split("\n").map((line, i) => (
-                        <p key={i} className={i > 0 ? "mt-2" : ""}>
+                      {msg.content.split('\n').map((line, i) => (
+                        <p key={i} className={i > 0 ? 'mt-2' : ''}>
                           {line}
                         </p>
                       ))}
@@ -1145,8 +1068,7 @@ export default function InterviewPage() {
                         onClick={() => {
                           streamingRef.current = {
                             ...streamingRef.current,
-                            thinkingVisible:
-                              !streamingRef.current.thinkingVisible,
+                            thinkingVisible: !streamingRef.current.thinkingVisible,
                           };
                           setStreaming({ ...streamingRef.current });
                         }}
@@ -1164,15 +1086,15 @@ export default function InterviewPage() {
                           <span className="flex gap-0.5 ml-1">
                             <span
                               className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
-                              style={{ animationDelay: "0ms" }}
+                              style={{ animationDelay: '0ms' }}
                             />
                             <span
                               className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
-                              style={{ animationDelay: "120ms" }}
+                              style={{ animationDelay: '120ms' }}
                             />
                             <span
                               className="w-1 h-1 rounded-full bg-pink-400 animate-bounce"
-                              style={{ animationDelay: "240ms" }}
+                              style={{ animationDelay: '240ms' }}
                             />
                           </span>
                         )}
@@ -1184,8 +1106,8 @@ export default function InterviewPage() {
                       )}
                       {streaming.content && (
                         <div className="text-sm leading-relaxed mt-2">
-                          {streaming.content.split("\n").map((line, i) => (
-                            <p key={i} className={i > 0 ? "mt-2" : ""}>
+                          {streaming.content.split('\n').map((line, i) => (
+                            <p key={i} className={i > 0 ? 'mt-2' : ''}>
                               {line}
                             </p>
                           ))}
@@ -1198,8 +1120,8 @@ export default function InterviewPage() {
                 {isStreaming && !streaming.thinking && streaming.content && (
                   <div className="flex justify-start">
                     <div className="max-w-[80%] px-4 py-3 text-sm leading-relaxed bg-muted border-l-4 border-l-pink-500/60 text-foreground rounded-r-xl">
-                      {streaming.content.split("\n").map((line, i) => (
-                        <p key={i} className={i > 0 ? "mt-2" : ""}>
+                      {streaming.content.split('\n').map((line, i) => (
+                        <p key={i} className={i > 0 ? 'mt-2' : ''}>
                           {line}
                         </p>
                       ))}
@@ -1257,7 +1179,7 @@ export default function InterviewPage() {
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 transition-colors disabled:opacity-50"
             >
               <StopCircle className="w-3.5 h-3.5" />
-              {isEnding ? "结束中..." : "结束本轮"}
+              {isEnding ? '结束中...' : '结束本轮'}
             </button>
           </div>
         </div>
@@ -1280,10 +1202,7 @@ export default function InterviewPage() {
               </div>
               <div className="flex items-center justify-between px-4 pb-3">
                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                  <span>
-                    {providerConfig?.providers[providerConfig.active]?.model ||
-                      ""}
-                  </span>
+                  <span>{providerConfig?.providers[providerConfig.active]?.model || ''}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <button

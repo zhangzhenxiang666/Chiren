@@ -1,19 +1,12 @@
-import { useState, useRef, useEffect } from "react";
-import {
-  Eye,
-  EyeOff,
-  Trash2,
-  GripVertical,
-  Sparkles,
-  Pencil,
-} from "lucide-react";
-import { useResumeStore } from "@/stores/resume-store";
-import { useEditorStore } from "@/stores/editor-store";
-import { cn } from "@/lib/utils";
-import { useDragHandle } from "./dnd/sortable-section";
-import { useAIChat } from "./DraggableAIChatButton";
-import { PersonalInfo } from "./sections/PersonalInfo";
-import { Summary } from "./sections/Summary";
+import { useState, useRef, useEffect } from 'react';
+import { Eye, EyeOff, Trash2, GripVertical, Sparkles, Pencil } from 'lucide-react';
+import { useResumeStore } from '@/stores/resume-store';
+import { useEditorStore } from '@/stores/editor-store';
+import { cn } from '@/lib/utils';
+import { useDragHandle } from './dnd/sortable-section';
+import { useAIChat } from './DraggableAIChatButton';
+import { PersonalInfo } from './sections/PersonalInfo';
+import { Summary } from './sections/Summary';
 import {
   WorkExperience,
   Education,
@@ -24,8 +17,8 @@ import {
   GitHub,
   QrCodes,
   CustomSection,
-} from "./sections";
-import type { ResumeSection, SectionContent } from "@/types/resume";
+} from './sections';
+import type { ResumeSection, SectionContent } from '@/types/resume';
 
 const sectionComponents: Record<
   string,
@@ -53,11 +46,7 @@ interface SectionWrapperProps {
   onRemove: () => void;
 }
 
-export function SectionWrapper({
-  section,
-  onUpdate,
-  onRemove,
-}: SectionWrapperProps) {
+export function SectionWrapper({ section, onUpdate, onRemove }: SectionWrapperProps) {
   const { toggleSectionVisibility } = useResumeStore();
   const { selectedSectionId, selectSection } = useEditorStore();
   const [isRenaming, setIsRenaming] = useState(false);
@@ -83,26 +72,22 @@ export function SectionWrapper({
     setIsRenaming(false);
   };
 
-  const isRenamable = section.type !== "personal_info";
-  const isVisibilityChangable = section.type !== "personal_info";
-  const isDeletable = section.type !== "personal_info";
+  const isRenamable = section.type !== 'personal_info';
+  const isVisibilityChangable = section.type !== 'personal_info';
+  const isDeletable = section.type !== 'personal_info';
   const isSelected = selectedSectionId === section.id;
   const SectionComponent =
     sectionComponents[section.type] ||
-    (() => (
-      <p className="text-sm text-muted-foreground">
-        未知段落类型: {section.type}
-      </p>
-    ));
+    (() => <p className="text-sm text-muted-foreground">未知段落类型: {section.type}</p>);
 
   return (
     <div
       data-section-id={section.id}
       className={cn(
-        "rounded-lg border bg-background p-4 shadow-sm transition-all duration-200 cursor-pointer",
+        'rounded-lg border bg-background p-4 shadow-sm transition-all duration-200 cursor-pointer',
         isSelected
-          ? "border-pink-500 ring-2 ring-pink-500/40"
-          : "border-border hover:border-muted-foreground/50",
+          ? 'border-pink-500 ring-2 ring-pink-500/40'
+          : 'border-border hover:border-muted-foreground/50',
       )}
       onClick={() => selectSection(section.id)}
     >
@@ -122,8 +107,8 @@ export function SectionWrapper({
             onChange={(e) => setRenameValue(e.target.value)}
             onBlur={commitRename}
             onKeyDown={(e) => {
-              if (e.key === "Enter") commitRename();
-              if (e.key === "Escape") {
+              if (e.key === 'Enter') commitRename();
+              if (e.key === 'Escape') {
                 setRenameValue(section.title);
                 setIsRenaming(false);
               }
@@ -169,17 +154,13 @@ export function SectionWrapper({
           <button
             type="button"
             className="rounded p-1 text-muted-foreground hover:bg-accent hover:text-foreground"
-            title={section.visible ? "隐藏" : "显示"}
+            title={section.visible ? '隐藏' : '显示'}
             onClick={(e) => {
               e.stopPropagation();
               toggleSectionVisibility(section.id);
             }}
           >
-            {section.visible ? (
-              <Eye className="h-4 w-4" />
-            ) : (
-              <EyeOff className="h-4 w-4" />
-            )}
+            {section.visible ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
           </button>
         )}
 
@@ -200,8 +181,8 @@ export function SectionWrapper({
 
       <div
         className={cn(
-          "transition-all duration-200",
-          !section.visible && "opacity-50 pointer-events-none select-none",
+          'transition-all duration-200',
+          !section.visible && 'opacity-50 pointer-events-none select-none',
         )}
       >
         <SectionComponent section={section} onUpdate={onUpdate} />

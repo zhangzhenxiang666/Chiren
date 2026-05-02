@@ -10,25 +10,25 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#1e293b";
-const TILE_COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"];
+const PRIMARY = '#1e293b';
+const TILE_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
 
 function getTileColor(idx: number): string {
   return TILE_COLORS[idx % TILE_COLORS.length];
 }
 
 function getTileBg(idx: number): string {
-  const bgs = ["#eff6ff", "#ecfdf5", "#fffbeb", "#f5f3ff"];
+  const bgs = ['#eff6ff', '#ecfdf5', '#fffbeb', '#f5f3ff'];
   return bgs[idx % bgs.length];
 }
 
 export function MosaicTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -50,13 +50,13 @@ export function MosaicTemplate({ resume }: { resume: Resume }) {
   ].filter(Boolean);
 
   const filteredSections = resume.sections.filter(
-    (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
+    (s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s),
   );
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div
@@ -76,13 +76,10 @@ export function MosaicTemplate({ resume }: { resume: Resume }) {
           )}
           <div>
             <h1 className="text-2xl font-bold" style={{ color: PRIMARY }}>
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
-              <p
-                className="mt-1 text-sm font-medium"
-                style={{ color: TILE_COLORS[3] }}
-              >
+              <p className="mt-1 text-sm font-medium" style={{ color: TILE_COLORS[3] }}>
                 {pi.jobTitle}
               </p>
             )}
@@ -114,23 +111,13 @@ export function MosaicTemplate({ resume }: { resume: Resume }) {
           <div key={section.id} className="mb-5 pt-1" data-section>
             <div className="rounded-lg p-4" style={{ backgroundColor: bg }}>
               <div className="mb-2.5 flex items-center gap-2">
-                <div
-                  className="h-5 w-5 rounded"
-                  style={{ backgroundColor: color, opacity: 0.2 }}
-                />
-                <h2
-                  className="text-sm font-bold uppercase tracking-wider"
-                  style={{ color }}
-                >
+                <div className="h-5 w-5 rounded" style={{ backgroundColor: color, opacity: 0.2 }} />
+                <h2 className="text-sm font-bold uppercase tracking-wider" style={{ color }}>
                   {section.title}
                 </h2>
               </div>
               <div className="mt-2">
-                <MosaicSectionContent
-                  section={section}
-                  color={color}
-                  resume={resume}
-                />
+                <MosaicSectionContent section={section} color={color} resume={resume} />
               </div>
             </div>
           </div>
@@ -152,7 +139,7 @@ function MosaicSectionContent({
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -163,35 +150,28 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: PRIMARY }}
-                >
+                <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                   {item.position}
                 </span>
                 {item.company && (
                   <span className="text-sm" style={{ color }}>
-                    {" "}
+                    {' '}
                     | {item.company}
                   </span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -229,31 +209,22 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.institution}
               </span>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm text-zinc-600">
-              {degreeField(item.degree, item.field)}
-            </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -271,15 +242,13 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-2">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
-            <p className="mb-1 text-xs font-semibold text-zinc-500">
-              {cat.name}
-            </p>
+          <div key={cat.id} data-pdf-item>
+            <p className="mb-1 text-xs font-semibold text-zinc-500">{cat.name}</p>
             <div className="flex flex-wrap gap-1.5">
               {(cat.skills || []).map((skill: string, i: number) => (
                 <span
@@ -297,21 +266,20 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold" style={{ color }}>
                 {item.name}
               </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs text-zinc-400">
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -350,12 +318,12 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-semibold" style={{ color }}>
                 {item.name}
@@ -364,9 +332,7 @@ function MosaicSectionContent({
                 ⭐ {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-400">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-400">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -379,33 +345,26 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between">
+          <div key={item.id} data-pdf-item className="flex items-baseline justify-between">
             <div>
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-sm text-zinc-600"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-sm text-zinc-600"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="text-xs text-zinc-400">{item.date}</span>
-            )}
+            {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -414,10 +373,7 @@ function MosaicSectionContent({
             key={item.id}
             className="flex items-center gap-2 rounded-full bg-white px-3 py-1 shadow-sm"
           >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: color }}
-            />
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.language}
             </span>
@@ -428,26 +384,19 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
         {items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-semibold"
-                style={{ color: PRIMARY }}
-              >
+              <span className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.title}
               </span>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -460,7 +409,7 @@ function MosaicSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -469,7 +418,7 @@ function MosaicSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id} className="rounded-md bg-white p-3 shadow-sm">
+          <div key={item.id} data-pdf-item className="rounded-md bg-white p-3 shadow-sm">
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

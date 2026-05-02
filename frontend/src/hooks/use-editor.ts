@@ -1,9 +1,9 @@
-import { useCallback, useEffect } from "react";
-import { useResumeStore } from "@/stores/resume-store";
-import { useEditorStore } from "@/stores/editor-store";
-import type { ResumeSection } from "@/types/resume";
-import { fetchResumeDetail, fetchResumeSections } from "@/lib/api";
-import { generateId } from "@/lib/utils";
+import { useCallback, useEffect } from 'react';
+import { useResumeStore } from '@/stores/resume-store';
+import { useEditorStore } from '@/stores/editor-store';
+import type { ResumeSection } from '@/types/resume';
+import { fetchResumeDetail, fetchResumeSections } from '@/lib/api';
+import { generateId } from '@/lib/utils';
 
 export function useEditor(resumeId: string) {
   const {
@@ -28,16 +28,14 @@ export function useEditor(resumeId: string) {
         const content = s.content as unknown as Record<string, unknown>;
         if (Array.isArray(content?.items)) {
           content.items = (content.items as any[]).map((item) =>
-            typeof item === "object" && item !== null && !item.id
+            typeof item === 'object' && item !== null && !item.id
               ? { ...item, id: generateId() }
               : item,
           );
         }
         if (Array.isArray(content?.categories)) {
           content.categories = (content.categories as any[]).map((cat) =>
-            typeof cat === "object" && cat !== null && !cat.id
-              ? { ...cat, id: generateId() }
-              : cat,
+            typeof cat === 'object' && cat !== null && !cat.id ? { ...cat, id: generateId() } : cat,
           );
         }
         return {
@@ -60,7 +58,7 @@ export function useEditor(resumeId: string) {
         updatedAt: new Date(resumeData.updatedAt),
       });
     } catch (error) {
-      console.error("Failed to load resume:", error);
+      console.error('Failed to load resume:', error);
     }
   }, [resumeId, setResume]);
 

@@ -10,17 +10,17 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#1e1b4b";
-const ACCENT = "#f43f5e";
-const HIGHLIGHT = "#fbbf24";
+const PRIMARY = '#1e1b4b';
+const ACCENT = '#f43f5e';
+const HIGHLIGHT = '#fbbf24';
 
 export function ArtisticTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -42,13 +42,10 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header with colored block */}
-      <div
-        className="relative px-10 py-8 text-white"
-        style={{ background: PRIMARY }}
-      >
+      <div className="relative px-10 py-8 text-white" style={{ background: PRIMARY }}>
         {/* Decorative shapes */}
         <div
           className="absolute right-6 top-4 h-24 w-24 rounded-full opacity-20"
@@ -75,14 +72,9 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
             />
           )}
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">
-              {pi.fullName || "Your Name"}
-            </h1>
+            <h1 className="text-3xl font-extrabold tracking-tight">{pi.fullName || 'Your Name'}</h1>
             {pi.jobTitle && (
-              <p
-                className="mt-1 text-sm font-medium"
-                style={{ color: HIGHLIGHT }}
-              >
+              <p className="mt-1 text-sm font-medium" style={{ color: HIGHLIGHT }}>
                 {pi.jobTitle}
               </p>
             )}
@@ -100,10 +92,7 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8 pt-6">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <div className="mb-2.5 flex items-center gap-2">
@@ -113,10 +102,7 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
                 >
                   {section.title}
                 </h2>
-                <div
-                  className="h-0.5 flex-1"
-                  style={{ borderTop: `2px dashed ${ACCENT}40` }}
-                />
+                <div className="h-0.5 flex-1" style={{ borderTop: `2px dashed ${ACCENT}40` }} />
               </div>
               <div className="mt-2">
                 <ArtisticSectionContent section={section} resume={resume} />
@@ -128,17 +114,11 @@ export function ArtisticTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function ArtisticSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function ArtisticSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <div
         className="rounded-lg p-4"
@@ -157,7 +137,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
@@ -179,19 +159,15 @@ function ArtisticSectionContent({
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold text-white"
                 style={{ backgroundColor: ACCENT }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
               <p className="text-sm font-medium" style={{ color: ACCENT }}>
                 {item.company}
-                {item.location ? `, ${item.location}` : ""}
+                {item.location ? `, ${item.location}` : ''}
               </p>
             )}
             {item.description && (
@@ -216,10 +192,7 @@ function ArtisticSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: HIGHLIGHT }}
@@ -235,7 +208,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
@@ -250,25 +223,18 @@ function ArtisticSectionContent({
                 {item.institution}
               </h3>
               <span className="text-xs text-zinc-400">
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             <p className="text-sm text-zinc-600">
               {degreeField(item.degree, item.field)}
-              {item.location ? ` — ${item.location}` : ""}
+              {item.location ? ` — ${item.location}` : ''}
             </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: HIGHLIGHT }}
@@ -284,12 +250,12 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p
               className="mb-1.5 text-xs font-bold uppercase tracking-wider"
               style={{ color: ACCENT }}
@@ -319,7 +285,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
@@ -335,9 +301,8 @@ function ArtisticSectionContent({
               </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -363,10 +328,7 @@ function ArtisticSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: HIGHLIGHT }}
@@ -382,7 +344,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="flex flex-wrap gap-2">
@@ -401,7 +363,7 @@ function ArtisticSectionContent({
             {(item.issuer || item.date) && (
               <p className="text-xs text-zinc-500">
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </p>
             )}
@@ -411,7 +373,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
@@ -421,10 +383,7 @@ function ArtisticSectionContent({
             className="flex items-center gap-2 rounded-full px-4 py-1.5"
             style={{ border: `2px dashed ${ACCENT}30` }}
           >
-            <span
-              className="h-2.5 w-2.5 rounded-full"
-              style={{ backgroundColor: ACCENT }}
-            />
+            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: ACCENT }} />
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.language}
             </span>
@@ -435,7 +394,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
@@ -450,7 +409,7 @@ function ArtisticSectionContent({
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
             {item.language && (
@@ -470,7 +429,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
@@ -484,9 +443,7 @@ function ArtisticSectionContent({
               <h3 className="text-sm font-bold" style={{ color: PRIMARY }}>
                 {item.title}
               </h3>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
             {item.subtitle && (
               <p className="text-sm" style={{ color: ACCENT }}>
@@ -505,7 +462,7 @@ function ArtisticSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 

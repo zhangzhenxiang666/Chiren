@@ -10,16 +10,16 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { isSectionEmpty, md, degreeField } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { isSectionEmpty, md, degreeField } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const GRADIENT = "linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)";
-const ACCENT = "#a855f7";
+const GRADIENT = 'linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%)';
+const ACCENT = '#a855f7';
 
 export function GradientTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -41,13 +41,10 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Full-bleed gradient header */}
-      <div
-        className="relative px-10 py-8 text-white"
-        style={{ background: GRADIENT }}
-      >
+      <div className="relative px-10 py-8 text-white" style={{ background: GRADIENT }}>
         {/* Decorative elements */}
         <div className="absolute -right-8 -top-8 h-36 w-36 rounded-full border-4 border-white/10" />
         <div className="absolute bottom-2 right-16 h-20 w-20 rounded-full bg-white/5" />
@@ -63,9 +60,7 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
             />
           )}
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl font-bold tracking-tight">
-              {pi.fullName || "Your Name"}
-            </h1>
+            <h1 className="text-3xl font-bold tracking-tight">{pi.fullName || 'Your Name'}</h1>
             {pi.jobTitle && (
               <p className="mt-1.5 text-base font-light tracking-wide text-white/80">
                 {pi.jobTitle}
@@ -76,9 +71,7 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
                 {contacts.map((item, i) => (
                   <span key={i} className="flex items-center gap-2">
                     {item}
-                    {i < contacts.length - 1 && (
-                      <span className="text-white/30">|</span>
-                    )}
+                    {i < contacts.length - 1 && <span className="text-white/30">|</span>}
                   </span>
                 ))}
               </div>
@@ -90,8 +83,7 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
         <div
           className="absolute bottom-0 left-0 h-1 w-full"
           style={{
-            background:
-              "linear-gradient(90deg, #ec4899 0%, #8b5cf6 50%, transparent 100%)",
+            background: 'linear-gradient(90deg, #ec4899 0%, #8b5cf6 50%, transparent 100%)',
           }}
         />
       </div>
@@ -99,10 +91,7 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8 pt-6">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               <h2
@@ -126,17 +115,11 @@ export function GradientTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function GradientSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function GradientSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -147,7 +130,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     const items = (content as WorkExperienceContent).items || [];
     return (
       <div className="space-y-4">
@@ -158,20 +141,14 @@ function GradientSectionContent({
             style={{ borderImage: GRADIENT, borderImageSlice: 1 }}
           >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-semibold text-zinc-800">
-                {item.position}
-              </h3>
+              <h3 className="text-sm font-semibold text-zinc-800">{item.position}</h3>
               <span
                 className="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold text-white"
                 style={{ background: GRADIENT }}
               >
-                {item.startDate} -{" "}
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
@@ -215,7 +192,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     const items = (content as EducationContent).items || [];
     return (
       <div className="space-y-3">
@@ -226,21 +203,13 @@ function GradientSectionContent({
             style={{ borderImage: GRADIENT, borderImageSlice: 1 }}
           >
             <div className="flex items-baseline justify-between">
-              <h3 className="text-sm font-semibold text-zinc-800">
-                {item.institution}
-              </h3>
+              <h3 className="text-sm font-semibold text-zinc-800">{item.institution}</h3>
               <span className="text-xs text-zinc-400">
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            <p className="text-sm text-zinc-600">
-              {degreeField(item.degree, item.field)}
-            </p>
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            <p className="text-sm text-zinc-600">{degreeField(item.degree, item.field)}</p>
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -258,12 +227,12 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     const categories = (content as SkillsContent).categories || [];
     return (
       <div className="space-y-3">
         {categories.map((cat: any) => (
-          <div key={cat.id}>
+          <div key={cat.id} data-pdf-item>
             <p className="mb-1.5 text-xs font-bold uppercase tracking-wider text-zinc-500">
               {cat.name}
             </p>
@@ -273,10 +242,10 @@ function GradientSectionContent({
                   key={i}
                   className="rounded-full px-3 py-0.5 text-xs font-medium text-zinc-700"
                   style={{
-                    border: "1.5px solid transparent",
+                    border: '1.5px solid transparent',
                     backgroundImage: `linear-gradient(white, white), ${GRADIENT}`,
-                    backgroundOrigin: "border-box",
-                    backgroundClip: "padding-box, border-box",
+                    backgroundOrigin: 'border-box',
+                    backgroundClip: 'padding-box, border-box',
                   }}
                 >
                   {skill}
@@ -289,7 +258,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-3">
@@ -305,9 +274,8 @@ function GradientSectionContent({
               </h3>
               {item.startDate && (
                 <span className="text-xs text-zinc-400">
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -347,19 +315,19 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div key={item.id} className="flex items-baseline justify-between">
+          <div key={item.id} data-pdf-item className="flex items-baseline justify-between">
             <span className="text-sm font-semibold" style={{ color: ACCENT }}>
               {item.name}
             </span>
             {(item.issuer || item.date) && (
               <span className="text-xs text-zinc-500">
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </span>
             )}
@@ -369,7 +337,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-3">
@@ -378,15 +346,13 @@ function GradientSectionContent({
             key={item.id}
             className="flex items-center gap-2 rounded-full px-4 py-1.5"
             style={{
-              border: "1.5px solid transparent",
+              border: '1.5px solid transparent',
               backgroundImage: `linear-gradient(white, white), ${GRADIENT}`,
-              backgroundOrigin: "border-box",
-              backgroundClip: "padding-box, border-box",
+              backgroundOrigin: 'border-box',
+              backgroundClip: 'padding-box, border-box',
             }}
           >
-            <span className="text-sm font-medium text-zinc-700">
-              {item.language}
-            </span>
+            <span className="text-sm font-medium text-zinc-700">{item.language}</span>
             <span className="text-xs text-zinc-400">{item.proficiency}</span>
           </div>
         ))}
@@ -394,7 +360,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
@@ -409,12 +375,10 @@ function GradientSectionContent({
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-500">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -427,7 +391,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
@@ -441,13 +405,9 @@ function GradientSectionContent({
               <h3 className="text-sm font-semibold" style={{ color: ACCENT }}>
                 {item.title}
               </h3>
-              {item.date && (
-                <span className="text-xs text-zinc-400">{item.date}</span>
-              )}
+              {item.date && <span className="text-xs text-zinc-400">{item.date}</span>}
             </div>
-            {item.subtitle && (
-              <p className="text-sm text-zinc-500">{item.subtitle}</p>
-            )}
+            {item.subtitle && <p className="text-sm text-zinc-500">{item.subtitle}</p>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -460,7 +420,7 @@ function GradientSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 

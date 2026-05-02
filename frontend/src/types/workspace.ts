@@ -1,24 +1,24 @@
 export interface JdRequirement {
   name: string;
   category:
-    | "hard_skill"
-    | "soft_skill"
-    | "tool"
-    | "domain_knowledge"
-    | "certification"
-    | "education"
-    | "experience"
-    | "language";
-  importance: "mandatory" | "preferred" | "bonus";
+    | 'hard_skill'
+    | 'soft_skill'
+    | 'tool'
+    | 'domain_knowledge'
+    | 'certification'
+    | 'education'
+    | 'experience'
+    | 'language';
+  importance: 'mandatory' | 'preferred' | 'bonus';
   level?: string | null;
   rawText?: string | null;
 }
 
 export interface KeywordMatch {
   keyword: string;
-  category: "required" | "preferred" | "bonus";
+  category: 'required' | 'preferred' | 'bonus';
   importance: number;
-  matchType: "exact" | "synonym" | "contextual";
+  matchType: 'exact' | 'synonym' | 'contextual';
   evidence?: string;
 }
 
@@ -31,7 +31,7 @@ export interface PartialMatch {
 
 export interface MissingKeyword {
   keyword: string;
-  category: "required" | "preferred" | "bonus";
+  category: 'required' | 'preferred' | 'bonus';
   importance: number;
   suggestion?: string;
 }
@@ -39,28 +39,28 @@ export interface MissingKeyword {
 export interface SkillMatch {
   skill: string;
   matchScore: number;
-  category: "technical" | "domain" | "tool" | "soft_skill" | "certification";
+  category: 'technical' | 'domain' | 'tool' | 'soft_skill' | 'certification';
 }
 
 export interface Strength {
   description: string;
   type:
-    | "skill_match"
-    | "experience_match"
-    | "project_relevance"
-    | "certification"
-    | "education_match"
-    | "unique_advantage";
+    | 'skill_match'
+    | 'experience_match'
+    | 'project_relevance'
+    | 'certification'
+    | 'education_match'
+    | 'unique_advantage';
 }
 
 export interface Suggestion {
   sectionId: string;
   current: string;
   suggested: string;
-  priority: "high" | "medium" | "low";
-  type: "content_gap" | "wording" | "keyword_add" | "format" | "structure";
+  priority: 'high' | 'medium' | 'low';
+  type: 'content_gap' | 'wording' | 'keyword_add' | 'format' | 'structure';
   rationale: string;
-  targetDimension?: "skills" | "experience" | "education";
+  targetDimension?: 'skills' | 'experience' | 'education';
   expectedScoreDelta?: number;
 }
 

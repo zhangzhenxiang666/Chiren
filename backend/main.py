@@ -13,6 +13,7 @@ from apps.conversation_message import router as conversation_message_router
 from apps.cover_letter import router as cover_letter_router
 from apps.export import router as export_router
 from apps.export.browser_manager import ensure_browser
+from apps.export.browser_pool import close_browser_pool
 from apps.interview import router as interview_router
 from apps.jd_analysis import router as jd_analysis_router
 from apps.parser import router as parser_router
@@ -36,6 +37,8 @@ async def lifespan(app: FastAPI):
     log.info("Cleaned up %d work records on startup", deleted)
     asyncio.create_task(ensure_browser())
     yield
+    # 应用关闭时释放浏览器池资源
+    await close_browser_pool()
 
 
 app = FastAPI(lifespan=lifespan)

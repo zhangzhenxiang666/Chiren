@@ -7,15 +7,15 @@ import type {
   LanguagesContent,
   GitHubContent,
   CustomContent,
-} from "../../../types/resume";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { AvatarImage } from "../avatar-image";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { AvatarImage } from '../avatar-image';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const GOLD = "#d4af37";
+const GOLD = '#d4af37';
 
 export function ElegantTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
@@ -33,16 +33,11 @@ export function ElegantTemplate({ resume }: { resume: Resume }) {
             style={{ border: `2px solid ${GOLD}` }}
           />
         )}
-        <h1
-          className="text-3xl font-bold tracking-wide"
-          style={{ color: "#2c2c2c" }}
-        >
-          {pi.fullName || "Your Name"}
+        <h1 className="text-3xl font-bold tracking-wide" style={{ color: '#2c2c2c' }}>
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
-          <p className="mt-1 text-base tracking-widest text-zinc-500 uppercase">
-            {pi.jobTitle}
-          </p>
+          <p className="mt-1 text-base tracking-widest text-zinc-500 uppercase">{pi.jobTitle}</p>
         )}
         <div className="mx-auto mt-3 flex items-center justify-center gap-1">
           <div className="h-px flex-1 max-w-16" style={{ background: GOLD }} />
@@ -68,9 +63,7 @@ export function ElegantTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-8 pt-1" data-section>
             <div className="mb-4 flex items-center gap-3">
@@ -92,17 +85,11 @@ export function ElegantTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function ElegantSectionContent({
-  section,
-  lang,
-}: {
-  section: any;
-  lang?: string;
-}) {
+function ElegantSectionContent({ section, lang }: { section: any; lang?: string }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-center text-sm leading-relaxed text-zinc-600 italic"
@@ -113,30 +100,21 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {(content.items || []).map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: "#2c2c2c" }}
-                >
+                <span className="text-sm font-bold" style={{ color: '#2c2c2c' }}>
                   {item.position}
                 </span>
-                {item.company && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.company}
-                  </span>
-                )}
+                {item.company && <span className="text-sm text-zinc-500"> — {item.company}</span>}
               </div>
               <span className="shrink-0 text-xs italic text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (item.current ? (lang === "zh" ? "至今" : "Present") : "")}
+                {item.startDate} –{' '}
+                {item.endDate || (item.current ? (lang === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -147,8 +125,7 @@ function ElegantSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400 italic">
-                {lang === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {lang === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -168,34 +145,25 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {(content.items || []).map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: "#2c2c2c" }}
-                >
+                <span className="text-sm font-bold" style={{ color: '#2c2c2c' }}>
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.institution}
-                  </span>
+                  <span className="text-sm text-zinc-500"> — {item.institution}</span>
                 )}
               </div>
               <span className="shrink-0 text-xs italic text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate || (lang === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (lang === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-5">
                 {item.highlights.map((h: string, i: number) => (
@@ -213,40 +181,34 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1">
         {(content.categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span
-              className="w-32 shrink-0 font-semibold"
-              style={{ color: GOLD }}
-            >
+            <span className="w-32 shrink-0 font-semibold" style={{ color: GOLD }}>
               {cat.name}:
             </span>
-            <span className="text-zinc-600">
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span className="text-zinc-600">{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: "#2c2c2c" }}>
+              <span className="text-sm font-bold" style={{ color: '#2c2c2c' }}>
                 {item.name}
               </span>
               {item.startDate && (
                 <span className="shrink-0 text-xs italic text-zinc-400">
-                  {item.startDate} –{" "}
-                  {item.endDate || (lang === "zh" ? "至今" : "Present")}
+                  {item.startDate} – {item.endDate || (lang === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -258,8 +220,7 @@ function ElegantSectionContent({
             )}
             {item.technologies?.length > 0 && (
               <p className="mt-0.5 text-xs text-zinc-400 italic">
-                {lang === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+                {lang === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -279,27 +240,20 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-baseline justify-between text-sm"
-          >
+          <div key={item.id} className="flex items-baseline justify-between text-sm">
             <div>
-              <span className="font-semibold" style={{ color: "#2c2c2c" }}>
+              <span className="font-semibold" style={{ color: '#2c2c2c' }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-zinc-500"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-zinc-500"> — {item.issuer}</span>}
             </div>
             {item.date && (
-              <span className="shrink-0 text-xs italic text-zinc-400">
-                {item.date}
-              </span>
+              <span className="shrink-0 text-xs italic text-zinc-400">{item.date}</span>
             )}
           </div>
         ))}
@@ -307,7 +261,7 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -323,25 +277,21 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-4">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
-              <span className="text-sm font-bold" style={{ color: "#2c2c2c" }}>
+              <span className="text-sm font-bold" style={{ color: '#2c2c2c' }}>
                 {item.name}
               </span>
               <span className="text-xs italic text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-400 italic">
-                {item.language}
-              </span>
-            )}
+            {item.language && <span className="text-xs text-zinc-400 italic">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -354,31 +304,21 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: "#2c2c2c" }}
-                >
+                <span className="text-sm font-semibold" style={{ color: '#2c2c2c' }}>
                   {item.title}
                 </span>
-                {item.subtitle && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
               </div>
               {item.date && (
-                <span className="shrink-0 text-xs italic text-zinc-400">
-                  {item.date}
-                </span>
+                <span className="shrink-0 text-xs italic text-zinc-400">{item.date}</span>
               )}
             </div>
             {item.description && (
@@ -393,7 +333,7 @@ function ElegantSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -401,8 +341,8 @@ function ElegantSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
-            <span className="text-sm font-medium" style={{ color: "#2c2c2c" }}>
+          <div key={item.id} data-pdf-item>
+            <span className="text-sm font-medium" style={{ color: '#2c2c2c' }}>
               {item.name || item.title || item.language}
             </span>
             {item.description && (

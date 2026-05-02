@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState } from 'react';
 import {
   Palette,
   Type,
@@ -8,25 +8,21 @@ import {
   RotateCcw,
   LayoutGrid,
   Sparkles,
-} from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover";
-import { Label } from "@/components/ui/label";
-import { useResumeStore } from "@/stores/resume-store";
-import type { ThemeConfig } from "@/types/resume";
-import { TEMPLATES, TEMPLATE_NAMES } from "@/lib/constants";
-import { TemplateThumbnail } from "../template/TemplateThumbnail";
+} from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
+import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Label } from '@/components/ui/label';
+import { useResumeStore } from '@/stores/resume-store';
+import type { ThemeConfig } from '@/types/resume';
+import { TEMPLATES, TEMPLATE_NAMES } from '@/lib/constants';
+import { TemplateThumbnail } from '../template/TemplateThumbnail';
 
 const DEFAULT_THEME: ThemeConfig = {
-  primaryColor: "#1a1a1a",
-  accentColor: "#3b82f6",
-  fontFamily: "Inter",
-  fontSize: "medium",
+  primaryColor: '#1a1a1a',
+  accentColor: '#3b82f6',
+  fontFamily: 'Inter',
+  fontSize: 'medium',
   lineSpacing: 1.5,
   margin: { top: 20, right: 20, bottom: 20, left: 20 },
   sectionSpacing: 16,
@@ -34,78 +30,78 @@ const DEFAULT_THEME: ThemeConfig = {
 
 const PRESET_THEMES = [
   {
-    id: "classic",
-    colors: ["#1a1a1a", "#3b82f6", "#ffffff", "#374151"],
+    id: 'classic',
+    colors: ['#1a1a1a', '#3b82f6', '#ffffff', '#374151'],
     config: {
-      primaryColor: "#1a1a1a",
-      accentColor: "#3b82f6",
-      fontFamily: "Georgia",
-      fontSize: "medium" as const,
+      primaryColor: '#1a1a1a',
+      accentColor: '#3b82f6',
+      fontFamily: 'Georgia',
+      fontSize: 'medium' as const,
       lineSpacing: 1.5,
       margin: { top: 24, right: 24, bottom: 24, left: 24 },
       sectionSpacing: 16,
     },
   },
   {
-    id: "modern",
-    colors: ["#0f172a", "#6366f1", "#f8fafc", "#475569"],
+    id: 'modern',
+    colors: ['#0f172a', '#6366f1', '#f8fafc', '#475569'],
     config: {
-      primaryColor: "#0f172a",
-      accentColor: "#6366f1",
-      fontFamily: "Inter",
-      fontSize: "medium" as const,
+      primaryColor: '#0f172a',
+      accentColor: '#6366f1',
+      fontFamily: 'Inter',
+      fontSize: 'medium' as const,
       lineSpacing: 1.6,
       margin: { top: 20, right: 20, bottom: 20, left: 20 },
       sectionSpacing: 14,
     },
   },
   {
-    id: "minimal",
-    colors: ["#27272a", "#a1a1aa", "#ffffff", "#52525b"],
+    id: 'minimal',
+    colors: ['#27272a', '#a1a1aa', '#ffffff', '#52525b'],
     config: {
-      primaryColor: "#27272a",
-      accentColor: "#a1a1aa",
-      fontFamily: "Helvetica",
-      fontSize: "small" as const,
+      primaryColor: '#27272a',
+      accentColor: '#a1a1aa',
+      fontFamily: 'Helvetica',
+      fontSize: 'small' as const,
       lineSpacing: 1.4,
       margin: { top: 28, right: 28, bottom: 28, left: 28 },
       sectionSpacing: 12,
     },
   },
   {
-    id: "elegant",
-    colors: ["#1c1917", "#b45309", "#fffbeb", "#57534e"],
+    id: 'elegant',
+    colors: ['#1c1917', '#b45309', '#fffbeb', '#57534e'],
     config: {
-      primaryColor: "#1c1917",
-      accentColor: "#b45309",
-      fontFamily: "Palatino",
-      fontSize: "medium" as const,
+      primaryColor: '#1c1917',
+      accentColor: '#b45309',
+      fontFamily: 'Palatino',
+      fontSize: 'medium' as const,
       lineSpacing: 1.6,
       margin: { top: 26, right: 26, bottom: 26, left: 26 },
       sectionSpacing: 18,
     },
   },
   {
-    id: "bold",
-    colors: ["#020617", "#e11d48", "#fff1f2", "#334155"],
+    id: 'bold',
+    colors: ['#020617', '#e11d48', '#fff1f2', '#334155'],
     config: {
-      primaryColor: "#020617",
-      accentColor: "#e11d48",
-      fontFamily: "Arial",
-      fontSize: "large" as const,
+      primaryColor: '#020617',
+      accentColor: '#e11d48',
+      fontFamily: 'Arial',
+      fontSize: 'large' as const,
       lineSpacing: 1.5,
       margin: { top: 20, right: 20, bottom: 20, left: 20 },
       sectionSpacing: 16,
     },
   },
   {
-    id: "creative",
-    colors: ["#134e4a", "#0d9488", "#f0fdfa", "#115e59"],
+    id: 'creative',
+    colors: ['#134e4a', '#0d9488', '#f0fdfa', '#115e59'],
     config: {
-      primaryColor: "#134e4a",
-      accentColor: "#0d9488",
-      fontFamily: "Verdana",
-      fontSize: "medium" as const,
+      primaryColor: '#134e4a',
+      accentColor: '#0d9488',
+      fontFamily: 'Verdana',
+      fontSize: 'medium' as const,
       lineSpacing: 1.5,
       margin: { top: 22, right: 22, bottom: 22, left: 22 },
       sectionSpacing: 14,
@@ -113,14 +109,7 @@ const PRESET_THEMES = [
   },
 ];
 
-const FONT_OPTIONS = [
-  "Inter",
-  "Georgia",
-  "Helvetica",
-  "Arial",
-  "Palatino",
-  "Verdana",
-];
+const FONT_OPTIONS = ['Inter', 'Georgia', 'Helvetica', 'Arial', 'Palatino', 'Verdana'];
 
 function CollapsibleSection({
   title,
@@ -141,11 +130,7 @@ function CollapsibleSection({
         onClick={() => setOpen(!open)}
         className="flex w-full cursor-pointer items-center gap-2 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground dark:hover:text-muted-foreground"
       >
-        {open ? (
-          <ChevronDown className="h-3 w-3" />
-        ) : (
-          <ChevronRight className="h-3 w-3" />
-        )}
+        {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         <Icon className="h-3.5 w-3.5" />
         <span>{title}</span>
       </button>
@@ -183,18 +168,14 @@ export function ThemeEditor() {
       </div>
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-4 py-3 space-y-1">
-          <CollapsibleSection
-            title="切换模板"
-            icon={LayoutGrid}
-            defaultOpen={false}
-          >
+          <CollapsibleSection title="切换模板" icon={LayoutGrid} defaultOpen={false}>
             <div className="h-48 overflow-y-auto">
               <div className="grid grid-cols-3 gap-2">
                 {TEMPLATES.map((tpl) => (
                   <button
                     key={tpl}
                     type="button"
-                    className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? "border-pink-500 shadow-sm" : "border-border hover:border-muted-foreground"}`}
+                    className={`group/tpl cursor-pointer overflow-hidden rounded-lg border-2 transition-all ${currentResume?.template === tpl ? 'border-pink-500 shadow-sm' : 'border-border hover:border-muted-foreground'}`}
                     onClick={() => useResumeStore.getState().setTemplate(tpl)}
                   >
                     <div className="bg-background p-1">
@@ -204,7 +185,7 @@ export function ThemeEditor() {
                       />
                     </div>
                     <div
-                      className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? "bg-pink-50 text-pink-700" : "text-muted-foreground"}`}
+                      className={`truncate px-1 py-0.5 text-center text-[10px] font-medium ${currentResume?.template === tpl ? 'bg-pink-50 text-pink-700' : 'text-muted-foreground'}`}
                     >
                       {TEMPLATE_NAMES[tpl] ?? tpl}
                     </div>
@@ -214,10 +195,7 @@ export function ThemeEditor() {
             </div>
           </CollapsibleSection>
           <Separator className="my-2 bg-muted-foreground/20" />
-          <CollapsibleSection
-            title="预设主题"
-            icon={Sparkles as React.ElementType}
-          >
+          <CollapsibleSection title="预设主题" icon={Sparkles as React.ElementType}>
             <div className="grid grid-cols-3 gap-2">
               {PRESET_THEMES.map((preset) => (
                 <button
@@ -236,17 +214,17 @@ export function ThemeEditor() {
                     ))}
                   </div>
                   <span className="text-[10px] text-muted-foreground group-hover:text-foreground dark:group-hover:text-foreground">
-                    {preset.id === "classic"
-                      ? "经典"
-                      : preset.id === "modern"
-                        ? "现代"
-                        : preset.id === "minimal"
-                          ? "简约"
-                          : preset.id === "elegant"
-                            ? "优雅"
-                            : preset.id === "bold"
-                              ? "大胆"
-                              : "创意"}
+                    {preset.id === 'classic'
+                      ? '经典'
+                      : preset.id === 'modern'
+                        ? '现代'
+                        : preset.id === 'minimal'
+                          ? '简约'
+                          : preset.id === 'elegant'
+                            ? '优雅'
+                            : preset.id === 'bold'
+                              ? '大胆'
+                              : '创意'}
                   </span>
                 </button>
               ))}
@@ -286,9 +264,9 @@ export function ThemeEditor() {
             <label className="block text-xs text-muted-foreground">字号</label>
             <div className="mt-1.5 grid grid-cols-3 gap-1.5">
               {[
-                { value: "small", label: "小" },
-                { value: "medium", label: "中" },
-                { value: "large", label: "大" },
+                { value: 'small', label: '小' },
+                { value: 'medium', label: '中' },
+                { value: 'large', label: '大' },
               ].map((opt) => (
                 <button
                   key={opt.value}
@@ -296,8 +274,8 @@ export function ThemeEditor() {
                   onClick={() => updateTheme({ fontSize: opt.value })}
                   className={`rounded border px-1.5 py-px text-[10px] font-medium transition-all ${
                     themeConfig.fontSize === opt.value
-                      ? "border-pink-500 bg-pink-50 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400"
-                      : "border-border text-muted-foreground hover:border-muted-foreground"
+                      ? 'border-pink-500 bg-pink-50 text-pink-600 dark:bg-pink-500/20 dark:text-pink-400'
+                      : 'border-border text-muted-foreground hover:border-muted-foreground'
                   }`}
                 >
                   {opt.label}
@@ -312,9 +290,7 @@ export function ThemeEditor() {
                 max={2.5}
                 step={0.1}
                 value={themeConfig.lineSpacing}
-                onChange={(e) =>
-                  updateTheme({ lineSpacing: Number(e.target.value) })
-                }
+                onChange={(e) => updateTheme({ lineSpacing: Number(e.target.value) })}
                 className="mt-1 w-full"
               />
               <span className="text-xs text-muted-foreground">
@@ -332,28 +308,24 @@ export function ThemeEditor() {
                 max={32}
                 step={2}
                 value={themeConfig.sectionSpacing}
-                onChange={(e) =>
-                  updateTheme({ sectionSpacing: Number(e.target.value) })
-                }
+                onChange={(e) => updateTheme({ sectionSpacing: Number(e.target.value) })}
                 className="mt-1 w-full"
               />
-              <span className="text-xs text-muted-foreground">
-                {themeConfig.sectionSpacing}px
-              </span>
+              <span className="text-xs text-muted-foreground">{themeConfig.sectionSpacing}px</span>
             </label>
             <div className="mt-1.5 space-y-2">
               <span className="text-xs text-muted-foreground">页边距</span>
               <div className="grid grid-cols-4 gap-1">
-                {(["top", "right", "bottom", "left"] as const).map((dir) => (
+                {(['top', 'right', 'bottom', 'left'] as const).map((dir) => (
                   <div key={dir} className="flex flex-col items-center">
                     <span className="mb-1 text-[9px] text-muted-foreground">
-                      {dir === "top"
-                        ? "上"
-                        : dir === "right"
-                          ? "右"
-                          : dir === "bottom"
-                            ? "下"
-                            : "左"}
+                      {dir === 'top'
+                        ? '上'
+                        : dir === 'right'
+                          ? '右'
+                          : dir === 'bottom'
+                            ? '下'
+                            : '左'}
                     </span>
                     <input
                       type="number"
@@ -392,9 +364,7 @@ function ColorPicker({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <Label className="text-xs text-muted-foreground dark:text-muted-foreground">
-        {label}
-      </Label>
+      <Label className="text-xs text-muted-foreground dark:text-muted-foreground">{label}</Label>
       <Popover>
         <PopoverTrigger asChild>
           <button
@@ -408,15 +378,9 @@ function ColorPicker({
             <span className="font-mono text-muted-foreground">{value}</span>
           </button>
         </PopoverTrigger>
-        <PopoverContent
-          className="w-56 p-2 bg-popover shadow-lg border border-input"
-          align="end"
-        >
+        <PopoverContent className="w-56 p-2 bg-popover shadow-lg border border-input" align="end">
           <div className="relative h-6 w-full border border-border overflow-hidden">
-            <div
-              className="absolute inset-0"
-              style={{ backgroundColor: value }}
-            />
+            <div className="absolute inset-0" style={{ backgroundColor: value }} />
             <input
               type="color"
               value={value}

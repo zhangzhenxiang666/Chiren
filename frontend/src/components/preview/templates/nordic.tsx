@@ -10,23 +10,23 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const SLATE_500 = "#64748b";
-const SLATE_400 = "#94a3b8";
-const SLATE_50 = "#f8fafc";
+const SLATE_500 = '#64748b';
+const SLATE_400 = '#94a3b8';
+const SLATE_50 = '#f8fafc';
 
 export function NordicTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div className="mb-8 text-center">
@@ -38,17 +38,11 @@ export function NordicTemplate({ resume }: { resume: Resume }) {
             style={{ border: `2px solid ${SLATE_400}` }}
           />
         )}
-        <h1
-          className="text-2xl font-light tracking-wide"
-          style={{ color: SLATE_500 }}
-        >
-          {pi.fullName || "Your Name"}
+        <h1 className="text-2xl font-light tracking-wide" style={{ color: SLATE_500 }}>
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
-          <p
-            className="mt-1 text-sm font-light tracking-wider"
-            style={{ color: SLATE_400 }}
-          >
+          <p className="mt-1 text-sm font-light tracking-wider" style={{ color: SLATE_400 }}>
             {pi.jobTitle}
           </p>
         )}
@@ -73,16 +67,11 @@ export function NordicTemplate({ resume }: { resume: Resume }) {
       </div>
 
       {/* Thin divider */}
-      <div
-        className="mx-auto mb-8 h-px w-full"
-        style={{ backgroundColor: SLATE_400 }}
-      />
+      <div className="mx-auto mb-8 h-px w-full" style={{ backgroundColor: SLATE_400 }} />
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-9" data-section>
             <h2
@@ -100,17 +89,11 @@ export function NordicTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function NordicSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function NordicSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm font-light leading-relaxed"
@@ -122,44 +105,27 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-sm p-3"
-            style={{ backgroundColor: SLATE_50 }}
-          >
+          <div key={item.id} className="rounded-sm p-3" style={{ backgroundColor: SLATE_50 }}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: SLATE_500 }}
-                >
+                <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
                   {item.position}
                 </span>
                 {item.company && (
-                  <span
-                    className="text-sm font-light"
-                    style={{ color: SLATE_400 }}
-                  >
-                    {" "}
+                  <span className="text-sm font-light" style={{ color: SLATE_400 }}>
+                    {' '}
                     | {item.company}
                   </span>
                 )}
               </div>
-              <span
-                className="shrink-0 text-xs font-light"
-                style={{ color: SLATE_400 }}
-              >
-                {item.startDate} -{" "}
+              <span className="shrink-0 text-xs font-light" style={{ color: SLATE_400 }}>
+                {item.startDate} -{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -170,12 +136,8 @@ function NordicSectionContent({
               />
             )}
             {item.technologies?.length > 0 && (
-              <p
-                className="mt-0.5 text-xs font-light"
-                style={{ color: SLATE_400 }}
-              >
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+              <p className="mt-0.5 text-xs font-light" style={{ color: SLATE_400 }}>
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -196,40 +158,25 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-sm p-3"
-            style={{ backgroundColor: SLATE_50 }}
-          >
+          <div key={item.id} className="rounded-sm p-3" style={{ backgroundColor: SLATE_50 }}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: SLATE_500 }}
-                >
+                <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span
-                    className="text-sm font-light"
-                    style={{ color: SLATE_400 }}
-                  >
-                    {" "}
+                  <span className="text-sm font-light" style={{ color: SLATE_400 }}>
+                    {' '}
                     - {item.institution}
                   </span>
                 )}
               </div>
-              <span
-                className="shrink-0 text-xs font-light"
-                style={{ color: SLATE_400 }}
-              >
-                {item.startDate} -{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+              <span className="shrink-0 text-xs font-light" style={{ color: SLATE_400 }}>
+                {item.startDate} - {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             {item.gpa && (
@@ -255,19 +202,16 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1.5">
         {((content as SkillsContent).categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span
-              className="w-28 shrink-0 font-medium"
-              style={{ color: SLATE_500 }}
-            >
+            <span className="w-28 shrink-0 font-medium" style={{ color: SLATE_500 }}>
               {cat.name}:
             </span>
             <span className="font-light" style={{ color: SLATE_400 }}>
-              {(cat.skills || []).join(", ")}
+              {(cat.skills || []).join(', ')}
             </span>
           </div>
         ))}
@@ -275,30 +219,19 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-sm p-3"
-            style={{ backgroundColor: SLATE_50 }}
-          >
+          <div key={item.id} className="rounded-sm p-3" style={{ backgroundColor: SLATE_50 }}>
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-medium"
-                style={{ color: SLATE_500 }}
-              >
+              <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
                 {item.name}
               </span>
               {item.startDate && (
-                <span
-                  className="shrink-0 text-xs font-light"
-                  style={{ color: SLATE_400 }}
-                >
-                  {item.startDate} -{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                <span className="shrink-0 text-xs font-light" style={{ color: SLATE_400 }}>
+                  {item.startDate} -{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -310,12 +243,8 @@ function NordicSectionContent({
               />
             )}
             {item.technologies?.length > 0 && (
-              <p
-                className="mt-0.5 text-xs font-light"
-                style={{ color: SLATE_400 }}
-              >
-                {resume.language === "zh" ? "技术栈" : "Tech"}:{" "}
-                {item.technologies.join(", ")}
+              <p className="mt-0.5 text-xs font-light" style={{ color: SLATE_400 }}>
+                {resume.language === 'zh' ? '技术栈' : 'Tech'}: {item.technologies.join(', ')}
               </p>
             )}
             {item.highlights?.length > 0 && (
@@ -336,7 +265,7 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -356,7 +285,7 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="space-y-1.5">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -365,7 +294,7 @@ function NordicSectionContent({
               {item.language}
             </span>
             <span className="text-sm font-light" style={{ color: SLATE_400 }}>
-              {" "}
+              {' '}
               — {item.proficiency}
             </span>
           </div>
@@ -374,21 +303,14 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-sm p-3"
-            style={{ backgroundColor: SLATE_50 }}
-          >
+          <div key={item.id} className="rounded-sm p-3" style={{ backgroundColor: SLATE_50 }}>
             <div className="flex items-baseline justify-between">
-              <span
-                className="text-sm font-medium"
-                style={{ color: SLATE_500 }}
-              >
+              <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
                 {item.name}
               </span>
               <span className="text-xs font-light" style={{ color: SLATE_400 }}>
@@ -413,34 +335,25 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
           <div key={item.id}>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-medium"
-                  style={{ color: SLATE_500 }}
-                >
+                <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
                   {item.title}
                 </span>
                 {item.subtitle && (
-                  <span
-                    className="text-sm font-light"
-                    style={{ color: SLATE_400 }}
-                  >
-                    {" "}
+                  <span className="text-sm font-light" style={{ color: SLATE_400 }}>
+                    {' '}
                     — {item.subtitle}
                   </span>
                 )}
               </div>
               {item.date && (
-                <span
-                  className="shrink-0 text-xs font-light"
-                  style={{ color: SLATE_400 }}
-                >
+                <span className="shrink-0 text-xs font-light" style={{ color: SLATE_400 }}>
                   {item.date}
                 </span>
               )}
@@ -458,7 +371,7 @@ function NordicSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -467,7 +380,7 @@ function NordicSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: SLATE_500 }}>
               {item.name || item.title || item.language}
             </span>

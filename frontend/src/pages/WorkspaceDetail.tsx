@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import {
   Plus,
   ArrowLeft,
@@ -11,21 +11,21 @@ import {
   Pencil,
   Trash2,
   Loader2,
-} from "lucide-react";
-import { toast } from "sonner";
-import type { Workspace, SubResume } from "../types/workspace";
-import type { Resume, ResumeSection } from "../types/resume";
-import ResumePreview from "../components/preview/ResumePreview";
-import EditorToolbar from "../components/editor/EditorToolbar";
-import { EditorSidebar } from "../components/editor/EditorSidebar";
-import { EditorCanvas } from "../components/editor/EditorCanvas";
-import { ThemeEditor } from "../components/editor/ThemeEditor";
-import { EditorPreviewPanel } from "../components/editor/EditorPreviewPanel";
-import { CoverLetterDialog } from "../components/editor/CoverLetterDialog";
-import { DraggableAIChatButton } from "../components/editor/DraggableAIChatButton";
-import { useResumeStore } from "../stores/resume-store";
-import { useEditorStore } from "../stores/editor-store";
-import type { JdAnalysis } from "../lib/api";
+} from 'lucide-react';
+import { toast } from 'sonner';
+import type { Workspace, SubResume } from '../types/workspace';
+import type { Resume, ResumeSection } from '../types/resume';
+import ResumePreview from '../components/preview/ResumePreview';
+import EditorToolbar from '../components/editor/EditorToolbar';
+import { EditorSidebar } from '../components/editor/EditorSidebar';
+import { EditorCanvas } from '../components/editor/EditorCanvas';
+import { ThemeEditor } from '../components/editor/ThemeEditor';
+import { EditorPreviewPanel } from '../components/editor/EditorPreviewPanel';
+import { CoverLetterDialog } from '../components/editor/CoverLetterDialog';
+import { DraggableAIChatButton } from '../components/editor/DraggableAIChatButton';
+import { useResumeStore } from '../stores/resume-store';
+import { useEditorStore } from '../stores/editor-store';
+import type { JdAnalysis } from '../lib/api';
 import {
   fetchWorkspaces,
   fetchResumeSections,
@@ -38,22 +38,22 @@ import {
   checkRunningMatchTask,
   updateResume,
   deleteWorkspace,
-} from "../lib/api";
-import { markUnread, addNotificationTask } from "../lib/notification";
-import GenerateForPositionModal from "../components/workspace/GenerateForPositionModal";
-import ScoreDetailModal from "../components/workspace/ScoreDetailModal";
-import EditSubResumeModal from "../components/workspace/EditSubResumeModal";
-import ConfirmDialog from "../components/ui/ConfirmDialog";
-import ResumeInsightsPanel from "../components/workspace/ResumeInsightsPanel";
-import OverviewTab from "../components/workspace/OverviewTab";
-import JDAnalysisTab from "../components/workspace/JDAnalysisTab";
-import InterviewTab from "../components/workspace/InterviewTab";
-import { getScoreColorClass } from "../lib/resume-insights";
+} from '../lib/api';
+import { markUnread, addNotificationTask } from '../lib/notification';
+import GenerateForPositionModal from '../components/workspace/GenerateForPositionModal';
+import ScoreDetailModal from '../components/workspace/ScoreDetailModal';
+import EditSubResumeModal from '../components/workspace/EditSubResumeModal';
+import ConfirmDialog from '../components/ui/ConfirmDialog';
+import ResumeInsightsPanel from '../components/workspace/ResumeInsightsPanel';
+import OverviewTab from '../components/workspace/OverviewTab';
+import JDAnalysisTab from '../components/workspace/JDAnalysisTab';
+import InterviewTab from '../components/workspace/InterviewTab';
+import { getScoreColorClass } from '../lib/resume-insights';
 
-type MainTab = "overview" | "jd" | "interview" | "meta";
+type MainTab = 'overview' | 'jd' | 'interview' | 'meta';
 
-const VALID_TABS = new Set<string>(["overview", "jd", "interview", "meta"]);
-const DEFAULT_TAB: MainTab = "overview";
+const VALID_TABS = new Set<string>(['overview', 'jd', 'interview', 'meta']);
+const DEFAULT_TAB: MainTab = 'overview';
 
 export default function WorkspaceDetail() {
   const navigate = useNavigate();
@@ -63,7 +63,7 @@ export default function WorkspaceDetail() {
     tab: urlTab,
   } = useParams<{ id: string; resumeId?: string; tab?: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const activateParam = searchParams.get("activate");
+  const activateParam = searchParams.get('activate');
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [wsLoading, setWsLoading] = useState(true);
   const [sections, setSections] = useState<ResumeSection[]>([]);
@@ -74,28 +74,21 @@ export default function WorkspaceDetail() {
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [showScoreDetail, setShowScoreDetail] = useState(false);
   const [currentScoreResumeId] = useState<string | null>(null);
-  const [resumeAnalyses, setResumeAnalyses] = useState<
-    Map<string, JdAnalysis[]>
-  >(new Map());
+  const [resumeAnalyses, setResumeAnalyses] = useState<Map<string, JdAnalysis[]>>(new Map());
   const [coverLetterOpen, setCoverLetterOpen] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingResume, setEditingResume] = useState<SubResume | null>(null);
-  const [confirmDeleteResumeId, setConfirmDeleteResumeId] = useState<
-    string | null
-  >(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [editJobTitle, setEditJobTitle] = useState("");
-  const [editJobDescription, setEditJobDescription] = useState("");
+  const [confirmDeleteResumeId, setConfirmDeleteResumeId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const [editJobTitle, setEditJobTitle] = useState('');
+  const [editJobDescription, setEditJobDescription] = useState('');
   const [isSubmittingMeta, setIsSubmittingMeta] = useState(false);
 
-  const activeTab: MainTab = VALID_TABS.has(urlTab || "")
-    ? (urlTab as MainTab)
-    : DEFAULT_TAB;
+  const activeTab: MainTab = VALID_TABS.has(urlTab || '') ? (urlTab as MainTab) : DEFAULT_TAB;
 
   const selectedAnalysisId =
-    activeTab === "jd" && activateParam ? Number(activateParam) : undefined;
-  const selectedCollectionId =
-    activeTab === "interview" ? activateParam || undefined : undefined;
+    activeTab === 'jd' && activateParam ? Number(activateParam) : undefined;
+  const selectedCollectionId = activeTab === 'interview' ? activateParam || undefined : undefined;
 
   const handleSelectAnalysis = useCallback(
     (analysisId: number) => {
@@ -129,7 +122,7 @@ export default function WorkspaceDetail() {
 
   useEffect(() => {
     if (!id) {
-      toast.error("缺少工作空间 ID");
+      toast.error('缺少工作空间 ID');
       return;
     }
     fetchWorkspaces()
@@ -138,13 +131,13 @@ export default function WorkspaceDetail() {
         if (ws) {
           setWorkspace(ws);
         } else {
-          toast.error("未找到该工作空间");
+          toast.error('未找到该工作空间');
           setWorkspace(null);
         }
       })
       .catch((err) => {
-        console.error("Failed to fetch workspace:", err);
-        toast.error("加载工作空间失败");
+        console.error('Failed to fetch workspace:', err);
+        toast.error('加载工作空间失败');
       })
       .finally(() => {
         setWsLoading(false);
@@ -190,11 +183,7 @@ export default function WorkspaceDetail() {
   }, [workspace, refreshWorkspaces, urlResumeId, id, navigate]);
 
   const handleEditSubmit = useCallback(
-    async (payload: {
-      title: string;
-      jobTitle: string;
-      jobDescription: string;
-    }) => {
+    async (payload: { title: string; jobTitle: string; jobDescription: string }) => {
       if (!editingResume) return;
       try {
         await updateResume({
@@ -205,12 +194,12 @@ export default function WorkspaceDetail() {
             job_description: payload.jobDescription,
           },
         });
-        toast.success("子简历信息已更新");
+        toast.success('子简历信息已更新');
         setShowEditModal(false);
         setEditingResume(null);
         refreshSubResumes();
       } catch (err: any) {
-        toast.error(err.message || "更新子简历失败");
+        toast.error(err.message || '更新子简历失败');
       }
     },
     [editingResume, refreshSubResumes],
@@ -223,8 +212,8 @@ export default function WorkspaceDetail() {
         setSections(data.sort((a, b) => a.sortOrder - b.sortOrder));
       })
       .catch((err) => {
-        console.error("Failed to fetch resume sections:", err);
-        toast.error("加载简历数据失败");
+        console.error('Failed to fetch resume sections:', err);
+        toast.error('加载简历数据失败');
       })
       .finally(() => {
         setLoading(false);
@@ -271,7 +260,7 @@ export default function WorkspaceDetail() {
         }
       })
       .catch((err) => {
-        console.error("Failed to fetch sub resumes:", err);
+        console.error('Failed to fetch sub resumes:', err);
       })
       .finally(() => {
         setSubResumesLoading(false);
@@ -281,24 +270,24 @@ export default function WorkspaceDetail() {
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { taskType: string };
-      if (detail?.taskType !== "jd_generate") return;
+      if (detail?.taskType !== 'jd_generate') return;
       refreshSubResumes();
     };
-    window.addEventListener("global-sse-complete", handler);
+    window.addEventListener('global-sse-complete', handler);
     return () => {
-      window.removeEventListener("global-sse-complete", handler);
+      window.removeEventListener('global-sse-complete', handler);
     };
   }, [refreshSubResumes]);
 
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { taskType: string };
-      if (detail?.taskType !== "jd_score") return;
+      if (detail?.taskType !== 'jd_score') return;
       refreshSubResumes();
     };
-    window.addEventListener("global-sse-complete", handler);
+    window.addEventListener('global-sse-complete', handler);
     return () => {
-      window.removeEventListener("global-sse-complete", handler);
+      window.removeEventListener('global-sse-complete', handler);
     };
   }, [refreshSubResumes]);
 
@@ -316,24 +305,16 @@ export default function WorkspaceDetail() {
         replace: true,
       });
     }
-  }, [
-    id,
-    subResumes,
-    subResumesLoading,
-    workspace,
-    urlResumeId,
-    urlTab,
-    navigate,
-  ]);
+  }, [id, subResumes, subResumesLoading, workspace, urlResumeId, urlTab, navigate]);
 
   const resumeData: Resume | null = useMemo(() => {
     if (!workspace) return null;
     return {
       id: workspace.id,
-      userId: "",
+      userId: '',
       title: workspace.title,
       template: workspace.template,
-      themeConfig: workspace.themeConfig as unknown as Resume["themeConfig"],
+      themeConfig: workspace.themeConfig as unknown as Resume['themeConfig'],
       isDefault: workspace.isDefault,
       language: workspace.language,
       sections,
@@ -385,16 +366,15 @@ export default function WorkspaceDetail() {
   );
 
   useEffect(() => {
-    if (activeTab === "meta" && selectedSubResume) {
-      setEditTitle(selectedSubResume.title || "");
-      setEditJobTitle(selectedSubResume.jobTitle || "");
-      setEditJobDescription(selectedSubResume.jobDescription || "");
+    if (activeTab === 'meta' && selectedSubResume) {
+      setEditTitle(selectedSubResume.title || '');
+      setEditJobTitle(selectedSubResume.jobTitle || '');
+      setEditJobDescription(selectedSubResume.jobDescription || '');
     }
   }, [activeTab, selectedSubResume]);
 
   const selectedAnalyses = useMemo(
-    () =>
-      selectedSubResumeId ? resumeAnalyses.get(selectedSubResumeId) || [] : [],
+    () => (selectedSubResumeId ? resumeAnalyses.get(selectedSubResumeId) || [] : []),
     [resumeAnalyses, selectedSubResumeId],
   );
 
@@ -403,17 +383,13 @@ export default function WorkspaceDetail() {
     try {
       const config = await getProviderConfig();
       const activeConfig = config.providers[config.active];
-      if (
-        !activeConfig?.apiKey ||
-        !activeConfig?.baseUrl ||
-        !activeConfig?.model
-      ) {
-        toast.error("请先在设置中配置 AI 提供商");
+      if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+        toast.error('请先在设置中配置 AI 提供商');
         return;
       }
       const existingTask = await checkRunningMatchTask(selectedSubResume.id);
       if (existingTask) {
-        toast.error("该简历已有正在进行的评分任务");
+        toast.error('该简历已有正在进行的评分任务');
         return;
       }
       const { taskId } = await createMatchTask({
@@ -426,8 +402,8 @@ export default function WorkspaceDetail() {
       markUnread();
       addNotificationTask({
         id: taskId,
-        taskType: "jd_score",
-        status: "running",
+        taskType: 'jd_score',
+        status: 'running',
         workspaceId: workspace.id,
         metaInfo: { title: selectedSubResume.title },
         errorMessage: null,
@@ -443,53 +419,46 @@ export default function WorkspaceDetail() {
         </div>,
       );
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "评分请求失败");
+      toast.error(err instanceof Error ? err.message : '评分请求失败');
     }
   }, [selectedSubResume, workspace]);
 
   const tabs: { id: MainTab; label: string; icon: React.ReactNode }[] = [
     {
-      id: "overview",
-      label: "概览",
+      id: 'overview',
+      label: '概览',
       icon: <LayoutGrid className="w-3.5 h-3.5" />,
     },
     {
-      id: "jd",
-      label: "JD 分析",
+      id: 'jd',
+      label: 'JD 分析',
       icon: <FileSearch className="w-3.5 h-3.5" />,
     },
     {
-      id: "interview",
-      label: "面试管理",
+      id: 'interview',
+      label: '面试管理',
       icon: <Users className="w-3.5 h-3.5" />,
     },
-    { id: "meta", label: "元数据", icon: <Pencil className="w-3.5 h-3.5" /> },
+    { id: 'meta', label: '元数据', icon: <Pencil className="w-3.5 h-3.5" /> },
   ];
 
   if (wsLoading) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        加载中...
-      </div>
+      <div className="flex items-center justify-center h-full text-muted-foreground">加载中...</div>
     );
   }
 
   if (!workspace) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-4">
-        <Inbox
-          className="w-16 h-16 text-muted-foreground/40"
-          strokeWidth={1.5}
-        />
+        <Inbox className="w-16 h-16 text-muted-foreground/40" strokeWidth={1.5} />
         <div className="text-center">
           <p className="text-lg text-foreground mb-1">工作空间不存在</p>
-          <p className="text-sm text-muted-foreground">
-            访问的工作空间可能已被删除或不存在
-          </p>
+          <p className="text-sm text-muted-foreground">访问的工作空间可能已被删除或不存在</p>
         </div>
         <button
           type="button"
-          onClick={() => navigate("/workspace")}
+          onClick={() => navigate('/workspace')}
           className="mt-2 px-4 py-2 rounded-lg border border-border text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
         >
           返回工作空间列表
@@ -548,9 +517,7 @@ export default function WorkspaceDetail() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        加载中...
-      </div>
+      <div className="flex items-center justify-center h-full text-muted-foreground">加载中...</div>
     );
   }
 
@@ -561,7 +528,7 @@ export default function WorkspaceDetail() {
           <nav className="flex items-center gap-2 text-xs">
             <button
               type="button"
-              onClick={() => navigate("/workspace")}
+              onClick={() => navigate('/workspace')}
               className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors"
             >
               <ArrowLeft className="w-3 h-3" />
@@ -571,9 +538,7 @@ export default function WorkspaceDetail() {
             <span className="text-muted-foreground">{workspace!.title}</span>
             <ChevronRight className="w-3 h-3 text-muted-foreground/40" />
             <span className="text-foreground font-medium">
-              {selectedSubResume?.jobTitle ||
-                selectedSubResume?.title ||
-                "未选择"}
+              {selectedSubResume?.jobTitle || selectedSubResume?.title || '未选择'}
             </span>
           </nav>
 
@@ -581,9 +546,11 @@ export default function WorkspaceDetail() {
 
           <div className="flex items-center gap-3 text-xs text-muted-foreground">
             {selectedSubResume?.matchScore !== undefined && (
-              <span className={`flex items-center gap-1 ${getScoreColorClass(selectedSubResume.matchScore).text}`}>
+              <span
+                className={`flex items-center gap-1 ${getScoreColorClass(selectedSubResume.matchScore).text}`}
+              >
                 <span
-                  className={`w-2 h-2 rounded-full ${getScoreColorClass(selectedSubResume.matchScore).text.replace("text-", "bg-")}`}
+                  className={`w-2 h-2 rounded-full ${getScoreColorClass(selectedSubResume.matchScore).text.replace('text-', 'bg-')}`}
                 />
                 匹配度 {selectedSubResume.matchScore}%
               </span>
@@ -616,23 +583,21 @@ export default function WorkspaceDetail() {
 
           <div
             className="overflow-hidden border border-foreground/10 rounded-xl relative flex-shrink-0"
-            style={{ width: "calc(595px * 0.44)", height: "540px" }}
+            style={{ width: 'calc(595px * 0.44)', height: '540px' }}
           >
             <div
               className="bg-white text-black"
               style={{
-                transform: "scale(0.44)",
-                transformOrigin: "top left",
-                width: "595px",
+                transform: 'scale(0.44)',
+                transformOrigin: 'top left',
+                width: '595px',
               }}
             >
               <div id="resume-preview-container">
                 {resumeData && (
                   <ResumePreview
                     resume={{ ...resumeData, template: workspace!.template }}
-                    onClick={() =>
-                      navigate(`/workspace/${workspace!.id}/template/edit`)
-                    }
+                    onClick={() => navigate(`/workspace/${workspace!.id}/template/edit`)}
                   />
                 )}
               </div>
@@ -652,9 +617,7 @@ export default function WorkspaceDetail() {
                 <div>
                   <div className="flex items-center gap-2 mb-0.5">
                     <h2 className="text-base font-bold">
-                      {selectedSubResume?.jobTitle ||
-                        selectedSubResume?.title ||
-                        "未选择子简历"}
+                      {selectedSubResume?.jobTitle || selectedSubResume?.title || '未选择子简历'}
                     </h2>
                     {selectedSubResume?.matchScore !== undefined &&
                       selectedSubResume.matchScore >= 85 && (
@@ -665,32 +628,32 @@ export default function WorkspaceDetail() {
                   </div>
                   <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                     <span>
-                      创建:{" "}
+                      创建:{' '}
                       {selectedSubResume
                         ? new Date(selectedSubResume.createdAt)
-                            .toLocaleString("zh-CN", {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
+                            .toLocaleString('zh-CN', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
                             })
-                            .replace(/\//g, "-")
-                        : "--"}
+                            .replace(/\//g, '-')
+                        : '--'}
                     </span>
                     <span>
-                      更新:{" "}
+                      更新:{' '}
                       {selectedSubResume
                         ? new Date(selectedSubResume.updatedAt)
-                            .toLocaleString("zh-CN", {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
+                            .toLocaleString('zh-CN', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit',
                             })
-                            .replace(/\//g, "-")
-                        : "--"}
+                            .replace(/\//g, '-')
+                        : '--'}
                     </span>
                   </div>
                 </div>
@@ -699,9 +662,7 @@ export default function WorkspaceDetail() {
                 <button
                   onClick={() => {
                     if (!selectedSubResume || !workspace) return;
-                    navigate(
-                      `/workspace/${workspace.id}/resumes/${selectedSubResume.id}/edit`,
-                    );
+                    navigate(`/workspace/${workspace.id}/resumes/${selectedSubResume.id}/edit`);
                   }}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-border text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted transition-all"
                 >
@@ -728,16 +689,15 @@ export default function WorkspaceDetail() {
                 key={tab.id}
                 onClick={() => {
                   if (selectedSubResumeId) {
-                    navigate(
-                      `/workspace/${id}/resumes/${selectedSubResumeId}/${tab.id}`,
-                      { replace: true },
-                    );
+                    navigate(`/workspace/${id}/resumes/${selectedSubResumeId}/${tab.id}`, {
+                      replace: true,
+                    });
                   }
                 }}
                 className={`py-2.5 px-3 text-xs font-medium flex items-center gap-1.5 transition-all relative ${
                   activeTab === tab.id
-                    ? "text-pink-400"
-                    : "text-muted-foreground hover:text-foreground"
+                    ? 'text-pink-400'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {tab.icon}
@@ -750,21 +710,21 @@ export default function WorkspaceDetail() {
           </div>
 
           <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 min-h-0">
-            {activeTab === "overview" && (
+            {activeTab === 'overview' && (
               <OverviewTab
                 analyses={selectedAnalyses}
-                subResumeId={selectedSubResumeId || ""}
+                subResumeId={selectedSubResumeId || ''}
                 onViewInterview={(collectionId) => {
                   if (selectedSubResumeId) {
                     navigate(
-                      `/workspace/${id}/resumes/${selectedSubResumeId}/interview${collectionId ? `?activate=${collectionId}` : ""}`,
+                      `/workspace/${id}/resumes/${selectedSubResumeId}/interview${collectionId ? `?activate=${collectionId}` : ''}`,
                       { replace: true },
                     );
                   }
                 }}
               />
             )}
-            {activeTab === "jd" && (
+            {activeTab === 'jd' && (
               <JDAnalysisTab
                 analyses={selectedAnalyses}
                 selectedId={selectedAnalysisId}
@@ -772,7 +732,7 @@ export default function WorkspaceDetail() {
                 onStartScoring={handleScoreJD}
               />
             )}
-            {activeTab === "interview" && selectedSubResumeId && (
+            {activeTab === 'interview' && selectedSubResumeId && (
               <InterviewTab
                 subResumeId={selectedSubResumeId}
                 subResumeTitle={selectedSubResume?.title}
@@ -780,13 +740,11 @@ export default function WorkspaceDetail() {
                 onSelectCollection={handleSelectCollection}
               />
             )}
-            {activeTab === "meta" && selectedSubResume && (
+            {activeTab === 'meta' && selectedSubResume && (
               <div className="h-full flex flex-col">
                 <div className="grid grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="text-xs text-muted-foreground mb-1.5 block">
-                      简历名称
-                    </label>
+                    <label className="text-xs text-muted-foreground mb-1.5 block">简历名称</label>
                     <input
                       type="text"
                       value={editTitle}
@@ -796,8 +754,7 @@ export default function WorkspaceDetail() {
                   </div>
                   <div>
                     <label className="text-xs text-muted-foreground mb-1.5 block">
-                      岗位名称{" "}
-                      <span className="text-muted-foreground/60">(选填)</span>
+                      岗位名称 <span className="text-muted-foreground/60">(选填)</span>
                     </label>
                     <input
                       type="text"
@@ -821,11 +778,9 @@ export default function WorkspaceDetail() {
                       请尽量填写完整的岗位要求和职责描述
                     </span>
                     <span
-                      className={`text-[11px] ${editJobDescription.trim() ? "text-pink-400" : "text-muted-foreground/60"}`}
+                      className={`text-[11px] ${editJobDescription.trim() ? 'text-pink-400' : 'text-muted-foreground/60'}`}
                     >
-                      {editJobDescription.length > 0
-                        ? `${editJobDescription.length} 字`
-                        : "必填"}
+                      {editJobDescription.length > 0 ? `${editJobDescription.length} 字` : '必填'}
                     </span>
                   </div>
                 </div>
@@ -834,10 +789,9 @@ export default function WorkspaceDetail() {
                     type="button"
                     onClick={() => {
                       if (selectedSubResumeId) {
-                        navigate(
-                          `/workspace/${id}/resumes/${selectedSubResumeId}/overview`,
-                          { replace: true },
-                        );
+                        navigate(`/workspace/${id}/resumes/${selectedSubResumeId}/overview`, {
+                          replace: true,
+                        });
                       }
                     }}
                     className="px-4 py-2 rounded-lg border border-border text-muted-foreground hover:text-foreground hover:bg-muted transition-colors text-sm font-medium"
@@ -847,8 +801,7 @@ export default function WorkspaceDetail() {
                   <button
                     type="button"
                     onClick={async () => {
-                      if (!editJobDescription.trim() || !selectedSubResume)
-                        return;
+                      if (!editJobDescription.trim() || !selectedSubResume) return;
                       setIsSubmittingMeta(true);
                       try {
                         await updateResume({
@@ -859,16 +812,15 @@ export default function WorkspaceDetail() {
                             job_description: editJobDescription.trim(),
                           },
                         });
-                        toast.success("子简历信息已更新");
+                        toast.success('子简历信息已更新');
                         if (selectedSubResumeId) {
-                          navigate(
-                            `/workspace/${id}/resumes/${selectedSubResumeId}/overview`,
-                            { replace: true },
-                          );
+                          navigate(`/workspace/${id}/resumes/${selectedSubResumeId}/overview`, {
+                            replace: true,
+                          });
                         }
                         refreshSubResumes();
                       } catch (err: any) {
-                        toast.error(err.message || "更新子简历失败");
+                        toast.error(err.message || '更新子简历失败');
                       } finally {
                         setIsSubmittingMeta(false);
                       }
@@ -902,9 +854,7 @@ export default function WorkspaceDetail() {
                 子简历
               </span>
             </div>
-            <span className="text-muted-foreground text-[10px]">
-              {subResumes.length} 份
-            </span>
+            <span className="text-muted-foreground text-[10px]">{subResumes.length} 份</span>
           </div>
 
           <div className="space-y-2 overflow-y-auto pr-1 flex-1 min-h-0">
@@ -927,22 +877,17 @@ export default function WorkspaceDetail() {
               subResumes.map((resume) => {
                 const isActive = resume.id === selectedSubResumeId;
                 const scoreColor =
-                  resume.matchScore !== undefined
-                    ? getScoreColorClass(resume.matchScore)
-                    : null;
+                  resume.matchScore !== undefined ? getScoreColorClass(resume.matchScore) : null;
                 return (
                   <div
                     key={resume.id}
                     onClick={() =>
-                      navigate(
-                        `/workspace/${id}/resumes/${resume.id}/${activeTab}`,
-                        { replace: true },
-                      )
+                      navigate(`/workspace/${id}/resumes/${resume.id}/${activeTab}`, {
+                        replace: true,
+                      })
                     }
                     className={`rounded-lg border p-3 cursor-pointer transition-all group ${
-                      isActive
-                        ? "border-pink-400"
-                        : "border-border hover:border-foreground/30"
+                      isActive ? 'border-pink-400' : 'border-border hover:border-foreground/30'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-2">
@@ -950,42 +895,35 @@ export default function WorkspaceDetail() {
                         <h3 className="text-xs font-semibold truncate text-foreground">
                           {resume.title}
                         </h3>
-                        {resume.matchScore !== undefined &&
-                          resume.matchScore >= 85 && (
-                            <span className="px-1 py-0.5 rounded text-[9px] bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 shrink-0 font-medium">
-                              推荐
-                            </span>
-                          )}
+                        {resume.matchScore !== undefined && resume.matchScore >= 85 && (
+                          <span className="px-1 py-0.5 rounded text-[9px] bg-green-100 dark:bg-green-500/15 text-green-700 dark:text-green-300 shrink-0 font-medium">
+                            推荐
+                          </span>
+                        )}
                       </div>
                     </div>
 
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-[10px] text-muted-foreground">
-                        创建时间:{" "}
+                        创建时间:{' '}
                         {new Date(resume.createdAt)
-                          .toLocaleDateString("zh-CN", {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
+                          .toLocaleDateString('zh-CN', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
                           })
-                          .replace(/\//g, "-")}
+                          .replace(/\//g, '-')}
                       </div>
                       <div className="flex items-center gap-0.5 shrink-0">
-                        <span className="text-[10px] text-muted-foreground">
-                          匹配度:
-                        </span>
+                        <span className="text-[10px] text-muted-foreground">匹配度:</span>
                         {resume.matchScore !== undefined ? (
-                          <span
-                            className={`text-[10px] font-bold ${scoreColor?.text}`}
-                          >
+                          <span className={`text-[10px] font-bold ${scoreColor?.text}`}>
                             {resume.matchScore}%
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-muted-foreground">
-                            --
-                          </span>
+                          <span className="text-[10px] font-bold text-muted-foreground">--</span>
                         )}
                       </div>
                     </div>
@@ -994,10 +932,7 @@ export default function WorkspaceDetail() {
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                           <FileSearch className="w-3 h-3" />
-                          <span>
-                            JD分析:{" "}
-                            {(resumeAnalyses.get(resume.id) || []).length}个记录
-                          </span>
+                          <span>JD分析: {(resumeAnalyses.get(resume.id) || []).length}个记录</span>
                         </div>
                         <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
                           <Users className="w-3 h-3" />
@@ -1033,12 +968,8 @@ export default function WorkspaceDetail() {
           try {
             const config = await getProviderConfig();
             const activeConfig = config.providers[config.active];
-            if (
-              !activeConfig?.apiKey ||
-              !activeConfig?.baseUrl ||
-              !activeConfig?.model
-            ) {
-              toast.error("请先在设置中配置 AI 提供商");
+            if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+              toast.error('请先在设置中配置 AI 提供商');
               return;
             }
             const { taskId } = await createSubResumeWithAI({
@@ -1052,13 +983,13 @@ export default function WorkspaceDetail() {
               apiKey: activeConfig.apiKey,
               model: activeConfig.model,
             });
-            const title = payload.name || payload.jobTitle || "";
+            const title = payload.name || payload.jobTitle || '';
             setShowGenerateModal(false);
             markUnread();
             addNotificationTask({
               id: taskId,
-              taskType: "jd_generate",
-              status: "running",
+              taskType: 'jd_generate',
+              status: 'running',
               workspaceId: workspace!.id,
               metaInfo: { title },
               errorMessage: null,
@@ -1067,9 +998,7 @@ export default function WorkspaceDetail() {
             });
             toast.success(
               <div className="flex flex-col gap-1">
-                <span className="font-medium text-sm">
-                  AI 子简历生成任务已启动
-                </span>
+                <span className="font-medium text-sm">AI 子简历生成任务已启动</span>
                 {title && (
                   <span className="text-xs text-muted-foreground truncate">
                     「{title}」正在生成中
@@ -1078,7 +1007,7 @@ export default function WorkspaceDetail() {
               </div>,
             );
           } catch (err: any) {
-            toast.error(err.message || "AI 生成请求失败");
+            toast.error(err.message || 'AI 生成请求失败');
           }
         }}
         onCreateDirect={async (payload) => {
@@ -1090,20 +1019,18 @@ export default function WorkspaceDetail() {
               jobTitle: payload.jobTitle || undefined,
               template: payload.template,
             });
-            toast.success("子简历创建成功");
+            toast.success('子简历创建成功');
             setShowGenerateModal(false);
 
             const data = await fetchResumeDetail(workspace!.id);
-            const subs: SubResume[] = (data.subResumes || []).map(
-              (sub: any) => ({
-                id: sub.id,
-                title: sub.title,
-                jobTitle: sub.metaInfo?.job_title,
-                jobDescription: sub.metaInfo?.job_description,
-                createdAt: sub.createdAt,
-                updatedAt: sub.updatedAt,
-              }),
-            );
+            const subs: SubResume[] = (data.subResumes || []).map((sub: any) => ({
+              id: sub.id,
+              title: sub.title,
+              jobTitle: sub.metaInfo?.job_title,
+              jobDescription: sub.metaInfo?.job_description,
+              createdAt: sub.createdAt,
+              updatedAt: sub.updatedAt,
+            }));
             await Promise.all(
               subs.map(async (sub) => {
                 try {
@@ -1122,14 +1049,11 @@ export default function WorkspaceDetail() {
             );
             setSubResumes(subs);
             if (subs.length > 0 && !urlResumeId) {
-              navigate(
-                `/workspace/${id}/resumes/${subs[0].id}/${DEFAULT_TAB}`,
-                { replace: true },
-              );
+              navigate(`/workspace/${id}/resumes/${subs[0].id}/${DEFAULT_TAB}`, { replace: true });
             }
             refreshWorkspaces();
           } catch {
-            toast.error("创建子简历失败");
+            toast.error('创建子简历失败');
           }
         }}
       />
@@ -1137,16 +1061,10 @@ export default function WorkspaceDetail() {
       <ScoreDetailModal
         open={showScoreDetail}
         onClose={() => setShowScoreDetail(false)}
-        resumeId={currentScoreResumeId || ""}
-        resumeTitle={
-          subResumes.find((r) => r.id === currentScoreResumeId)?.title || ""
-        }
-        analyses={
-          currentScoreResumeId
-            ? resumeAnalyses.get(currentScoreResumeId) || []
-            : []
-        }
-        workspaceId={workspace?.id || ""}
+        resumeId={currentScoreResumeId || ''}
+        resumeTitle={subResumes.find((r) => r.id === currentScoreResumeId)?.title || ''}
+        analyses={currentScoreResumeId ? resumeAnalyses.get(currentScoreResumeId) || [] : []}
+        workspaceId={workspace?.id || ''}
       />
 
       <EditSubResumeModal
@@ -1178,11 +1096,11 @@ export default function WorkspaceDetail() {
           if (!confirmDeleteResumeId) return;
           try {
             await deleteWorkspace(confirmDeleteResumeId);
-            toast.success("子简历已删除");
+            toast.success('子简历已删除');
             setConfirmDeleteResumeId(null);
             refreshSubResumes();
           } catch (err: any) {
-            toast.error(err.message || "删除失败");
+            toast.error(err.message || '删除失败');
           }
         }}
         onCancel={() => setConfirmDeleteResumeId(null)}

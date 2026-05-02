@@ -8,8 +8,8 @@ import {
   Languages,
   FileText,
   SpellCheck,
-} from "lucide-react";
-import { useResumeStore } from "@/stores/resume-store";
+} from 'lucide-react';
+import { useResumeStore } from '@/stores/resume-store';
 
 interface EditorToolbarProps {
   title?: string;
@@ -26,7 +26,7 @@ interface EditorToolbarProps {
  * Migrated from JadeAI editor. Button handlers are TODO placeholders.
  */
 export default function EditorToolbar({
-  title = "未命名简历",
+  title = '未命名简历',
   onBack,
   onCoverLetterOpen,
   onThemeToggle,
@@ -36,7 +36,7 @@ export default function EditorToolbar({
 }: EditorToolbarProps) {
   const { isSaving, isDirty } = useResumeStore();
 
-  const saveLabel = isSaving ? "保存中..." : isDirty ? "未保存" : "已保存";
+  const saveLabel = isSaving ? '保存中...' : isDirty ? '未保存' : '已保存';
 
   return (
     <div className="flex h-12 items-center justify-between border-b border-border bg-muted px-3">
@@ -53,9 +53,7 @@ export default function EditorToolbar({
 
         <div className="h-6 w-px bg-muted-foreground/20"></div>
 
-        <span className="max-w-48 truncate text-sm font-medium text-foreground">
-          {title}
-        </span>
+        <span className="max-w-48 truncate text-sm font-medium text-foreground">{title}</span>
 
         <span className="text-xs text-muted-foreground">{saveLabel}</span>
 
@@ -129,7 +127,7 @@ export default function EditorToolbar({
           type="button"
           title="主题"
           onClick={onThemeToggle}
-          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? "bg-pink-500/30 text-pink-400" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}
+          className={`flex items-center gap-1 rounded-md p-1.5 transition-colors ${themeActive ? 'bg-pink-500/30 text-pink-400' : 'text-muted-foreground hover:bg-accent hover:text-foreground'}`}
         >
           <Palette className="h-4 w-4" />
           <span className="ml-1 hidden text-xs sm:inline">主题</span>

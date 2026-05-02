@@ -1,5 +1,5 @@
-import { ChevronUp, ChevronDown, Trash2, Edit3 } from "lucide-react";
-import type { InterviewerProfile } from "./CustomInterviewerModal";
+import { ChevronUp, ChevronDown, Trash2, Edit3 } from 'lucide-react';
+import type { InterviewerProfile } from './CustomInterviewerModal';
 
 interface DraftRound {
   tempId: string;
@@ -49,9 +49,7 @@ export default function RoundCard({
 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-0.5">
-          <span className="text-[10px] text-muted-foreground font-mono">
-            #{index + 1}
-          </span>
+          <span className="text-[10px] text-muted-foreground font-mono">#{index + 1}</span>
           <span className="text-xs font-medium truncate">{round.name}</span>
         </div>
         <p className="text-[10px] text-muted-foreground truncate">

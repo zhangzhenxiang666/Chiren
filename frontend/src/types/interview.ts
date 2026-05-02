@@ -1,4 +1,4 @@
-export type InterviewStatus = "not_started" | "in_progress" | "completed";
+export type InterviewStatus = 'not_started' | 'in_progress' | 'completed';
 
 export interface InterviewCollection {
   id: string;
@@ -49,12 +49,12 @@ export interface CreateInterviewRoundParams {
 }
 
 export type BuiltInInterviewerType =
-  | "hr"
-  | "technical"
-  | "scenario"
-  | "project"
-  | "behavioral"
-  | "leader";
+  | 'hr'
+  | 'technical'
+  | 'scenario'
+  | 'project'
+  | 'behavioral'
+  | 'leader';
 
 export interface BuiltInInterviewer {
   type: BuiltInInterviewerType;
@@ -103,7 +103,7 @@ export interface UpdateRoundStatusParams {
   status: InterviewStatus;
 }
 
-export type InterviewChatAction = "start" | "answer" | "skip" | "hint";
+export type InterviewChatAction = 'start' | 'answer' | 'skip' | 'hint';
 
 export interface InterviewChatParams {
   roundId: string;

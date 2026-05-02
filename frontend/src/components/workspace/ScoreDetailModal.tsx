@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import {
   X,
   TrendingUp,
@@ -12,16 +12,16 @@ import {
   Minus,
   Plus,
   Star,
-} from "lucide-react";
-import { toast } from "sonner";
+} from 'lucide-react';
+import { toast } from 'sonner';
 import {
   fetchResumeSectionById,
   getProviderConfig,
   createMatchTask,
   checkRunningMatchTask,
   type JdAnalysis,
-} from "../../lib/api";
-import { markUnread, addNotificationTask } from "../../lib/notification";
+} from '../../lib/api';
+import { markUnread, addNotificationTask } from '../../lib/notification';
 
 export interface ScoreDetailModalProps {
   open: boolean;
@@ -37,34 +37,34 @@ export interface ScoreDetailModalProps {
 function scoreColor(score: number) {
   if (score >= 90)
     return {
-      text: "text-emerald-400",
-      hex: "#34d399",
-      bar: "bg-emerald-400",
-      ring: "#34d399",
-      badge: "bg-emerald-400/10 border-emerald-400/25 text-emerald-400",
+      text: 'text-emerald-400',
+      hex: '#34d399',
+      bar: 'bg-emerald-400',
+      ring: '#34d399',
+      badge: 'bg-emerald-400/10 border-emerald-400/25 text-emerald-400',
     };
   if (score >= 75)
     return {
-      text: "text-yellow-400",
-      hex: "#facc15",
-      bar: "bg-yellow-400",
-      ring: "#facc15",
-      badge: "bg-yellow-400/10 border-yellow-400/25 text-yellow-400",
+      text: 'text-yellow-400',
+      hex: '#facc15',
+      bar: 'bg-yellow-400',
+      ring: '#facc15',
+      badge: 'bg-yellow-400/10 border-yellow-400/25 text-yellow-400',
     };
   if (score >= 60)
     return {
-      text: "text-orange-400",
-      hex: "#fb923c",
-      bar: "bg-orange-400",
-      ring: "#fb923c",
-      badge: "bg-orange-400/10 border-orange-400/25 text-orange-400",
+      text: 'text-orange-400',
+      hex: '#fb923c',
+      bar: 'bg-orange-400',
+      ring: '#fb923c',
+      badge: 'bg-orange-400/10 border-orange-400/25 text-orange-400',
     };
   return {
-    text: "text-red-400",
-    hex: "#f87171",
-    bar: "bg-red-400",
-    ring: "#f87171",
-    badge: "bg-red-400/10 border-red-400/25 text-red-400",
+    text: 'text-red-400',
+    hex: '#f87171',
+    bar: 'bg-red-400',
+    ring: '#f87171',
+    badge: 'bg-red-400/10 border-red-400/25 text-red-400',
   };
 }
 
@@ -79,12 +79,7 @@ function ScoreRing({ score, size = 108 }: { score: number; size?: number }) {
 
   return (
     <div className="relative shrink-0" style={{ width: size, height: size }}>
-      <svg
-        width={size}
-        height={size}
-        className="-rotate-90"
-        style={{ display: "block" }}
-      >
+      <svg width={size} height={size} className="-rotate-90" style={{ display: 'block' }}>
         <circle
           cx={size / 2}
           cy={size / 2}
@@ -104,17 +99,13 @@ function ScoreRing({ score, size = 108 }: { score: number; size?: number }) {
           strokeDasharray={circ}
           strokeDashoffset={offset}
           style={{
-            transition: "stroke-dashoffset 0.9s cubic-bezier(0.16,1,0.3,1)",
+            transition: 'stroke-dashoffset 0.9s cubic-bezier(0.16,1,0.3,1)',
             filter: `drop-shadow(0 0 6px ${c.hex}55)`,
           }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span
-          className={`text-4xl font-black leading-none tracking-tight ${c.text}`}
-        >
-          {score}
-        </span>
+        <span className={`text-4xl font-black leading-none tracking-tight ${c.text}`}>{score}</span>
         <span className="text-[9px] font-semibold text-muted-foreground uppercase tracking-[0.12em] mt-1">
           总体匹配
         </span>
@@ -130,9 +121,7 @@ function ATSBar({ score }: { score: number }) {
   return (
     <div className="w-full">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-muted-foreground tracking-wide">
-          ATS 兼容性
-        </span>
+        <span className="text-xs font-medium text-muted-foreground tracking-wide">ATS 兼容性</span>
         <div
           className={`flex items-center gap-1.5 text-xs font-bold px-2 py-0.5 rounded-full border ${c.badge}`}
         >
@@ -155,13 +144,11 @@ function ATSBar({ score }: { score: number }) {
         />
       </div>
       <div className="flex justify-between mt-1 px-0.5">
-        {["差", "一般", "良好", "优秀"].map((label, i) => (
+        {['差', '一般', '良好', '优秀'].map((label, i) => (
           <span
             key={label}
-            className={`text-[9px] ${i === 0 ? "text-left" : i === 3 ? "text-right" : "text-center"} ${
-              score >= (i + 1) * 25 - 10
-                ? "text-muted-foreground"
-                : "text-muted-foreground/30"
+            className={`text-[9px] ${i === 0 ? 'text-left' : i === 3 ? 'text-right' : 'text-center'} ${
+              score >= (i + 1) * 25 - 10 ? 'text-muted-foreground' : 'text-muted-foreground/30'
             }`}
           >
             {label}
@@ -187,7 +174,7 @@ function MiniSparkline({ scores }: { scores: number[] }) {
       const y = h - ((s - min) / range) * h;
       return `${x},${y}`;
     })
-    .join(" ");
+    .join(' ');
 
   return (
     <svg width={w} height={h} className="opacity-60">
@@ -205,13 +192,7 @@ function MiniSparkline({ scores }: { scores: number[] }) {
 
 // ─── Suggestion Accordion ────────────────────────────────────────────────────
 
-function SuggestionDiff({
-  current,
-  suggested,
-}: {
-  current: string;
-  suggested: string;
-}) {
+function SuggestionDiff({ current, suggested }: { current: string; suggested: string }) {
   return (
     <div className="rounded-lg overflow-hidden border border-border text-sm">
       <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/5 border-b border-border">
@@ -253,8 +234,8 @@ function SectionSuggestionGroup({
     <div
       className={`rounded-xl border transition-all duration-200 overflow-hidden ${
         open
-          ? "border-border bg-muted/40"
-          : "border-border bg-background hover:border-muted-foreground"
+          ? 'border-border bg-muted/40'
+          : 'border-border bg-background hover:border-muted-foreground'
       }`}
     >
       <button
@@ -264,12 +245,12 @@ function SectionSuggestionGroup({
       >
         <div
           className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 transition-colors ${
-            open ? "bg-pink-500/20" : "bg-muted"
+            open ? 'bg-pink-500/20' : 'bg-muted'
           }`}
         >
           <ChevronDown
             className={`w-3 h-3 transition-transform duration-200 ${
-              open ? "rotate-180 text-pink-400" : "text-muted-foreground"
+              open ? 'rotate-180 text-pink-400' : 'text-muted-foreground'
             }`}
           />
         </div>
@@ -318,9 +299,7 @@ function JDPreview({ jd }: { jd?: string }) {
 
         <div className="absolute left-0 top-full mt-2 z-50 hidden group-hover/jd:block w-[520px]">
           <div className="rounded-lg border border-border bg-card p-3 shadow-xl">
-            <p className="text-[12px] text-foreground leading-relaxed whitespace-pre-wrap">
-              {jd}
-            </p>
+            <p className="text-[12px] text-foreground leading-relaxed whitespace-pre-wrap">{jd}</p>
           </div>
         </div>
       </div>
@@ -332,12 +311,12 @@ function JDPreview({ jd }: { jd?: string }) {
 
 function fmtDate(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleDateString("zh-CN", { month: "2-digit", day: "2-digit" });
+  return d.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' });
 }
 
 function fmtTime(dateStr: string) {
   const d = new Date(dateStr);
-  return d.toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 }
 
 // ─── Trend icon ───────────────────────────────────────────────────────────────
@@ -361,16 +340,13 @@ export default function ScoreDetailModal({
   const sortedAnalyses = useMemo(
     () =>
       [...analyses].sort(
-        (a, b) =>
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       ),
     [analyses],
   );
 
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [sectionTitles, setSectionTitles] = useState<Record<string, string>>(
-    {},
-  );
+  const [sectionTitles, setSectionTitles] = useState<Record<string, string>>({});
   const [loadingTitles, setLoadingTitles] = useState<Set<string>>(new Set());
   const loadingRef = useRef<Set<string>>(new Set());
 
@@ -386,17 +362,13 @@ export default function ScoreDetailModal({
     try {
       const config = await getProviderConfig();
       const activeConfig = config.providers[config.active];
-      if (
-        !activeConfig?.apiKey ||
-        !activeConfig?.baseUrl ||
-        !activeConfig?.model
-      ) {
-        toast.error("请先在设置中配置 AI 提供商");
+      if (!activeConfig?.apiKey || !activeConfig?.baseUrl || !activeConfig?.model) {
+        toast.error('请先在设置中配置 AI 提供商');
         return;
       }
       const existingTask = await checkRunningMatchTask(resumeId);
       if (existingTask) {
-        toast.error("该简历已有正在进行的评分任务");
+        toast.error('该简历已有正在进行的评分任务');
         return;
       }
       const { taskId } = await createMatchTask({
@@ -409,8 +381,8 @@ export default function ScoreDetailModal({
       markUnread();
       addNotificationTask({
         id: taskId,
-        taskType: "jd_score",
-        status: "running",
+        taskType: 'jd_score',
+        status: 'running',
         workspaceId,
         metaInfo: { title: resumeTitle },
         errorMessage: null,
@@ -426,7 +398,7 @@ export default function ScoreDetailModal({
         </div>,
       );
     } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "评分请求失败");
+      toast.error(err instanceof Error ? err.message : '评分请求失败');
     }
   }, [resumeId, resumeTitle, workspaceId]);
 
@@ -441,11 +413,10 @@ export default function ScoreDetailModal({
     >();
     for (const s of currentAnalysis.suggestions) {
       if (!s.sectionId) continue;
-      if (!map.has(s.sectionId))
-        map.set(s.sectionId, { sectionId: s.sectionId, suggestions: [] });
+      if (!map.has(s.sectionId)) map.set(s.sectionId, { sectionId: s.sectionId, suggestions: [] });
       map.get(s.sectionId)!.suggestions.push({
-        current: s.current ?? "",
-        suggested: s.suggested ?? "",
+        current: s.current ?? '',
+        suggested: s.suggested ?? '',
       });
     }
     return Array.from(map.values());
@@ -516,9 +487,7 @@ export default function ScoreDetailModal({
               {resumeTitle}
             </h2>
 
-            {currentAnalysis && (
-              <JDPreview jd={currentAnalysis.jobDescription} />
-            )}
+            {currentAnalysis && <JDPreview jd={currentAnalysis.jobDescription} />}
 
             <div className="flex items-center gap-2 mt-0.5">
               {isViewingHistory && currentAnalysis && (
@@ -534,7 +503,7 @@ export default function ScoreDetailModal({
               <span className="text-[11px] text-muted-foreground">
                 {isViewingHistory && currentAnalysis
                   ? `${fmtDate(currentAnalysis.createdAt)} ${fmtTime(currentAnalysis.createdAt)} 快照`
-                  : "最新评分结果"}
+                  : '最新评分结果'}
               </span>
             </div>
           </div>
@@ -592,9 +561,7 @@ export default function ScoreDetailModal({
                   {sparklineScores.length >= 2 && (
                     <div className="flex items-center gap-2">
                       <MiniSparkline scores={sparklineScores} />
-                      <span className="text-[9px] text-muted-foreground/60">
-                        趋势
-                      </span>
+                      <span className="text-[9px] text-muted-foreground/60">趋势</span>
                     </div>
                   )}
                 </div>
@@ -606,10 +573,7 @@ export default function ScoreDetailModal({
                     const isLatest = index === 0;
                     const c = scoreColor(analysis.overallScore);
                     const prevScore = sortedAnalyses[index + 1]?.overallScore;
-                    const delta =
-                      prevScore !== undefined
-                        ? analysis.overallScore - prevScore
-                        : 0;
+                    const delta = prevScore !== undefined ? analysis.overallScore - prevScore : 0;
 
                     return (
                       <button
@@ -617,17 +581,17 @@ export default function ScoreDetailModal({
                         type="button"
                         onClick={() => setSelectedIndex(index)}
                         className={`relative w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-all duration-150 group ${
-                          isSelected ? "bg-pink-500/8" : "hover:bg-muted"
+                          isSelected ? 'bg-pink-500/8' : 'hover:bg-muted'
                         }`}
                       >
                         {/* Left accent */}
                         <div
                           className={`absolute left-0 top-2 bottom-2 w-[3px] rounded-r-full transition-all duration-200 ${
                             isSelected
-                              ? "bg-pink-500"
+                              ? 'bg-pink-500'
                               : isLatest
-                                ? "bg-blue-500/30"
-                                : "bg-transparent group-hover:bg-border"
+                                ? 'bg-blue-500/30'
+                                : 'bg-transparent group-hover:bg-border'
                           }`}
                         />
 
@@ -639,9 +603,7 @@ export default function ScoreDetailModal({
                               : `border-border bg-muted group-hover:border-muted-foreground`
                           }`}
                         >
-                          <span
-                            className={`text-[15px] font-black leading-none ${c.text}`}
-                          >
+                          <span className={`text-[15px] font-black leading-none ${c.text}`}>
                             {analysis.overallScore}
                           </span>
                           <div className="w-5 h-[2px] bg-border rounded-full mt-1 overflow-hidden">
@@ -666,9 +628,7 @@ export default function ScoreDetailModal({
                             <span className="text-[10px] text-muted-foreground/60">
                               {fmtTime(analysis.createdAt)}
                             </span>
-                            {index < sortedAnalyses.length - 1 && (
-                              <TrendIcon delta={delta} />
-                            )}
+                            {index < sortedAnalyses.length - 1 && <TrendIcon delta={delta} />}
                           </div>
                         </div>
                       </button>
@@ -704,9 +664,7 @@ export default function ScoreDetailModal({
                     <div className="rounded-xl border border-border bg-card overflow-hidden">
                       <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                         <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="text-xs font-semibold text-foreground">
-                          已匹配
-                        </span>
+                        <span className="text-xs font-semibold text-foreground">已匹配</span>
                         <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
                           {currentAnalysis.keywordMatches?.length ?? 0}
                         </span>
@@ -733,16 +691,13 @@ export default function ScoreDetailModal({
                     <div className="rounded-xl border border-border bg-card overflow-hidden">
                       <div className="flex items-center gap-2 px-4 py-3 border-b border-border/50">
                         <AlertCircle className="w-3.5 h-3.5 text-orange-400" />
-                        <span className="text-xs font-semibold text-foreground">
-                          待补充
-                        </span>
+                        <span className="text-xs font-semibold text-foreground">待补充</span>
                         <span className="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-orange-500/10 text-orange-500 border border-orange-500/20">
                           {currentAnalysis.missingKeywords?.length ?? 0}
                         </span>
                       </div>
                       <div className="px-3 py-3 flex flex-wrap gap-1.5 min-h-[52px]">
-                        {(currentAnalysis.missingKeywords ?? []).length ===
-                        0 ? (
+                        {(currentAnalysis.missingKeywords ?? []).length === 0 ? (
                           <span className="text-xs text-muted-foreground/40 italic self-center mx-auto">
                             无缺失关键词
                           </span>
@@ -766,9 +721,7 @@ export default function ScoreDetailModal({
                       <div className="flex items-center justify-center w-5 h-5 rounded-md bg-yellow-500/10 border border-yellow-500/20">
                         <Lightbulb className="w-3 h-3 text-yellow-400" />
                       </div>
-                      <h3 className="text-[13px] font-semibold text-foreground">
-                        改进建议
-                      </h3>
+                      <h3 className="text-[13px] font-semibold text-foreground">改进建议</h3>
                       {groupedSuggestions.length > 0 && (
                         <span className="text-[10px] text-muted-foreground/60 font-mono bg-muted px-1.5 py-0.5 rounded border border-border">
                           {groupedSuggestions.length} 个模块
@@ -779,9 +732,7 @@ export default function ScoreDetailModal({
                     {groupedSuggestions.length === 0 ? (
                       <div className="flex flex-col items-center justify-center py-8 rounded-xl border border-border bg-card gap-2">
                         <CheckCircle2 className="w-8 h-8 text-emerald-400/20" />
-                        <p className="text-sm text-muted-foreground/40">
-                          暂无改进建议
-                        </p>
+                        <p className="text-sm text-muted-foreground/40">暂无改进建议</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
@@ -789,9 +740,7 @@ export default function ScoreDetailModal({
                           <SectionSuggestionGroup
                             key={group.sectionId}
                             sectionId={group.sectionId}
-                            sectionTitle={
-                              sectionTitles[group.sectionId] || group.sectionId
-                            }
+                            sectionTitle={sectionTitles[group.sectionId] || group.sectionId}
                             isLoadingTitle={loadingTitles.has(group.sectionId)}
                             suggestions={group.suggestions}
                           />

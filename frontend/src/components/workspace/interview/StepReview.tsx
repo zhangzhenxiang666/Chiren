@@ -1,4 +1,4 @@
-import type { InterviewerProfile } from "./CustomInterviewerModal";
+import type { InterviewerProfile } from './CustomInterviewerModal';
 
 interface DraftRound {
   tempId: string;
@@ -22,19 +22,12 @@ export default function StepReview({ name, rounds }: StepReviewProps) {
       </div>
 
       <div>
-        <p className="text-xs text-muted-foreground mb-2">
-          共 {rounds.length} 轮面试
-        </p>
+        <p className="text-xs text-muted-foreground mb-2">共 {rounds.length} 轮面试</p>
         <div className="space-y-2">
           {rounds.map((round, index) => (
-            <div
-              key={round.tempId}
-              className="p-3 rounded-lg border border-border bg-card"
-            >
+            <div key={round.tempId} className="p-3 rounded-lg border border-border bg-card">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="text-[10px] font-mono text-muted-foreground">
-                  #{index + 1}
-                </span>
+                <span className="text-[10px] font-mono text-muted-foreground">#{index + 1}</span>
                 <span className="text-xs font-medium">{round.name}</span>
               </div>
               <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground">

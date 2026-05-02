@@ -1,8 +1,8 @@
-import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
-const DAYS = ["日", "一", "二", "三", "四", "五", "六"];
+const DAYS = ['日', '一', '二', '三', '四', '五', '六'];
 
 interface CalendarProps {
   value?: Date | null;
@@ -12,9 +12,7 @@ interface CalendarProps {
 
 export function Calendar({ value, onChange, className }: CalendarProps) {
   const today = new Date();
-  const [viewDate, setViewDate] = React.useState(
-    value ? new Date(value) : today,
-  );
+  const [viewDate, setViewDate] = React.useState(value ? new Date(value) : today);
 
   const year = viewDate.getFullYear();
   const month = viewDate.getMonth();
@@ -71,7 +69,7 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
     d.getDate() === value.getDate();
 
   return (
-    <div className={cn("w-64 select-none", className)}>
+    <div className={cn('w-64 select-none', className)}>
       {/* Header */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-1">
@@ -114,10 +112,7 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
       {/* Weekday headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAYS.map((d) => (
-          <div
-            key={d}
-            className="h-7 text-center text-[10px] text-muted-foreground leading-7"
-          >
+          <div key={d} className="h-7 text-center text-[10px] text-muted-foreground leading-7">
             {d}
           </div>
         ))}
@@ -131,15 +126,12 @@ export function Calendar({ value, onChange, className }: CalendarProps) {
             type="button"
             onClick={() => onChange && onChange(cell.date)}
             className={cn(
-              "h-7 w-7 mx-auto rounded-full text-xs transition-colors flex items-center justify-center",
+              'h-7 w-7 mx-auto rounded-full text-xs transition-colors flex items-center justify-center',
               cell.current
-                ? "text-foreground hover:bg-accent"
-                : "text-muted-foreground hover:bg-muted",
-              isSelected(cell.date) &&
-                "bg-pink-500 text-white hover:bg-pink-600",
-              !isSelected(cell.date) &&
-                isToday(cell.date) &&
-                "ring-1 ring-pink-400",
+                ? 'text-foreground hover:bg-accent'
+                : 'text-muted-foreground hover:bg-muted',
+              isSelected(cell.date) && 'bg-pink-500 text-white hover:bg-pink-600',
+              !isSelected(cell.date) && isToday(cell.date) && 'ring-1 ring-pink-400',
             )}
           >
             {cell.day}

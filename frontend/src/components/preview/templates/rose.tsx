@@ -10,30 +10,27 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const PRIMARY = "#881337";
-const ACCENT = "#be185d";
-const ROSE_50 = "#fff1f2";
-const ROSE_100 = "#ffe4e6";
+const PRIMARY = '#881337';
+const ACCENT = '#be185d';
+const ROSE_50 = '#fff1f2';
+const ROSE_100 = '#ffe4e6';
 
 export function RoseTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
-      <div
-        className="mb-8 rounded-2xl px-8 py-6 text-center"
-        style={{ backgroundColor: ROSE_50 }}
-      >
+      <div className="mb-8 rounded-2xl px-8 py-6 text-center" style={{ backgroundColor: ROSE_50 }}>
         {pi.avatar && (
           <AvatarImage
             src={pi.avatar}
@@ -42,11 +39,8 @@ export function RoseTemplate({ resume }: { resume: Resume }) {
             style={{ borderColor: ACCENT }}
           />
         )}
-        <h1
-          className="text-2xl font-semibold tracking-wide"
-          style={{ color: PRIMARY }}
-        >
-          {pi.fullName || "Your Name"}
+        <h1 className="text-2xl font-semibold tracking-wide" style={{ color: PRIMARY }}>
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
           <p className="mt-1 text-sm" style={{ color: ACCENT }}>
@@ -63,10 +57,7 @@ export function RoseTemplate({ resume }: { resume: Resume }) {
             className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: ACCENT, opacity: 0.6 }}
           />
-          <span
-            className="h-1 w-1 rounded-full"
-            style={{ backgroundColor: ACCENT }}
-          />
+          <span className="h-1 w-1 rounded-full" style={{ backgroundColor: ACCENT }} />
           <span
             className="h-1.5 w-1.5 rounded-full"
             style={{ backgroundColor: ACCENT, opacity: 0.6 }}
@@ -100,17 +91,12 @@ export function RoseTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-7 pt-1" data-section>
             {/* Section header with rose accent */}
             <div className="mb-4 flex items-center gap-2">
-              <div
-                className="h-0.5 w-8 rounded-full"
-                style={{ backgroundColor: ACCENT }}
-              />
+              <div className="h-0.5 w-8 rounded-full" style={{ backgroundColor: ACCENT }} />
               <h2
                 className="text-xs font-semibold uppercase tracking-[0.15em]"
                 style={{ color: PRIMARY }}
@@ -127,21 +113,15 @@ export function RoseTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function RoseSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function RoseSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="rounded-xl px-4 py-3 text-sm italic leading-relaxed"
-        style={{ backgroundColor: ROSE_50, color: "#57534e" }}
+        style={{ backgroundColor: ROSE_50, color: '#57534e' }}
         dangerouslySetInnerHTML={{
           __html: md((content as SummaryContent).text),
         }}
@@ -149,15 +129,11 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-4"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-4" style={{ borderColor: ROSE_100 }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.position}
@@ -166,13 +142,9 @@ function RoseSectionContent({
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
                 style={{ backgroundColor: ROSE_50, color: ACCENT }}
               >
-                {item.startDate} &ndash;{" "}
+                {item.startDate} &ndash;{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
@@ -202,10 +174,7 @@ function RoseSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: ACCENT }}
@@ -221,23 +190,18 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-4"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-4" style={{ borderColor: ROSE_100 }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {degreeField(item.degree, item.field)}
               </h3>
               <span className="shrink-0 text-xs" style={{ color: ACCENT }}>
-                {item.startDate} &ndash;{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} &ndash;{' '}
+                {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             {item.institution && (
@@ -246,17 +210,14 @@ function RoseSectionContent({
               </p>
             )}
             {item.gpa && (
-              <p className="text-xs" style={{ color: "#a8a29e" }}>
+              <p className="text-xs" style={{ color: '#a8a29e' }}>
                 GPA: {item.gpa}
               </p>
             )}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: ACCENT }}
@@ -272,7 +233,7 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-3">
         {((content as SkillsContent).categories || []).map((cat: any) => (
@@ -300,24 +261,19 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-4"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-4" style={{ borderColor: ROSE_100 }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
               </h3>
               {item.startDate && (
                 <span className="shrink-0 text-xs" style={{ color: ACCENT }}>
-                  {item.startDate} {"\u2013"}{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} {'\u2013'}{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -343,10 +299,7 @@ function RoseSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
                       style={{ backgroundColor: ACCENT }}
@@ -362,7 +315,7 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="flex flex-wrap gap-2">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -377,7 +330,7 @@ function RoseSectionContent({
             {(item.issuer || item.date) && (
               <p className="text-xs" style={{ color: ACCENT }}>
                 {item.issuer}
-                {item.issuer && item.date ? " | " : ""}
+                {item.issuer && item.date ? ' | ' : ''}
                 {item.date}
               </p>
             )}
@@ -387,7 +340,7 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="flex flex-wrap gap-2">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -396,10 +349,7 @@ function RoseSectionContent({
             className="flex items-center gap-2 rounded-full px-4 py-1.5"
             style={{ backgroundColor: ROSE_50 }}
           >
-            <span
-              className="h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: ACCENT }}
-            />
+            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: ACCENT }} />
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.language}
             </span>
@@ -412,16 +362,12 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-4"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-4" style={{ borderColor: ROSE_100 }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.name}
@@ -450,15 +396,11 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-4"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-4" style={{ borderColor: ROSE_100 }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-semibold" style={{ color: PRIMARY }}>
                 {item.title}
@@ -486,7 +428,7 @@ function RoseSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -495,11 +437,7 @@ function RoseSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div
-            key={item.id}
-            className="rounded-xl border p-3"
-            style={{ borderColor: ROSE_100 }}
-          >
+          <div key={item.id} className="rounded-xl border p-3" style={{ borderColor: ROSE_100 }}>
             <span className="text-sm font-medium" style={{ color: PRIMARY }}>
               {item.name || item.title || item.language}
             </span>

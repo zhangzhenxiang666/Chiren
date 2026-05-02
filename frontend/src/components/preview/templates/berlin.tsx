@@ -10,18 +10,18 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const BLUE = "#2563eb";
-const YELLOW = "#eab308";
-const RED_B = "#dc2626";
-const TEXT = "#18181b";
+const BLUE = '#2563eb';
+const YELLOW = '#eab308';
+const RED_B = '#dc2626';
+const TEXT = '#18181b';
 
 export function BerlinTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   const contacts = [
@@ -43,13 +43,10 @@ export function BerlinTemplate({ resume }: { resume: Resume }) {
   return (
     <div
       className="mx-auto max-w-[210mm] overflow-hidden bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header with geometric block */}
-      <div
-        className="relative px-10 py-8 text-white"
-        style={{ backgroundColor: "#000000" }}
-      >
+      <div className="relative px-10 py-8 text-white" style={{ backgroundColor: '#000000' }}>
         {/* Geometric decorations */}
         <div
           className="absolute right-8 top-4 h-20 w-20 rounded-full border-4"
@@ -75,13 +72,10 @@ export function BerlinTemplate({ resume }: { resume: Resume }) {
           )}
           <div>
             <h1 className="text-3xl font-extrabold uppercase tracking-tight">
-              {pi.fullName || "Your Name"}
+              {pi.fullName || 'Your Name'}
             </h1>
             {pi.jobTitle && (
-              <p
-                className="mt-1 text-sm font-light tracking-wider"
-                style={{ color: YELLOW }}
-              >
+              <p className="mt-1 text-sm font-light tracking-wider" style={{ color: YELLOW }}>
                 {pi.jobTitle}
               </p>
             )}
@@ -99,28 +93,19 @@ export function BerlinTemplate({ resume }: { resume: Resume }) {
       {/* Body */}
       <div className="p-8 pt-6">
         {resume.sections
-          .filter(
-            (s) =>
-              s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-          )
+          .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
           .map((section) => (
             <div key={section.id} className="mb-6" data-section>
               {/* Section header with geometric accent */}
               <div className="mb-3 flex items-center gap-2">
-                <div
-                  className="h-5 w-5 rounded-full"
-                  style={{ backgroundColor: BLUE }}
-                />
+                <div className="h-5 w-5 rounded-full" style={{ backgroundColor: BLUE }} />
                 <h2
                   className="text-sm font-extrabold uppercase tracking-wider"
                   style={{ color: TEXT }}
                 >
                   {section.title}
                 </h2>
-                <div
-                  className="ml-auto h-1 w-12"
-                  style={{ backgroundColor: YELLOW }}
-                />
+                <div className="ml-auto h-1 w-12" style={{ backgroundColor: YELLOW }} />
               </div>
               <BerlinSectionContent section={section} lang={resume.language} />
             </div>
@@ -130,17 +115,11 @@ export function BerlinTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function BerlinSectionContent({
-  section,
-  lang,
-}: {
-  section: any;
-  lang?: string;
-}) {
+function BerlinSectionContent({ section, lang }: { section: any; lang?: string }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <div className="border-l-4 pl-4" style={{ borderColor: BLUE }}>
         <p
@@ -153,32 +132,24 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
       <div className="space-y-4">
         {((content as WorkExperienceContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: YELLOW }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: YELLOW }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: TEXT }}>
                 {item.position}
               </h3>
-              <span
-                className="shrink-0 text-xs font-bold"
-                style={{ color: BLUE }}
-              >
-                {item.startDate} &ndash;{" "}
-                {item.endDate ||
-                  (item.current ? (lang === "zh" ? "至今" : "Present") : "")}
+              <span className="shrink-0 text-xs font-bold" style={{ color: BLUE }}>
+                {item.startDate} &ndash;{' '}
+                {item.endDate || (item.current ? (lang === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.company && (
               <p className="text-sm font-semibold" style={{ color: BLUE }}>
                 {item.company}
-                {item.location ? `, ${item.location}` : ""}
+                {item.location ? `, ${item.location}` : ''}
               </p>
             )}
             {item.description && (
@@ -203,10 +174,7 @@ function BerlinSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0"
                       style={{ backgroundColor: RED_B }}
@@ -222,40 +190,30 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
       <div className="space-y-3">
         {((content as EducationContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: BLUE }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: BLUE }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: TEXT }}>
                 {degreeField(item.degree, item.field)}
               </h3>
               <span className="shrink-0 text-xs" style={{ color: BLUE }}>
-                {item.startDate} &ndash;{" "}
-                {item.endDate || (lang === "zh" ? "至今" : "Present")}
+                {item.startDate} &ndash; {item.endDate || (lang === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
             {item.institution && (
               <p className="text-sm font-semibold" style={{ color: YELLOW }}>
                 {item.institution}
-                {item.location ? `, ${item.location}` : ""}
+                {item.location ? `, ${item.location}` : ''}
               </p>
             )}
-            {item.gpa && (
-              <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-xs text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0"
                       style={{ backgroundColor: RED_B }}
@@ -271,15 +229,12 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-3">
         {((content as SkillsContent).categories || []).map((cat: any) => (
           <div key={cat.id}>
-            <p
-              className="mb-1 text-xs font-bold uppercase tracking-wider"
-              style={{ color: BLUE }}
-            >
+            <p className="mb-1 text-xs font-bold uppercase tracking-wider" style={{ color: BLUE }}>
               {cat.name}
             </p>
             <div className="flex flex-wrap gap-1.5">
@@ -299,23 +254,18 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     return (
       <div className="space-y-3">
         {((content as ProjectsContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: YELLOW }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: YELLOW }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: BLUE }}>
                 {item.name}
               </h3>
               {item.startDate && (
                 <span className="shrink-0 text-xs" style={{ color: BLUE }}>
-                  {item.startDate} {"\u2013"}{" "}
-                  {item.endDate || (lang === "zh" ? "至今" : "Present")}
+                  {item.startDate} {'\u2013'} {item.endDate || (lang === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -341,10 +291,7 @@ function BerlinSectionContent({
             {item.highlights?.length > 0 && (
               <ul className="mt-1.5 space-y-0.5">
                 {item.highlights.map((h: string, i: number) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-sm text-zinc-600"
-                  >
+                  <li key={i} className="flex items-start gap-2 text-sm text-zinc-600">
                     <span
                       className="mt-1.5 h-1.5 w-1.5 shrink-0"
                       style={{ backgroundColor: RED_B }}
@@ -360,7 +307,7 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     return (
       <div className="space-y-1.5">
         {((content as CertificationsContent).items || []).map((item: any) => (
@@ -369,18 +316,10 @@ function BerlinSectionContent({
               <span className="text-sm font-bold" style={{ color: TEXT }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-sm text-zinc-500">
-                  {" "}
-                  &mdash; {item.issuer}
-                </span>
-              )}
+              {item.issuer && <span className="text-sm text-zinc-500"> &mdash; {item.issuer}</span>}
             </div>
             {item.date && (
-              <span
-                className="shrink-0 text-xs font-bold"
-                style={{ color: BLUE }}
-              >
+              <span className="shrink-0 text-xs font-bold" style={{ color: BLUE }}>
                 {item.date}
               </span>
             )}
@@ -390,7 +329,7 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     return (
       <div className="flex flex-wrap gap-2">
         {((content as LanguagesContent).items || []).map((item: any) => (
@@ -399,10 +338,7 @@ function BerlinSectionContent({
             className="flex items-center gap-2 border px-3 py-1"
             style={{ borderColor: BLUE }}
           >
-            <span
-              className="h-2 w-2 rounded-full"
-              style={{ backgroundColor: YELLOW }}
-            />
+            <span className="h-2 w-2 rounded-full" style={{ backgroundColor: YELLOW }} />
             <span className="text-sm font-medium" style={{ color: TEXT }}>
               {item.language}
             </span>
@@ -413,24 +349,17 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: YELLOW }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: YELLOW }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: BLUE }}>
                 {item.name}
               </h3>
-              <span
-                className="shrink-0 text-xs font-bold"
-                style={{ color: BLUE }}
-              >
+              <span className="shrink-0 text-xs font-bold" style={{ color: BLUE }}>
                 &#11088; {item.stars?.toLocaleString()}
               </span>
             </div>
@@ -451,15 +380,11 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     return (
       <div className="space-y-3">
         {((content as CustomContent).items || []).map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: BLUE }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: BLUE }}>
             <div className="flex items-baseline justify-between">
               <h3 className="text-sm font-bold" style={{ color: TEXT }}>
                 {item.title}
@@ -487,7 +412,7 @@ function BerlinSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -496,11 +421,7 @@ function BerlinSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div
-            key={item.id}
-            className="border-l-4 pl-4"
-            style={{ borderColor: BLUE }}
-          >
+          <div key={item.id} className="border-l-4 pl-4" style={{ borderColor: BLUE }}>
             <span className="text-sm font-bold" style={{ color: TEXT }}>
               {item.name || item.title || item.language}
             </span>

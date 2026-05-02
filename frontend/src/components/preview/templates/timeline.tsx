@@ -7,22 +7,22 @@ import type {
   LanguagesContent,
   CustomContent,
   GitHubContent,
-} from "../../../types/resume";
-import { AvatarImage } from "../avatar-image";
-import { degreeField, isSectionEmpty, md } from "../utils";
-import { QrCodesPreview } from "../qr-codes-preview";
+} from '../../../types/resume';
+import { AvatarImage } from '../avatar-image';
+import { degreeField, isSectionEmpty, md } from '../utils';
+import { QrCodesPreview } from '../qr-codes-preview';
 
-const BLUE_GRAY = "#475569";
-const ACCENT = "#3b82f6";
+const BLUE_GRAY = '#475569';
+const ACCENT = '#3b82f6';
 
 export function TimelineTemplate({ resume }: { resume: Resume }) {
-  const personalInfo = resume.sections.find((s) => s.type === "personal_info");
+  const personalInfo = resume.sections.find((s) => s.type === 'personal_info');
   const pi = (personalInfo?.content || {}) as PersonalInfoContent;
 
   return (
     <div
       className="mx-auto max-w-[210mm] bg-white shadow-lg"
-      style={{ fontFamily: "Inter, sans-serif" }}
+      style={{ fontFamily: 'Inter, sans-serif' }}
     >
       {/* Header */}
       <div className="mb-6 text-center">
@@ -35,7 +35,7 @@ export function TimelineTemplate({ resume }: { resume: Resume }) {
           />
         )}
         <h1 className="text-2xl font-bold" style={{ color: BLUE_GRAY }}>
-          {pi.fullName || "Your Name"}
+          {pi.fullName || 'Your Name'}
         </h1>
         {pi.jobTitle && (
           <p className="mt-0.5 text-base" style={{ color: ACCENT }}>
@@ -63,9 +63,7 @@ export function TimelineTemplate({ resume }: { resume: Resume }) {
 
       {/* Sections */}
       {resume.sections
-        .filter(
-          (s) => s.visible && s.type !== "personal_info" && !isSectionEmpty(s),
-        )
+        .filter((s) => s.visible && s.type !== 'personal_info' && !isSectionEmpty(s))
         .map((section) => (
           <div key={section.id} className="mb-6 pt-1" data-section>
             <h2
@@ -83,17 +81,11 @@ export function TimelineTemplate({ resume }: { resume: Resume }) {
   );
 }
 
-function TimelineSectionContent({
-  section,
-  resume,
-}: {
-  section: any;
-  resume: Resume;
-}) {
+function TimelineSectionContent({ section, resume }: { section: any; resume: Resume }) {
   const content = section.content;
   if (!content) return null;
 
-  if (section.type === "summary") {
+  if (section.type === 'summary') {
     return (
       <p
         className="text-sm leading-relaxed text-zinc-600"
@@ -104,16 +96,13 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "work_experience") {
+  if (section.type === 'work_experience') {
     return (
-      <div
-        className="relative border-l-2 pl-6 ml-2"
-        style={{ borderColor: "#e2e8f0" }}
-      >
+      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
         {(content.items || []).map((item: any, idx: number) => (
           <div
             key={item.id}
-            className={`relative ${idx < (content.items || []).length - 1 ? "pb-5" : ""}`}
+            className={`relative ${idx < (content.items || []).length - 1 ? 'pb-5' : ''}`}
           >
             {/* Timeline dot */}
             <div
@@ -122,30 +111,18 @@ function TimelineSectionContent({
             />
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: BLUE_GRAY }}
-                >
+                <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>
                   {item.position}
                 </span>
-                {item.company && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    | {item.company}
-                  </span>
-                )}
+                {item.company && <span className="text-sm text-zinc-500"> | {item.company}</span>}
               </div>
               <span
                 className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                style={{ background: "#eff6ff", color: ACCENT }}
+                style={{ background: '#eff6ff', color: ACCENT }}
               >
-                {item.startDate} –{" "}
+                {item.startDate} –{' '}
                 {item.endDate ||
-                  (item.current
-                    ? resume.language === "zh"
-                      ? "至今"
-                      : "Present"
-                    : "")}
+                  (item.current ? (resume.language === 'zh' ? '至今' : 'Present') : '')}
               </span>
             </div>
             {item.description && (
@@ -160,7 +137,7 @@ function TimelineSectionContent({
                   <span
                     key={i}
                     className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                    style={{ background: "#eff6ff", color: ACCENT }}
+                    style={{ background: '#eff6ff', color: ACCENT }}
                   >
                     {t}
                   </span>
@@ -184,16 +161,13 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "education") {
+  if (section.type === 'education') {
     return (
-      <div
-        className="relative border-l-2 pl-6 ml-2"
-        style={{ borderColor: "#e2e8f0" }}
-      >
+      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
         {(content.items || []).map((item: any, idx: number) => (
           <div
             key={item.id}
-            className={`relative ${idx < (content.items || []).length - 1 ? "pb-4" : ""}`}
+            className={`relative ${idx < (content.items || []).length - 1 ? 'pb-4' : ''}`}
           >
             <div
               className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white"
@@ -201,28 +175,18 @@ function TimelineSectionContent({
             />
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-bold"
-                  style={{ color: BLUE_GRAY }}
-                >
+                <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>
                   {degreeField(item.degree, item.field)}
                 </span>
                 {item.institution && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.institution}
-                  </span>
+                  <span className="text-sm text-zinc-500"> — {item.institution}</span>
                 )}
               </div>
               <span className="shrink-0 text-xs text-zinc-400">
-                {item.startDate} –{" "}
-                {item.endDate ||
-                  (resume.language === "zh" ? "至今" : "Present")}
+                {item.startDate} – {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
               </span>
             </div>
-            {item.gpa && (
-              <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>
-            )}
+            {item.gpa && <p className="text-sm text-zinc-500">GPA: {item.gpa}</p>}
             {item.highlights?.length > 0 && (
               <ul className="mt-1 list-disc pl-4">
                 {item.highlights.map((h: string, i: number) => (
@@ -240,38 +204,27 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "skills") {
+  if (section.type === 'skills') {
     return (
       <div className="space-y-1">
         {(content.categories || []).map((cat: any) => (
           <div key={cat.id} className="flex text-sm">
-            <span
-              className="w-28 shrink-0 font-medium"
-              style={{ color: ACCENT }}
-            >
+            <span className="w-28 shrink-0 font-medium" style={{ color: ACCENT }}>
               {cat.name}:
             </span>
-            <span className="text-zinc-600">
-              {(cat.skills || []).join(", ")}
-            </span>
+            <span className="text-zinc-600">{(cat.skills || []).join(', ')}</span>
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "projects") {
+  if (section.type === 'projects') {
     const items = (content as ProjectsContent).items || [];
     return (
-      <div
-        className="relative border-l-2 pl-6 ml-2"
-        style={{ borderColor: "#e2e8f0" }}
-      >
+      <div className="relative border-l-2 pl-6 ml-2" style={{ borderColor: '#e2e8f0' }}>
         {items.map((item: any, idx: number) => (
-          <div
-            key={item.id}
-            className={`relative ${idx < items.length - 1 ? "pb-5" : ""}`}
-          >
+          <div key={item.id} className={`relative ${idx < items.length - 1 ? 'pb-5' : ''}`}>
             <div
               className="absolute -left-[31px] top-1 h-4 w-4 rounded-full border-2 bg-white"
               style={{ borderColor: ACCENT }}
@@ -283,11 +236,10 @@ function TimelineSectionContent({
               {item.startDate && (
                 <span
                   className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium"
-                  style={{ background: "#eff6ff", color: ACCENT }}
+                  style={{ background: '#eff6ff', color: ACCENT }}
                 >
-                  {item.startDate} –{" "}
-                  {item.endDate ||
-                    (resume.language === "zh" ? "至今" : "Present")}
+                  {item.startDate} –{' '}
+                  {item.endDate || (resume.language === 'zh' ? '至今' : 'Present')}
                 </span>
               )}
             </div>
@@ -303,7 +255,7 @@ function TimelineSectionContent({
                   <span
                     key={i}
                     className="rounded-full px-2 py-0.5 text-[10px] font-medium"
-                    style={{ background: "#eff6ff", color: ACCENT }}
+                    style={{ background: '#eff6ff', color: ACCENT }}
                   >
                     {t}
                   </span>
@@ -327,35 +279,26 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "certifications") {
+  if (section.type === 'certifications') {
     const items = (content as CertificationsContent).items || [];
     return (
       <div className="space-y-1.5">
         {items.map((item: any) => (
-          <div
-            key={item.id}
-            className="flex items-baseline justify-between text-sm"
-          >
+          <div key={item.id} className="flex items-baseline justify-between text-sm">
             <div>
               <span className="font-semibold" style={{ color: BLUE_GRAY }}>
                 {item.name}
               </span>
-              {item.issuer && (
-                <span className="text-zinc-500"> — {item.issuer}</span>
-              )}
+              {item.issuer && <span className="text-zinc-500"> — {item.issuer}</span>}
             </div>
-            {item.date && (
-              <span className="shrink-0 text-xs text-zinc-400">
-                {item.date}
-              </span>
-            )}
+            {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
           </div>
         ))}
       </div>
     );
   }
 
-  if (section.type === "languages") {
+  if (section.type === 'languages') {
     const items = (content as LanguagesContent).items || [];
     return (
       <div className="flex flex-wrap gap-x-6 gap-y-1">
@@ -371,23 +314,21 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "github") {
+  if (section.type === 'github') {
     const items = (content as GitHubContent).items || [];
     return (
       <div className="space-y-3">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <span className="text-sm font-bold" style={{ color: BLUE_GRAY }}>
                 {item.name}
               </span>
               <span className="text-xs text-zinc-400">
-                {"\u2B50"} {item.stars?.toLocaleString()}
+                {'\u2B50'} {item.stars?.toLocaleString()}
               </span>
             </div>
-            {item.language && (
-              <span className="text-xs text-zinc-500">{item.language}</span>
-            )}
+            {item.language && <span className="text-xs text-zinc-500">{item.language}</span>}
             {item.description && (
               <p
                 className="mt-1 text-sm text-zinc-600"
@@ -400,32 +341,20 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "custom") {
+  if (section.type === 'custom') {
     const items = (content as CustomContent).items || [];
     return (
       <div className="space-y-2">
         {items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <div className="flex items-baseline justify-between">
               <div>
-                <span
-                  className="text-sm font-semibold"
-                  style={{ color: BLUE_GRAY }}
-                >
+                <span className="text-sm font-semibold" style={{ color: BLUE_GRAY }}>
                   {item.title}
                 </span>
-                {item.subtitle && (
-                  <span className="text-sm text-zinc-500">
-                    {" "}
-                    — {item.subtitle}
-                  </span>
-                )}
+                {item.subtitle && <span className="text-sm text-zinc-500"> — {item.subtitle}</span>}
               </div>
-              {item.date && (
-                <span className="shrink-0 text-xs text-zinc-400">
-                  {item.date}
-                </span>
-              )}
+              {item.date && <span className="shrink-0 text-xs text-zinc-400">{item.date}</span>}
             </div>
             {item.description && (
               <p
@@ -439,7 +368,7 @@ function TimelineSectionContent({
     );
   }
 
-  if (section.type === "qr_codes") {
+  if (section.type === 'qr_codes') {
     return <QrCodesPreview items={(content as any).items || []} />;
   }
 
@@ -447,7 +376,7 @@ function TimelineSectionContent({
     return (
       <div className="space-y-2">
         {content.items.map((item: any) => (
-          <div key={item.id}>
+          <div key={item.id} data-pdf-item>
             <span className="text-sm font-medium" style={{ color: BLUE_GRAY }}>
               {item.name || item.title || item.language}
             </span>
