@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect } from "react";
 import {
   FileText,
   Users,
@@ -9,7 +9,7 @@ import {
   Key,
   Pencil,
   Lightbulb,
-} from 'lucide-react';
+} from "lucide-react";
 import {
   LineChart,
   Line,
@@ -18,12 +18,19 @@ import {
   Tooltip,
   ResponsiveContainer,
   CartesianGrid,
-} from 'recharts';
-import type { JdAnalysis } from '../../types/workspace';
-import { getScoreColorClass, fmtDateTime } from '../../lib/resume-insights';
-import { enrichJdAnalysis } from '../../lib/jd-analysis-adapter';
-import { useInterviewStore } from '@/stores/interview-store';
-import type { InterviewStatus } from '@/types/interview';
+} from "recharts";
+import type { JdAnalysis } from "../../types/workspace";
+import { getScoreColorClass, fmtDateTime } from "../../lib/resume-insights";
+import { enrichJdAnalysis } from "../../lib/jd-analysis-adapter";
+import { useInterviewStore } from "@/stores/interview-store";
+import type { InterviewStatus } from "@/types/interview";
+import {
+  typography,
+  card,
+  icon as iconSizes,
+  emptyState,
+} from "../../lib/component-styles";
+import ScoreRing from "./ScoreRing";
 
 interface OverviewTabProps {
   analyses: JdAnalysis[];
@@ -34,16 +41,20 @@ interface OverviewTabProps {
 // Helper to render lucide icons for suggestions based on type
 const getSuggestionIcon = (type: string): any => {
   switch (type) {
-    case 'keyword_add':
+    case "keyword_add":
       return <Key className="w-3 h-3 text-muted-foreground" />;
-    case 'wording':
+    case "wording":
       return <Pencil className="w-3 h-3 text-muted-foreground" />;
     default:
       return <Lightbulb className="w-3 h-3 text-muted-foreground" />;
   }
 };
 
-export default function OverviewTab({ analyses, subResumeId, onViewInterview }: OverviewTabProps) {
+export default function OverviewTab({
+  analyses,
+  subResumeId,
+  onViewInterview,
+}: OverviewTabProps) {
   const currentAnalysis = useMemo(() => {
     if (!analyses.length) return null;
     const latest = analyses[0];
@@ -53,7 +64,7 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
   const keywordMatchesArr = useMemo(() => {
     if (!currentAnalysis?.keywordMatches) return [];
     return Array.isArray(currentAnalysis.keywordMatches) &&
-      typeof currentAnalysis.keywordMatches[0] === 'object'
+      typeof currentAnalysis.keywordMatches[0] === "object"
       ? (currentAnalysis.keywordMatches as any[])
       : [];
   }, [currentAnalysis]);
@@ -65,7 +76,7 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
   const missingKeywordsArr = useMemo(() => {
     if (!currentAnalysis?.missingKeywords) return [];
     return Array.isArray(currentAnalysis.missingKeywords) &&
-      typeof currentAnalysis.missingKeywords[0] === 'object'
+      typeof currentAnalysis.missingKeywords[0] === "object"
       ? (currentAnalysis.missingKeywords as any[])
       : [];
   }, [currentAnalysis]);
@@ -90,8 +101,6 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
     }));
   }, [analyses]);
 
-  const scoreColor = currentAnalysis ? getScoreColorClass(currentAnalysis.overallScore) : null;
-
   const interviewCollections = useInterviewStore((s) => s.collections);
   const fetchCollections = useInterviewStore((s) => s.fetchCollections);
 
@@ -104,117 +113,117 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
   const getStatusColor = (status: InterviewStatus): string => {
     const colors: Record<InterviewStatus, string> = {
       completed:
-        'text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30',
-      in_progress: 'text-blue-400 bg-blue-500/10 border border-blue-500/20',
-      not_started: 'text-muted-foreground bg-muted/30 border border-border',
+        "text-green-700 dark:text-green-300 bg-green-100 dark:bg-green-500/15 border border-green-300 dark:border-green-500/30",
+      in_progress: "text-blue-400 bg-blue-500/10 border border-blue-500/20",
+      not_started: "text-muted-foreground bg-muted/30 border border-border",
     };
     return colors[status] || colors.not_started;
   };
 
   const getStatusLabel = (status: InterviewStatus): string => {
     const labels: Record<InterviewStatus, string> = {
-      completed: '已完成',
-      in_progress: '进行中',
-      not_started: '待开始',
+      completed: "已完成",
+      in_progress: "进行中",
+      not_started: "待开始",
     };
     return labels[status] || status;
   };
 
-  return (
-    <div className="flex gap-3 fade-in min-w-0 h-full overflow-hidden">
-      <div className="flex-1 space-y-3 min-w-0 overflow-y-auto pr-1">
-        <div className="rounded-lg border border-border p-4 bg-card">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-semibold flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-muted-foreground" />
-              JD 匹配概览
-              {currentAnalysis && (
-                <span className="text-muted-foreground font-normal">
-                  (v{currentAnalysis.version})
-                </span>
-              )}
-            </h3>
-            {currentAnalysis && (
-              <span className="text-[10px] text-muted-foreground">
-                {fmtDateTime(currentAnalysis.createdAt)}
-              </span>
-            )}
-          </div>
+  const requirementTotal =
+    currentAnalysis?.totalRequirements ||
+    keywordMatchesArr.length +
+      partialMatchesArr.length +
+      missingKeywordsArr.length;
+  const completedInterviewCount = interviewCollections.filter(
+    (c) => c.status === "completed",
+  ).length;
+  const interviewRoundTotal = interviewCollections.reduce(
+    (sum, c) => sum + c.rounds.length,
+    0,
+  );
+  const interviewRoundCompleted = interviewCollections.reduce(
+    (sum, c) => sum + c.rounds.filter((r) => r.status === "completed").length,
+    0,
+  );
+  const topSuggestions = [...suggestionsArr].sort((a: any, b: any) => {
+    const priority = { high: 3, medium: 2, low: 1 };
+    return (
+      (priority[b.priority as keyof typeof priority] || 0) -
+      (priority[a.priority as keyof typeof priority] || 0)
+    );
+  });
 
+  return (
+    <div className="grid h-full min-w-0 grid-cols-[minmax(0,1fr)_320px] gap-4 overflow-hidden fade-in">
+      <div className="min-w-0 space-y-4 overflow-y-auto pr-1">
+        <div className={`${card.base} overflow-hidden`}>
           {currentAnalysis ? (
-            <div className="flex items-center gap-5">
-              <div className="relative w-20 h-20 shrink-0">
-                <svg className="w-20 h-20" viewBox="0 0 100 100">
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.06)"
-                    strokeWidth="8"
+            <>
+              <div className="grid grid-cols-[132px_minmax(0,1fr)]">
+                <div className="flex items-center justify-center border-r border-border bg-muted/30 p-5">
+                  <ScoreRing
+                    score={currentAnalysis.overallScore}
+                    label="总体匹配"
                   />
-                  <circle
-                    cx="50"
-                    cy="50"
-                    r="42"
-                    fill="none"
-                    stroke="url(#ovGrad)"
-                    strokeWidth="8"
-                    strokeDasharray="264"
-                    strokeDashoffset={264 * (1 - currentAnalysis.overallScore / 100)}
-                    strokeLinecap="round"
-                    style={{
-                      transform: 'rotate(-90deg)',
-                      transformOrigin: '50% 50%',
-                      transition: 'stroke-dashoffset 1s ease',
-                    }}
-                  />
-                  <defs>
-                    <linearGradient id="ovGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#ec4899" />
-                      <stop offset="100%" stopColor="#f472b6" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className={`text-lg font-bold ${scoreColor?.text}`}>
-                    {currentAnalysis.overallScore}
-                  </span>
-                  <span className="text-[9px] text-muted-foreground">匹配</span>
+                </div>
+                <div className="min-w-0 p-5">
+                  <div className="mb-3 flex items-center justify-between gap-3">
+                    <h3
+                      className={`${typography.heading.md} flex items-center gap-2`}
+                    >
+                      <FileText
+                        className={`${iconSizes.md} text-muted-foreground`}
+                      />
+                      最新 JD 结论
+                    </h3>
+                    <span className={typography.caption.md}>
+                      v{currentAnalysis.version} ·{" "}
+                      {fmtDateTime(currentAnalysis.createdAt)}
+                    </span>
+                  </div>
+                  <p className="text-sm leading-relaxed text-muted-foreground break-all">
+                    {currentAnalysis.summary}
+                  </p>
+                  <div className="mt-4 grid grid-cols-3 gap-3">
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <div className="text-[11px] text-muted-foreground">
+                        完全匹配
+                      </div>
+                      <div className="mt-1 text-lg font-semibold text-green-600 dark:text-green-400">
+                        {keywordMatchesArr.length}
+                        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                          /{requirementTotal || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <div className="text-[11px] text-muted-foreground">
+                        部分匹配
+                      </div>
+                      <div className="mt-1 text-lg font-semibold text-amber-600 dark:text-amber-400">
+                        {partialMatchesArr.length}
+                        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                          /{requirementTotal || 0}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-border bg-background p-3">
+                      <div className="text-[11px] text-muted-foreground">
+                        缺失
+                      </div>
+                      <div className="mt-1 text-lg font-semibold text-red-600 dark:text-red-400">
+                        {missingKeywordsArr.length}
+                        <span className="ml-1 text-[10px] font-normal text-muted-foreground">
+                          /{requirementTotal || 0}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">匹配项</span>
-                  <span className="text-xs font-bold text-green-400">
-                    {keywordMatchesArr.length}
-                    <span className="text-[10px] text-muted-foreground font-normal">
-                      /{currentAnalysis.totalRequirements || 20}
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">部分匹配</span>
-                  <span className="text-xs font-bold text-yellow-400">
-                    {partialMatchesArr.length}
-                    <span className="text-[10px] text-muted-foreground font-normal">
-                      /{currentAnalysis.totalRequirements || 20}
-                    </span>
-                  </span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] text-muted-foreground">缺失</span>
-                  <span className="text-xs font-bold text-red-400">
-                    {missingKeywordsArr.length}
-                    <span className="text-[10px] text-muted-foreground font-normal">
-                      /{currentAnalysis.totalRequirements || 20}
-                    </span>
-                  </span>
-                </div>
-              </div>
-            </div>
+            </>
           ) : (
-            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground gap-2">
+            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground gap-2">
               <Star className="w-8 h-8 opacity-20" />
               <p className="text-xs">暂无评分数据</p>
               <p className="text-[10px] opacity-60">请先对子简历进行 JD 评分</p>
@@ -222,85 +231,62 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
           )}
         </div>
 
-        <div className="rounded-lg border border-border p-4 bg-card">
-          <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5 text-green-400" />
-            核心优势
-          </h3>
-          {strengthsArr.length > 0 ? (
-            <div className="space-y-2">
-              {strengthsArr.map((s, idx) => (
-                <div key={idx} className="flex items-start gap-2">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-green-400 shrink-0 mt-0.5" />
-                  <span className="text-[10px] text-foreground break-all">{s.description}</span>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-[10px] text-muted-foreground opacity-60">暂无优势分析</p>
-          )}
-        </div>
-
-        <div className="rounded-lg border border-border p-4 bg-card">
-          <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-            <Star className="w-3.5 h-3.5 text-yellow-400" />
-            关键技能匹配
-          </h3>
-          {skillMatchesArr.length > 0 ? (
-            <div className="space-y-2">
-              {skillMatchesArr.map((s, idx) => {
-                const c = getScoreColorClass(s.matchScore);
-                return (
-                  <div key={idx}>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[10px] break-all">{s.skill}</span>
-                      <span className={`text-[10px] font-bold ${c.text}`}>{s.matchScore}%</span>
-                    </div>
-                    <div className="h-1 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className={`h-full bg-gradient-to-r ${c.barFrom} ${c.barTo} rounded-full transition-all duration-700`}
-                        style={{ width: `${s.matchScore}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-[10px] text-muted-foreground opacity-60">暂无技能匹配数据</p>
-          )}
-        </div>
-
-        {suggestionsArr.length > 0 && (
-          <div className="rounded-lg border border-border p-4 bg-card">
-            <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-              <AlertCircle className="w-3.5 h-3.5 text-yellow-400" />
-              改进建议
+        <div className="grid grid-cols-2 gap-4">
+          <div className={`${card.base} p-5`}>
+            <h3
+              className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+            >
+              <CheckCircle2 className={`${iconSizes.md} text-green-500`} />
+              候选优势
             </h3>
-            <div className="space-y-2">
-              {suggestionsArr.slice(0, 3).map((s, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-start gap-2 text-[10px]"
-                  style={{
-                    borderLeft: `3px solid ${s.priority === 'high' ? '#ef4444' : s.priority === 'medium' ? '#facc15' : '#22c55e'}`,
-                    paddingLeft: 8,
-                  }}
-                >
-                  <span className="text-muted-foreground shrink-0">
-                    {getSuggestionIcon(s.type)}
-                  </span>
-                  <span className="text-muted-foreground break-all">{s.rationale}</span>
-                </div>
-              ))}
-            </div>
+            {strengthsArr.length > 0 ? (
+              <div className="space-y-3">
+                {strengthsArr.slice(0, 4).map((s, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green-500" />
+                    <span className="text-xs leading-relaxed text-muted-foreground break-all">
+                      {s.description}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className={typography.caption.md}>暂无优势分析</p>
+            )}
           </div>
-        )}
+
+          <div className={`${card.base} p-5`}>
+            <h3
+              className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+            >
+              <AlertCircle className={`${iconSizes.md} text-amber-500`} />
+              优先处理
+            </h3>
+            {topSuggestions.length > 0 ? (
+              <div className="space-y-3">
+                {topSuggestions.slice(0, 4).map((s, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <span className="mt-0.5 shrink-0">
+                      {getSuggestionIcon(s.type)}
+                    </span>
+                    <span className="text-xs leading-relaxed text-muted-foreground break-all">
+                      {s.rationale}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className={typography.caption.md}>暂无改进建议</p>
+            )}
+          </div>
+        </div>
 
         {historyAnalyses.length > 0 && (
-          <div className="rounded-lg border border-border p-4 bg-card">
-            <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-muted-foreground" />
+          <div className={`${card.base} p-5`}>
+            <h3
+              className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+            >
+              <Clock className={`${iconSizes.md} text-muted-foreground`} />
               JD 评分趋势
             </h3>
             <div className="h-[160px] w-full">
@@ -311,19 +297,19 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(255,255,255,0.06)"
+                    stroke="hsl(var(--border))"
                     vertical={false}
                   />
                   <XAxis
                     dataKey="version"
-                    tick={{ fontSize: 10, fill: '#888' }}
+                    tick={{ fontSize: 10, fill: "#888" }}
                     tickFormatter={(v) => `v${v}`}
-                    axisLine={{ stroke: 'rgba(255,255,255,0.1)' }}
+                    axisLine={{ stroke: "hsl(var(--border))" }}
                     tickLine={false}
                   />
                   <YAxis
                     domain={[0, 100]}
-                    tick={{ fontSize: 10, fill: '#888' }}
+                    tick={{ fontSize: 10, fill: "#888" }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -354,7 +340,7 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
                   <Line
                     type="monotone"
                     dataKey="overallScore"
-                    stroke="#ec4899"
+                    stroke="hsl(var(--primary))"
                     strokeWidth={2}
                     dot={(props: any) => {
                       const { cx, cy, payload } = props;
@@ -364,67 +350,187 @@ export default function OverviewTab({ analyses, subResumeId, onViewInterview }: 
                           cx={cx}
                           cy={cy}
                           r={isLatest ? 4 : 3}
-                          fill={isLatest ? '#ec4899' : '#1a1a2e'}
-                          stroke="#ec4899"
+                          fill={
+                            isLatest
+                              ? "hsl(var(--primary))"
+                              : "hsl(var(--background))"
+                          }
+                          stroke="hsl(var(--primary))"
                           strokeWidth={2}
                         />
                       );
                     }}
-                    activeDot={{ r: 5, fill: '#ec4899', stroke: '#fff', strokeWidth: 2 }}
+                    activeDot={{
+                      r: 5,
+                      fill: "hsl(var(--primary))",
+                      stroke: "hsl(var(--background))",
+                      strokeWidth: 2,
+                    }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           </div>
         )}
-      </div>
 
-      <div className="w-[320px] shrink-0 space-y-3 overflow-y-auto">
-        {interviewCollections.length > 0 ? (
-          <div className="rounded-lg border border-border p-4 bg-card">
-            <h3 className="text-xs font-semibold mb-3 flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-muted-foreground" />
-              面试方案
-            </h3>
-
-            <div className="space-y-2">
-              {interviewCollections.map((col) => {
-                const completedCount = col.rounds.filter((r) => r.status === 'completed').length;
+        <div className={`${card.base} p-5`}>
+          <h3
+            className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+          >
+            <Star className={`${iconSizes.md} text-yellow-400`} />
+            关键技能匹配
+          </h3>
+          {skillMatchesArr.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {skillMatchesArr.map((s, idx) => {
+                const c = getScoreColorClass(s.matchScore);
                 return (
-                  <div
-                    key={col.id}
-                    className="rounded-lg border border-border p-2.5 cursor-pointer hover:bg-muted/30 transition-all"
-                    onClick={() => onViewInterview(col.id)}
-                  >
-                    <div className="flex items-center justify-between mb-0.5">
-                      <span className="text-[10px] font-medium">{col.name}</span>
-                      <span
-                        className={`px-1.5 py-0.5 rounded text-[9px] ${getStatusColor(col.status)}`}
-                      >
-                        {getStatusLabel(col.status)}
+                  <div key={idx}>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs break-all">{s.skill}</span>
+                      <span className={`text-xs font-bold ${c.text}`}>
+                        {s.matchScore}%
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[9px] text-muted-foreground">
-                      <span>
-                        {completedCount}/{col.rounds.length} · {col.rounds.length} 轮面试
-                      </span>
-                      <span>{fmtDateTime(col.createdAt)}</span>
+                    <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`h-full bg-gradient-to-r ${c.barFrom} ${c.barTo} rounded-full transition-all duration-700`}
+                        style={{ width: `${s.matchScore}%` }}
+                      />
                     </div>
                   </div>
                 );
               })}
             </div>
+          ) : (
+            <p className="text-[10px] text-muted-foreground opacity-60">
+              暂无技能匹配数据
+            </p>
+          )}
+        </div>
+      </div>
+
+      <aside className="space-y-4 overflow-y-auto">
+        <div className={`${card.base} p-5`}>
+          <h3
+            className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+          >
+            <Users className={`${iconSizes.md} text-muted-foreground`} />
+            面试进度
+          </h3>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-border bg-background p-3">
+              <div className="text-[10px] text-muted-foreground">方案完成</div>
+              <div className="mt-1 text-base font-semibold tabular-nums">
+                {completedInterviewCount}/{interviewCollections.length}
+              </div>
+            </div>
+            <div className="rounded-lg border border-border bg-background p-3">
+              <div className="text-[10px] text-muted-foreground">轮次完成</div>
+              <div className="mt-1 text-base font-semibold tabular-nums">
+                {interviewRoundCompleted}/{interviewRoundTotal}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {interviewCollections.length > 0 ? (
+          <div className={`${card.base} p-5`}>
+            <h3
+              className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+            >
+              <Users className={`${iconSizes.md} text-muted-foreground`} />
+              面试方案
+            </h3>
+
+            <div className="space-y-2">
+              {interviewCollections.map((col) => {
+                const completedCount = col.rounds.filter(
+                  (r) => r.status === "completed",
+                ).length;
+                const progress = col.rounds.length
+                  ? Math.round((completedCount / col.rounds.length) * 100)
+                  : 0;
+                return (
+                  <button
+                    key={col.id}
+                    type="button"
+                    className="w-full rounded-lg border border-border p-3 text-left transition-all hover:bg-muted/40"
+                    onClick={() => onViewInterview(col.id)}
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-2">
+                      <span className="truncate text-xs font-medium">
+                        {col.name}
+                      </span>
+                      <span
+                        className={`shrink-0 px-2 py-0.5 rounded text-[10px] ${getStatusColor(col.status)}`}
+                      >
+                        {getStatusLabel(col.status)}
+                      </span>
+                    </div>
+                    <div className="mb-1.5 h-1 overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full rounded-full bg-primary"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+                      <span>
+                        {completedCount}/{col.rounds.length} 轮
+                      </span>
+                      <span>{fmtDateTime(col.createdAt)}</span>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         ) : (
-          <div className="rounded-lg border border-border p-4 bg-card">
-            <div className="flex flex-col items-center justify-center py-6 text-muted-foreground gap-2">
-              <Users className="w-8 h-8 opacity-20" />
-              <p className="text-xs">暂无面试方案</p>
-              <p className="text-[10px] opacity-60">前往面试模块创建方案</p>
+          <div className={`${card.base} p-5`}>
+            <div className={emptyState.container}>
+              <Users className={emptyState.icon} />
+              <p className={emptyState.title}>暂无面试方案</p>
+              <p className={emptyState.description}>前往面试模块创建方案</p>
             </div>
           </div>
         )}
-      </div>
+
+        <div className={`${card.base} p-5`}>
+          <h3
+            className={`${typography.heading.md} mb-4 flex items-center gap-2`}
+          >
+            <Clock className={`${iconSizes.md} text-muted-foreground`} />
+            分析版本
+          </h3>
+          {historyAnalyses.length > 0 ? (
+            <div className="space-y-2">
+              {historyAnalyses.slice(0, 4).map((a) => {
+                const c = getScoreColorClass(a.overallScore);
+                return (
+                  <div
+                    key={a.id}
+                    className="flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2"
+                  >
+                    <div className="min-w-0">
+                      <div className="text-xs font-medium">v{a.version}</div>
+                      <div className="truncate text-[10px] text-muted-foreground">
+                        {fmtDateTime(a.createdAt)}
+                      </div>
+                    </div>
+                    <span
+                      className={`text-xs font-semibold tabular-nums ${c.text}`}
+                    >
+                      {a.overallScore}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className={typography.caption.md}>暂无历史版本</p>
+          )}
+        </div>
+      </aside>
     </div>
   );
 }
