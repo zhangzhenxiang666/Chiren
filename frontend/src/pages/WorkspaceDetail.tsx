@@ -519,7 +519,7 @@ export default function WorkspaceDetail() {
   }
 
   return (
-    <div className="workspace-detail-page flex flex-col absolute inset-0">
+    <div className="flex flex-col absolute inset-0">
       {/* Top: Breadcrumb Navigation */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border shrink-0 bg-background">
         <nav className="flex items-center gap-2 text-xs">

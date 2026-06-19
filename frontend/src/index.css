@@ -2,52 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Shadcn HSL Variables: Light Mode ── */
+/* ── Shadcn HSL Variables: Light Mode (synced with workspace-detail-page) ── */
 :root {
-  --border: 240 6% 90%;
-  --input: 240 6% 90%;
-  --ring: 240 5% 65%;
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 221 83% 53%;
 
-  --background: 0 0% 100%;
+  --background: 210 40% 98%;
   --foreground: 222 47% 11%;
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
-  --primary: 222 47% 11%;
+  --primary: 221 83% 53%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96%;
   --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
+  --muted: 214 32% 93%;
   --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
+  --accent: 214 32% 93%;
   --accent-foreground: 222 47% 11%;
   --destructive: 0 84% 60%;
   --destructive-foreground: 210 40% 98%;
+  --success: 142 76% 36%;
+  --success-foreground: 0 0% 100%;
 }
 
-/* ── Shadcn HSL Variables: Dark Mode ── */
+/* ── Shadcn HSL Variables: Dark Mode (synced with workspace-detail-page) ── */
 .dark {
-  --border: 217 33% 18%;
-  --input: 217 33% 18%;
-  --ring: 212 27% 84%;
+  --border: 220 14% 22%;
+  --input: 220 14% 24%;
+  --ring: 224 76% 48%;
 
-  --background: 222 47% 7%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 10%;
-  --card-foreground: 210 40% 98%;
+  --background: 222 28% 10%;
+  --foreground: 210 35% 96%;
+  --card: 222 24% 13%;
+  --card-foreground: 210 35% 96%;
   --popover: 222 47% 10%;
   --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
+  --primary: 217 91% 60%;
   --primary-foreground: 222 47% 11%;
   --secondary: 217 33% 17%;
   --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
+  --muted: 221 20% 18%;
+  --muted-foreground: 215 18% 70%;
+  --accent: 220 20% 19%;
+  --accent-foreground: 210 35% 96%;
   --destructive: 0 63% 31%;
   --destructive-foreground: 210 40% 98%;
+  --success: 142 76% 46%;
+  --success-foreground: 0 0% 100%;
 }
 
 /* ── Scrollbar ── */
@@ -260,36 +264,4 @@ code {
   background: var(--code-bg);
 }
 
-/* ── Page-scoped variable overrides: Workspace Detail Page (Light Mode) ── */
-.workspace-detail-page {
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --background: 210 40% 98%;
-  --card: 0 0% 100%;
-  --muted: 214 32% 93%;
-  --accent: 214 32% 93%;
-  --ring: 221 83% 53%;
-  --primary: 221 83% 53%;
-  --primary-foreground: 210 40% 98%;
-  --success: 142 76% 36%;
-  --success-foreground: 0 0% 100%;
-}
 
-/* ── Page-scoped variable overrides: Workspace Detail Page (Dark Mode) ── */
-.dark .workspace-detail-page {
-  --border: 220 14% 22%;
-  --input: 220 14% 24%;
-  --background: 222 28% 10%;
-  --foreground: 210 35% 96%;
-  --card: 222 24% 13%;
-  --card-foreground: 210 35% 96%;
-  --muted: 221 20% 18%;
-  --muted-foreground: 215 18% 70%;
-  --accent: 220 20% 19%;
-  --accent-foreground: 210 35% 96%;
-  --ring: 224 76% 48%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --success: 142 76% 46%;
-  --success-foreground: 0 0% 100%;
-}
