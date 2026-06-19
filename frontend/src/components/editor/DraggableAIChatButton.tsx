@@ -54,6 +54,16 @@ const clamp = (value: number, min: number, max: number) => Math.max(min, Math.mi
 
 const generateUniqueId = () => `msg_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
+/**
+ * 解码文本中的 JSON Unicode 转义序列（\uXXXX → 实际字符）。
+ * 某些 LLM 会在输出中产生 \uXXXX 形式的转义文本而非真正的 Unicode 字符。
+ * 保留末尾不完整的转义序列以支持流式拼接。
+ */
+function decodeUnicodeEscapes(text: string): string {
+  // 匹配完整的 \uXXXX；若末尾有 \、\u、\uXX 等不完整序列则保留
+  return text.replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
 function snakeToCamel(obj: Record<string, unknown>): Record<string, unknown> {
   if (typeof obj !== 'object' || obj === null) return obj;
   const result: Record<string, unknown> = {};
@@ -550,7 +560,10 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
           case 'text_delta':
             updateStreaming((prev) => {
               if (!prev) return null;
-              return { ...prev, text: prev.text + (event.data.text as string) };
+              return {
+                ...prev,
+                text: decodeUnicodeEscapes(prev.text + (event.data.text as string)),
+              };
             });
             scrollToBottom();
             break;
@@ -829,7 +842,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                 const userText = textBlockForUser?.text || '消息发送成功';
                 return (
                   <div key={msg.id} className="flex justify-end">
-                    <div className="max-w-[85%] rounded-2xl rounded-br-md px-3 py-2 text-xs leading-relaxed bg-primary text-primary-foreground">
+                    <div className="max-w-[85%] overflow-hidden break-words rounded-2xl rounded-br-md px-3 py-2 text-xs leading-relaxed bg-primary text-primary-foreground">
                       {userText}
                     </div>
                   </div>
@@ -855,7 +868,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                   <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white">
                     <Sparkles className="h-3 w-3" />
                   </div>
-                  <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
+                  <div className="max-w-[85%] overflow-hidden rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
                     {reasoning && (
                       <>
                         <button
@@ -882,7 +895,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                     {textBlocks.map((block, i) => (
                       <div
                         key={`${msgKey}-text-${block.type}-${i}`}
-                        className="whitespace-pre-wrap text-xs leading-relaxed text-foreground"
+                        className="text-xs leading-relaxed text-foreground [&_table]:w-full [&_table]:border-collapse [&_table]:my-2 [&_table]:block [&_table]:overflow-x-auto"
                       >
                         <ReactMarkdown
                           remarkPlugins={[remarkGfm]}
@@ -907,7 +920,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                                 {children}
                               </h4>
                             ),
-                            p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
+                            p: ({ children }) => (
+                              <p className="text-foreground mb-1 whitespace-pre-wrap break-words">
+                                {children}
+                              </p>
+                            ),
                             ul: ({ children }) => (
                               <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">
                                 {children}
@@ -918,9 +935,13 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                                 {children}
                               </ol>
                             ),
-                            li: ({ children }) => <li className="text-foreground">{children}</li>,
+                            li: ({ children }) => (
+                              <li className="text-foreground break-words">{children}</li>
+                            ),
                             strong: ({ children }) => (
-                              <strong className="font-semibold text-foreground">{children}</strong>
+                              <strong className="font-semibold text-foreground">
+                                {children}
+                              </strong>
                             ),
                             em: ({ children }) => (
                               <em className="italic text-foreground">{children}</em>
@@ -931,12 +952,36 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               </blockquote>
                             ),
                             a: ({ children }) => (
-                              <span className="text-pink-400 cursor-pointer">{children}</span>
-                            ),
-                            table: ({ children }) => (
-                              <table className="w-full text-xs border-collapse my-2">
+                              <span className="text-pink-400 cursor-pointer break-all">
                                 {children}
-                              </table>
+                              </span>
+                            ),
+                            pre: ({ children }) => (
+                              <pre className="bg-muted rounded p-2 overflow-x-auto text-[11px] whitespace-pre-wrap break-words">
+                                {children}
+                              </pre>
+                            ),
+                            code: ({ className, children, ...props }) => {
+                              const isInline = !className;
+                              return isInline ? (
+                                <code
+                                  className="bg-muted rounded px-1 py-0.5 text-[11px]"
+                                  {...props}
+                                >
+                                  {children}
+                                </code>
+                              ) : (
+                                <code className={className} {...props}>
+                                  {children}
+                                </code>
+                              );
+                            },
+                            table: ({ children }) => (
+                              <div className="overflow-x-auto my-2">
+                                <table className="w-full text-xs border-collapse">
+                                  {children}
+                                </table>
+                              </div>
                             ),
                             thead: ({ children }) => (
                               <thead className="bg-secondary text-secondary-foreground">
@@ -944,12 +989,12 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                               </thead>
                             ),
                             th: ({ children }) => (
-                              <th className="border-border px-3 py-1 text-left font-medium text-foreground">
+                              <th className="border border-border px-3 py-1 text-left font-medium text-foreground whitespace-nowrap">
                                 {children}
                               </th>
                             ),
                             td: ({ children }) => (
-                              <td className="border-border px-3 py-1 text-foreground">
+                              <td className="border border-border px-3 py-1 text-foreground break-words">
                                 {children}
                               </td>
                             ),
@@ -1044,7 +1089,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-purple-600 text-white">
                 <Sparkles className="h-3 w-3" />
               </div>
-              <div className="max-w-[85%] rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
+              <div className="max-w-[85%] overflow-hidden rounded-2xl rounded-bl-md space-y-2 px-3 py-2 text-xs leading-relaxed bg-secondary text-secondary-foreground">
                 {streamingMessage.thinking && (
                   <button
                     type="button"
@@ -1098,7 +1143,7 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                   </div>
                 )}
                 {streamingMessage.text && (
-                  <div className="whitespace-pre-wrap text-xs leading-relaxed text-foreground">
+                  <div className="text-xs leading-relaxed text-foreground [&_table]:w-full [&_table]:border-collapse [&_table]:my-2 [&_table]:block [&_table]:overflow-x-auto">
                     <ReactMarkdown
                       remarkPlugins={[remarkGfm]}
                       components={{
@@ -1114,7 +1159,11 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                         h4: ({ children }) => (
                           <h4 className="text-xs font-medium text-foreground mb-1">{children}</h4>
                         ),
-                        p: ({ children }) => <p className="text-foreground mb-1">{children}</p>,
+                        p: ({ children }) => (
+                          <p className="text-foreground mb-1 whitespace-pre-wrap break-words">
+                            {children}
+                          </p>
+                        ),
                         ul: ({ children }) => (
                           <ul className="list-disc list-inside text-foreground mb-1 space-y-0.5">
                             {children}
@@ -1125,7 +1174,9 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                             {children}
                           </ol>
                         ),
-                        li: ({ children }) => <li className="text-foreground">{children}</li>,
+                        li: ({ children }) => (
+                          <li className="text-foreground break-words">{children}</li>
+                        ),
                         strong: ({ children }) => (
                           <strong className="font-semibold text-foreground">{children}</strong>
                         ),
@@ -1138,7 +1189,52 @@ function AIChatDialog({ position, onClose, onMouseDown }: AIChatDialogProps) {
                           </blockquote>
                         ),
                         a: ({ children }) => (
-                          <span className="text-pink-400 cursor-pointer">{children}</span>
+                          <span className="text-pink-400 cursor-pointer break-all">{children}</span>
+                        ),
+                        pre: ({ children }) => (
+                          <pre className="bg-muted rounded p-2 overflow-x-auto text-[11px] whitespace-pre-wrap break-words">
+                            {children}
+                          </pre>
+                        ),
+                        code: ({ className, children, ...props }) => {
+                          const isInline = !className;
+                          return isInline ? (
+                            <code
+                              className="bg-muted rounded px-1 py-0.5 text-[11px]"
+                              {...props}
+                            >
+                              {children}
+                            </code>
+                          ) : (
+                            <code className={className} {...props}>
+                              {children}
+                            </code>
+                          );
+                        },
+                        table: ({ children }) => (
+                          <div className="overflow-x-auto my-2">
+                            <table className="w-full text-xs border-collapse">
+                              {children}
+                            </table>
+                          </div>
+                        ),
+                        thead: ({ children }) => (
+                          <thead className="bg-secondary text-secondary-foreground">
+                            {children}
+                          </thead>
+                        ),
+                        th: ({ children }) => (
+                          <th className="border border-border px-3 py-1 text-left font-medium text-foreground whitespace-nowrap">
+                            {children}
+                          </th>
+                        ),
+                        td: ({ children }) => (
+                          <td className="border border-border px-3 py-1 text-foreground break-words">
+                            {children}
+                          </td>
+                        ),
+                        tr: ({ children }) => (
+                          <tr className="border-b border-border">{children}</tr>
                         ),
                       }}
                     >
