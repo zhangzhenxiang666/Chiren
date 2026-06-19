@@ -93,8 +93,13 @@ def _assign_ids(submitted_items: list, existing_items: list) -> list:
             if isinstance(existing_items[-1], dict)
             else existing_items[-1].get("id", "")
         )
-        prefix = last_id.split("-")[0]
-        last_index = int(last_id.split("-")[1])
+        # 兼容外部 id 格式（如 GitHub 的 UUID），不符合预期格式时生成全新前缀
+        if _ID_FORMAT.match(last_id):
+            prefix = last_id.split("-")[0]
+            last_index = int(last_id.split("-")[1])
+        else:
+            prefix = _generate_prefix()
+            last_index = 0
     else:
         prefix = _generate_prefix()
         last_index = 0
@@ -121,15 +126,15 @@ def _validate_item_id(item: dict, field_path: str, existing_ids: set[str]) -> li
     """
     验证单个 item 的 id。
 
-    - 格式必须符合 8hex-4位数字
     - 如果提供了 id，则必须是已存在的 id（新 item 不应带 id）
+    - 已存在 id 的格式不限（兼容 GitHub 等外部来源的 UUID id）
     """
     errors = []
     item_id = item.get("id")
     if not item_id:
         return errors
 
-    if not _ID_FORMAT.match(item_id) or item_id not in existing_ids:
+    if item_id not in existing_ids:
         errors.append(
             f"  - {field_path}.id: '{item_id}' is invalid. Omit the id field for new items (it will be auto-generated); preserve the original id for existing items."
         )
